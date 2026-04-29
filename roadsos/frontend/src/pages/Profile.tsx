@@ -118,7 +118,7 @@ export const Profile = () => {
         
         {/* Header Profile */}
         <div className="flex items-center space-x-4 bg-navy/80 backdrop-blur-md p-4 rounded-2xl border border-white/5">
-          <div className="w-16 h-16 bg-gradient-to-tr from-emergency to-amber-500 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg">
+          <div className="w-16 h-16 bg-linear-to-tr from-emergency to-amber-500 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg">
             JS
           </div>
           <div className="flex-1">

@@ -82,6 +82,8 @@ export const IncidentReport = () => {
             <input 
               type="file" 
               accept="image/*" 
+              title="Upload evidence photo"
+              placeholder="Select photo"
               className="hidden" 
               ref={fileInputRef}
               onChange={handlePhotoUpload}
@@ -99,7 +101,7 @@ export const IncidentReport = () => {
             ) : (
               <div className="relative rounded-2xl overflow-hidden border border-white/10 group">
                 <img src={photoUrl} alt="Uploaded evidence" className="w-full h-40 object-cover opacity-80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-3">
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent flex items-end p-3">
                   <div className="flex items-center text-safe text-xs font-bold">
                     <CheckCircle2 size={14} className="mr-1" /> AI Scanning Complete
                   </div>
@@ -118,8 +120,8 @@ export const IncidentReport = () => {
           <div>
             <label className="text-xs text-muted font-mono uppercase tracking-widest block mb-2">Location & Time</label>
             <div className="space-y-3">
-              <input type="text" value="28.6139° N, 77.2090° E" disabled className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-400 font-mono" />
-              <input type="datetime-local" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-safe" />
+              <input title="Location coordinates" placeholder="Location coordinates" type="text" value="28.6139° N, 77.2090° E" disabled className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-400 font-mono" />
+              <input title="Incident time" placeholder="Incident time" type="datetime-local" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-safe" />
             </div>
           </div>
 
@@ -127,6 +129,7 @@ export const IncidentReport = () => {
           <div className={`transition-all duration-500 ${aiAnalyzed ? 'ring-1 ring-safe/50 rounded-xl bg-safe/5' : ''}`}>
             <label className="text-xs text-muted font-mono uppercase tracking-widest block mb-2 px-1">Accident Typology</label>
             <select 
+              title="Accident Typology"
               value={typology}
               onChange={(e) => setTypology(e.target.value)}
               className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-safe appearance-none"

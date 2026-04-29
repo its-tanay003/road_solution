@@ -69,6 +69,7 @@ export const FirstAid = () => {
             </div>
             <button 
               onClick={handleReadAloud}
+              title="Read Aloud Instructions"
               className={`p-2 rounded-full transition-colors flex items-center justify-center border ${isPlayingTTS ? 'bg-white text-emergency border-white animate-pulse' : 'bg-transparent text-white border-white/50 hover:bg-white/10'}`}
             >
               <Volume2 size={24} />
@@ -90,7 +91,7 @@ export const FirstAid = () => {
             {/* Steps */}
             <div className="space-y-6">
               <div className="flex">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">1</div>
+                <div className="shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">1</div>
                 <div>
                   <h4 className="font-bold text-gray-900">Apply Direct Pressure</h4>
                   <p className="text-gray-600 text-sm mt-1">Press hard and continuously with a clean cloth or sterile dressing.</p>
@@ -98,7 +99,7 @@ export const FirstAid = () => {
               </div>
               
               <div className="flex">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">2</div>
+                <div className="shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">2</div>
                 <div>
                   <h4 className="font-bold text-gray-900">Elevate the Injury</h4>
                   <p className="text-gray-600 text-sm mt-1">Raise the injured area above the level of the heart if possible.</p>
@@ -106,7 +107,7 @@ export const FirstAid = () => {
               </div>
 
               <div className="flex">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">3</div>
+                <div className="shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">3</div>
                 <div>
                   <h4 className="font-bold text-gray-900">Lay the Person Down</h4>
                   <p className="text-gray-600 text-sm mt-1">Help them lie down to prevent fainting and maintain blood flow to the brain.</p>
