@@ -1,0 +1,26 @@
+{
+  "sos": {
+    "button": "SOS",
+    "triggering": "Triggering in...",
+    "cancel": "Tap to Cancel",
+    "help_coming": "HELP IS COMING",
+    "status": {
+      "ambulance": "Ambulance called ✓",
+      "contacts": "Contacts notified ✓",
+      "location": "Location shared ✓"
+    },
+    "stay_calm": "Stay calm. Don't move if injured."
+  },
+  "nav": {
+    "home": "Home",
+    "map": "Nearby Map",
+    "triage": "AI Triage",
+    "first_aid": "First Aid",
+    "profile": "Profile"
+  },
+  "triage": {
+    "placeholder": "Describe the emergency...",
+    "send": "Send",
+    "fallback_error": "Connecting you to emergency lines. Please call 108 or 112 immediately."
+  }
+}
