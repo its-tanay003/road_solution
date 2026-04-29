@@ -59,20 +59,17 @@ export const TiltCard: React.FC<TiltCardProps> = ({ children, className = '', on
     >
       {/* Dynamic Glow Effect behind the card */}
       <div 
-        className="absolute inset-0 bg-linear-to-tr from-cyan-500/20 to-purple-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"
-        style={{ transform: "translateZ(-20px)" }} 
+        className="absolute inset-0 bg-linear-to-tr from-cyan-500/20 to-purple-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl transform-[translateZ(-20px)]"
       />
       
       {/* Glassmorphism Surface */}
       <div 
-        className="relative h-full w-full bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 shadow-2xl overflow-hidden"
-        style={{ transform: "translateZ(20px)" }}
+        className="relative h-full w-full bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 shadow-2xl overflow-hidden transform-[translateZ(20px)]"
       >
         {/* Subtle inner gradient shimmer */}
         <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        {/* Content lifted slightly higher in Z-space */}
-        <div style={{ transform: "translateZ(30px)" }}>
+        <div className="transform-[translateZ(30px)]">
           {children}
         </div>
       </div>
