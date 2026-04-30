@@ -122,9 +122,21 @@ export const useUserStore = create<UserState>((set) => ({
   toggleResponderMode: () => set((state) => ({ isResponder: !state.isResponder }))
 }));
 
+interface Service {
+  id?: string;
+  name: string;
+  type: string;
+  lat?: number;
+  lng?: number;
+  phone_primary?: string;
+  address?: string;
+  distance?: number;
+  eta?: string;
+}
+
 interface ServicesState {
-  services: { id: string; name: string; type: string }[];
-  setServices: (services: { id: string; name: string; type: string }[]) => void;
+  services: Service[];
+  setServices: (services: Service[]) => void;
 }
 
 export const useServicesStore = create<ServicesState>((set) => ({
