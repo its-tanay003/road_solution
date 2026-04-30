@@ -1,5 +1,6 @@
 import { pool } from '../db/connection';
 import { broadcastToResponders } from './socketService';
+import { ResponderService } from './responderService';
 
 // Simple Circuit Breaker State
 const circuitBreaker = {
@@ -44,6 +45,21 @@ export const enqueueSos = async (sosEventId: string, payload: any) => {
     
     // Attempt Primary Channel: WebSockets / Live Command Center
     const internetStatus = broadcastToResponders('sos_alert', payload) ? 'DELIVERED' : 'PENDING';
+    
+    // Community Responder Dispatch
+    // Find volunteers within radius (Severity can be dynamically extracted, assuming MODERATE for fallback)
+    const severity = payload.severity || 'MODERATE';
+    const responders = await ResponderService.findResponders(payload.lat, payload.lng, severity);
+    const volunteers = responders.filter(r => r.type === 'volunteer' && r.distance < 5000); // within 5km
+
+    if (volunteers.length > 0) {
+      // Simulate targeted push notification or targeted websocket event
+      broadcastToResponders('community-alert', {
+        ...payload,
+        volunteersAlerted: volunteers.length
+      });
+      console.log(`Dispatched community-alert to ${volunteers.length} nearby volunteers.`);
+    }
     
     await client.query(
       `INSERT INTO sos_dispatch_queue (sos_event_id, channel, status, payload) VALUES ($1, $2, $3, $4)`,
