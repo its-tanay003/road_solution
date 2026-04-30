@@ -24,7 +24,7 @@ export const DemoController = () => {
     setDemoMode
   } = useDemoStore();
 
-  const { triggerSos, isActive, countdownActive, countdownTime, startCountdown, decrementCountdown } = useSosStore();
+  const { triggerSos, isActive, isTriggering, countdownActive, countdownTime, startCountdown, decrementCountdown } = useSosStore();
   const { isMeshMode, setMeshMode } = useNetworkStore();
   const { setStressed } = useUIStore();
 
@@ -50,15 +50,15 @@ export const DemoController = () => {
     });
 
     await new Promise(r => setTimeout(r, 1200));
-    addThinkingStep('OPTIMIZING HOSPITAL ROUTING (TRAUMA LEVEL 1 REQUIRED)...');
-    setDecisionExplanation('hospital', { 
-      name: 'City General Trauma', 
-      reason: 'Only nearby facility with available ICU bed and neurosurgery team.', 
-      confidence: 0.96 
-    });
-
     incrementStats();
-  }, [addThinkingStep, incrementStats, setDecisionExplanation, triggerSos]);
+    
+    // Auto-save stats to localStorage for persistence during demo
+    const currentStats = { 
+      livesSaved: livesSaved + 1, 
+      avgResponseReduction: avgResponseReduction + 0.1 
+    };
+    localStorage.setItem('roadsos_demo_stats', JSON.stringify(currentStats));
+  }, [addThinkingStep, incrementStats, setDecisionExplanation, triggerSos, livesSaved, avgResponseReduction]);
 
   // Crash Simulation Logic
   useEffect(() => {
@@ -74,6 +74,11 @@ export const DemoController = () => {
   }, [countdownActive, countdownTime, decrementCountdown, handleAutoRescue]);
 
   const runScenario = (type: 'CRASH' | 'RURAL' | 'MULTI') => {
+    if (isActive || isTriggering) {
+      alert("An SOS is already active. Please cancel it before starting a new demo scenario.");
+      return;
+    }
+
     clearThinking();
     startScenario(type);
     

@@ -30,17 +30,22 @@ router.post('/trigger', async (req, res) => {
     );
 
     const sosEventId = result.rows[0].id;
-    let contactsNotified = 0;
     
+    // Notify contacts in parallel
+    let contactsNotified = 0;
     if (contactPhones && Array.isArray(contactPhones)) {
-      for (const phone of contactPhones) {
-        const message = `EMERGENCY: SOS triggered by device ${deviceId}. Location: https://maps.google.com/?q=${lat},${lng}. Live tracking: ${process.env.FRONTEND_URL}/track/${token}`;
-        const sent = await sendSosSms(phone, message);
-        if (sent) contactsNotified++;
-      }
-      
+      const results = await Promise.all(
+        contactPhones.map(async (phone) => {
+          const message = `EMERGENCY: SOS triggered by device ${deviceId}. Location: https://maps.google.com/?q=${lat},${lng}. Live tracking: ${process.env.FRONTEND_URL}/track/${token}`;
+          return await sendSosSms(phone, message);
+        })
+      );
+      contactsNotified = results.filter(Boolean).length;
       await pool.query('UPDATE sos_events SET contacts_notified = $1 WHERE id = $2', [contactsNotified, sosEventId]);
     }
+
+    // Emit live thinking/processing event via Socket.IO
+    broadcastLocationUpdate(token, lat, lng); // Ensures tracking room is initialized
 
     // Incident Memory Engine: Log Trigger Action with enhanced telemetry
     await pool.query(

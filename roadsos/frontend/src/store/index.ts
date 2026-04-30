@@ -205,8 +205,8 @@ export const useDemoStore = create<DemoState>((set) => ({
     responder: null,
     hospital: null
   },
-  livesSaved: 1242,
-  avgResponseReduction: 35,
+  livesSaved: JSON.parse(localStorage.getItem('roadsos_demo_stats') || '{}').livesSaved || 1242,
+  avgResponseReduction: JSON.parse(localStorage.getItem('roadsos_demo_stats') || '{}').avgResponseReduction || 35,
 
   setDemoMode: (isDemo) => set({ isDemoMode: isDemo }),
   startScenario: (scenario) => set({ currentScenario: scenario, aiThinking: [] }),
