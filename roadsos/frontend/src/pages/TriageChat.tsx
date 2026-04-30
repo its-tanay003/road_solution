@@ -1,18 +1,83 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Globe, ChevronLeft } from 'lucide-react';
+import { Send, Mic, MicOff, Globe, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 export const TriageChat = () => {
-  const { t } = useTranslation();
+  const { } = useTranslation();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<{role: string, content: string}[]>([
     { role: 'assistant', content: "Hello. I am the ROADSoS AI Assistant. Is anyone injured? What type of vehicles are involved?" }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = true;
+
+        recognitionRef.current.onresult = (event: any) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+          
+          if (finalTranscript) {
+            setInput((prev) => prev + finalTranscript);
+          }
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+    }
+    
+    // Speak initial message
+    speakMessage(messages[0].content);
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      setInput('');
+      recognitionRef.current?.start();
+      setIsListening(true);
+    }
+  };
+
+  const speakMessage = (text: string) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel(); // Stop current speech
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -21,16 +86,68 @@ export const TriageChat = () => {
   const handleSend = async (text: string = input) => {
     if (!text.trim()) return;
     
+    // Stop listening if sending
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }
+
     const newMessages = [...messages, { role: 'user', content: text }];
     setMessages(newMessages);
     setInput('');
     setIsTyping(true);
 
-    // Mock API call simulation
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/triage/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMessages })
+      });
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiResponse = "";
+
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.replace('data: ', '');
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                aiResponse += parsed.content;
+                setMessages(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1].content = aiResponse;
+                  return updated;
+                });
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete chunks
+            }
+          }
+        }
+      }
+      
+      speakMessage(aiResponse);
+      
+    } catch (error) {
+      console.error("Chat Error:", error);
+      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to the emergency AI network. Please call emergency services directly if this is critical." }]);
+    } finally {
       setIsTyping(false);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Understood. Searching for the nearest available emergency services..." }]);
-    }, 1500);
+    }
   };
 
   const quickReplies = [
@@ -45,7 +162,7 @@ export const TriageChat = () => {
       
       {/* Top Header */}
       <div className="flex items-center justify-between p-4 bg-navy/80 backdrop-blur-md border-b border-white/5 z-20">
-        <button onClick={() => navigate(-1)} className="p-2 bg-white/5 rounded-full text-card hover:bg-white/10 transition-colors">
+        <button onClick={() => navigate(-1)} aria-label="Go Back" title="Go Back" className="p-2 bg-white/5 rounded-full text-card hover:bg-white/10 transition-colors">
           <ChevronLeft size={20} />
         </button>
         <div className="flex flex-col items-center">
@@ -57,7 +174,7 @@ export const TriageChat = () => {
           </div>
           <span className="text-[10px] font-mono text-muted mt-1 uppercase">Step 1 of 3</span>
         </div>
-        <button className="p-2 bg-white/5 rounded-full text-card hover:bg-white/10 transition-colors">
+        <button aria-label="Language" title="Language" className="p-2 bg-white/5 rounded-full text-card hover:bg-white/10 transition-colors">
           <Globe size={20} />
         </button>
       </div>
@@ -141,8 +258,13 @@ export const TriageChat = () => {
 
       {/* Input Area */}
       <div className="p-4 bg-navy/90 backdrop-blur-xl border-t border-white/10 flex items-center space-x-3 pb-safe">
-        <button className="p-3 bg-emergency/20 rounded-full text-emergency hover:bg-emergency hover:text-white transition-colors border border-emergency/30">
-          <Mic size={22} />
+        <button 
+          onClick={toggleListening}
+          aria-label={isListening ? "Stop Listening" : "Start Listening"}
+          title={isListening ? "Stop Listening" : "Start Listening"}
+          className={`p-3 rounded-full transition-colors border ${isListening ? 'bg-emergency text-white border-emergency' : 'bg-emergency/20 text-emergency border-emergency/30 hover:bg-emergency hover:text-white'}`}
+        >
+          {isListening ? <MicOff size={22} /> : <Mic size={22} />}
         </button>
         <input 
           type="text" 
@@ -154,6 +276,8 @@ export const TriageChat = () => {
         />
         <button 
           onClick={() => handleSend()}
+          aria-label="Send Message"
+          title="Send Message"
           className="p-3 bg-white/10 text-white rounded-2xl hover:bg-white/20 transition-colors"
         >
           <Send size={20} />

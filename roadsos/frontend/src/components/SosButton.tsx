@@ -10,7 +10,7 @@ export const SosButton = () => {
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (isTriggering && countdown > 0) {
       timer = setTimeout(() => setCountdown(c => c - 1), 1000);
     } else if (isTriggering && countdown === 0) {
