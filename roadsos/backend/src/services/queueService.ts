@@ -1,6 +1,8 @@
 import { pool } from '../db/connection';
 import { broadcastToResponders } from './socketService';
 import { ResponderService } from './responderService';
+import { PrioritizationEngine } from './prioritizationEngine';
+import { Responder } from '../models/types';
 
 // Simple Circuit Breaker State
 const circuitBreaker = {
@@ -46,19 +48,24 @@ export const enqueueSos = async (sosEventId: string, payload: any) => {
     // Attempt Primary Channel: WebSockets / Live Command Center
     const internetStatus = broadcastToResponders('sos_alert', payload) ? 'DELIVERED' : 'PENDING';
     
-    // Community Responder Dispatch
-    // Find volunteers within radius (Severity can be dynamically extracted, assuming MODERATE for fallback)
+    // Community Responder Dispatch: Use Prioritization Engine
     const severity = payload.severity || 'MODERATE';
-    const responders = await ResponderService.findResponders(payload.lat, payload.lng, severity);
-    const volunteers = responders.filter(r => r.type === 'volunteer' && r.distance < 5000); // within 5km
+    const allResponders = await ResponderService.findResponders(payload.lat, payload.lng, severity);
+    const volunteers = allResponders.filter(r => r.type === 'volunteer');
+    
+    // Select top 5 optimal volunteers based on skill, distance, and reputation
+    const optimalVolunteers = await PrioritizationEngine.selectOptimalResponders(
+      { lat: payload.lat, lng: payload.lng }, 
+      volunteers
+    );
 
-    if (volunteers.length > 0) {
-      // Simulate targeted push notification or targeted websocket event
+    if (optimalVolunteers.length > 0) {
       broadcastToResponders('community-alert', {
         ...payload,
-        volunteersAlerted: volunteers.length
+        volunteersAlerted: optimalVolunteers.length,
+        responders: optimalVolunteers.map(r => ({ id: r.id, score: r.matchScore }))
       });
-      console.log(`Dispatched community-alert to ${volunteers.length} nearby volunteers.`);
+      console.log(`Dispatched community-alert to ${optimalVolunteers.length} optimal volunteers.`);
     }
     
     await client.query(

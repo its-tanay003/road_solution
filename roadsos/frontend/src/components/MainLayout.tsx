@@ -27,15 +27,15 @@ export const MainLayout = () => {
   }, []);
 
   const navItems = [
-    { path: '/', icon: ShieldAlert, label: t('nav.home') },
-    { path: '/map', icon: Map, label: t('nav.map') },
+    { path: '/', icon: ShieldAlert, label: t('nav.home', 'SOS') },
+    { path: '/feed', icon: Map, label: t('nav.feed', 'Safety Feed') },
     { path: '/chat', icon: MessageSquare, label: t('nav.triage', 'Triage') },
     { path: '/profile', icon: User, label: t('nav.profile', 'Profile') },
-    { path: '/admin', icon: Settings, label: t('nav.admin', 'Admin') },
+    { path: '/b2b', icon: Settings, label: t('nav.b2b', 'B2B Hub') },
   ];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-navy via-background to-black text-card flex flex-col font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-navy via-background to-black text-card flex flex-col font-sans overflow-x-hidden">
       
       {/* Offline Banner */}
       <AnimatePresence>
@@ -99,6 +99,7 @@ export const MainLayout = () => {
               <button 
                 key={item.path}
                 onClick={() => navigate(item.path)}
+                aria-label={item.label}
                 className={`w-full flex justify-center py-3 border-r-2 transition-all ${isActive ? 'text-emergency border-emergency bg-white/5' : 'text-muted border-transparent hover:text-white hover:bg-white/5'}`}
               >
                 <Icon size={24} className={isActive ? 'drop-shadow-[0_0_8px_rgba(215,38,56,0.8)]' : ''} />

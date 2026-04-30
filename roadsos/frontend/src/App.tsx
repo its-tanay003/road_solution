@@ -14,6 +14,8 @@ const FirstAid = lazy(() => import('./pages/FirstAid').then(module => ({ default
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
 const RoutePlanner = lazy(() => import('./pages/RoutePlanner').then(module => ({ default: module.RoutePlanner })));
 const IncidentReport = lazy(() => import('./pages/IncidentReport').then(module => ({ default: module.IncidentReport })));
+const B2BDashboard = lazy(() => import('./pages/B2B/Dashboard').then(module => ({ default: module.B2BDashboard })));
+const SafetyFeed = lazy(() => import('./pages/Community/SafetyFeed').then(module => ({ default: module.SafetyFeed })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center w-full h-screen bg-background">
@@ -36,9 +38,11 @@ const AnimatedRoutes = () => {
             <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
             <Route path="/route" element={<PageWrapper><RoutePlanner /></PageWrapper>} />
             <Route path="/report" element={<PageWrapper><IncidentReport /></PageWrapper>} />
+            <Route path="/feed" element={<PageWrapper><SafetyFeed /></PageWrapper>} />
           </Route>
-          {/* Admin doesn't use the standard mobile bottom nav */}
+          {/* Admin and B2B don't use the standard mobile bottom nav */}
           <Route path="/admin" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
+          <Route path="/b2b" element={<PageWrapper><B2BDashboard /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
     </Suspense>

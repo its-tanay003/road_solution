@@ -4,6 +4,9 @@ import { sendSosSms } from '../services/twilioService';
 import { broadcastLocationUpdate } from '../services/socketService';
 import { redisClient } from '../services/cacheService';
 import { enqueueSos } from '../services/queueService';
+import { SwarmIntelligenceEngine } from '../services/swarmIntelligence';
+import { VoiceCallBridge } from '../services/voiceCallBridge';
+import { adapterManager } from '../services/adapters/adapterManager';
 import crypto from 'crypto';
 
 const router = Router();
@@ -52,6 +55,17 @@ router.post('/trigger', async (req, res) => {
       })]
     );
 
+    // Swarm Intelligence: Aggregate reports
+    const swarmResult = await SwarmIntelligenceEngine.processReport({
+      id: sosEventId,
+      userId: deviceId,
+      lat,
+      lng,
+      type: 'EMERGENCY',
+      timestamp: Date.now(),
+      confidence: 0.9
+    });
+
     // Enqueue for Multi-Channel Dispatch (WebSockets, SMS, MESH)
     const payload = {
       type: 'EMERGENCY',
@@ -60,9 +74,34 @@ router.post('/trigger', async (req, res) => {
       lng,
       medicalProfile: medicalProfile || null,
       emotionalState,
-      token
+      token,
+      swarmAction: swarmResult.action,
+      unifiedIncidentId: swarmResult.incidentId
     };
     await enqueueSos(sosEventId, payload);
+
+    // AI Voice Call Bridge: Trigger if severity is high or critical
+    if (swarmResult.action === 'CREATED_NEW') {
+      VoiceCallBridge.initiateCall({
+        incidentId: sosEventId,
+        type: 'EMERGENCY',
+        severity: 'CRITICAL',
+        location: { lat, lng },
+        telemetry: { emotionalState },
+        medicalInfo: medicalProfile,
+        contactNumber: contactPhones?.[0]
+      });
+    }
+
+    // Adapter Layer: Broadcast to external partners (Twilio, Gov, etc.)
+    adapterManager.broadcastSOS({
+      incidentId: sosEventId,
+      type: 'EMERGENCY',
+      severity: 'CRITICAL',
+      location: { lat, lng },
+      telemetry: { emotionalState },
+      medicalInfo: medicalProfile
+    });
 
     res.json({ token, message: 'SOS Triggered successfully', contactsNotified, eventId: sosEventId });
   } catch (err) {
