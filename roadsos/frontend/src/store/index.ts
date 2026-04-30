@@ -95,8 +95,8 @@ export const useSosStore = create<SosState>((set, get) => ({
 interface UserState {
   language: string;
   setLanguage: (lang: string) => void;
-  contacts: any[];
-  addContact: (contact: any) => void;
+  contacts: { name: string; phone: string }[];
+  addContact: (contact: { name: string; phone: string }) => void;
   medicalInfo: {
     bloodGroup: string;
     allergies: string;
@@ -123,8 +123,8 @@ export const useUserStore = create<UserState>((set) => ({
 }));
 
 interface ServicesState {
-  services: any[];
-  setServices: (services: any[]) => void;
+  services: { id: string; name: string; type: string }[];
+  setServices: (services: { id: string; name: string; type: string }[]) => void;
 }
 
 export const useServicesStore = create<ServicesState>((set) => ({
@@ -166,10 +166,57 @@ export const useAlertStore = create<AlertState>((set) => ({
 
 interface NetworkState {
   isLowBandwidth: boolean;
+  isMeshMode: boolean;
   setLowBandwidth: (isLow: boolean) => void;
+  setMeshMode: (isMesh: boolean) => void;
 }
 
 export const useNetworkStore = create<NetworkState>((set) => ({
   isLowBandwidth: false,
-  setLowBandwidth: (isLow) => set({ isLowBandwidth: isLow })
+  isMeshMode: false,
+  setLowBandwidth: (isLow) => set({ isLowBandwidth: isLow }),
+  setMeshMode: (isMesh) => set({ isMeshMode: isMesh })
+}));
+
+interface DemoState {
+  isDemoMode: boolean;
+  currentScenario: 'CRASH' | 'RURAL' | 'MULTI' | null;
+  aiThinking: string[];
+  decisionExplanations: {
+    responder: { id: string; reason: string; confidence: number } | null;
+    hospital: { name: string; reason: string; confidence: number } | null;
+  };
+  livesSaved: number;
+  avgResponseReduction: number;
+  
+  setDemoMode: (isDemo: boolean) => void;
+  startScenario: (scenario: 'CRASH' | 'RURAL' | 'MULTI') => void;
+  addThinkingStep: (step: string) => void;
+  clearThinking: () => void;
+  setDecisionExplanation: (type: 'responder' | 'hospital', data: { id?: string; name?: string; reason: string; confidence: number }) => void;
+  incrementStats: () => void;
+}
+
+export const useDemoStore = create<DemoState>((set) => ({
+  isDemoMode: false,
+  currentScenario: null,
+  aiThinking: [],
+  decisionExplanations: {
+    responder: null,
+    hospital: null
+  },
+  livesSaved: 1242,
+  avgResponseReduction: 35,
+
+  setDemoMode: (isDemo) => set({ isDemoMode: isDemo }),
+  startScenario: (scenario) => set({ currentScenario: scenario, aiThinking: [] }),
+  addThinkingStep: (step) => set((state) => ({ aiThinking: [...state.aiThinking, step] })),
+  clearThinking: () => set({ aiThinking: [] }),
+  setDecisionExplanation: (type, data) => set((state) => ({
+    decisionExplanations: { ...state.decisionExplanations, [type]: data }
+  })),
+  incrementStats: () => set((state) => ({ 
+    livesSaved: state.livesSaved + 1,
+    avgResponseReduction: state.avgResponseReduction + 0.1
+  }))
 }));

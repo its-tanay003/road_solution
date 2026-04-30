@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { useNetworkStore } from '../store';
+import { useNetworkStore, useSosStore } from '../store';
+import { DemoController } from './Demo/DemoController';
 
 export const MainLayout = () => {
   const { t } = useTranslation();
@@ -12,6 +13,7 @@ export const MainLayout = () => {
   const navigate = useNavigate();
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const { isLowBandwidth } = useNetworkStore();
+  const { isActive } = useSosStore();
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -108,6 +110,23 @@ export const MainLayout = () => {
           })}
         </div>
       </aside>
+
+      <DemoController />
+
+      {/* Cinematic SOS Effect Overlay */}
+      <AnimatePresence>
+        {isActive && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ 
+              opacity: [0, 0.2, 0.1, 0.3, 0.2],
+              backgroundColor: ['rgba(215,38,56,0)', 'rgba(215,38,56,0.2)', 'rgba(215,38,56,0.1)']
+            }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="fixed inset-0 pointer-events-none z-40 shadow-[inset_0_0_100px_rgba(215,38,56,0.5)]"
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
