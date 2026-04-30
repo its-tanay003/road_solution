@@ -46,17 +46,20 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
   
   const defaultCenter: [number, number] = location ? [location.lat, location.lng] : [28.6139, 77.2090]; // Delhi default
 
+  const centerLat = defaultCenter[0];
+  const centerLng = defaultCenter[1];
+
   useEffect(() => {
     if (showRiskHeatmap) {
       // Fetch simulated heatmap from backend
-      fetch(`/api/risk/heatmap?minLat=${defaultCenter[0]-0.1}&maxLat=${defaultCenter[0]+0.1}&minLng=${defaultCenter[1]-0.1}&maxLng=${defaultCenter[1]+0.1}`)
+      fetch(`${import.meta.env.VITE_API_URL || ''}/api/risk/heatmap?minLat=${centerLat-0.1}&maxLat=${centerLat+0.1}&minLng=${centerLng-0.1}&maxLng=${centerLng+0.1}`)
         .then(res => res.json())
         .then(data => {
           if (data.points) setHeatpoints(data.points);
         })
         .catch(err => console.error('Failed to load risk heatmap', err));
     }
-  }, [showRiskHeatmap, defaultCenter[0], defaultCenter[1]]);
+  }, [showRiskHeatmap, centerLat, centerLng]);
 
   const getIcon = (type: string) => {
     switch(type) {
@@ -101,18 +104,20 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
           </Marker>
         )}
 
-        {services.map((service, idx) => (
+        {services.filter(s => s.lat !== undefined && s.lng !== undefined).map((service, idx) => (
           <Marker 
             key={idx} 
-            position={[service.lat, service.lng]} 
+            position={[service.lat!, service.lng!]} 
             icon={getIcon(service.type)}
           >
             <Popup className="font-sans">
               <strong>{service.name}</strong><br/>
               {service.type.toUpperCase()}<br/>
-              <a href={`tel:${service.phone_primary}`} className="text-emergency font-bold">
-                {service.phone_primary}
-              </a>
+              {service.phone_primary && (
+                <a href={`tel:${service.phone_primary}`} className="text-emergency font-bold">
+                  {service.phone_primary}
+                </a>
+              )}
             </Popup>
           </Marker>
         ))}

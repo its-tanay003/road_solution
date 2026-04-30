@@ -41,7 +41,7 @@ export const Home = () => {
   useEffect(() => {
     if (isActive && uxMode === 'DEFAULT') {
       setUxMode('EMERGENCY');
-    } else if (!isActive) {
+    } else if (!isActive && uxMode === 'EMERGENCY') {
       setUxMode('DEFAULT');
     }
   }, [isActive, uxMode]);
@@ -66,6 +66,19 @@ export const Home = () => {
     }
   }, [voiceEnabled, isListening, startListening, error]);
 
+  const fetchNearbyServices = useCallback(async (lat: number, lng: number) => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/services/nearby?lat=${lat}&lng=${lng}`);
+      setServices(data);
+    } catch {
+      console.warn("Could not fetch services, using fallback data");
+      setServices([
+        { name: 'AIIMS Delhi Trauma Centre', type: 'hospital', lat: 28.5672, lng: 77.2100, phone_primary: '011-26588500' },
+        { name: 'Delhi Ambulance 102', type: 'ambulance', lat: 28.6139, lng: 77.2090, phone_primary: '102' }
+      ]);
+    }
+  }, [setServices]);
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -73,27 +86,14 @@ export const Home = () => {
           setLocation(position.coords.latitude, position.coords.longitude);
           fetchNearbyServices(position.coords.latitude, position.coords.longitude);
         },
-        (error) => console.error("Location error", error),
+        (locError) => console.error("Location error", locError),
         { enableHighAccuracy: true }
       );
     } else {
       setLocation(28.6139, 77.2090);
       fetchNearbyServices(28.6139, 77.2090);
     }
-  }, []);
-
-  const fetchNearbyServices = async (lat: number, lng: number) => {
-    try {
-      const { data } = await axios.get(`http://localhost:3000/api/services/nearby?lat=${lat}&lng=${lng}`);
-      setServices(data);
-    } catch (err) {
-      console.warn("Could not fetch services, using fallback data");
-      setServices([
-        { name: 'AIIMS Delhi Trauma Centre', type: 'hospital', lat: 28.5672, lng: 77.2100, phone_primary: '011-26588500' },
-        { name: 'Delhi Ambulance 102', type: 'ambulance', lat: 28.6139, lng: 77.2090, phone_primary: '102' }
-      ]);
-    }
-  };
+  }, [setLocation, fetchNearbyServices]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col font-sans relative overflow-hidden">
