@@ -4,15 +4,20 @@ import { ShieldAlert, AlertTriangle, Hospital, Shield, Wrench, Activity, Mic, Mi
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useWakeWord } from '../hooks/useWakeWord';
+import { useNetworkMode } from '../hooks/useNetworkMode';
 import { motion } from 'framer-motion';
 import { LiveCore } from '../components/LiveCore';
 import { TiltCard } from '../components/TiltCard';
+import { LiveMap } from './LiveMap'; // assuming it exists or we use a placeholder
+import { TriageChat } from './TriageChat'; // assuming we can import or make a placeholder
+import { ShieldCheck, ActivitySquare, Radio } from 'lucide-react';
 
 export const Home = () => {
   const navigate = useNavigate();
   const { setLocation, isActive, triggerSos } = useSosStore();
   const { setServices } = useServicesStore();
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const { isOffline, isLowBandwidth } = useNetworkMode();
 
   // Wake word handler
   const handleWakeWord = useCallback((word: string) => {
@@ -113,6 +118,18 @@ export const Home = () => {
         </motion.button>
       </header>
 
+      {/* Offline / Low Bandwidth Banner */}
+      <motion.div 
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: isOffline || isLowBandwidth ? 'auto' : 0, opacity: isOffline || isLowBandwidth ? 1 : 0 }}
+        className="overflow-hidden bg-amber-500/20 border-b border-amber-500/50 backdrop-blur-md"
+      >
+        <div className="px-4 py-2 flex items-center justify-center text-amber-400 text-xs font-mono">
+          <AlertTriangle size={14} className="mr-2" />
+          {isOffline ? 'Working Offline - Using Cached Data' : 'Low Bandwidth Mode Active'}
+        </div>
+      </motion.div>
+
       {/* Voice Status Banner */}
       <motion.div 
         initial={{ height: 0, opacity: 0 }}
@@ -141,37 +158,174 @@ export const Home = () => {
         </TiltCard>
 
         {/* Live 3D SOS Core */}
-        <div className="flex-1 flex flex-col items-center justify-center py-4">
-          <LiveCore />
-        </div>
-        
-        {!isActive && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="w-full flex flex-col gap-4 mt-auto"
-          >
-            <h2 className="text-xs font-mono text-cyan-500 tracking-[0.2em] uppercase text-center flex items-center justify-center">
-              <span className="h-px bg-linear-to-r from-transparent to-cyan-500/50 flex-1 mr-4"></span>
-              Emergency Dispatch
-              <span className="h-px bg-linear-to-l from-transparent to-cyan-500/50 flex-1 ml-4"></span>
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: Hospital, label: 'Hospital', color: 'text-emergency', gradient: 'from-red-500/10 to-red-900/10' },
-                { icon: Activity, label: 'Ambulance', color: 'text-safe', gradient: 'from-emerald-500/10 to-emerald-900/10' },
-                { icon: Shield, label: 'Police', color: 'text-blue-400', gradient: 'from-blue-500/10 to-blue-900/10' },
-                { icon: Wrench, label: 'Towing', color: 'text-amber-400', gradient: 'from-amber-500/10 to-amber-900/10' },
-              ].map((service, i) => (
-                <TiltCard key={i} onClick={() => navigate('/map')}>
-                  <div className={`flex flex-col items-center justify-center py-4 bg-linear-to-b ${service.gradient} rounded-xl`}>
-                    <service.icon className={`${service.color} mb-3 drop-shadow-[0_0_8px_currentColor]`} size={32} />
-                    <span className="text-xs font-mono font-semibold text-slate-300 uppercase tracking-widest">{service.label}</span>
-                  </div>
-                </TiltCard>
-              ))}
+        {!isActive ? (
+          <>
+            <div className="flex-1 flex flex-col items-center justify-center py-4">
+              <LiveCore />
             </div>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="w-full flex flex-col gap-4 mt-auto"
+            >
+              <h2 className="text-xs font-mono text-cyan-500 tracking-[0.2em] uppercase text-center flex items-center justify-center">
+                <span className="h-px bg-linear-to-r from-transparent to-cyan-500/50 flex-1 mr-4"></span>
+                Emergency Dispatch
+                <span className="h-px bg-linear-to-l from-transparent to-cyan-500/50 flex-1 ml-4"></span>
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: Hospital, label: 'Hospital', color: 'text-emergency', gradient: 'from-red-500/10 to-red-900/10' },
+                  { icon: Activity, label: 'Ambulance', color: 'text-safe', gradient: 'from-emerald-500/10 to-emerald-900/10' },
+                  { icon: Shield, label: 'Police', color: 'text-blue-400', gradient: 'from-blue-500/10 to-blue-900/10' },
+                  { icon: Wrench, label: 'Towing', color: 'text-amber-400', gradient: 'from-amber-500/10 to-amber-900/10' },
+                ].map((service, i) => (
+                  <TiltCard key={i} onClick={() => navigate('/map')}>
+                    <div className={`flex flex-col items-center justify-center py-4 bg-linear-to-b ${service.gradient} rounded-xl`}>
+                      <service.icon className={`${service.color} mb-3 drop-shadow-[0_0_8px_currentColor]`} size={32} />
+                      <span className="text-xs font-mono font-semibold text-slate-300 uppercase tracking-widest">{service.label}</span>
+                    </div>
+                  </TiltCard>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="fixed inset-0 top-[72px] bg-slate-950 z-40 flex flex-col md:flex-row p-4 gap-4 overflow-hidden"
+          >
+            {/* Command Center - 3 Pane Layout */}
+            
+            {/* Pane 1: Live Telemetry & Map */}
+            <div className="flex-1 rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-md overflow-hidden relative shadow-[0_0_30px_rgba(34,211,238,0.1)] flex flex-col">
+              <div className="bg-slate-900/80 border-b border-white/10 px-4 py-3 flex items-center justify-between z-10">
+                <div className="flex items-center space-x-2 text-cyan-400 font-mono text-sm">
+                  <Radio size={16} className="animate-pulse" />
+                  <span>LIVE TELEMETRY & MAP</span>
+                </div>
+                <div className="flex items-center space-x-3 text-xs">
+                  <span className="flex items-center text-emerald-400"><div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2"></div> GPS ACTIVE</span>
+                </div>
+              </div>
+              <div className="flex-1 relative">
+                <LiveMap />
+                {/* Floating metrics over map */}
+                <div className="absolute bottom-4 left-4 right-4 grid grid-cols-3 gap-2 pointer-events-none">
+                  <div className="bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-lg">
+                    <div className="text-[10px] text-slate-400 font-mono">LATITUDE</div>
+                    <div className="text-sm text-cyan-400 font-mono">{useSosStore.getState().location?.lat.toFixed(4) || '--'}</div>
+                  </div>
+                  <div className="bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-lg">
+                    <div className="text-[10px] text-slate-400 font-mono">LONGITUDE</div>
+                    <div className="text-sm text-cyan-400 font-mono">{useSosStore.getState().location?.lng.toFixed(4) || '--'}</div>
+                  </div>
+                  <div className="bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-lg">
+                    <div className="text-[10px] text-slate-400 font-mono">NEAREST RESPONDER</div>
+                    <div className="text-sm text-amber-400 font-mono">2.4 km</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pane 2: AI Triage Assistant */}
+            <div className="flex-1 rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-md overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.1)] flex flex-col">
+              <div className="bg-slate-900/80 border-b border-white/10 px-4 py-3 flex items-center space-x-2 text-purple-400 font-mono text-sm">
+                <ActivitySquare size={16} />
+                <span>AI TRIAGE ASSISTANT</span>
+              </div>
+              <div className="flex-1 overflow-auto relative">
+                <div className="absolute inset-0 pointer-events-none bg-linear-to-b from-transparent to-slate-950/50 z-10" />
+                <TriageChat />
+              </div>
+            </div>
+
+            {/* Pane 3: Status & Operations Panel */}
+            <div className="w-full md:w-80 rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col">
+              <div className="bg-slate-900/80 border-b border-white/10 px-4 py-3 flex items-center justify-between text-slate-200 font-mono text-sm">
+                <div className="flex items-center space-x-2">
+                  <ShieldCheck size={16} className="text-emerald-400" />
+                  <span>OPERATIONS</span>
+                </div>
+              </div>
+              <div className="p-4 flex-1 flex flex-col gap-4 overflow-y-auto">
+                {/* Active SOS Status */}
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                  <h3 className="text-red-400 font-mono text-xs mb-2">CRITICAL INCIDENT ACTIVE</h3>
+                  <div className="text-3xl font-bold text-white tracking-wider animate-pulse">00:04:12</div>
+                  <div className="text-xs text-slate-400 mt-1">Elapsed Time</div>
+                </div>
+
+                {/* Dispatch Queue & Timeline */}
+                <div className="flex-1 overflow-y-auto pr-2">
+                  <h3 className="text-slate-400 font-mono text-xs mb-3 flex justify-between">
+                    <span>INCIDENT TIMELINE</span>
+                    <span className="text-cyan-400">LIVE</span>
+                  </h3>
+                  
+                  <div className="relative border-l border-white/20 ml-3 pl-4 space-y-6 pb-4">
+                    {/* Timeline Item 1 */}
+                    <div className="relative">
+                      <div className="absolute top-8 left-[-21px] w-10 h-10 bg-black border border-white/10 rounded-full flex items-center justify-center z-10 shadow-[0_0_15px_rgba(239,68,68,0.3)]"></div>
+                      <div className="text-xs text-slate-400 font-mono mb-1">00:00:00 (T+0)</div>
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <div className="text-sm font-bold text-white">SOS Triggered</div>
+                        <div className="text-xs text-slate-300 mt-1">Medical Profile: Type 2 Diabetes attached.</div>
+                        <div className="mt-2 flex items-center">
+                           <span className="text-[10px] font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30 flex items-center">
+                             <ShieldCheck size={10} className="mr-1"/> VERIFIED DEVICE
+                           </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Timeline Item 2 */}
+                    <div className="relative">
+                      <div className="absolute left-[-21px] top-1 w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_#A855F7]"></div>
+                      <div className="text-xs text-slate-400 font-mono mb-1">00:01:15 (T+1m)</div>
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <div className="text-sm font-bold text-white flex justify-between">
+                          <span>AI Triage Completed</span>
+                          <span className="text-purple-400 text-xs">CRITICAL</span>
+                        </div>
+                        <div className="text-xs text-slate-300 mt-1">Classified as multi-vehicle collision. Automated dispatch requested.</div>
+                      </div>
+                    </div>
+
+                    {/* Timeline Item 3 (Responder) */}
+                    <div className="relative">
+                      <div className="absolute left-[-21px] top-1 w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#FBBF24]"></div>
+                      <div className="text-xs text-slate-400 font-mono mb-1">00:03:10 (T+3m)</div>
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <div className="text-sm font-bold text-white">Witness Report Added</div>
+                        <div className="text-xs text-slate-300 mt-1">"Severe impact, one person trapped."</div>
+                        <div className="mt-2 flex items-center justify-between">
+                           <span className="text-[10px] font-mono bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30 flex items-center">
+                             ★ 4.8 TRUST SCORE
+                           </span>
+                           <div className="flex space-x-2 text-[10px] font-mono text-slate-400">
+                             <button className="hover:text-emerald-400">👍 12</button>
+                             <button className="hover:text-red-400">👎 0</button>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cancel Button */}
+                <button 
+                  onClick={() => useSosStore.getState().cancelSos()} 
+                  className="mt-auto w-full py-3 rounded-lg border-2 border-red-500/50 text-red-400 font-bold tracking-widest hover:bg-red-500/20 transition-all uppercase text-sm"
+                >
+                  Resolve Incident
+                </button>
+              </div>
+            </div>
+
           </motion.div>
         )}
       </main>

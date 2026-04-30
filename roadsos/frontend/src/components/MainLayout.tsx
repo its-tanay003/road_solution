@@ -4,11 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useNetworkStore } from '../store';
+
 export const MainLayout = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const { isLowBandwidth } = useNetworkStore();
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -45,6 +48,17 @@ export const MainLayout = () => {
           >
             <WifiOff size={16} />
             <span>Working Offline - Using Cached Data</span>
+          </motion.div>
+        )}
+        
+        {isLowBandwidth && !isOffline && (
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="bg-blue-600/90 backdrop-blur-sm text-white p-2 text-center text-sm font-mono flex items-center justify-center space-x-2 z-50 sticky top-0"
+          >
+            <span>Low Network - Animations Disabled</span>
           </motion.div>
         )}
       </AnimatePresence>

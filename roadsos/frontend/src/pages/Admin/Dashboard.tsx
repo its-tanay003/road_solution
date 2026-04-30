@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Activity, Users, MapPin, Database } from 'lucide-react';
-import axios from 'axios';
+
 
 export const Dashboard = () => {
-  const { t } = useTranslation();
+  const { } = useTranslation();
   const [stats, setStats] = useState({
     totalServices: 0,
     activeSos: 0,

@@ -3,13 +3,14 @@ import { pool } from '../db/connection';
 import { sendSosSms } from '../services/twilioService';
 import { broadcastLocationUpdate } from '../services/socketService';
 import { redisClient } from '../services/cacheService';
+import { enqueueSos } from '../services/queueService';
 import crypto from 'crypto';
 
 const router = Router();
 
 // Trigger SOS
 router.post('/trigger', async (req, res) => {
-  const { deviceId, lat, lng, contactPhones } = req.body;
+  const { deviceId, lat, lng, contactPhones, medicalProfile, blackboxData, emotionalState, networkCondition } = req.body;
   
   if (!deviceId || !lat || !lng) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -25,7 +26,9 @@ router.post('/trigger', async (req, res) => {
       [deviceId, lng, lat, token, expiresAt]
     );
 
+    const sosEventId = result.rows[0].id;
     let contactsNotified = 0;
+    
     if (contactPhones && Array.isArray(contactPhones)) {
       for (const phone of contactPhones) {
         const message = `EMERGENCY: SOS triggered by device ${deviceId}. Location: https://maps.google.com/?q=${lat},${lng}. Live tracking: ${process.env.FRONTEND_URL}/track/${token}`;
@@ -33,10 +36,35 @@ router.post('/trigger', async (req, res) => {
         if (sent) contactsNotified++;
       }
       
-      await pool.query('UPDATE sos_events SET contacts_notified = $1 WHERE id = $2', [contactsNotified, result.rows[0].id]);
+      await pool.query('UPDATE sos_events SET contacts_notified = $1 WHERE id = $2', [contactsNotified, sosEventId]);
     }
 
-    res.json({ token, message: 'SOS Triggered successfully', contactsNotified });
+    // Incident Memory Engine: Log Trigger Action with enhanced telemetry
+    await pool.query(
+      `INSERT INTO incident_logs (sos_event_id, action_type, description, metadata) VALUES ($1, $2, $3, $4)`,
+      [sosEventId, 'TRIGGERED', 'SOS initiated from device.', JSON.stringify({ 
+        lat, 
+        lng, 
+        medicalProfile_provided: !!medicalProfile,
+        emotionalState: emotionalState || 'unknown',
+        networkCondition: networkCondition || 'unknown',
+        hasBlackboxData: blackboxData && blackboxData.length > 0
+      })]
+    );
+
+    // Enqueue for Multi-Channel Dispatch (WebSockets, SMS, MESH)
+    const payload = {
+      type: 'EMERGENCY',
+      deviceId,
+      lat,
+      lng,
+      medicalProfile: medicalProfile || null,
+      emotionalState,
+      token
+    };
+    await enqueueSos(sosEventId, payload);
+
+    res.json({ token, message: 'SOS Triggered successfully', contactsNotified, eventId: sosEventId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to trigger SOS' });

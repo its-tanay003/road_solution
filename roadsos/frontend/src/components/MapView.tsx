@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useServicesStore, useSosStore } from '../store';
@@ -39,11 +39,24 @@ const MapUpdater = ({ center }: { center: [number, number] }) => {
   return null;
 };
 
-export const MapView = () => {
+export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean }) => {
   const { location } = useSosStore();
   const { services } = useServicesStore();
+  const [heatpoints, setHeatpoints] = useState<{lat: number, lng: number, intensity: number}[]>([]);
   
   const defaultCenter: [number, number] = location ? [location.lat, location.lng] : [28.6139, 77.2090]; // Delhi default
+
+  useEffect(() => {
+    if (showRiskHeatmap) {
+      // Fetch simulated heatmap from backend
+      fetch(`/api/risk/heatmap?minLat=${defaultCenter[0]-0.1}&maxLat=${defaultCenter[0]+0.1}&minLng=${defaultCenter[1]-0.1}&maxLng=${defaultCenter[1]+0.1}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.points) setHeatpoints(data.points);
+        })
+        .catch(err => console.error('Failed to load risk heatmap', err));
+    }
+  }, [showRiskHeatmap, defaultCenter[0], defaultCenter[1]]);
 
   const getIcon = (type: string) => {
     switch(type) {
@@ -67,6 +80,20 @@ export const MapView = () => {
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         <MapUpdater center={defaultCenter} />
+
+        {/* Heatmap Overlay */}
+        {showRiskHeatmap && heatpoints.map((point, i) => (
+          <Circle 
+            key={`heat-${i}`}
+            center={[point.lat, point.lng]}
+            radius={800 * point.intensity} // Dynamic radius based on risk intensity
+            pathOptions={{ 
+              color: 'transparent',
+              fillColor: '#ef4444', 
+              fillOpacity: point.intensity * 0.6 
+            }}
+          />
+        ))}
         
         {location && (
           <Marker position={[location.lat, location.lng]}>

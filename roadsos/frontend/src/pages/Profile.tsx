@@ -2,6 +2,7 @@ import { Heart, Settings, Phone, Lock, Unlock, AlertTriangle, Edit2, Save, X, Do
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useUIStore, useUserStore, useAlertStore } from '../store';
+import { useCrashDetection } from '../hooks/useCrashDetection';
 
 // Helper: Calculate slippy map tile coordinates
 const lon2tile = (lon: number, zoom: number) => (Math.floor((lon + 180) / 360 * Math.pow(2, zoom)));
@@ -20,6 +21,10 @@ export const Profile = () => {
   const [isCaching, setIsCaching] = useState(false);
   const [cacheProgress, setCacheProgress] = useState(0);
   const [isCached, setIsCached] = useState(false);
+
+  // Crash Detection Simulation
+  const [isSimulatingCrash, setIsSimulatingCrash] = useState(false);
+  useCrashDetection(isSimulatingCrash);
 
   // Mock AES-GCM Encrypt Function
   const handleLockVault = async () => {
@@ -312,6 +317,29 @@ export const Profile = () => {
                >
                  Debug: Simulate Incoming Alert
                </button>
+            )}
+
+            {/* Auto Crash Detection */}
+            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+              <div>
+                <div className="font-bold text-sm flex items-center">
+                  Auto Crash Detection
+                </div>
+                <div className="text-xs text-muted max-w-[200px]">
+                  Automatically trigger SOS upon &gt;4G impact
+                </div>
+              </div>
+              <div 
+                onClick={() => setIsSimulatingCrash(!isSimulatingCrash)}
+                className={`w-12 h-6 rounded-full relative cursor-pointer border transition-colors ${isSimulatingCrash ? 'bg-emergency/20 border-emergency/50' : 'bg-white/10 border-white/20'}`}
+              >
+                <div className={`w-5 h-5 rounded-full absolute top-0.5 shadow-sm transition-all ${isSimulatingCrash ? 'bg-emergency right-0.5' : 'bg-white/50 left-0.5'}`}></div>
+              </div>
+            </div>
+            {isSimulatingCrash && (
+               <div className="text-xs text-emergency font-mono bg-emergency/10 p-2 rounded border border-emergency/20">
+                 Simulation Active: Simulated 5.2G impact will occur in 5 seconds...
+               </div>
             )}
 
             <div className="flex justify-between items-center pt-2 border-t border-white/10">

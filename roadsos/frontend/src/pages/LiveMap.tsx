@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 export const LiveMap = () => {
   const { services } = useServicesStore();
   const [sheetState, setSheetState] = useState<'peek' | 'half' | 'full'>('peek');
+  const [showRiskHeatmap, setShowRiskHeatmap] = useState(false);
   const navigate = useNavigate();
 
   const getSheetY = () => {
@@ -23,7 +24,7 @@ export const LiveMap = () => {
     <div className="relative w-full h-[calc(100vh-80px)] overflow-hidden bg-background">
       {/* Full Bleed Map */}
       <div className="absolute inset-0">
-        <MapView />
+        <MapView showRiskHeatmap={showRiskHeatmap} />
       </div>
 
       {/* Top Floating Search Overlay */}
@@ -42,6 +43,12 @@ export const LiveMap = () => {
         
         {/* Category Chips */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <button 
+            onClick={() => setShowRiskHeatmap(!showRiskHeatmap)}
+            className={`px-4 py-1.5 rounded-full backdrop-blur-md border border-white/10 text-xs font-mono whitespace-nowrap transition-colors ${showRiskHeatmap ? 'bg-emergency text-white shadow-[0_0_10px_#D72638]' : 'bg-navy/80 text-white hover:bg-white/10'}`}
+          >
+            🔥 AI Risk Overlay
+          </button>
           {['All', 'Hospitals', 'Police', 'Ambulances', 'Towing'].map((cat) => (
             <button key={cat} className="px-4 py-1.5 rounded-full bg-navy/80 backdrop-blur-md border border-white/10 text-xs font-mono whitespace-nowrap hover:bg-safe/20 hover:text-safe transition-colors">
               {cat}
@@ -59,7 +66,7 @@ export const LiveMap = () => {
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={0.2}
-        onDragEnd={(e, info) => {
+        onDragEnd={(_e, info) => {
           if (info.offset.y < -50) {
             setSheetState(prev => prev === 'peek' ? 'half' : 'full');
           } else if (info.offset.y > 50) {

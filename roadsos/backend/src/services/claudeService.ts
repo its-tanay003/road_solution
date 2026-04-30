@@ -54,3 +54,91 @@ export const streamClaudeResponse = async (
     res.end();
   }
 };
+
+export interface TriageInput {
+  description: string;
+  medicalProfile: any;
+  hasImage: boolean;
+}
+
+export interface TriageResult {
+  severity: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW';
+  injuryType: string;
+  recommendedActions: string[];
+  requiredServices: ('ambulance' | 'police' | 'fire' | 'towing')[];
+  confidenceScore: number;
+}
+
+export const evaluateTriage = async (input: TriageInput): Promise<TriageResult> => {
+  if (process.env.ANTHROPIC_API_KEY === 'mock_key' || !process.env.ANTHROPIC_API_KEY) {
+    // Mock triage evaluation
+    let severity: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW' = 'MODERATE';
+    let confidenceScore = 0.85;
+    
+    if (input.description.toLowerCase().includes('blood') || input.description.toLowerCase().includes('unconscious')) {
+      severity = 'CRITICAL';
+    } else if (input.description.toLowerCase().includes('scratch') || input.description.toLowerCase().includes('minor')) {
+      severity = 'LOW';
+      confidenceScore = 0.9;
+    }
+
+    // If description is too short, lower confidence
+    if (input.description.length < 10 && !input.hasImage) {
+      confidenceScore = 0.5;
+    }
+
+    return {
+      severity,
+      injuryType: severity === 'CRITICAL' ? 'Severe Trauma' : 'Minor Injury',
+      recommendedActions: [
+        'Ensure the area is safe',
+        'Do not move the victim unless in immediate danger',
+        'Apply pressure to any bleeding'
+      ],
+      requiredServices: severity === 'CRITICAL' ? ['ambulance', 'police'] : [],
+      confidenceScore
+    };
+  }
+
+  const prompt = `You are an Emergency AI Triage System. Evaluate the following incident:
+Description: ${input.description}
+Medical Profile: ${JSON.stringify(input.medicalProfile)}
+Image Provided: ${input.hasImage ? 'Yes' : 'No'}
+
+Respond ONLY with a JSON object matching this structure:
+{
+  "severity": "CRITICAL" | "HIGH" | "MODERATE" | "LOW",
+  "injuryType": "string",
+  "recommendedActions": ["action1", "action2"],
+  "requiredServices": ["ambulance", "police", "fire", "towing"],
+  "confidenceScore": number (0.0 to 1.0)
+}`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-3-sonnet-20240229',
+      max_tokens: 500,
+      system: "You are an emergency triage system that outputs ONLY valid JSON.",
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const content = response.content[0].type === 'text' ? response.content[0].text : '{}';
+    // Find json block
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+       const parsed = JSON.parse(jsonMatch[0]) as TriageResult;
+       return parsed;
+    }
+    throw new Error("Failed to parse JSON");
+  } catch (error) {
+    console.error("AI Triage Error:", error);
+    // Fallback if AI fails completely
+    return {
+      severity: 'HIGH',
+      injuryType: 'Unknown Trauma',
+      recommendedActions: ['Ensure scene safety', 'Wait for professional help'],
+      requiredServices: ['ambulance', 'police'],
+      confidenceScore: 0.4
+    };
+  }
+};
