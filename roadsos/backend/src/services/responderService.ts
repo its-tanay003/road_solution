@@ -1,16 +1,5 @@
 import { pool } from '../db/connection';
-
-export interface Responder {
-  id: string;
-  name: string;
-  type: 'ambulance' | 'police' | 'hospital' | 'volunteer';
-  phone_primary: string;
-  distance: number; // in meters
-  eta: number; // in seconds
-  tier: 'critical' | 'secondary' | 'backup';
-  lat: number;
-  lng: number;
-}
+import { Responder } from '../models/types';
 
 export class ResponderService {
   /**
@@ -94,7 +83,9 @@ export class ResponderService {
       eta,
       tier,
       lat: row.lat,
-      lng: row.lng
+      lng: row.lng,
+      verificationLevel: row.verification_level || 'BASIC',
+      reputation: row.reputation || 0
     };
   }
 
@@ -112,7 +103,9 @@ export class ResponderService {
         eta: 120, // 2 mins
         tier: 'critical',
         lat: lat + 0.002,
-        lng: lng + 0.002
+        lng: lng + 0.002,
+        verificationLevel: 'TRAINED',
+        reputation: 85
       });
       
       responders.push({
@@ -124,7 +117,9 @@ export class ResponderService {
         eta: 300, // 5 mins
         tier: 'critical',
         lat: lat - 0.008,
-        lng: lng + 0.005
+        lng: lng + 0.005,
+        verificationLevel: 'VERIFIED',
+        reputation: 98
       });
     }
 
@@ -138,7 +133,9 @@ export class ResponderService {
       eta: 600, // 10 mins
       tier: 'secondary',
       lat: lat + 0.02,
-      lng: lng - 0.03
+      lng: lng - 0.03,
+      verificationLevel: 'VERIFIED',
+      reputation: 95
     });
 
     responders.push({
@@ -150,7 +147,9 @@ export class ResponderService {
       eta: 450, // 7.5 mins (they drive fast)
       tier: 'secondary',
       lat: lat - 0.04,
-      lng: lng - 0.01
+      lng: lng - 0.01,
+      verificationLevel: 'VERIFIED',
+      reputation: 90
     });
 
     // Backup Tier
@@ -164,7 +163,9 @@ export class ResponderService {
         eta: 1200, // 20 mins
         tier: 'backup',
         lat: lat + 0.1,
-        lng: lng + 0.1
+        lng: lng + 0.1,
+        verificationLevel: 'VERIFIED',
+        reputation: 99
       });
     }
 
