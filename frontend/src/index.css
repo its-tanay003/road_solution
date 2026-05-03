@@ -12,39 +12,151 @@
   --font-sans: 'DM Sans', sans-serif;
   --font-condensed: 'Barlow Condensed', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-dyslexic: 'OpenDyslexic', sans-serif;
+
+  --radius-4xl: 2rem;
+}
+
+@layer base {
+  /* Improved Focus Rings */
+  :focus-visible {
+    outline: 3px solid #3b82f6 !important;
+    outline-offset: 4px !important;
+  }
+
+  /* Accessibility Modes */
+  body.dyslexic {
+    font-family: var(--font-dyslexic) !important;
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High Contrast */
+  @media (prefers-contrast: high) {
+    :root {
+      --color-background: #000000;
+      --color-card: #ffffff;
+    }
+    * {
+      border-color: #ffffff !important;
+      text-decoration-thickness: 2px;
+    }
+    .text-muted {
+      color: #ffffff !important;
+      opacity: 1 !important;
+    }
+  }
 }
 
 @layer base {
   body {
-    @apply bg-background text-card antialiased selection:bg-emergency selection:text-white;
+    background-color: var(--color-background);
+    color: var(--color-card);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body.brutalist {
-    @apply bg-black text-white;
+    background-color: #000;
+    color: #fff;
+
     * {
       animation: none !important;
       transition: none !important;
+      -webkit-backdrop-filter: none !important;
       backdrop-filter: none !important;
     }
     
     .bg-navy\/80, .bg-white\/5, .bg-black\/40 {
-      @apply bg-black border-2 border-white;
+      background-color: #000;
+      border: 2px solid #fff;
     }
 
     .text-muted {
-      @apply text-white font-bold;
+      color: #fff;
+      font-weight: 800;
     }
 
     button {
-      @apply !border-4 !border-white !font-black !uppercase !text-xl !py-6;
+      border-width: 4px !important;
+      border-color: #fff !important;
+      font-weight: 900 !important;
+      text-transform: uppercase !important;
+      font-size: 1.25rem !important;
+      padding-top: 1.5rem !important;
+      padding-bottom: 1.5rem !important;
     }
 
     .bg-emergency {
-      @apply bg-red-600 text-white font-black;
+      background-color: #dc2626;
+      color: #fff;
+      font-weight: 900;
     }
 
     .text-safe, .text-amber-500, .text-blue-400 {
-      @apply text-white;
+      color: #fff;
     }
   }
+}
+
+/* Glassmorphism with Fallbacks */
+.glass {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* PWA Install Prompt Styles */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 28rem;
+  z-index: 100;
+  background-color: rgba(15, 23, 42, 0.9);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  pointer-events: auto;
+}
+
+.pwa-install-icon {
+  padding: 1rem;
+  background-color: rgba(34, 211, 238, 0.1);
+  border-radius: 1.5rem;
+  color: #22d3ee;
+  flex-shrink: 0;
+}
+
+.pwa-install-btn {
+  margin-left: auto;
+  padding: 0.75rem 1.5rem;
+  background-color: #22d3ee;
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 1rem;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+  transition: transform 0.2s;
+}
+
+.pwa-install-btn:hover {
+  transform: scale(1.05);
 }

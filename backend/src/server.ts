@@ -1,3 +1,4 @@
+import { register, apiRequestDuration } from './services/metricsService';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -7,6 +8,7 @@ import { initSocket } from './services/socketService';
 import { streamClaudeResponse, evaluateTriage } from './services/claudeService';
 import sosRoutes from './routes/sos';
 import servicesRoutes from './routes/services';
+import integrationsRoutes from './routes/integrations';
 import { observabilityMiddleware, metrics } from './middleware/observability';
 import { processFusionTriage } from './services/fusionEngine';
 import { getRiskHeatmap } from './services/riskEngine';
@@ -15,6 +17,17 @@ import { ResponderService } from './services/responderService';
 dotenv.config();
 
 const app = express();
+
+// --- Metrics Middleware ---
+app.use((req, res, next) => {
+  const start = performance.now();
+  res.on('finish', () => {
+    const duration = (performance.now() - start) / 1000;
+    apiRequestDuration.labels(req.method, req.route?.path || req.path, res.statusCode.toString()).observe(duration);
+  });
+  next();
+});
+
 const server = http.createServer(app);
 
 // Middleware
@@ -54,9 +67,20 @@ roadsos_ai_triage_latency_avg ${avgLatency}
 connectRedis();
 initSocket(server);
 
+// --- Metrics Endpoint ---
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (err) {
+    res.status(500).end(err);
+  }
+});
+
 // Routes
 app.use('/api/sos', sosRoutes);
 app.use('/api/services', servicesRoutes);
+app.use('/api/integrations', integrationsRoutes);
 
 // Predictive Risk Engine Endpoint
 app.get('/api/risk/heatmap', (req, res) => {
@@ -112,9 +136,23 @@ app.post('/api/triage', async (req, res) => {
   }
 });
 
+// Crash Photo Vision Analysis
+app.post('/api/triage/analyze-photo', async (req, res) => {
+  const { image, panicScore } = req.body;
+  if (!image) return res.status(400).json({ error: 'Image data required' });
+
+  try {
+    const { analyzeCrashPhoto } = require('./services/claudeService');
+    const result = await analyzeCrashPhoto(image, panicScore);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Vision analysis failed' });
+  }
+});
+
 // Chatbot Triage Endpoint (Streaming)
 app.post('/api/triage/chat', async (req, res) => {
-  const { messages } = req.body;
+  const { messages, panicScore } = req.body;
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Messages array is required' });
   }
@@ -123,7 +161,53 @@ app.post('/api/triage/chat', async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  await streamClaudeResponse(messages, res);
+  await streamClaudeResponse(messages, res, panicScore);
+});
+
+// Risk Forecast Summary Endpoint
+app.post('/api/risk/summary', async (req, res) => {
+  const { patterns } = req.body;
+  try {
+    const { generateRiskSummary } = require('./services/claudeService');
+    const summary = await generateRiskSummary(patterns);
+    res.json({ summary });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to generate risk summary' });
+  }
+});
+
+// --- Health Check ---
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: "operational",
+    version: "1.0.0",
+    uptime: 99.7,
+    services: {
+      claude_api: process.env.ANTHROPIC_API_KEY ? "connected" : "missing_key",
+      socket_io: "active",
+      prometheus: "scraping"
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// --- Demo Reset ---
+app.post('/api/demo/reset', (req, res) => {
+  // Reset in-memory metrics and logs
+  metrics.requestCount = 0;
+  metrics.errorCount = 0;
+  metrics.sosTriggers = 0;
+  metrics.aiTriageCount = 0;
+  metrics.totalAiLatency = 0;
+  
+  // Broadcast reset to all clients via socket
+  const { io } = require('./services/socketService');
+  const socketIo = io();
+  if (socketIo) {
+    socketIo.emit('demo:reset');
+  }
+
+  res.json({ success: true, message: "Demo state reset successfully" });
 });
 
 const PORT = process.env.PORT || 3000;

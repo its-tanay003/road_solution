@@ -1,6 +1,10 @@
-import { AlertTriangle, Clock, PlayCircle, Volume2, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Clock, PlayCircle, Volume2, ShieldCheck, Activity, Info, Video } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Panel } from '../components/ui/Panel';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 
 export const FirstAid = () => {
   const { t, i18n } = useTranslation();
@@ -18,18 +22,9 @@ export const FirstAid = () => {
     }
 
     const utterance = new SpeechSynthesisUtterance(stepsText);
-    
-    // Map internal i18n language codes to browser BCP-47 Speech Synthesis tags
     const langMap: Record<string, string> = {
-      en: 'en-IN',
-      hi: 'hi-IN',
-      ta: 'ta-IN',
-      te: 'te-IN',
-      ml: 'ml-IN',
-      kn: 'kn-IN',
-      mr: 'mr-IN',
-      pa: 'pa-IN',
-      bn: 'bn-IN'
+      en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', 
+      ml: 'ml-IN', kn: 'kn-IN', mr: 'mr-IN', pa: 'pa-IN', bn: 'bn-IN'
     };
     
     utterance.lang = langMap[i18n.language] || 'en-US';
@@ -41,92 +36,95 @@ export const FirstAid = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
-      {/* Active Timer Header */}
-      <div className="bg-navy text-white p-4 sticky top-0 z-50 shadow-md flex justify-between items-center">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-emergency rounded-full animate-ping mr-3"></div>
-          <span className="font-condensed font-bold text-lg tracking-wide">AMBULANCE DISPATCHED</span>
+    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] font-sans pb-24">
+      {/* Active Mission Header */}
+      <div className="bg-[var(--nx-bg-surface)]/90 backdrop-blur-md border-b border-[var(--nx-border)] p-4 sticky top-0 z-50 flex justify-between items-center h-16 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+             <div className="w-3 h-3 bg-[var(--nx-red-primary)] rounded-full animate-ping shadow-[0_0_10px_var(--nx-red-primary)]" />
+             <div className="absolute inset-0 w-3 h-3 bg-[var(--nx-red-primary)] rounded-full" />
+          </div>
+          <span className="font-black text-sm tracking-[0.2em] text-white uppercase">INTERCEPT ACTIVE</span>
         </div>
-        <div className="flex items-center text-safe font-mono font-bold">
-          <Clock size={16} className="mr-1" /> ETA: 6m
+        <div className="flex items-center gap-3 bg-[var(--nx-red-dim)] border border-[var(--nx-red-primary)]/20 px-3 py-1 rounded-sm">
+          <Clock size={14} className="text-[var(--nx-red-primary)]" />
+          <span className="font-mono font-black text-sm text-[var(--nx-red-primary)]">ETA: 6M</span>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* AI Confidence Badge */}
-        <div className="bg-safe/10 border border-safe/30 p-3 rounded-xl flex items-center justify-center shadow-sm">
-          <ShieldCheck className="text-safe mr-2" size={20} />
-          <span className="text-safe font-mono font-bold text-sm">AI Triage Confidence: 98% Match</span>
+      <div className="p-6 max-w-2xl mx-auto space-y-8">
+        {/* AI Confidence Status */}
+        <div className="nexus-card p-3 bg-[var(--nx-blue-dim)] border-[var(--nx-blue-primary)]/20 flex items-center justify-center gap-3">
+          <ShieldCheck className="text-[var(--nx-blue-primary)]" size={18} />
+          <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">NEXUS-AI TRIAGE CONFIDENCE: 98% MATCH</span>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-emergency p-4 flex justify-between items-center">
-            <div className="flex items-center">
-              <AlertTriangle className="text-white mr-3" size={28} />
-              <h1 className="text-white font-condensed font-bold text-2xl">Severe Bleeding</h1>
-            </div>
-            <button 
-              onClick={handleReadAloud}
-              title="Read Aloud Instructions"
-              className={`p-2 rounded-full transition-colors flex items-center justify-center border ${isPlayingTTS ? 'bg-white text-emergency border-white animate-pulse' : 'bg-transparent text-white border-white/50 hover:bg-white/10'}`}
-            >
-              <Volume2 size={24} />
-            </button>
-          </div>
-          
-          <div className="p-5">
-            {/* DO NOT DO Section */}
-            <div className="bg-red-50 border-l-4 border-emergency p-4 mb-6 rounded-r-lg">
-              <h3 className="font-bold text-emergency flex items-center mb-1">
-                <AlertTriangle size={16} className="mr-1" /> DO NOT DO
-              </h3>
-              <ul className="text-sm text-red-900 space-y-1 list-disc ml-4">
-                <li>Do not remove any embedded objects.</li>
-                <li>Do not remove blood-soaked bandages; add more on top.</li>
-              </ul>
-            </div>
-
-            {/* Steps */}
-            <div className="space-y-6">
-              <div className="flex">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">1</div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Apply Direct Pressure</h4>
-                  <p className="text-gray-600 text-sm mt-1">Press hard and continuously with a clean cloth or sterile dressing.</p>
-                </div>
+        {/* Tactical Instructions Panel */}
+        <div className="nexus-card bg-[var(--nx-bg-surface)] border-[var(--nx-border)] overflow-hidden shadow-2xl">
+           <div className="bg-[var(--nx-red-primary)] p-5 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                 <AlertTriangle className="text-white" size={24} />
+                 <h1 className="text-xl font-black text-white tracking-tighter uppercase leading-none">SEVERE HEMORRHAGE PROTOCOL</h1>
               </div>
-              
-              <div className="flex">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">2</div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Elevate the Injury</h4>
-                  <p className="text-gray-600 text-sm mt-1">Raise the injured area above the level of the heart if possible.</p>
-                </div>
+              <button 
+                onClick={handleReadAloud}
+                className={`w-10 h-10 rounded-sm flex items-center justify-center border transition-all ${isPlayingTTS ? 'bg-white text-[var(--nx-red-primary)] animate-pulse' : 'bg-black/20 text-white border-white/10 hover:bg-black/40'}`}
+              >
+                <Volume2 size={20} />
+              </button>
+           </div>
+           
+           <div className="p-6 space-y-8">
+              {/* Critical Warnings */}
+              <div className="p-4 bg-[var(--nx-red-dim)] border-l-4 border-[var(--nx-red-primary)] rounded-r-sm">
+                 <div className="flex items-center gap-2 text-[var(--nx-red-primary)] mb-2">
+                    <Info size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">CRITICAL NEGATIVES</span>
+                 </div>
+                 <ul className="text-xs text-white/90 space-y-2 list-none pl-1">
+                   <li className="flex gap-2 items-start opacity-90"><span className="text-[var(--nx-red-primary)]">•</span> DO NOT REMOVE EMBEDDED OBJECTS</li>
+                   <li className="flex gap-2 items-start opacity-90"><span className="text-[var(--nx-red-primary)]">•</span> DO NOT REPLACE SATURATED DRESSINGS - STACK ONLY</li>
+                 </ul>
               </div>
 
-              <div className="flex">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-3">3</div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Lay the Person Down</h4>
-                  <p className="text-gray-600 text-sm mt-1">Help them lie down to prevent fainting and maintain blood flow to the brain.</p>
-                </div>
+              {/* Step Sequence */}
+              <div className="space-y-6">
+                <StepItem num="01" title="DIRECT PRESSURE" text="APPLY CONTINUOUS HIGH-PRESSURE FORCE USING STERILE ASSETS OR CLEAN CLOTHING." active />
+                <StepItem num="02" title="ELEVATION" text="POSITION INJURY VECTOR ABOVE CARDIAC LEVEL TO REDUCE HYDROSTATIC PRESSURE." />
+                <StepItem num="03" title="STABILIZE POSITION" text="PLACE ASSET IN SUPINE POSITION TO MAINTAIN CEREBRAL BLOOD FLOW." />
               </div>
-            </div>
-          </div>
+           </div>
         </div>
 
-        {/* Offline Video Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-          <h3 className="font-bold text-gray-900 mb-3">Offline Video Guide</h3>
-          <div className="relative rounded-xl overflow-hidden bg-gray-900 aspect-video flex items-center justify-center cursor-pointer">
-            <img src="https://via.placeholder.com/600x300/16213e/ffffff?text=First+Aid+Demo" alt="Video Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-60" />
-            <PlayCircle size={48} className="text-white relative z-10" />
-            <div className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded text-white text-xs font-mono">1:45</div>
-          </div>
-        </div>
+        {/* Visual Support Panel */}
+        <Panel title="Tactical Video Guide" icon={Video} subtitle="Local encrypted cache active">
+           <div className="relative rounded-sm overflow-hidden border border-[var(--nx-border)] aspect-video group cursor-pointer">
+              <img src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&q=80&w=1000" alt="Video Placeholder" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                 <div className="w-16 h-16 rounded-full border-2 border-white/20 flex items-center justify-center bg-black/20 backdrop-blur-sm group-hover:border-[var(--nx-blue-primary)] group-hover:text-[var(--nx-blue-primary)] transition-all">
+                    <PlayCircle size={40} className="ml-1" />
+                 </div>
+              </div>
+              <div className="absolute bottom-4 right-4 bg-black/80 px-2 py-1 rounded-sm text-[9px] font-mono text-white border border-white/10 uppercase">
+                 Local • 1:45
+              </div>
+              {/* Tactical scanline */}
+              <div className="absolute inset-0 pointer-events-none opacity-10 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)]" />
+           </div>
+        </Panel>
       </div>
     </div>
   );
 };
+
+const StepItem = ({ num, title, text, active }: any) => (
+  <div className="flex gap-6 group">
+     <div className={`w-10 h-10 shrink-0 border rounded-sm flex items-center justify-center font-mono font-black text-sm transition-all ${active ? 'bg-[var(--nx-red-primary)] border-[var(--nx-red-primary)] text-white shadow-[0_0_15px_rgba(255,59,59,0.3)]' : 'bg-white/[0.02] border-[var(--nx-border)] text-[var(--nx-text-tertiary)]'}`}>
+        {num}
+     </div>
+     <div className="pt-1 flex-1">
+        <h4 className={`text-sm font-black uppercase tracking-tight mb-1.5 transition-colors ${active ? 'text-white' : 'text-[var(--nx-text-secondary)]'}`}>{title}</h4>
+        <p className="text-xs text-[var(--nx-text-dim)] leading-relaxed font-mono uppercase">{text}</p>
+     </div>
+  </div>
+);

@@ -3,6 +3,9 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-le
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useServicesStore, useSosStore } from '../store';
+import { RiskForecastLayer } from './RiskForecastLayer';
+import { ShieldAlert, Info } from 'lucide-react';
+import { DroneDispatchLayer } from './DroneDispatchLayer';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -42,6 +45,7 @@ const MapUpdater = ({ center }: { center: [number, number] }) => {
 export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean }) => {
   const { location } = useSosStore();
   const { services } = useServicesStore();
+  const [internalShowRisk, setInternalShowRisk] = useState(showRiskHeatmap);
   const [heatpoints, setHeatpoints] = useState<{lat: number, lng: number, intensity: number}[]>([]);
   
   const defaultCenter: [number, number] = location ? [location.lat, location.lng] : [28.6139, 77.2090]; // Delhi default
@@ -84,12 +88,12 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
         />
         <MapUpdater center={defaultCenter} />
 
-        {/* Heatmap Overlay */}
-        {showRiskHeatmap && heatpoints.map((point, i) => (
+        {/* Legacy Heatmap Overlay (Simple Circles) */}
+        {showRiskHeatmap && !internalShowRisk && heatpoints.map((point, i) => (
           <Circle 
             key={`heat-${i}`}
             center={[point.lat, point.lng]}
-            radius={800 * point.intensity} // Dynamic radius based on risk intensity
+            radius={800 * point.intensity} 
             pathOptions={{ 
               color: 'transparent',
               fillColor: '#ef4444', 
@@ -97,6 +101,12 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
             }}
           />
         ))}
+
+        {/* Advanced AI Risk Forecast Layer */}
+        {internalShowRisk && <RiskForecastLayer />}
+
+        {/* Drone Dispatch System */}
+        <DroneDispatchLayer />
         
         {location && (
           <Marker position={[location.lat, location.lng]}>
@@ -122,6 +132,29 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
           </Marker>
         ))}
       </MapContainer>
+
+      {/* Risk Forecast Toggle */}
+      <div className="absolute bottom-6 left-6 z-1000 flex flex-col gap-3">
+        <button 
+          onClick={() => setInternalShowRisk(!internalShowRisk)}
+          className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-xl border ${
+            internalShowRisk 
+              ? 'bg-emergency text-white border-white/20' 
+              : 'bg-slate-900/80 text-slate-400 border-white/10 hover:bg-slate-800'
+          }`}
+        >
+          <ShieldAlert size={16} />
+          {internalShowRisk ? 'Hide Risk Forecast' : 'Show Risk Forecast'}
+        </button>
+        
+        {internalShowRisk && (
+          <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 p-3 rounded-xl flex items-center gap-2 text-[8px] text-slate-500 uppercase tracking-widest animate-in fade-in slide-in-from-bottom-2">
+            <Info size={12} className="text-cyan-400" />
+            Live Grid Analysis: 0.5km Resolution
+          </div>
+        )}
+      </div>
+
       <style>{`
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
           background: rgba(22, 33, 62, 0.8) !important;

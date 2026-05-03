@@ -7,10 +7,13 @@ import {
   ChevronRight, 
   MessageSquare,
   ThumbsUp,
-  Share2
+  Share2,
+  Bell,
+  Filter
 } from 'lucide-react';
-import { TiltCard } from '../../components/TiltCard';
-import { ReputationBadge } from '../../components/User/ReputationBadge';
+import { Panel } from '../../components/ui/Panel';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 
 interface SafetyAlert {
   id: string;
@@ -58,80 +61,104 @@ export const SafetyFeed = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-black text-slate-200 pb-24 pt-24 px-6">
-      <div className="max-w-2xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-            <Shield className="text-cyan-400" size={32} />
-            Community <span className="text-cyan-400">Safety Feed</span>
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">Verified alerts within your 10km radius</p>
+    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] pb-24 pt-24 px-6 relative overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-[var(--nx-blue-primary)]/5 blur-[120px] pointer-events-none" />
+      
+      <div className="max-w-3xl mx-auto relative z-10">
+        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-[var(--nx-blue-primary)]/10 border border-[var(--nx-blue-primary)]/30 rounded-sm flex items-center justify-center text-[var(--nx-blue-primary)]">
+                <Shield size={24} />
+              </div>
+              <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">COMMUNITY <span className="text-[var(--nx-blue-primary)]">INTEL</span></h1>
+            </div>
+            <p className="text-[var(--nx-text-dim)] text-xs font-mono uppercase tracking-widest">Sector Intelligence • 10KM Operational Radius</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <Button variant="secondary" size="sm" className="gap-2 font-bold tracking-widest">
+                <Filter size={14} /> FILTER
+             </Button>
+             <Button variant="secondary" size="sm" className="gap-2 font-bold tracking-widest">
+                <Bell size={14} /> ALERTS
+             </Button>
+          </div>
         </header>
 
         <div className="space-y-6">
           {alerts.map((alert, i) => (
             <motion.div
               key={alert.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <TiltCard className="overflow-hidden border-white/5 bg-slate-900/40 backdrop-blur-md">
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${
-                        alert.severity === 'HIGH' ? 'bg-red-500/20 text-red-500' :
-                        alert.severity === 'MODERATE' ? 'bg-amber-500/20 text-amber-500' : 'bg-cyan-500/20 text-cyan-500'
+              <div className="nexus-card bg-[var(--nx-bg-surface)] hover:border-[var(--nx-border-active)] transition-all group overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex gap-4">
+                      <div className={`w-12 h-12 rounded-sm border flex items-center justify-center shrink-0 ${
+                        alert.severity === 'HIGH' ? 'bg-[var(--nx-red-dim)] border-[var(--nx-red-primary)]/30 text-[var(--nx-red-primary)] shadow-[0_0_15px_rgba(255,59,59,0.1)]' :
+                        alert.severity === 'MODERATE' ? 'bg-[var(--nx-amber-dim)] border-[var(--nx-amber-primary)]/30 text-[var(--nx-amber-primary)]' : 
+                        'bg-[var(--nx-blue-dim)] border-[var(--nx-blue-primary)]/30 text-[var(--nx-blue-primary)]'
                       }`}>
-                        <AlertTriangle size={20} />
+                        <AlertTriangle size={24} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg leading-tight">{alert.type}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-slate-500 flex items-center gap-1">
-                            <MapPin size={10} /> {alert.location} • {alert.distance}
-                          </p>
-                          <ReputationBadge level={i % 3 === 0 ? 'VERIFIED' : 'TRAINED'} points={1200 + (i * 50)} />
+                        <div className="flex items-center gap-3 mb-1">
+                           <h3 className="font-black text-lg text-white uppercase tracking-tight">{alert.type}</h3>
+                           <Badge variant={alert.severity === 'HIGH' ? 'critical' : alert.severity === 'MODERATE' ? 'warning' : 'info'}>
+                              {alert.severity} PRIORITY
+                           </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-[10px] font-mono text-[var(--nx-text-dim)] uppercase tracking-tighter">
+                          <span className="flex items-center gap-1.5"><MapPin size={12} className="text-[var(--nx-blue-primary)]" /> {alert.location}</span>
+                          <span className="w-1 h-1 bg-[var(--nx-border)] rounded-full" />
+                          <span>{alert.distance}</span>
                         </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-600 uppercase">{alert.time}</span>
+                    <span className="text-[10px] font-mono text-[var(--nx-text-dim)] uppercase font-bold">{alert.time}</span>
                   </div>
 
-                  <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                  <p className="text-[var(--nx-text-secondary)] text-sm mb-8 leading-relaxed font-sans border-l-2 border-[var(--nx-border)] pl-4">
                     {alert.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-6">
-                      <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-cyan-400 transition-colors">
-                        <MessageSquare size={14} /> {alert.updates} Updates
+                  <div className="flex items-center justify-between pt-6 border-t border-[var(--nx-border)]">
+                    <div className="flex items-center gap-8">
+                      <button className="flex items-center gap-2 text-[10px] font-black text-[var(--nx-text-tertiary)] hover:text-[var(--nx-blue-primary)] transition-colors uppercase tracking-widest">
+                        <MessageSquare size={16} /> {alert.updates} INTEL RELAYS
                       </button>
-                      <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-cyan-400 transition-colors">
-                        <ThumbsUp size={14} /> Verify
+                      <button className="flex items-center gap-2 text-[10px] font-black text-[var(--nx-text-tertiary)] hover:text-[var(--nx-green-primary)] transition-colors uppercase tracking-widest">
+                        <ThumbsUp size={16} /> VERIFY SIGNAL
                       </button>
                     </div>
-                    <button 
-                      aria-label="Share alert"
-                      className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"
-                    >
-                      <Share2 size={14} />
+                    <button className="p-2.5 bg-white/[0.02] border border-[var(--nx-border)] rounded-sm hover:border-[var(--nx-border-active)] hover:text-white transition-all text-[var(--nx-text-dim)]">
+                      <Share2 size={16} />
                     </button>
                   </div>
                 </div>
-              </TiltCard>
+                {/* Visual scanline */}
+                <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-[var(--nx-blue-primary)] to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
+              </div>
             </motion.div>
           ))}
         </div>
 
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full mt-8 py-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500/20 transition-all flex items-center justify-center gap-2"
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12"
         >
-          Post a Safety Alert <ChevronRight size={16} />
-        </motion.button>
+          <button className="w-full h-16 bg-[var(--nx-blue-primary)] text-navy font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-[0_0_30px_rgba(10,132,255,0.2)] group overflow-hidden">
+             BROADCAST FIELD ALERT <ChevronRight size={18} />
+             <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12" />
+          </button>
+        </motion.div>
       </div>
     </div>
   );

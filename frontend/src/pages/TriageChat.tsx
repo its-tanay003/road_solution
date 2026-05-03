@@ -1,22 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, Globe, ChevronLeft } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Send, Mic, MicOff, Globe, ChevronLeft, WifiOff, Zap, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useUIStore } from '../store';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 
 export const TriageChat = () => {
-  const { } = useTranslation();
+  const { panicScore } = useUIStore();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<{role: string, content: string}[]>([
-    { role: 'assistant', content: "Hello. I am the ROADSoS AI Assistant. Is anyone injured? What type of vehicles are involved?" }
+    { role: 'assistant', content: "Neural triage active. Describe the situation. Is anyone injured? What type of vehicles are involved?" }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [reasoningTokens, setReasoningTokens] = useState<number | null>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
-  // Initialize Speech Recognition
+  const speakMessage = (text: string) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.1;
+    utterance.pitch = 0.9; // More tactical/robotic
+    window.speechSynthesis.speak(utterance);
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -26,17 +38,12 @@ export const TriageChat = () => {
         recognitionRef.current.interimResults = true;
 
         recognitionRef.current.onresult = (event: any) => {
-          let interimTranscript = '';
           let finalTranscript = '';
-
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
               finalTranscript += event.results[i][0].transcript;
-            } else {
-              interimTranscript += event.results[i][0].transcript;
             }
           }
-          
           if (finalTranscript) {
             setInput((prev) => prev + finalTranscript);
           }
@@ -47,10 +54,6 @@ export const TriageChat = () => {
         };
       }
     }
-    
-    // Speak initial message
-    speakMessage(messages[0].content);
-    
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
@@ -70,23 +73,12 @@ export const TriageChat = () => {
     }
   };
 
-  const speakMessage = (text: string) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel(); // Stop current speech
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
-  };
-
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
   const handleSend = async (text: string = input) => {
     if (!text.trim()) return;
-    
-    // Stop listening if sending
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
@@ -96,192 +88,196 @@ export const TriageChat = () => {
     setMessages(newMessages);
     setInput('');
     setIsTyping(true);
+    setReasoningTokens(null);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/triage/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages })
+        body: JSON.stringify({ 
+          messages: newMessages,
+          panicScore: panicScore
+        })
       });
 
+      if (!response.ok) throw new Error("Network error");
       if (!response.body) throw new Error("No response body");
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let aiResponse = "";
+      let streamedResponse = "";
 
       setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
-        
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.replace('data: ', '');
             if (data === '[DONE]') continue;
             try {
               const parsed = JSON.parse(data);
+              
+              if (parsed.reasoningTokens) {
+                setReasoningTokens(parsed.reasoningTokens);
+              }
+
               if (parsed.content) {
-                aiResponse += parsed.content;
                 setMessages(prev => {
                   const updated = [...prev];
-                  updated[updated.length - 1].content = aiResponse;
+                  const lastMsg = updated[updated.length - 1];
+                  lastMsg.content += parsed.content;
+                  streamedResponse = lastMsg.content;
                   return updated;
                 });
               }
-            } catch (e) {
-              // Ignore parse errors for incomplete chunks
+            } catch {
+              // Chunks may be partial
             }
           }
         }
       }
-      
-      speakMessage(aiResponse);
-      
+      speakMessage(streamedResponse);
+      setIsOfflineMode(false);
     } catch (error) {
       console.error("Chat Error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to the emergency AI network. Please call emergency services directly if this is critical." }]);
+      setIsOfflineMode(true);
+      const offlineResponse = "PROTOCOL 404: AI offline. Are they breathing? Start CPR if needed. Apply pressure to bleeding.";
+      setMessages(prev => [...prev, { role: 'assistant', content: offlineResponse }]);
+      speakMessage(offlineResponse);
     } finally {
       setIsTyping(false);
     }
   };
 
-  const quickReplies = [
-    "Yes, injuries present", 
-    "Just property damage", 
-    "Need an ambulance", 
-    "Fire detected"
-  ];
-
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)] w-full bg-background relative z-10">
-      
-      {/* Top Header */}
-      <div className="flex items-center justify-between p-4 bg-navy/80 backdrop-blur-md border-b border-white/5 z-20">
-        <button onClick={() => navigate(-1)} aria-label="Go Back" title="Go Back" className="p-2 bg-white/5 rounded-full text-card hover:bg-white/10 transition-colors">
-          <ChevronLeft size={20} />
-        </button>
-        <div className="flex flex-col items-center">
-          <h2 className="font-condensed font-bold tracking-widest text-lg">AI TRIAGE</h2>
-          <div className="flex space-x-1 mt-1">
-            <div className="h-1 w-6 bg-safe rounded-full"></div>
-            <div className="h-1 w-6 bg-white/20 rounded-full"></div>
-            <div className="h-1 w-6 bg-white/20 rounded-full"></div>
+    <div className="flex flex-col h-full w-full bg-[var(--nx-bg-base)] relative overflow-hidden font-sans">
+      {/* Tactical Scanline Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-5 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.1)_2px,rgba(255,255,255,0.1)_3px)] z-50" />
+
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-[var(--nx-border)] bg-[var(--nx-bg-surface)]/80 backdrop-blur-md z-20">
+        <div className="flex items-center gap-4">
+          <Button variant="secondary" size="sm" onClick={() => navigate(-1)} className="p-2 min-w-0">
+            <ChevronLeft size={16} />
+          </Button>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-bold tracking-[0.2em] uppercase text-white">Neural Triage</h2>
+              <Badge variant="ai">Thinking</Badge>
+            </div>
+            <div className="flex gap-1 mt-1.5">
+               {[1, 2, 3].map(i => (
+                 <div key={i} className={`h-0.5 w-4 rounded-full ${i === 1 ? 'bg-[var(--nx-red-primary)]' : 'bg-[var(--nx-border)]'}`} />
+               ))}
+            </div>
           </div>
-          <span className="text-[10px] font-mono text-muted mt-1 uppercase">Step 1 of 3</span>
         </div>
-        <button aria-label="Language" title="Language" className="p-2 bg-white/5 rounded-full text-card hover:bg-white/10 transition-colors">
-          <Globe size={20} />
-        </button>
-      </div>
-
-      {/* AI Avatar Header */}
-      <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-navy/50 to-transparent">
-        <motion.div 
-          className="relative w-20 h-20 flex items-center justify-center"
-          animate={{ scale: isTyping ? [1, 1.1, 1] : 1 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <motion.div 
-            className="absolute inset-0 rounded-full border border-safe/40"
-            animate={{ rotate: 360, scale: isTyping ? [1, 1.3, 1] : 1 }}
-            transition={{ rotate: { duration: 10, repeat: Infinity, ease: "linear" }, scale: { duration: 1.5, repeat: Infinity } }}
-            style={{ borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%" }}
-          />
-          <motion.div 
-            className="absolute inset-0 rounded-full border border-safe/20"
-            animate={{ rotate: -360, scale: isTyping ? [1, 1.2, 1] : 1 }}
-            transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 2, repeat: Infinity } }}
-            style={{ borderRadius: "50% 50% 30% 70% / 50% 70% 30% 50%" }}
-          />
-          <motion.div 
-            className="absolute inset-3 rounded-full bg-safe/20 blur-lg"
-            animate={{ scale: isTyping ? [1, 1.5, 1] : [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-          <div className="z-10 w-10 h-10 rounded-full bg-safe shadow-[0_0_20px_rgba(46,196,182,0.8)]"></div>
-        </motion.div>
-        <div className="mt-4 text-safe font-mono text-xs tracking-widest uppercase opacity-80">
-          {isTyping ? "Analyzing Input..." : "Listening"}
+        
+        <div className="flex items-center gap-3">
+          {reasoningTokens && (
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="text-[8px] text-[var(--nx-text-tertiary)] uppercase font-mono">Reasoning Tokens</span>
+              <span className="text-[10px] font-mono text-[var(--nx-purple-primary)]">{reasoningTokens}</span>
+            </div>
+          )}
+          <Button variant="secondary" size="sm" className="p-2 min-w-0">
+            <Globe size={16} />
+          </Button>
         </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* Message Feed */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 flex flex-col">
         <AnimatePresence>
           {messages.map((msg, idx) => (
             <motion.div 
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.05 * (idx % 5), type: 'spring', stiffness: 200, damping: 20 }}
-              key={idx} 
+              key={idx}
+              initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }}
+              animate={{ opacity: 1, x: 0 }}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[85%] p-4 rounded-3xl shadow-lg ${msg.role === 'user' ? 'bg-emergency/90 text-white rounded-br-sm border border-red-500/50' : 'bg-white/10 text-card rounded-bl-sm border border-white/20 font-sans text-md leading-relaxed backdrop-blur-md'}`}>
-                {msg.content}
+              <div className={`max-w-[85%] relative ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                <div className={`nexus-label mb-1 text-[9px] ${msg.role === 'user' ? 'text-[var(--nx-red-primary)]' : 'text-[var(--nx-blue-primary)]'}`}>
+                  {msg.role === 'user' ? 'WITNESS' : 'ROADOS AI'}
+                </div>
+                <div className={`p-4 rounded-sm border ${
+                  msg.role === 'user' 
+                    ? 'bg-[var(--nx-red-dim)] border-[var(--nx-red-primary)]/30 text-white' 
+                    : 'bg-[var(--nx-bg-surface)] border-[var(--nx-border)] text-[var(--nx-text-secondary)] leading-relaxed text-sm'
+                }`}>
+                  {msg.content}
+                  {msg.role === 'assistant' && msg.content === '' && (
+                    <div className="flex gap-1 py-1">
+                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 rounded-full bg-[var(--nx-blue-primary)]" />
+                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-[var(--nx-blue-primary)]" />
+                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-[var(--nx-blue-primary)]" />
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))}
-          {isTyping && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex justify-start"
-            >
-              <div className="bg-white/10 p-4 rounded-3xl rounded-bl-sm flex space-x-2 border border-white/20 backdrop-blur-md">
-                <div className="w-2.5 h-2.5 bg-safe rounded-full animate-pulse"></div>
-                <div className="w-2.5 h-2.5 bg-safe rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-2.5 h-2.5 bg-safe rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
         <div ref={endOfMessagesRef} />
       </div>
-      
-      {/* Quick Replies */}
-      <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
-        {quickReplies.map((reply, i) => (
-          <button 
-            key={i}
-            onClick={() => handleSend(reply)}
-            className="whitespace-nowrap px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-sans hover:bg-white/10 transition-colors"
-          >
-            {reply}
-          </button>
-        ))}
-      </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-navy/90 backdrop-blur-xl border-t border-white/10 flex items-center space-x-3 pb-safe">
-        <button 
-          onClick={toggleListening}
-          aria-label={isListening ? "Stop Listening" : "Start Listening"}
-          title={isListening ? "Stop Listening" : "Start Listening"}
-          className={`p-3 rounded-full transition-colors border ${isListening ? 'bg-emergency text-white border-emergency' : 'bg-emergency/20 text-emergency border-emergency/30 hover:bg-emergency hover:text-white'}`}
-        >
-          {isListening ? <MicOff size={22} /> : <Mic size={22} />}
-        </button>
-        <input 
-          type="text" 
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Describe the emergency..."
-          className="flex-1 bg-black/40 text-white rounded-2xl px-5 py-3 focus:outline-none focus:ring-1 focus:ring-safe/50 border border-white/5 font-sans placeholder-gray-500"
-        />
-        <button 
-          onClick={() => handleSend()}
-          aria-label="Send Message"
-          title="Send Message"
-          className="p-3 bg-white/10 text-white rounded-2xl hover:bg-white/20 transition-colors"
-        >
-          <Send size={20} />
-        </button>
+      <div className="p-4 bg-[var(--nx-bg-surface)] border-t border-[var(--nx-border)] space-y-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+           {["Yes, injuries present", "Just property damage", "Multiple vehicles", "Smoke/Fire detected"].map((reply, i) => (
+             <button 
+               key={i} 
+               onClick={() => handleSend(reply)}
+               className="nexus-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--nx-text-tertiary)] hover:text-white border-[var(--nx-border)] hover:border-[var(--nx-border-active)] whitespace-nowrap transition-colors"
+             >
+               {reply}
+             </button>
+           ))}
+        </div>
+
+        <div className="flex gap-3 items-center">
+          <Button 
+            variant={isListening ? 'primary' : 'secondary'}
+            onClick={toggleListening}
+            className={`p-3 min-w-0 rounded-full ${isListening ? 'animate-pulse bg-[var(--nx-red-primary)]' : ''}`}
+          >
+            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+          </Button>
+          
+          <div className="flex-1 relative">
+            <input 
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="REPORTING INCIDENT DETAILS..."
+              className="w-full bg-black/40 border border-[var(--nx-border)] rounded-sm py-3 px-4 text-sm font-mono text-white placeholder:text-[var(--nx-text-dim)] focus:outline-none focus:border-[var(--nx-blue-primary)] transition-colors"
+            />
+          </div>
+
+          <Button 
+            variant="secondary" 
+            onClick={() => handleSend()}
+            disabled={!input.trim() || isTyping}
+            className="p-3 min-w-0 rounded-sm"
+          >
+            <Send size={20} />
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-between">
+           <div className="flex items-center gap-2">
+             <div className="w-1.5 h-1.5 rounded-full bg-[var(--nx-green-primary)] shadow-[0_0_4px_var(--nx-green-primary)]" />
+             <span className="text-[9px] font-mono text-[var(--nx-text-tertiary)] uppercase tracking-widest">Neural Link Encryption Active</span>
+           </div>
+           {isOfflineMode && (
+             <Badge variant="warning">Offline Protocol</Badge>
+           )}
+        </div>
       </div>
     </div>
   );

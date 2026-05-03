@@ -1,6 +1,6 @@
 // Predictive Risk Engine (Simulated)
 
-export const calculateRiskScore = (lat: number, lng: number): number => {
+export const calculateRiskScore = (lat: number, lng: number, weatherMultiplier: number = 1.0): number => {
   // In a real system, this would query a PostGIS database of past incidents,
   // cross-reference with live traffic APIs (e.g., Google Maps Traffic),
   // and check weather APIs (e.g., OpenWeather).
@@ -18,7 +18,7 @@ export const calculateRiskScore = (lat: number, lng: number): number => {
   }
 
   // Cap at 100
-  const finalScore = Math.min(Math.round(baseRisk * timeMultiplier), 100);
+  const finalScore = Math.min(Math.round(baseRisk * timeMultiplier * weatherMultiplier), 100);
   
   return finalScore;
 };

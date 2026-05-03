@@ -1,6 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HttpServer } from 'http';
-import { redisClient } from './cacheService';
+import { websocketConnections } from './metricsService';
 
 let io: SocketIOServer;
 
@@ -14,6 +14,7 @@ export const initSocket = (server: HttpServer) => {
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+    websocketConnections.inc();
 
     // Responders join the global alert room
     socket.on('join_responders', () => {
@@ -58,8 +59,42 @@ export const initSocket = (server: HttpServer) => {
       io.to(data.targetId).emit('webrtc-ice-candidate', { senderId: socket.id, candidate: data.candidate });
     });
 
+    // Mesh Specific Signaling
+    socket.on('mesh:offer', (data: { offer: any }) => {
+      socket.broadcast.emit('mesh:offer', { offer: data.offer, from: socket.id });
+    });
+
+    socket.on('mesh:answer', (data: { targetId: string, answer: any }) => {
+      io.to(data.targetId).emit('mesh:answer', { answer: data.answer, from: socket.id });
+    });
+
+    socket.on('mesh:ice-candidate', (data: { targetId: string, candidate: any }) => {
+      io.to(data.targetId).emit('mesh:ice-candidate', { candidate: data.candidate, from: socket.id });
+    });
+
+    // --- Demo Sync Events ---
+    socket.on('sos:triggered', (data: any) => {
+      console.log('Demo SOS Triggered:', data);
+      socket.broadcast.emit('sos:triggered', {
+        ...data,
+        timestamp: new Date(),
+        socketId: socket.id
+      });
+    });
+
+    socket.on('judge:sos', (data: { name: string; location: [number, number]; sessionId: string }) => {
+      console.log(`Judge SOS from ${data.name} in session ${data.sessionId}`);
+      io.emit('judge:sos', {
+        ...data,
+        id: `judge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        timestamp: new Date(),
+        socketId: socket.id
+      });
+    });
+
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);
+      websocketConnections.dec();
     });
   });
 

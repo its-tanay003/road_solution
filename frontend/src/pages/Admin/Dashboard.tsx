@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Activity, Users, MapPin, 
   AlertTriangle, Clock, Radio, BarChart3, 
-  Terminal, Zap, Globe
+  Terminal, Zap, Globe, Cpu, Server, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { Panel } from '../../components/ui/Panel';
 
 export const Dashboard = () => {
   const [stats] = useState({
@@ -16,213 +19,228 @@ export const Dashboard = () => {
   });
 
   const [activeIncidents] = useState([
-    { id: 'SOS-912', location: 'New Delhi, Area 5', severity: 'CRITICAL', time: '2m ago', telemetry: { speed: '0km/h', gForce: '4.2g' } },
-    { id: 'SOS-884', location: 'Gurgaon, Sector 44', severity: 'MODERATE', time: '12m ago', telemetry: { speed: '12km/h', gForce: '0.8g' } },
+    { id: 'SOS-912', location: 'New Delhi, Area 5', severity: 'critical', time: '2m ago', telemetry: { speed: '0km/h', gForce: '4.2g' } },
+    { id: 'SOS-884', location: 'Gurgaon, Sector 44', severity: 'warning', time: '12m ago', telemetry: { speed: '12km/h', gForce: '0.8g' } },
+    { id: 'SOS-771', location: 'Noida, Expressway', severity: 'active', time: '45m ago', telemetry: { speed: '0km/h', gForce: '2.1g' } },
   ]);
 
-  return (
-    <div className="min-h-screen bg-navy text-white font-sans selection:bg-emergency selection:text-white">
-      {/* Background Glow */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emergency/10 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-safe/10 blur-[120px] rounded-full"></div>
-      </div>
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-      {/* Glass Header */}
-      <header className="sticky top-0 z-50 flex justify-between items-center px-8 py-4 bg-navy/60 backdrop-blur-xl border-b border-white/5">
-        <div className="flex items-center space-x-4">
-          <div className="p-2 bg-emergency/20 rounded-lg border border-emergency/30">
-            <ShieldCheck className="text-emergency" size={24} />
-          </div>
-          <div>
-            <h1 className="text-xl font-condensed font-bold tracking-tighter uppercase">
-              ROADSoS <span className="text-emergency">COMMAND</span>
-            </h1>
-            <div className="flex items-center space-x-2">
-              <div className="h-1.5 w-1.5 bg-safe rounded-full animate-pulse"></div>
-              <span className="text-[10px] font-mono text-muted uppercase tracking-widest">Global Ops Active</span>
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] font-sans selection:bg-[var(--nx-red-primary)] selection:text-white flex flex-col">
+      {/* Tactical Header */}
+      <header className="h-16 px-8 border-b border-[var(--nx-border)] flex items-center justify-between sticky top-0 z-50 bg-[var(--nx-bg-base)]/80 backdrop-blur-md">
+        <div className="flex items-center gap-10">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 bg-[var(--nx-red-primary)] rounded-sm flex items-center justify-center shadow-[0_0_12px_rgba(255,59,59,0.3)]">
+              <ShieldCheck className="text-white" size={20} />
             </div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tighter text-white leading-none">ROADSoS <span className="text-[var(--nx-red-primary)]">COMMAND</span></h1>
+              <p className="text-[10px] text-[var(--nx-text-tertiary)] uppercase tracking-widest mt-1">Global Intelligence Hub</p>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-6 border-l border-[var(--nx-border)] pl-10">
+             <div className="flex flex-col">
+                <span className="nexus-label">Region</span>
+                <span className="text-xs font-mono text-white mt-0.5">ASIA-SOUTH-1</span>
+             </div>
+             <div className="flex flex-col">
+                <span className="nexus-label">Core Version</span>
+                <span className="text-xs font-mono text-[var(--nx-text-tertiary)] mt-0.5">v2.4.0-STABLE</span>
+             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-6">
-          <div className="hidden lg:flex items-center space-x-4 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-            <div className="flex items-center space-x-2 border-r border-white/10 pr-4">
-              <Globe size={14} className="text-safe" />
-              <span className="text-xs font-mono">ASIA-SOUTH-1</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Terminal size={14} className="text-muted" />
-              <span className="text-xs font-mono uppercase">V2.4.0-STABLE</span>
-            </div>
+        <div className="flex items-center gap-6">
+           <div className="flex items-center gap-3 bg-white/[0.03] border border-[var(--nx-border)] px-4 py-2 rounded-sm">
+              <Cpu size={14} className="text-[var(--nx-blue-primary)]" />
+              <div className="h-3 w-[1px] bg-[var(--nx-border)]" />
+              <span className="text-[10px] font-mono text-[var(--nx-text-secondary)]">AI ENGINE: ONLINE</span>
+           </div>
+           
+           <div className="text-right hidden sm:block">
+            <div className="text-sm font-mono text-white leading-none">{currentTime.toLocaleTimeString([], { hour12: false })}</div>
+            <div className="text-[10px] text-[var(--nx-text-tertiary)] uppercase mt-1">TACTICAL TIME</div>
           </div>
-          <button className="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-all">
-            Logout
-          </button>
+
+          <Button variant="secondary" size="sm">LOGOUT</Button>
         </div>
       </header>
 
-      <main className="p-8 max-w-[1600px] mx-auto">
+      <main className="p-8 grid grid-cols-12 gap-8 max-w-[1800px] mx-auto w-full flex-1">
         {/* Top Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <MetricCard title="ACTIVE SOS" value={stats.activeSos} icon={<AlertTriangle />} color="emergency" />
-          <MetricCard title="AVG RESPONSE" value={stats.avgResponseTime} icon={<Clock />} color="safe" />
-          <MetricCard title="MESH NODES" value={stats.meshNodes} icon={<Radio />} color="blue" />
-          <MetricCard title="COMMUNITY" value="1,204" icon={<Users />} color="purple" />
-          <MetricCard title="INTELLIGENCE" value="98%" icon={<Zap />} color="amber" />
+        <div className="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <MetricCard title="ACTIVE SOS" value={stats.activeSos} icon={<AlertTriangle size={18} />} variant="critical" />
+          <MetricCard title="AVG RESPONSE" value={stats.avgResponseTime} icon={<Clock size={18} />} variant="active" />
+          <MetricCard title="MESH NODES" value={stats.meshNodes} icon={<Radio size={18} />} variant="mesh" />
+          <MetricCard title="COMMUNITY" value="1,204" icon={<Users size={18} />} variant="info" />
+          <MetricCard title="AI UPTIME" value="99.9%" icon={<Zap size={18} />} variant="ai" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Live Incidents */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold flex items-center">
-                  <Activity size={20} className="mr-2 text-emergency" />
-                  LIVE INCIDENT STREAM
-                </h2>
-                <div className="px-3 py-1 bg-emergency/10 border border-emergency/20 rounded text-[10px] font-bold text-emergency animate-pulse">
-                  HIGH PRIORITY MONITORING
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <AnimatePresence>
-                  {activeIncidents.map((incident) => (
-                    <motion.div 
-                      key={incident.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="group flex items-center justify-between p-4 bg-black/20 hover:bg-white/5 border border-white/5 rounded-xl transition-all cursor-pointer"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-3 rounded-lg ${incident.severity === 'CRITICAL' ? 'bg-emergency/20 text-emergency' : 'bg-amber-500/20 text-amber-500'}`}>
-                          <AlertTriangle size={20} />
-                        </div>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-mono font-bold">{incident.id}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${incident.severity === 'CRITICAL' ? 'bg-emergency text-white' : 'bg-amber-500 text-black'}`}>
-                              {incident.severity}
-                            </span>
+        {/* Live Incident Stream */}
+        <div className="col-span-12 lg:col-span-8 flex flex-col gap-8">
+          <Panel 
+            title="Live Incident Stream" 
+            icon={Activity} 
+            subtitle="Priority triage queue"
+            action={<Badge variant="critical" className="animate-pulse">Live Tracking</Badge>}
+          >
+            <div className="space-y-4">
+              <AnimatePresence>
+                {activeIncidents.map((incident) => (
+                  <motion.div 
+                    key={incident.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="nexus-card p-4 hover:border-[var(--nx-border-active)] transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-sm flex items-center justify-center border ${
+                            incident.severity === 'critical' ? 'bg-[var(--nx-red-dim)] border-[var(--nx-red-primary)]/30 text-[var(--nx-red-primary)]' : 'bg-[var(--nx-amber-dim)] border-[var(--nx-amber-primary)]/30 text-[var(--nx-amber-primary)]'
+                          }`}>
+                             <AlertTriangle size={20} />
                           </div>
-                          <p className="text-sm text-muted flex items-center mt-1">
-                            <MapPin size={12} className="mr-1" /> {incident.location}
-                          </p>
-                        </div>
-                      </div>
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-bold text-white font-mono">{incident.id}</span>
+                              <Badge variant={incident.severity as any}>{incident.severity}</Badge>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--nx-text-tertiary)] uppercase font-mono">
+                               <span className="flex items-center gap-1"><MapPin size={10} /> {incident.location}</span>
+                               <span className="w-1 h-1 bg-[var(--nx-border)] rounded-full" />
+                               <span>{incident.time}</span>
+                            </div>
+                          </div>
+                       </div>
 
-                      <div className="flex items-center space-x-8">
-                        <div className="hidden sm:flex flex-col items-end">
-                          <span className="text-[10px] font-mono text-muted uppercase">Telemetry</span>
-                          <span className="text-xs font-bold text-safe">{incident.telemetry.speed} | {incident.telemetry.gForce}</span>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          <span className="text-[10px] font-mono text-muted uppercase">Duration</span>
-                          <span className="text-xs font-bold">{incident.time}</span>
-                        </div>
-                        <button 
-                          aria-label="Zap Alert"
-                          title="Zap Alert"
-                          className="p-2 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Zap size={16} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                       <div className="flex items-center gap-8">
+                          <div className="text-right hidden sm:block">
+                             <div className="text-[9px] text-[var(--nx-text-dim)] uppercase font-bold mb-1">Telemetry</div>
+                             <div className="text-xs font-mono text-[var(--nx-green-primary)]">{incident.telemetry.speed} • {incident.telemetry.gForce}</div>
+                          </div>
+                          <Button variant="secondary" size="sm" className="min-w-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <Maximize2 size={14} />
+                          </Button>
+                       </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
+          </Panel>
 
-            {/* Simulated Heatmap Placeholder */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 h-[300px] flex flex-col items-center justify-center relative overflow-hidden">
-               <div className="absolute inset-0 opacity-20 grayscale invert">
-                 <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" alt="Map" className="w-full h-full object-cover" />
-               </div>
-               <div className="z-10 text-center">
-                 <Globe className="mx-auto mb-4 text-safe/50 animate-spin-slow" size={48} />
-                 <h3 className="font-bold">GEOSPATIAL RISK HEATMAP</h3>
-                 <p className="text-xs text-muted max-w-xs mt-2">Aggregating live sensor data from {stats.meshNodes} active mesh nodes.</p>
-               </div>
-            </div>
-          </div>
+          <Panel title="Geospatial Risk Analysis" icon={Globe} subtitle="Mesh data integration">
+             <div className="h-[350px] relative rounded-sm overflow-hidden border border-[var(--nx-border)]">
+                <div className="absolute inset-0 opacity-40 grayscale contrast-150 brightness-50">
+                   <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" alt="Map" className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                   <div className="w-64 h-64 border border-[var(--nx-blue-primary)]/20 rounded-full animate-ping" />
+                   <div className="absolute z-10 text-center">
+                      <div className="nexus-label mb-2">Neural Scan in Progress</div>
+                      <div className="text-xs font-mono text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-sm border border-[var(--nx-border)]">
+                         SCANNING SECTOR 04-G...
+                      </div>
+                   </div>
+                </div>
+                {/* Random risk nodes */}
+                <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-[var(--nx-red-primary)] rounded-full animate-pulse shadow-[0_0_10px_var(--nx-red-primary)]" />
+                <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-[var(--nx-amber-primary)] rounded-full animate-pulse shadow-[0_0_10px_var(--nx-amber-primary)]" />
+             </div>
+          </Panel>
+        </div>
 
-          {/* Right Column: Services & Network */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <h2 className="text-lg font-bold mb-4 flex items-center">
-                <Radio size={20} className="mr-2 text-blue-400" />
-                NETWORK STATUS
-              </h2>
+        {/* Sidebar: System & Assets */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-8">
+           <Panel title="System Infrastructure" icon={Server} subtitle="Integrity & performance">
               <div className="space-y-4">
-                 <StatusRow label="Cloud Signaling" status="Operational" color="safe" />
-                 <StatusRow label="P2P Mesh Network" status="124 Nodes" color="safe" />
-                 <StatusRow label="SMS Fallback Gateway" status="Standby" color="blue" />
-                 <StatusRow label="AI Triage Engine" status="Online" color="safe" />
+                 <StatusRow label="Cloud Gateway" status="NOMINAL" variant="active" />
+                 <StatusRow label="P2P Mesh Nodes" status="124 ACTIVE" variant="mesh" />
+                 <StatusRow label="Neural Engine" status="CONNECTED" variant="ai" />
+                 <StatusRow label="Vault Encryption" status="SECURE" variant="info" />
               </div>
-            </div>
+           </Panel>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold">TOP RESPONDERS</h2>
-                <BarChart3 size={18} className="text-muted" />
-              </div>
+           <Panel title="Top Regional Assets" icon={Shield} subtitle="Performance metrics">
               <div className="space-y-3">
-                <ResponderItem name="Delhi Trauma Center" type="Hospital" rating="4.9" />
-                <ResponderItem name="Rapid Unit 102" type="Ambulance" rating="4.8" />
-                <ResponderItem name="HQ Police Dispatch" type="Police" rating="5.0" />
+                 {[
+                   { name: 'AIIMS Delhi Trauma', type: 'hospital', score: '98%' },
+                   { name: 'Paramedic Unit 42', type: 'ambulance', score: '94%' },
+                   { name: 'Police Sector 7', type: 'police', score: '99%' },
+                 ].map((asset, i) => (
+                   <div key={i} className="p-3 bg-white/[0.01] border border-[var(--nx-border)] rounded-sm flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold text-white">{asset.name}</div>
+                        <div className="text-[9px] text-[var(--nx-text-tertiary)] uppercase mt-1">{asset.type}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-[var(--nx-blue-primary)]">{asset.score}</span>
+                        <Zap size={10} className="text-[var(--nx-amber-primary)]" />
+                      </div>
+                   </div>
+                 ))}
               </div>
-              <button className="w-full mt-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
-                Manage Directory
-              </button>
-            </div>
-          </div>
+              <Button variant="secondary" className="w-full mt-6 text-[10px] tracking-widest">DOWNLOAD OPS REPORT</Button>
+           </Panel>
+
+           <div className="mt-auto">
+             <Panel title="Critical Alerts" icon={AlertTriangle} variant="critical">
+                <div className="p-3 bg-[var(--nx-red-dim)] border border-[var(--nx-red-primary)]/20 rounded-sm">
+                   <div className="text-[10px] font-bold text-[var(--nx-red-primary)] uppercase mb-1">Severe Weather Warning</div>
+                   <p className="text-[11px] text-white/80 leading-relaxed">
+                     Heavy fog conditions in Gurgaon sector 44. Expected 40% increase in incident probability.
+                   </p>
+                </div>
+             </Panel>
+           </div>
         </div>
       </main>
     </div>
   );
 };
 
-const MetricCard = ({ title, value, icon, color }: any) => {
-  const colors: any = {
-    emergency: 'text-emergency bg-emergency/10 border-emergency/20',
-    safe: 'text-safe bg-safe/10 border-safe/20',
-    blue: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-    amber: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
-    purple: 'text-purple-400 bg-purple-400/10 border-purple-400/20'
+const MetricCard = ({ title, value, icon, variant }: any) => {
+  const styles = {
+    critical: 'border-[var(--nx-red-primary)]/20 bg-[var(--nx-red-dim)] text-[var(--nx-red-primary)]',
+    active: 'border-[var(--nx-green-primary)]/20 bg-[var(--nx-green-dim)] text-[var(--nx-green-primary)]',
+    mesh: 'border-[var(--nx-teal-primary)]/20 bg-[var(--nx-teal-dim)] text-[var(--nx-teal-primary)]',
+    info: 'border-[var(--nx-blue-primary)]/20 bg-[var(--nx-blue-dim)] text-[var(--nx-blue-primary)]',
+    ai: 'border-[var(--nx-purple-primary)]/20 bg-[var(--nx-purple-dim)] text-[var(--nx-purple-primary)]'
   };
 
   return (
-    <div className={`p-4 rounded-2xl border ${colors[color]} backdrop-blur-md`}>
-      <div className="flex items-center justify-between mb-2 opacity-80">
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider">{title}</span>
-        {icon}
-      </div>
-      <div className="text-2xl font-condensed font-bold">{value}</div>
+    <div className={`p-5 rounded-sm border ${styles[variant as keyof typeof styles]} flex flex-col gap-4`}>
+       <div className="flex items-center justify-between opacity-80">
+          <span className="text-[10px] font-bold uppercase tracking-wider">{title}</span>
+          {icon}
+       </div>
+       <div className="text-3xl font-bold tracking-tight text-white">{value}</div>
     </div>
   );
 };
 
-const StatusRow = ({ label, status, color }: any) => (
-  <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-    <span className="text-sm text-muted">{label}</span>
-    <div className="flex items-center space-x-2">
-      <div className={`h-1.5 w-1.5 rounded-full ${color === 'safe' ? 'bg-safe' : 'bg-blue-400'}`}></div>
-      <span className="text-xs font-mono font-bold">{status}</span>
+const StatusRow = ({ label, status, variant }: any) => (
+  <div className="flex items-center justify-between py-2.5 border-b border-[var(--nx-border)] last:border-0">
+    <span className="text-xs text-[var(--nx-text-secondary)]">{label}</span>
+    <div className="flex items-center gap-2">
+      <Badge variant={variant}>{status}</Badge>
     </div>
   </div>
 );
 
-const ResponderItem = ({ name, type, rating }: any) => (
-  <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-    <div>
-      <div className="text-sm font-bold">{name}</div>
-      <div className="text-[10px] text-muted uppercase">{type}</div>
-    </div>
-    <div className="flex items-center space-x-1">
-      <Zap size={10} className="text-amber-400" />
-      <span className="text-xs font-bold">{rating}</span>
-    </div>
-  </div>
+const Maximize2 = ({ size, className }: any) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="15 3 21 3 21 9" />
+    <polyline points="9 21 3 21 3 15" />
+    <line x1="21" y1="3" x2="14" y2="10" />
+    <line x1="3" y1="21" x2="10" y2="14" />
+  </svg>
 );

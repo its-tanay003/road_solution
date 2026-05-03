@@ -147,11 +147,19 @@ export const useServicesStore = create<ServicesState>((set) => ({
 interface UIState {
   isStressed: boolean;
   setStressed: (stressed: boolean) => void;
+  uxMode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE';
+  setUxMode: (mode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE') => void;
+  panicScore: number;
+  setPanicScore: (score: number) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   isStressed: false,
-  setStressed: (stressed) => set({ isStressed: stressed })
+  setStressed: (stressed) => set({ isStressed: stressed }),
+  uxMode: 'DEFAULT',
+  setUxMode: (mode) => set({ uxMode: mode }),
+  panicScore: 0,
+  setPanicScore: (score) => set({ panicScore: score })
 }));
 
 export interface AlertData {
@@ -231,4 +239,224 @@ export const useDemoStore = create<DemoState>((set) => ({
     livesSaved: state.livesSaved + 1,
     avgResponseReduction: state.avgResponseReduction + 0.1
   }))
+}));
+
+interface EmergencyState {
+  goldenHourActive: boolean;
+  dispatchConfirmed: boolean;
+  setGoldenHourActive: (active: boolean) => void;
+  confirmDispatch: () => void;
+}
+
+export const useEmergencyStore = create<EmergencyState>((set) => ({
+  goldenHourActive: false,
+  dispatchConfirmed: false,
+  setGoldenHourActive: (active) => set({ goldenHourActive: active, dispatchConfirmed: false }),
+  confirmDispatch: () => set({ dispatchConfirmed: true })
+}));
+
+interface JudgeIncident {
+  id: string;
+  name: string;
+  location: [number, number];
+  timestamp: Date;
+  sessionId: string;
+}
+
+interface JudgeStore {
+  activeIncidents: JudgeIncident[];
+  addIncident: (incident: JudgeIncident) => void;
+  removeIncident: (id: string) => void;
+  clearIncidents: () => void;
+}
+
+export const useJudgeStore = create<JudgeStore>((set) => ({
+  activeIncidents: [],
+  addIncident: (incident) => set((state) => ({ 
+    activeIncidents: [incident, ...state.activeIncidents].slice(0, 5) 
+  })),
+  removeIncident: (id) => set((state) => ({ 
+    activeIncidents: state.activeIncidents.filter(i => i.id !== id) 
+  })),
+  clearIncidents: () => set({ activeIncidents: [] })
+}));
+
+interface ChaosLog {
+  id: string;
+  message: string;
+  timestamp: Date;
+  type: 'FAIL' | 'RECOVERY' | 'INFO';
+}
+
+interface ChaosState {
+  internetKilled: boolean;
+  backendKilled: boolean;
+  latencyMs: number;
+  gpsCorrupted: boolean;
+  logs: ChaosLog[];
+  killInternet: () => void;
+  killBackend: () => void;
+  setLatency: (ms: number) => void;
+  corruptGps: () => void;
+  restoreAll: () => void;
+  addLog: (message: string, type: ChaosLog['type']) => void;
+}
+
+export const useChaosStore = create<ChaosState>((set) => ({
+  internetKilled: false,
+  backendKilled: false,
+  latencyMs: 0,
+  gpsCorrupted: false,
+  logs: [],
+  addLog: (message, type) => set((state) => ({
+    logs: [{ id: Math.random().toString(36), message, timestamp: new Date(), type } as ChaosLog, ...state.logs].slice(0, 50)
+  })),
+  killInternet: () => set((state) => {
+    const isKilling = !state.internetKilled;
+    const msg = isKilling ? "Internet connection severed. PWA Offline mode active." : "Internet connection restored.";
+    const type: ChaosLog['type'] = isKilling ? 'FAIL' : 'RECOVERY';
+    return { 
+      internetKilled: isKilling,
+      logs: [{ id: Math.random().toString(36), message: msg, timestamp: new Date(), type } as ChaosLog, ...state.logs].slice(0, 50)
+    };
+  }),
+  killBackend: () => set((state) => {
+    const isKilling = !state.backendKilled;
+    const msg = isKilling ? "Backend link terminated. Failover mode engaged." : "Backend handshake re-established.";
+    const type: ChaosLog['type'] = isKilling ? 'FAIL' : 'RECOVERY';
+    return { 
+      backendKilled: isKilling,
+      logs: [{ id: Math.random().toString(36), message: msg, timestamp: new Date(), type } as ChaosLog, ...state.logs].slice(0, 50)
+    };
+  }),
+  setLatency: (ms) => set((state) => ({
+    latencyMs: ms,
+    logs: [{ id: Math.random().toString(36), message: `Artificial latency set to ${ms}ms`, timestamp: new Date(), type: 'INFO' as ChaosLog['type'] } as ChaosLog, ...state.logs].slice(0, 50)
+  })),
+  corruptGps: () => set((state) => {
+    const isCorrupting = !state.gpsCorrupted;
+    const msg = isCorrupting ? "GPS Signal degraded. Multipath error injected." : "GPS Signal stabilized.";
+    const type: ChaosLog['type'] = isCorrupting ? 'FAIL' : 'RECOVERY';
+    return { 
+      gpsCorrupted: isCorrupting,
+      logs: [{ id: Math.random().toString(36), message: msg, timestamp: new Date(), type } as ChaosLog, ...state.logs].slice(0, 50)
+    };
+  }),
+  restoreAll: () => set((state) => ({
+    internetKilled: false,
+    backendKilled: false,
+    latencyMs: 0,
+    gpsCorrupted: false,
+    logs: [{ id: Math.random().toString(36), message: "SYSTEM RESTORE: All resilience protocols nominal.", timestamp: new Date(), type: 'RECOVERY' as ChaosLog['type'] } as ChaosLog, ...state.logs].slice(0, 50)
+  }))
+}));
+
+export interface Responder {
+  unitId: string;
+  unitType: 'ALS' | 'BLS' | 'Police' | 'Fire';
+  responderName: string;
+  incidentsHandled: number;
+  avgResponseTime: string;
+  aiCollaborationScore: number;
+  livesImpacted: number;
+  currentStatus: 'ON SCENE' | 'AVAILABLE' | 'EN ROUTE';
+  streak: number;
+  city: string;
+  shift: 'morning' | 'evening' | 'night';
+}
+
+interface LeaderboardState {
+  responders: Responder[];
+  updateResponders: (responders: Responder[]) => void;
+  shuffleMetrics: () => void;
+}
+
+export const useLeaderboardStore = create<LeaderboardState>((set) => ({
+  responders: [
+    { unitId: "A47", unitType: "ALS", responderName: "Unit Alpha 47", incidentsHandled: 23, avgResponseTime: "3m 42s", aiCollaborationScore: 94, livesImpacted: 11, currentStatus: "AVAILABLE", streak: 7, city: "New Delhi", shift: "morning" },
+    { unitId: "B12", unitType: "BLS", responderName: "Guardian 12", incidentsHandled: 19, avgResponseTime: "4m 15s", aiCollaborationScore: 88, livesImpacted: 8, currentStatus: "EN ROUTE", streak: 4, city: "Mumbai", shift: "morning" },
+    { unitId: "P09", unitType: "Police", responderName: "Sector-9 Patrol", incidentsHandled: 45, avgResponseTime: "2m 55s", aiCollaborationScore: 72, livesImpacted: 5, currentStatus: "ON SCENE", streak: 2, city: "New Delhi", shift: "evening" },
+    { unitId: "F03", unitType: "Fire", responderName: "Station 3 Rescue", incidentsHandled: 31, avgResponseTime: "5m 20s", aiCollaborationScore: 91, livesImpacted: 14, currentStatus: "AVAILABLE", streak: 9, city: "Bangalore", shift: "night" },
+    { unitId: "A11", unitType: "ALS", responderName: "Swift Response 11", incidentsHandled: 15, avgResponseTime: "4m 02s", aiCollaborationScore: 84, livesImpacted: 6, currentStatus: "AVAILABLE", streak: 3, city: "New Delhi", shift: "morning" },
+    { unitId: "B88", unitType: "BLS", responderName: "Unit Bravo 88", incidentsHandled: 12, avgResponseTime: "6m 10s", aiCollaborationScore: 61, livesImpacted: 3, currentStatus: "ON SCENE", streak: 1, city: "Mumbai", shift: "evening" }
+  ],
+  updateResponders: (responders) => set({ responders }),
+  shuffleMetrics: () => set((state) => ({
+    responders: state.responders.map(r => ({
+      ...r,
+      incidentsHandled: r.incidentsHandled + (Math.random() > 0.8 ? 1 : 0),
+      aiCollaborationScore: Math.min(100, Math.max(0, r.aiCollaborationScore + (Math.random() * 4 - 2)))
+    }))
+  }))
+}));
+
+export interface Drone {
+  droneId: string;
+  model: string;
+  status: 'STANDBY' | 'DISPATCHED' | 'ON SCENE' | 'RETURNING';
+  batteryPct: number;
+  currentLat: number;
+  currentLng: number;
+  baseLat: number;
+  baseLng: number;
+  payload: string;
+  maxRangeKm: number;
+  etaSeconds: number;
+  cameraActive: boolean;
+}
+
+interface DroneState {
+  drones: Drone[];
+  dispatchDrone: (droneId: string, targetLat: number, targetLng: number) => void;
+  updateDronePos: (droneId: string, lat: number, lng: number) => void;
+  toggleCamera: (droneId: string) => void;
+}
+
+export const useDroneStore = create<DroneState>((set) => ({
+  drones: [
+    { droneId: "DR-01", model: "DJI Matrice 30T", status: "STANDBY", batteryPct: 87, currentLat: 28.625, currentLng: 77.210, baseLat: 28.625, baseLng: 77.210, payload: "AED + Trauma Kit", maxRangeKm: 8, etaSeconds: 0, cameraActive: false },
+    { droneId: "DR-02", model: "DJI Matrice 30T", status: "STANDBY", batteryPct: 92, currentLat: 28.610, currentLng: 77.230, baseLat: 28.610, baseLng: 77.230, payload: "AED + Trauma Kit", maxRangeKm: 8, etaSeconds: 0, cameraActive: false },
+    { droneId: "DR-03", model: "DJI Matrice 30T", status: "STANDBY", batteryPct: 45, currentLat: 28.640, currentLng: 77.190, baseLat: 28.640, baseLng: 77.190, payload: "AED + Trauma Kit", maxRangeKm: 8, etaSeconds: 0, cameraActive: false },
+    { droneId: "DR-04", model: "DJI Matrice 30T", status: "STANDBY", batteryPct: 88, currentLat: 28.590, currentLng: 77.200, baseLat: 28.590, baseLng: 77.200, payload: "AED + Trauma Kit", maxRangeKm: 8, etaSeconds: 0, cameraActive: false },
+    { droneId: "DR-05", model: "DJI Matrice 30T", status: "STANDBY", batteryPct: 76, currentLat: 28.615, currentLng: 77.180, baseLat: 28.615, baseLng: 77.180, payload: "AED + Trauma Kit", maxRangeKm: 8, etaSeconds: 0, cameraActive: false }
+  ],
+  dispatchDrone: (droneId, targetLat, targetLng) => set((state) => ({
+    drones: state.drones.map(d => d.droneId === droneId ? { 
+      ...d, 
+      status: 'DISPATCHED',
+      currentLat: targetLat || d.currentLat,
+      currentLng: targetLng || d.currentLng
+    } : d)
+  })),
+  updateDronePos: (droneId, lat, lng) => set((state) => ({
+    drones: state.drones.map(d => d.droneId === droneId ? { ...d, currentLat: lat, currentLng: lng } : d)
+  })),
+  toggleCamera: (droneId) => set((state) => ({
+    drones: state.drones.map(d => d.droneId === droneId ? { ...d, cameraActive: !d.cameraActive } : d)
+  }))
+}));
+
+interface AccessibilityState {
+  isDyslexic: boolean;
+  isReducedMotion: boolean;
+  isHighContrast: boolean;
+  isSimpleLanguage: boolean;
+  setDyslexic: (val: boolean) => void;
+  setReducedMotion: (val: boolean) => void;
+  setHighContrast: (val: boolean) => void;
+  setSimpleLanguage: (val: boolean) => void;
+}
+
+export const useAccessibilityStore = create<AccessibilityState>((set) => ({
+  isDyslexic: false,
+  isReducedMotion: false,
+  isHighContrast: false,
+  isSimpleLanguage: false,
+  setDyslexic: (val) => {
+    set({ isDyslexic: val });
+    document.body.classList.toggle('dyslexic', val);
+  },
+  setReducedMotion: (val) => set({ isReducedMotion: val }),
+  setHighContrast: (val) => set({ isHighContrast: val }),
+  setSimpleLanguage: (val) => set({ isSimpleLanguage: val }),
 }));

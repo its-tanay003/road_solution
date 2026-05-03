@@ -6,8 +6,14 @@ import {
   AlertOctagon, 
   ChevronRight,
   BrainCircuit,
+  Settings,
+  Shield,
+  Activity,
+  History
 } from 'lucide-react';
 import { useDemoStore, useSosStore, useNetworkStore, useUIStore } from '../../store';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 
 export const DemoController = () => {
   const { 
@@ -52,7 +58,6 @@ export const DemoController = () => {
     await new Promise(r => setTimeout(r, 1200));
     incrementStats();
     
-    // Auto-save stats to localStorage for persistence during demo
     const currentStats = { 
       livesSaved: livesSaved + 1, 
       avgResponseReduction: avgResponseReduction + 0.1 
@@ -60,7 +65,6 @@ export const DemoController = () => {
     localStorage.setItem('roadsos_demo_stats', JSON.stringify(currentStats));
   }, [addThinkingStep, incrementStats, setDecisionExplanation, triggerSos, livesSaved, avgResponseReduction]);
 
-  // Crash Simulation Logic
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
     if (countdownActive && countdownTime > 0) {
@@ -75,10 +79,8 @@ export const DemoController = () => {
 
   const runScenario = (type: 'CRASH' | 'RURAL' | 'MULTI') => {
     if (isActive || isTriggering) {
-      alert("An SOS is already active. Please cancel it before starting a new demo scenario.");
       return;
     }
-
     clearThinking();
     startScenario(type);
     
@@ -97,24 +99,23 @@ export const DemoController = () => {
   if (!isDemoMode) return (
     <button 
       onClick={() => setDemoMode(true)}
-      aria-label="Activate Demo Mode"
-      className="fixed bottom-24 right-6 bg-cyan-600/20 backdrop-blur-md border border-cyan-500/30 p-2 rounded-full text-cyan-400 hover:bg-cyan-500/40 transition-all z-50 group"
+      className="fixed bottom-24 right-8 w-12 h-12 bg-[var(--nx-blue-primary)]/10 border border-[var(--nx-blue-primary)]/30 rounded-sm flex items-center justify-center text-[var(--nx-blue-primary)] hover:bg-[var(--nx-blue-primary)]/20 transition-all z-50 group shadow-[0_0_20px_rgba(10,132,255,0.2)]"
     >
-      <Zap size={20} className="group-hover:animate-pulse" />
+      <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500" />
     </button>
   );
 
   return (
     <>
-      {/* Floating Demo Panel */}
-      <div className="fixed top-24 right-6 z-[60] flex flex-col items-end gap-4 pointer-events-none">
+      {/* Tactical Controller Panel */}
+      <div className="fixed top-24 right-8 z-[200] flex flex-col items-end gap-4 pointer-events-none">
         <button 
           onClick={() => setShowPanel(!showPanel)}
-          className="pointer-events-auto bg-slate-900/80 backdrop-blur-xl border border-white/10 p-3 rounded-2xl text-white shadow-2xl hover:scale-105 transition-all flex items-center gap-3"
+          className="pointer-events-auto nexus-card bg-[var(--nx-bg-elevated)]/90 backdrop-blur-xl p-4 flex items-center gap-4 group transition-all"
         >
-          <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-          <span className="text-xs font-black uppercase tracking-widest">Demo Control Center</span>
-          {showPanel ? <ChevronRight size={16} className="rotate-90" /> : <ChevronRight size={16} />}
+          <div className="w-2 h-2 rounded-full bg-[var(--nx-blue-primary)] animate-pulse shadow-[0_0_8px_var(--nx-blue-primary)]" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">DEMO COMMAND CENTER</span>
+          <ChevronRight size={16} className={`text-[var(--nx-text-dim)] transition-transform ${showPanel ? 'rotate-90' : ''}`} />
         </button>
 
         <AnimatePresence>
@@ -123,65 +124,57 @@ export const DemoController = () => {
               initial={{ opacity: 0, x: 20, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 20, scale: 0.95 }}
-              className="pointer-events-auto w-80 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6"
+              className="pointer-events-auto w-80 bg-[var(--nx-bg-elevated)]/95 backdrop-blur-2xl border border-[var(--nx-border-active)] rounded-sm p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] space-y-8"
             >
-              {/* Stats Overview */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Performance Metrics */}
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Lives Saved</div>
-                  <div className="text-xl font-mono text-cyan-400 font-bold">{livesSaved.toLocaleString()}</div>
+                  <div className="nexus-label">LIVES SECURED</div>
+                  <div className="text-2xl font-black text-white font-mono">{livesSaved.toLocaleString()}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Response Δ</div>
-                  <div className="text-xl font-mono text-emerald-400 font-bold">-{avgResponseReduction}%</div>
+                  <div className="nexus-label">RESPONSE DELTA</div>
+                  <div className="text-2xl font-black text-[var(--nx-green-primary)] font-mono">-{avgResponseReduction}%</div>
                 </div>
               </div>
 
-              <div className="h-px bg-white/5" />
+              <div className="h-[1px] bg-[var(--nx-border)]" />
 
-              {/* Scenarios */}
-              <div className="space-y-3">
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Run Scenario</div>
-                <div className="grid grid-cols-1 gap-2">
-                  <button 
+              {/* Mission Scenarios */}
+              <div className="space-y-4">
+                <h3 className="nexus-label flex items-center gap-2"><History size={12} /> MISSION SCENARIOS</h3>
+                <div className="space-y-3">
+                  <ScenarioButton 
                     onClick={() => runScenario('CRASH')}
-                    className="flex items-center gap-3 p-3 bg-white/5 hover:bg-red-500/20 border border-white/5 rounded-xl transition-all group text-left"
-                  >
-                    <AlertOctagon size={18} className="text-red-500" />
-                    <div>
-                      <div className="text-xs font-bold text-white uppercase tracking-tight">Unconscious Victim</div>
-                      <div className="text-[9px] text-slate-500 font-mono">G-Force Trigger + Auto-Rescue</div>
-                    </div>
-                  </button>
-                  <button 
+                    icon={<AlertOctagon size={18} className="text-[var(--nx-red-primary)]" />}
+                    title="UNCONSCIOUS ASSET"
+                    desc="G-FORCE TRIGGER + AUTO-RESURRECTION"
+                  />
+                  <ScenarioButton 
                     onClick={() => runScenario('RURAL')}
-                    className="flex items-center gap-3 p-3 bg-white/5 hover:bg-amber-500/20 border border-white/5 rounded-xl transition-all group text-left"
-                  >
-                    <WifiOff size={18} className="text-amber-500" />
-                    <div>
-                      <div className="text-xs font-bold text-white uppercase tracking-tight">Rural Failure</div>
-                      <div className="text-[9px] text-slate-500 font-mono">Offline + P2P Mesh Relay</div>
-                    </div>
-                  </button>
+                    icon={<WifiOff size={18} className="text-[var(--nx-amber-primary)]" />}
+                    title="RURAL GRID FAILURE"
+                    desc="ZERO CONNECTIVITY + P2P MESH RELAY"
+                  />
                 </div>
               </div>
 
-              {/* System Toggles */}
-              <div className="space-y-3">
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">System State</div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => setMeshMode(!isMeshMode)}
-                    className={`flex-1 p-2 rounded-lg border text-[10px] font-bold transition-all ${isMeshMode ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-slate-500'}`}
-                  >
-                    Mesh Relay
-                  </button>
-                  <button 
-                    onClick={() => setDemoMode(false)}
-                    className="p-2 rounded-lg border border-white/10 text-slate-500 text-[10px] font-bold"
-                  >
-                    Exit Demo
-                  </button>
+              {/* Protocol Controls */}
+              <div className="space-y-4">
+                <h3 className="nexus-label flex items-center gap-2"><Shield size={12} /> PROTOCOL STATE</h3>
+                <div className="flex gap-3">
+                   <button 
+                     onClick={() => setMeshMode(!isMeshMode)}
+                     className={`flex-1 h-10 rounded-sm border text-[9px] font-black tracking-widest uppercase transition-all ${isMeshMode ? 'bg-[var(--nx-amber-dim)] border-[var(--nx-amber-primary)] text-[var(--nx-amber-primary)]' : 'bg-white/[0.02] border-[var(--nx-border)] text-[var(--nx-text-tertiary)] hover:border-[var(--nx-border-active)]'}`}
+                   >
+                     MESH RELAY: {isMeshMode ? 'ON' : 'OFF'}
+                   </button>
+                   <button 
+                     onClick={() => setDemoMode(false)}
+                     className="px-4 h-10 rounded-sm border border-[var(--nx-border)] text-[var(--nx-text-tertiary)] hover:text-white hover:border-[var(--nx-red-primary)] transition-all text-[9px] font-black tracking-widest uppercase"
+                   >
+                     EXIT
+                   </button>
                 </div>
               </div>
             </motion.div>
@@ -189,64 +182,52 @@ export const DemoController = () => {
         </AnimatePresence>
       </div>
 
-      {/* AI Thinking Overlay (Visible during Scenarios) */}
+      {/* AI Reasoning Visualization Overlay */}
       <AnimatePresence>
         {(aiThinking.length > 0 || isActive) && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-x-0 bottom-32 flex justify-center z-[55] pointer-events-none px-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed inset-x-0 bottom-32 flex justify-center z-[50] pointer-events-none px-6"
           >
-            <div className="max-w-2xl w-full bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
-              <div className="flex items-center gap-3 mb-4">
-                <BrainCircuit className="text-cyan-400 animate-pulse" size={20} />
-                <span className="text-xs font-black uppercase tracking-[0.3em] text-cyan-400">AI Intelligence Core</span>
+            <div className="max-w-2xl w-full bg-[var(--nx-bg-surface)]/90 backdrop-blur-xl border border-[var(--nx-border-active)] rounded-sm p-6 shadow-[0_20px_100px_rgba(0,0,0,0.8)]">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                   <div className="relative">
+                      <BrainCircuit className="text-[var(--nx-blue-primary)]" size={20} />
+                      <motion.div 
+                        animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="absolute inset-0 bg-[var(--nx-blue-primary)] rounded-full blur-md"
+                      />
+                   </div>
+                   <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--nx-blue-primary)]">NEURAL REASONING ENGINE</span>
+                </div>
+                <Badge variant="ai">ACTIVE ANALYSIS</Badge>
               </div>
               
-              <div className="space-y-2 font-mono text-[10px] text-slate-300">
-                {aiThinking.map((step, i) => (
+              <div className="space-y-2 h-32 overflow-y-auto scrollbar-hide flex flex-col-reverse">
+                {aiThinking.slice().reverse().map((step, i) => (
                   <motion.div 
                     key={i}
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="flex items-start gap-2"
+                    className="flex items-start gap-4 font-mono text-[10px] text-[var(--nx-text-secondary)]"
                   >
-                    <span className="text-cyan-600">[{new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' })}]</span>
-                    <span className={step.includes('DETECTION') || step.includes('INITIATING') ? 'text-red-400 font-bold' : ''}>{step}</span>
+                    <span className="text-[var(--nx-text-dim)]">[{new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' })}]</span>
+                    <span className={step.includes('DETECTION') || step.includes('INITIATING') ? 'text-[var(--nx-red-primary)] font-bold' : ''}>{step}</span>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Decision Explanations */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              {/* Tactical Explanations */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-[var(--nx-border)]">
                 {decisionExplanations.responder && (
-                  <motion.div 
-                    initial={{ y: 10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="p-3 bg-white/5 rounded-2xl border border-white/10"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="text-[9px] font-black uppercase text-slate-500">Responder Selected</div>
-                      <div className="text-[9px] font-mono text-cyan-400 font-bold">{Math.round(decisionExplanations.responder.confidence * 100)}% Match</div>
-                    </div>
-                    <div className="text-[10px] text-white font-bold mb-1">ID: {decisionExplanations.responder.id}</div>
-                    <div className="text-[9px] text-slate-400 leading-tight italic">"{decisionExplanations.responder.reason}"</div>
-                  </motion.div>
+                  <DecisionCard label="RESPONDER PROTOCOL" icon={<Activity size={12} />} color="blue" data={decisionExplanations.responder} />
                 )}
                 {decisionExplanations.hospital && (
-                  <motion.div 
-                    initial={{ y: 10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="p-3 bg-white/5 rounded-2xl border border-white/10"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="text-[9px] font-black uppercase text-slate-500">Optimal Facility</div>
-                      <div className="text-[9px] font-mono text-emerald-400 font-bold">{Math.round(decisionExplanations.hospital.confidence * 100)}% Match</div>
-                    </div>
-                    <div className="text-[10px] text-white font-bold mb-1">{decisionExplanations.hospital.name}</div>
-                    <div className="text-[9px] text-slate-400 leading-tight italic">"{decisionExplanations.hospital.reason}"</div>
-                  </motion.div>
+                  <DecisionCard label="FACILITY VECTOR" icon={<Shield size={12} />} color="green" data={decisionExplanations.hospital} />
                 )}
               </div>
             </div>
@@ -254,27 +235,32 @@ export const DemoController = () => {
         )}
       </AnimatePresence>
 
-      {/* Cinematic Overlays */}
+      {/* Critical Countdown Overlay */}
       <AnimatePresence>
         {countdownActive && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-red-950/40 backdrop-blur-[2px] z-[100] flex flex-col items-center justify-center pointer-events-none"
+            className="fixed inset-0 bg-[var(--nx-red-dim)]/60 backdrop-blur-[4px] z-[500] flex flex-col items-center justify-center pointer-events-none"
           >
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,59,59,0.1)_2px,rgba(255,59,59,0.1)_3px)] opacity-20" />
+            
             <motion.div 
-              animate={{ scale: [1, 1.1, 1] }}
+              animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 0.5 }}
-              className="text-9xl font-black text-red-500 drop-shadow-[0_0_50px_rgba(239,68,68,0.5)]"
+              className="text-[12rem] font-black text-[var(--nx-red-primary)] drop-shadow-[0_0_80px_rgba(255,59,59,0.8)] tracking-tighter"
             >
               {countdownTime}
             </motion.div>
-            <div className="text-2xl font-black text-white uppercase tracking-[0.5em] mt-8 animate-pulse">
-              Crash Detection Triggered
-            </div>
-            <div className="text-sm text-red-400 font-mono mt-4">
-              Awaiting consciousness verification...
+            
+            <div className="flex flex-col items-center mt-12">
+               <div className="px-6 py-2 bg-[var(--nx-red-primary)] text-white text-2xl font-black uppercase tracking-[0.4em] italic shadow-[0_0_40px_rgba(255,59,59,0.5)]">
+                 CRASH DETECTION ACTIVE
+               </div>
+               <p className="mt-6 text-[var(--nx-red-primary)] font-mono font-bold uppercase tracking-widest animate-pulse">
+                 Awaiting user consciousness confirmation...
+               </p>
             </div>
           </motion.div>
         )}
@@ -282,3 +268,34 @@ export const DemoController = () => {
     </>
   );
 };
+
+const ScenarioButton = ({ onClick, icon, title, desc }: any) => (
+  <button 
+    onClick={onClick}
+    className="w-full flex items-center gap-4 p-4 bg-white/[0.02] hover:bg-white/[0.05] border border-[var(--nx-border)] rounded-sm group transition-all text-left"
+  >
+    <div className="w-10 h-10 border border-[var(--nx-border)] flex items-center justify-center group-hover:border-[var(--nx-border-active)] transition-colors">
+       {icon}
+    </div>
+    <div>
+      <div className="text-[10px] font-black text-white uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-[8px] text-[var(--nx-text-dim)] font-mono uppercase tracking-tighter">{desc}</div>
+    </div>
+  </button>
+);
+
+const DecisionCard = ({ label, icon, color, data }: any) => (
+  <div className="p-4 bg-white/[0.01] border border-[var(--nx-border)] rounded-sm">
+    <div className="flex justify-between items-center mb-3">
+      <div className="flex items-center gap-2">
+         <span className={`text-[var(--nx-${color}-primary)]`}>{icon}</span>
+         <span className="text-[9px] font-black text-[var(--nx-text-dim)] uppercase tracking-widest">{label}</span>
+      </div>
+      <Badge variant={color === 'blue' ? 'active' : 'success'} className="text-[8px] py-0 px-2 h-4">
+        {Math.round(data.confidence * 100)}% CONFIDENCE
+      </Badge>
+    </div>
+    <div className="text-[11px] text-white font-bold mb-2 uppercase tracking-tight">{data.id || data.name}</div>
+    <div className="text-[9px] text-[var(--nx-text-secondary)] leading-relaxed italic uppercase font-mono tracking-tighter">"{data.reason}"</div>
+  </div>
+);

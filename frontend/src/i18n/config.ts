@@ -3,23 +3,19 @@ import { initReactI18next } from 'react-i18next';
 import en from './en.json';
 import hi from './hi.json';
 import ta from './ta.json';
-import te from './te.json';
-import kn from './kn.json';
-import ml from './ml.json';
-import mr from './mr.json';
-import bn from './bn.json';
-import pa from './pa.json';
+import es from './es.json';
+import fr from './fr.json';
+import ar from './ar.json';
+import zh from './zh.json';
 
 const resources = {
   en: { translation: en },
   hi: { translation: hi },
   ta: { translation: ta },
-  te: { translation: te },
-  kn: { translation: kn },
-  ml: { translation: ml },
-  mr: { translation: mr },
-  bn: { translation: bn },
-  pa: { translation: pa },
+  es: { translation: es },
+  fr: { translation: fr },
+  ar: { translation: ar },
+  zh: { translation: zh },
 };
 
 i18n
