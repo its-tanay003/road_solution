@@ -15,11 +15,17 @@ import { NearbyServicesPanel } from '../components/NearbyServicesPanel';
 import { OneTabEmergencyCall } from '../components/OneTabEmergencyCall';
 import { AmbulanceTracker } from '../components/AmbulanceTracker';
 import { GlobalServiceMode } from '../components/GlobalServiceMode';
+import { BystanderMode } from '../components/BystanderMode';
+import { DataAccuracyDashboard } from '../components/DataAccuracyDashboard';
+import { EmergencyButton } from '../components/EmergencyButton';
+import { PanicModeOverlay } from '../components/PanicModeOverlay';
 import { 
+  Eye,
   Radio, 
   Layout, 
   Zap,
   ActivitySquare,
+  ShieldCheck,
   X,
   MessageCircle,
   Share2
@@ -36,6 +42,7 @@ export const Home = () => {
   const [voiceEnabled] = useState(false);
   const [isWarRoomActive, setIsWarRoomActive] = useState(false);
   const [showHospitalDashboard, setShowHospitalDashboard] = useState(false);
+  const [showAccuracyDashboard, setShowAccuracyDashboard] = useState(false);
 
   // Auto-switch to Emergency mode
   useEffect(() => {
@@ -142,7 +149,25 @@ export const Home = () => {
                 className="col-span-12 grid grid-cols-12 gap-6"
               >
                 {/* Default Tactical View */}
-                <div className="col-span-12 lg:col-span-8">
+                <div className="col-span-12 lg:col-span-8 space-y-6">
+                  {/* Emergency Launchpad */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Panel className="flex items-center justify-center min-h-[300px]">
+                      <EmergencyButton />
+                    </Panel>
+
+                    <button 
+                      onClick={() => setUxMode('BYSTANDER')}
+                      title="Witness Protocol: I witnessed an accident"
+                      className="group relative overflow-hidden bg-amber-500 hover:bg-amber-600 p-8 rounded-4xl border-2 border-amber-400/50 transition-all active:scale-95 shadow-2xl shadow-amber-500/20 h-full"
+                    >
+                      <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-white/10 to-transparent pointer-events-none" />
+                      <Eye size={48} className="text-white mb-4 group-hover:scale-110 transition-transform" />
+                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-2">I witnessed an accident</h3>
+                      <p className="text-amber-100/70 text-sm font-bold uppercase tracking-widest">Bystander Protocol</p>
+                    </button>
+                  </div>
+
                   <LiveMap />
                 </div>
                 
@@ -164,6 +189,10 @@ export const Home = () => {
                         <ActivitySquare size={14} className="mr-2" />
                         Hospitals
                       </Button>
+                      <Button variant="secondary" size="sm" onClick={() => setShowAccuracyDashboard(!showAccuracyDashboard)} className={showAccuracyDashboard ? 'border-nx-blue-primary bg-nx-blue-dim' : 'col-span-2'}>
+                        <ShieldCheck size={14} className="mr-2" />
+                        Data Reliability
+                      </Button>
                     </div>
                   </Panel>
                 </div>
@@ -172,6 +201,11 @@ export const Home = () => {
           </AnimatePresence>
         </main>
       </div>
+
+      <AnimatePresence>
+        {uxMode === 'BYSTANDER' && <BystanderMode />}
+        {uxMode === 'PANIC' && <PanicModeOverlay />}
+      </AnimatePresence>
 
       {/* Persistent Modals */}
       <AnimatePresence>
@@ -201,6 +235,28 @@ export const Home = () => {
                 <p className="text-slate-500 text-sm">Real-time verification of local response infrastructure via Google Places API.</p>
               </div>
               <NearbyServicesPanel />
+            </div>
+          </motion.div>
+        )}
+
+        {showAccuracyDashboard && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-nx-bg-base/90 backdrop-blur-md">
+            <div className="w-full h-full max-w-5xl max-h-[90vh] relative overflow-y-auto bg-slate-950 rounded-[2.5rem] border border-white/10 p-8 shadow-2xl nexus-scrollbar">
+              <button 
+                onClick={() => setShowAccuracyDashboard(false)} 
+                className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
+                aria-label="Close Data Reliability Dashboard"
+              >
+                <X size={24} />
+              </button>
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-2">
+                  <ShieldCheck className="text-nx-blue-primary" size={32} />
+                  <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Data Reliability Center</h1>
+                </div>
+                <p className="text-slate-500 text-sm">Real-time verification of ROADSoS data sources and accuracy audit trails.</p>
+              </div>
+              <DataAccuracyDashboard />
             </div>
           </motion.div>
         )}

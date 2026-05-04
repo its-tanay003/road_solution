@@ -78,7 +78,7 @@ export const BystanderMode: React.FC = () => {
   const progress = (step / STEP_COUNT) * 100;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white text-black flex flex-col font-sans">
+    <div className="fixed inset-0 z-100 bg-white text-black flex flex-col font-sans">
       {/* Progress Bar */}
       <div className="h-2 w-full bg-slate-100">
         <motion.div 
@@ -96,7 +96,7 @@ export const BystanderMode: React.FC = () => {
         <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
           Step {step} of {STEP_COUNT}
         </span>
-        <button onClick={() => setUxMode('DEFAULT')} className="p-2 text-slate-400 hover:text-black transition-colors">
+        <button onClick={() => setUxMode('DEFAULT')} title="Close Bystander Mode" className="p-2 text-slate-400 hover:text-black transition-colors">
           <X size={20} />
         </button>
       </header>

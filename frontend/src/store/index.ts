@@ -206,8 +206,12 @@ export const useServicesStore = create<ServicesState>((set) => ({
 interface UIState {
   isStressed: boolean;
   setStressed: (stressed: boolean) => void;
-  uxMode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE' | 'BYSTANDER';
-  setUxMode: (mode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE' | 'BYSTANDER') => void;
+  uxMode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE' | 'BYSTANDER' | 'PANIC';
+  setUxMode: (mode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE' | 'BYSTANDER' | 'PANIC') => void;
+  isCrackedScreen: boolean;
+  setCrackedScreen: (isCracked: boolean) => void;
+  isGloveMode: boolean;
+  setGloveMode: (isGlove: boolean) => void;
   panicScore: number;
   setPanicScore: (score: number) => void;
 }
@@ -218,7 +222,11 @@ export const useUIStore = create<UIState>((set) => ({
   uxMode: 'DEFAULT',
   setUxMode: (mode) => set({ uxMode: mode }),
   panicScore: 0,
-  setPanicScore: (score) => set({ panicScore: score })
+  setPanicScore: (score) => set({ panicScore: score }),
+  isCrackedScreen: false,
+  setCrackedScreen: (val) => set({ isCrackedScreen: val }),
+  isGloveMode: false,
+  setGloveMode: (val) => set({ isGloveMode: val }),
 }));
 
 export interface AlertData {
