@@ -14,6 +14,7 @@ const FirstAid = lazy(() => import('./pages/FirstAid').then(module => ({ default
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
 const RoutePlanner = lazy(() => import('./pages/RoutePlanner').then(module => ({ default: module.RoutePlanner })));
 const IncidentReport = lazy(() => import('./pages/IncidentReport').then(module => ({ default: module.IncidentReport })));
+const FamilyTracker = lazy(() => import('./pages/FamilyTracker').then(module => ({ default: module.FamilyTracker })));
 const B2BDashboard = lazy(() => import('./pages/B2B/Dashboard').then(module => ({ default: module.B2BDashboard })));
 const SafetyFeed = lazy(() => import('./pages/Community/SafetyFeed').then(module => ({ default: module.SafetyFeed })));
 const DemoCommandCenter = lazy(() => import('./components/DemoCommandCenter').then(module => ({ default: module.DemoCommandCenter })));
@@ -36,10 +37,17 @@ const ResponderLeaderboard = lazy(() => import('./components/ResponderLeaderboar
 const CrashPredictionEngine = lazy(() => import('./components/CrashPredictionEngine').then(module => ({ default: module.CrashPredictionEngine })));
 const AccessibilityPanel = lazy(() => import('./components/AccessibilityPanel').then(module => ({ default: module.AccessibilityPanel })));
 const BootScreen = lazy(() => import('./pages/BootScreen').then(module => ({ default: module.BootScreen })));
+const TrainingSimulator = lazy(() => import('./pages/TrainingSimulator').then(module => ({ default: module.TrainingSimulator })));
+const NotificationCenter = lazy(() => import('./pages/NotificationCenter').then(module => ({ default: module.NotificationCenter })));
+const WearableIntegration = lazy(() => import('./pages/WearableIntegration').then(module => ({ default: module.WearableIntegration })));
+const BlockchainAuditTrail = lazy(() => import('./components/BlockchainAuditTrail').then(module => ({ default: module.BlockchainAuditTrail })));
+const NearbyServicesPanel = lazy(() => import('./components/NearbyServicesPanel').then(module => ({ default: module.NearbyServicesPanel })));
+const VehicleServices = lazy(() => import('./pages/VehicleServices').then(module => ({ default: module.VehicleServices })));
+const EmergencyNumbers = lazy(() => import('./pages/EmergencyNumbers').then(module => ({ default: module.EmergencyNumbers })));
 
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center w-full h-screen bg-[var(--nx-bg-base)]">
-    <div className="w-12 h-12 border-4 border-[var(--nx-red-primary)] border-t-transparent rounded-full animate-spin"></div>
+  <div className="flex items-center justify-center w-full h-screen bg-(--nx-bg-base)">
+    <div className="w-12 h-12 border-4 border-(--nx-red-primary) border-t-transparent rounded-full animate-spin"></div>
   </div>
 );
 
@@ -59,6 +67,7 @@ const AnimatedRoutes = () => {
             <Route path="/route" element={<PageWrapper><RoutePlanner /></PageWrapper>} />
             <Route path="/report" element={<PageWrapper><IncidentReport /></PageWrapper>} />
             <Route path="/feed" element={<PageWrapper><SafetyFeed /></PageWrapper>} />
+            <Route path="/notifications" element={<PageWrapper><NotificationCenter /></PageWrapper>} />
             <Route path="/demo" element={<DemoCommandCenter />} />
             <Route path="/timeline" element={<PageWrapper><IncidentTimeline /></PageWrapper>} />
             <Route path="/mesh" element={<PageWrapper><MeshStatus /></PageWrapper>} />
@@ -77,12 +86,18 @@ const AnimatedRoutes = () => {
             <Route path="/leaderboard" element={<PageWrapper><ResponderLeaderboard /></PageWrapper>} />
             <Route path="/prediction" element={<PageWrapper><CrashPredictionEngine /></PageWrapper>} />
             <Route path="/accessibility" element={<PageWrapper><AccessibilityPanel /></PageWrapper>} />
+            <Route path="/training" element={<PageWrapper><TrainingSimulator /></PageWrapper>} />
+            <Route path="/wearables" element={<PageWrapper><WearableIntegration /></PageWrapper>} />
+            <Route path="/audit" element={<PageWrapper><BlockchainAuditTrail /></PageWrapper>} />
+            <Route path="/services" element={<PageWrapper><NearbyServicesPanel /></PageWrapper>} />
+            <Route path="/vehicle" element={<PageWrapper><VehicleServices /></PageWrapper>} />
+            <Route path="/sos-global" element={<PageWrapper><EmergencyNumbers /></PageWrapper>} />
           </Route>
-          {/* Chaos Panel is a global utility, we can render it outside routes or as a global child */}
           <Route element={<><Outlet /><ChaosEngineeringPanel /></>}>
             <Route path="/admin" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
             <Route path="/b2b" element={<PageWrapper><B2BDashboard /></PageWrapper>} />
           </Route>
+          <Route path="/track/:incidentId" element={<PageWrapper><FamilyTracker /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
     </Suspense>
@@ -104,6 +119,12 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
 import { AmbientUIProvider } from './components/AmbientUIProvider';
 import { ResponderAlertOverlay } from './components/ResponderAlertOverlay';
 import CrashCountdownOverlay from './components/CrashCountdownOverlay';
+import { DistressDetectionProvider } from './components/DistressDetectionProvider';
+import { DistressStatusBar } from './components/DistressStatusBar';
+import { DistressAutoPrompt } from './components/DistressAutoPrompt';
+import { OfflineSyncProvider } from './components/OfflineSyncProvider';
+import { OfflineStatusBanner } from './components/OfflineStatusBanner';
+import { OfflineTriageOrchestrator } from './components/OfflineTriageOrchestrator';
 
 import { useState } from 'react';
 
@@ -120,11 +141,19 @@ function App() {
 
   return (
     <AmbientUIProvider>
-      <Router>
-        <CrashCountdownOverlay />
-        <ResponderAlertOverlay />
-        <AnimatedRoutes />
-      </Router>
+      <OfflineSyncProvider>
+        <DistressDetectionProvider>
+          <Router>
+            <OfflineStatusBanner />
+            <OfflineTriageOrchestrator />
+            <CrashCountdownOverlay />
+            <ResponderAlertOverlay />
+            <DistressStatusBar />
+            <DistressAutoPrompt />
+            <AnimatedRoutes />
+          </Router>
+        </DistressDetectionProvider>
+      </OfflineSyncProvider>
     </AmbientUIProvider>
   );
 }

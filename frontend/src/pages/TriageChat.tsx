@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, Globe, ChevronLeft, WifiOff, Zap, ShieldAlert } from 'lucide-react';
+import { Send, Mic, MicOff, Globe, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '../store';
+import { useWearableStore } from '../store/wearableStore';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 
 export const TriageChat = () => {
   const { panicScore } = useUIStore();
+  const { health, vehicle, devices } = useWearableStore();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<{role: string, content: string}[]>([
     { role: 'assistant', content: "Neural triage active. Describe the situation. Is anyone injured? What type of vehicles are involved?" }
@@ -96,7 +98,13 @@ export const TriageChat = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: newMessages,
-          panicScore: panicScore
+          panicScore: panicScore,
+          biometricContext: {
+            heartRate: health.bpmHistory[health.bpmHistory.length-1].value,
+            ecgStatus: health.ecgStatus,
+            vehicle: vehicle,
+            connectedDevices: devices.filter(d => d.status === 'CONNECTED').map(d => d.name)
+          }
         })
       });
 
@@ -154,12 +162,12 @@ export const TriageChat = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[var(--nx-bg-base)] relative overflow-hidden font-sans">
+    <div className="flex flex-col h-full w-full bg-nx-bg-base relative overflow-hidden font-sans">
       {/* Tactical Scanline Overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-5 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.1)_2px,rgba(255,255,255,0.1)_3px)] z-50" />
 
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[var(--nx-border)] bg-[var(--nx-bg-surface)]/80 backdrop-blur-md z-20">
+      <div className="flex items-center justify-between p-4 border-b border-nx-border bg-nx-bg-surface/80 backdrop-blur-md z-20">
         <div className="flex items-center gap-4">
           <Button variant="secondary" size="sm" onClick={() => navigate(-1)} className="p-2 min-w-0">
             <ChevronLeft size={16} />
@@ -171,7 +179,7 @@ export const TriageChat = () => {
             </div>
             <div className="flex gap-1 mt-1.5">
                {[1, 2, 3].map(i => (
-                 <div key={i} className={`h-0.5 w-4 rounded-full ${i === 1 ? 'bg-[var(--nx-red-primary)]' : 'bg-[var(--nx-border)]'}`} />
+                 <div key={i} className={`h-0.5 w-4 rounded-full ${i === 1 ? 'bg-nx-red-primary' : 'bg-nx-border'}`} />
                ))}
             </div>
           </div>
@@ -180,8 +188,8 @@ export const TriageChat = () => {
         <div className="flex items-center gap-3">
           {reasoningTokens && (
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-[8px] text-[var(--nx-text-tertiary)] uppercase font-mono">Reasoning Tokens</span>
-              <span className="text-[10px] font-mono text-[var(--nx-purple-primary)]">{reasoningTokens}</span>
+              <span className="text-[8px] text-nx-text-tertiary uppercase font-mono">Reasoning Tokens</span>
+              <span className="text-[10px] font-mono text-nx-purple-primary">{reasoningTokens}</span>
             </div>
           )}
           <Button variant="secondary" size="sm" className="p-2 min-w-0">
@@ -201,20 +209,20 @@ export const TriageChat = () => {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div className={`max-w-[85%] relative ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-                <div className={`nexus-label mb-1 text-[9px] ${msg.role === 'user' ? 'text-[var(--nx-red-primary)]' : 'text-[var(--nx-blue-primary)]'}`}>
+                <div className={`nexus-label mb-1 text-[9px] ${msg.role === 'user' ? 'text-nx-red-primary' : 'text-nx-blue-primary'}`}>
                   {msg.role === 'user' ? 'WITNESS' : 'ROADOS AI'}
                 </div>
                 <div className={`p-4 rounded-sm border ${
                   msg.role === 'user' 
-                    ? 'bg-[var(--nx-red-dim)] border-[var(--nx-red-primary)]/30 text-white' 
-                    : 'bg-[var(--nx-bg-surface)] border-[var(--nx-border)] text-[var(--nx-text-secondary)] leading-relaxed text-sm'
+                    ? 'bg-nx-red-dim border-nx-red-primary/30 text-white' 
+                    : 'bg-nx-bg-surface border-nx-border text-nx-text-secondary leading-relaxed text-sm'
                 }`}>
                   {msg.content}
                   {msg.role === 'assistant' && msg.content === '' && (
                     <div className="flex gap-1 py-1">
-                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 rounded-full bg-[var(--nx-blue-primary)]" />
-                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-[var(--nx-blue-primary)]" />
-                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-[var(--nx-blue-primary)]" />
+                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 rounded-full bg-nx-blue-primary" />
+                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-nx-blue-primary" />
+                      <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-nx-blue-primary" />
                     </div>
                   )}
                 </div>
@@ -226,13 +234,13 @@ export const TriageChat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-[var(--nx-bg-surface)] border-t border-[var(--nx-border)] space-y-4">
+      <div className="p-4 bg-nx-bg-surface border-t border-nx-border space-y-4">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
            {["Yes, injuries present", "Just property damage", "Multiple vehicles", "Smoke/Fire detected"].map((reply, i) => (
              <button 
                key={i} 
                onClick={() => handleSend(reply)}
-               className="nexus-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--nx-text-tertiary)] hover:text-white border-[var(--nx-border)] hover:border-[var(--nx-border-active)] whitespace-nowrap transition-colors"
+               className="nexus-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-nx-text-tertiary hover:text-white border-nx-border hover:border-nx-border-active whitespace-nowrap transition-colors"
              >
                {reply}
              </button>
@@ -243,7 +251,8 @@ export const TriageChat = () => {
           <Button 
             variant={isListening ? 'primary' : 'secondary'}
             onClick={toggleListening}
-            className={`p-3 min-w-0 rounded-full ${isListening ? 'animate-pulse bg-[var(--nx-red-primary)]' : ''}`}
+            title={isListening ? "STOP LISTENING" : "START VOICE INPUT"}
+            className={`p-3 min-w-0 rounded-full ${isListening ? 'animate-pulse bg-nx-red-primary' : ''}`}
           >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </Button>
@@ -255,7 +264,8 @@ export const TriageChat = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="REPORTING INCIDENT DETAILS..."
-              className="w-full bg-black/40 border border-[var(--nx-border)] rounded-sm py-3 px-4 text-sm font-mono text-white placeholder:text-[var(--nx-text-dim)] focus:outline-none focus:border-[var(--nx-blue-primary)] transition-colors"
+              title="INCIDENT REPORT INPUT"
+              className="w-full bg-black/40 border border-nx-border rounded-sm py-3 px-4 text-sm font-mono text-white placeholder:text-nx-text-dim focus:outline-none focus:border-nx-blue-primary transition-colors"
             />
           </div>
 
@@ -271,8 +281,8 @@ export const TriageChat = () => {
 
         <div className="flex items-center justify-between">
            <div className="flex items-center gap-2">
-             <div className="w-1.5 h-1.5 rounded-full bg-[var(--nx-green-primary)] shadow-[0_0_4px_var(--nx-green-primary)]" />
-             <span className="text-[9px] font-mono text-[var(--nx-text-tertiary)] uppercase tracking-widest">Neural Link Encryption Active</span>
+             <div className="w-1.5 h-1.5 rounded-full bg-nx-green-primary shadow-[0_0_4px_var(--nx-green-primary)]" />
+             <span className="text-[9px] font-mono text-nx-text-tertiary uppercase tracking-widest">Neural Link Encryption Active</span>
            </div>
            {isOfflineMode && (
              <Badge variant="warning">Offline Protocol</Badge>

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { useNetworkStore, useSosStore } from '../store';
+import { useNetworkStore, useSosStore, useUIStore } from '../store';
 import { DemoController } from './Demo/DemoController';
 
 export const MainLayout = () => {
@@ -14,6 +14,7 @@ export const MainLayout = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const { isLowBandwidth } = useNetworkStore();
   const { isActive } = useSosStore();
+  const { isStressed } = useUIStore();
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -55,7 +56,8 @@ export const MainLayout = () => {
 
       <div className="flex flex-1 relative overflow-hidden">
         {/* Desktop Sidebar - NEXUS Style */}
-        <aside className="hidden lg:flex flex-col w-16 border-r border-[var(--nx-border)] bg-[var(--nx-bg-surface)] z-[500] items-center py-6 gap-8">
+        {!isStressed && (
+          <aside className="hidden lg:flex flex-col w-16 border-r border-[var(--nx-border)] bg-[var(--nx-bg-surface)] z-[500] items-center py-6 gap-8">
            <div className="w-10 h-10 bg-[var(--nx-red-primary)] rounded-sm flex items-center justify-center shadow-[0_0_15px_rgba(255,59,59,0.3)] mb-4">
               <ShieldAlert size={24} className="text-white" />
            </div>
@@ -92,40 +94,45 @@ export const MainLayout = () => {
               </button>
            </div>
         </aside>
+        )}
 
         {/* Main Content Viewport */}
         <main className="flex-1 overflow-y-auto relative pb-20 lg:pb-0">
           <Outlet />
           
           {/* Tactical Frame Decorations */}
-          <div className="fixed top-0 right-0 p-4 pointer-events-none z-40 opacity-20 hidden lg:block">
-             <div className="text-[10px] font-mono text-right">
-                <div>COORD: {location.pathname.toUpperCase()}</div>
-                <div>SEC: ALPHA-9</div>
-             </div>
-          </div>
+          {!isStressed && (
+            <div className="fixed top-0 right-0 p-4 pointer-events-none z-40 opacity-20 hidden lg:block">
+               <div className="text-[10px] font-mono text-right">
+                  <div>COORD: {location.pathname.toUpperCase()}</div>
+                  <div>SEC: ALPHA-9</div>
+               </div>
+            </div>
+          )}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation - NEXUS Style */}
-      <nav className="fixed bottom-0 left-0 right-0 lg:hidden bg-[var(--nx-bg-surface)]/95 backdrop-blur-3xl border-t border-[var(--nx-border)] z-[500] px-6 h-20 flex justify-around items-center pb-safe shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
-        {navItems.map((item) => {
-          const isItemActive = location.pathname === item.path;
-          const Icon = item.icon;
-          return (
-            <button 
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-1 transition-all ${isItemActive ? 'text-[var(--nx-red-primary)]' : 'text-[var(--nx-text-tertiary)]'}`}
-            >
-              <div className={`p-2 rounded-sm ${isItemActive ? 'bg-[var(--nx-red-dim)]' : ''}`}>
-                <Icon size={20} />
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-widest">{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {!isStressed && (
+        <nav className="fixed bottom-0 left-0 right-0 lg:hidden bg-[var(--nx-bg-surface)]/95 backdrop-blur-3xl border-t border-[var(--nx-border)] z-[500] px-6 h-20 flex justify-around items-center pb-safe shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
+          {navItems.map((item) => {
+            const isItemActive = location.pathname === item.path;
+            const Icon = item.icon;
+            return (
+              <button 
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`flex flex-col items-center gap-1 transition-all ${isItemActive ? 'text-[var(--nx-red-primary)]' : 'text-[var(--nx-text-tertiary)]'}`}
+              >
+                <div className={`p-2 rounded-sm ${isItemActive ? 'bg-[var(--nx-red-dim)]' : ''}`}>
+                  <Icon size={20} />
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-widest">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       <DemoController />
 

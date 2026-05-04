@@ -1,6 +1,15 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import { websocketConnections } from './metricsService';
+import { 
+  addUserToRoom, 
+  removeUserFromRoom, 
+  addNoteToRoom, 
+  getIncidentRoomState,
+  setRoomConsensus,
+  RoomUser,
+  RoomNote
+} from './incidentRoomStore';
 
 let io: SocketIOServer;
 
@@ -15,6 +24,59 @@ export const initSocket = (server: HttpServer) => {
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
     websocketConnections.inc();
+
+    // === SHARED INCIDENT ROOM EVENTS ===
+    
+    socket.on('join_incident_room', async (data: { roomId: string, user: Omit<RoomUser, 'id'> }) => {
+      const roomStr = `incident:${data.roomId}`;
+      socket.join(roomStr);
+      socket.data.roomId = data.roomId;
+      
+      const fullUser: RoomUser = { ...data.user, id: socket.id };
+      const state = await addUserToRoom(data.roomId, fullUser);
+      
+      // Send current state to the joined user
+      socket.emit('incident_room_state', state);
+      
+      // Broadcast presence update to others
+      socket.to(roomStr).emit('incident_user_joined', fullUser);
+    });
+
+    socket.on('leave_incident_room', async (roomId: string) => {
+      const roomStr = `incident:${roomId}`;
+      socket.leave(roomStr);
+      socket.data.roomId = null;
+      
+      await removeUserFromRoom(roomId, socket.id);
+      socket.to(roomStr).emit('incident_user_left', socket.id);
+    });
+
+    socket.on('cursor_moved', (data: { roomId: string, x: number, y: number }) => {
+      socket.to(`incident:${data.roomId}`).emit('cursor_moved', { 
+        userId: socket.id, 
+        x: data.x, 
+        y: data.y 
+      });
+    });
+
+    socket.on('note_added', async (data: { roomId: string, note: RoomNote }) => {
+      await addNoteToRoom(data.roomId, data.note);
+      io.to(`incident:${data.roomId}`).emit('note_added', data.note);
+    });
+
+    socket.on('ai_request', (roomId: string) => {
+      io.to(`incident:${roomId}`).emit('ai_request_started', { requestedBy: socket.id });
+    });
+
+    socket.on('action_conflict', (data: { roomId: string, actionType: string, details: any }) => {
+      socket.to(`incident:${data.roomId}`).emit('action_conflict', {
+        userId: socket.id,
+        actionType: data.actionType,
+        details: data.details
+      });
+    });
+
+    // ===================================
 
     // Responders join the global alert room
     socket.on('join_responders', () => {
@@ -40,10 +102,8 @@ export const initSocket = (server: HttpServer) => {
 
     // --- WebRTC Mesh Signaling ---
     socket.on('discover-peers', () => {
-      // In a real app, use geospatial queries via Redis to find nearby active clients.
-      // For now, we simulate by sending a couple of random connected peer IDs (if any).
       const allClients = Array.from(io.sockets.sockets.keys());
-      const peers = allClients.filter(id => id !== socket.id).slice(0, 5); // up to 5 peers
+      const peers = allClients.filter(id => id !== socket.id).slice(0, 5);
       socket.emit('nearby-peers', peers);
     });
 
@@ -74,7 +134,6 @@ export const initSocket = (server: HttpServer) => {
 
     // --- Demo Sync Events ---
     socket.on('sos:triggered', (data: any) => {
-      console.log('Demo SOS Triggered:', data);
       socket.broadcast.emit('sos:triggered', {
         ...data,
         timestamp: new Date(),
@@ -83,7 +142,6 @@ export const initSocket = (server: HttpServer) => {
     });
 
     socket.on('judge:sos', (data: { name: string; location: [number, number]; sessionId: string }) => {
-      console.log(`Judge SOS from ${data.name} in session ${data.sessionId}`);
       io.emit('judge:sos', {
         ...data,
         id: `judge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -92,9 +150,15 @@ export const initSocket = (server: HttpServer) => {
       });
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log(`Socket disconnected: ${socket.id}`);
       websocketConnections.dec();
+      
+      // Remove from incident room if they were in one
+      if (socket.data.roomId) {
+        await removeUserFromRoom(socket.data.roomId, socket.id);
+        io.to(`incident:${socket.data.roomId}`).emit('incident_user_left', socket.id);
+      }
     });
   });
 
@@ -111,7 +175,7 @@ export const broadcastLocationUpdate = (token: string, lat: number, lng: number)
 export const broadcastToResponders = (event: string, payload: any): boolean => {
   if (io) {
     io.to('responders_global').emit(event, payload);
-    return true; // Sent to websocket server successfully
+    return true; 
   }
   return false;
 };

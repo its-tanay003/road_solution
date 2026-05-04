@@ -6,6 +6,7 @@ import { useServicesStore, useSosStore } from '../store';
 import { RiskForecastLayer } from './RiskForecastLayer';
 import { ShieldAlert, Info } from 'lucide-react';
 import { DroneDispatchLayer } from './DroneDispatchLayer';
+import { HospitalMapLayer } from './HospitalMapLayer';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -107,6 +108,9 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
 
         {/* Drone Dispatch System */}
         <DroneDispatchLayer />
+        
+        {/* Hospital Capacity System Layer */}
+        <HospitalMapLayer />
         
         {location && (
           <Marker position={[location.lat, location.lng]}>

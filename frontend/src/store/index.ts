@@ -1,6 +1,16 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import axios from 'axios';
 import { encryptData } from '../utils/crypto';
+
+export * from './hospitalStore';
+export type { Hospital } from './hospitalStore';
+export * from './blockchainStore';
+export * from './distressStore';
+export * from './notificationStore';
+export * from './trainingStore';
+export * from './wearableStore';
+export * from './ambulanceStore';
 
 interface SosState {
   isActive: boolean;
@@ -65,6 +75,16 @@ export const useSosStore = create<SosState>((set, get) => ({
         networkCondition: useNetworkStore.getState().isLowBandwidth ? 'poor' : 'good'
       });
       
+      // MOCK NOTIFICATION SYSTEM
+      setTimeout(() => {
+        const contacts = useUserStore.getState().contacts;
+        contacts.forEach(contact => {
+          if (contact.notifySms || contact.notifyPush) {
+            console.log(`[MOCK NOTIFICATION] Alerting ${contact.relationship} (${contact.name}) at ${contact.phone}`);
+          }
+        });
+      }, 1500);
+      
       set({ 
         trackingToken: response.data.token, 
         isActive: true, 
@@ -92,11 +112,29 @@ export const useSosStore = create<SosState>((set, get) => ({
   }))
 }));
 
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: string;
+  notifySms: boolean;
+  notifyPush: boolean;
+  notifyEmail: boolean;
+}
+
+import { COUNTRY_PROFILES, type CountryProfile } from '../data/countries';
+
 interface UserState {
   language: string;
+  countryCode: string;
+  activeCountry: CountryProfile;
   setLanguage: (lang: string) => void;
-  contacts: { name: string; phone: string }[];
-  addContact: (contact: { name: string; phone: string }) => void;
+  setCountryCode: (code: string) => void;
+  switchCountry: (code: string) => void;
+  contacts: EmergencyContact[];
+  addContact: (contact: EmergencyContact) => void;
+  removeContact: (id: string) => void;
+  updateContact: (id: string, contact: Partial<EmergencyContact>) => void;
   medicalInfo: {
     bloodGroup: string;
     allergies: string;
@@ -109,9 +147,30 @@ interface UserState {
 
 export const useUserStore = create<UserState>((set) => ({
   language: 'en',
+  countryCode: 'IN',
+  activeCountry: COUNTRY_PROFILES.IN,
   setLanguage: (lang) => set({ language: lang }),
+  setCountryCode: (code) => set({ countryCode: code }),
+  switchCountry: (code) => {
+    const profile = COUNTRY_PROFILES[code];
+    if (profile) {
+      set({ 
+        countryCode: code, 
+        activeCountry: profile,
+        language: profile.language 
+      });
+    }
+  },
   contacts: [],
-  addContact: (contact) => set((state) => ({ contacts: [...state.contacts, contact] })),
+  addContact: (contact) => set((state) => ({ 
+    contacts: state.contacts.length < 5 ? [...state.contacts, contact] : state.contacts 
+  })),
+  removeContact: (id) => set((state) => ({
+    contacts: state.contacts.filter(c => c.id !== id)
+  })),
+  updateContact: (id, contact) => set((state) => ({
+    contacts: state.contacts.map(c => c.id === id ? { ...c, ...contact } : c)
+  })),
   medicalInfo: {
     bloodGroup: 'O Positive',
     allergies: 'Penicillin',
@@ -147,8 +206,8 @@ export const useServicesStore = create<ServicesState>((set) => ({
 interface UIState {
   isStressed: boolean;
   setStressed: (stressed: boolean) => void;
-  uxMode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE';
-  setUxMode: (mode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE') => void;
+  uxMode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE' | 'BYSTANDER';
+  setUxMode: (mode: 'DEFAULT' | 'COMMAND' | 'EMERGENCY' | 'VOICE' | 'BYSTANDER') => void;
   panicScore: number;
   setPanicScore: (score: number) => void;
 }
@@ -460,3 +519,29 @@ export const useAccessibilityStore = create<AccessibilityState>((set) => ({
   setHighContrast: (val) => set({ isHighContrast: val }),
   setSimpleLanguage: (val) => set({ isSimpleLanguage: val }),
 }));
+
+export interface Debrief {
+  id: string;
+  incidentId: string;
+  timestamp: string;
+  content: string;
+}
+
+interface DebriefState {
+  debriefs: Debrief[];
+  saveDebrief: (debrief: Debrief) => void;
+  getDebrief: (id: string) => Debrief | undefined;
+}
+
+export const useDebriefStore = create<DebriefState>()(
+  persist(
+    (set, get) => ({
+      debriefs: [],
+      saveDebrief: (debrief) => set((state) => ({ debriefs: [...state.debriefs, debrief] })),
+      getDebrief: (id) => get().debriefs.find(d => d.id === id)
+    }),
+    {
+      name: 'roadsos-debriefs'
+    }
+  )
+);

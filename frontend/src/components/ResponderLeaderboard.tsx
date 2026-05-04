@@ -10,6 +10,7 @@ import {
   Heart
 } from 'lucide-react';
 import { useLeaderboardStore, type Responder } from '../store';
+import { useTrainingStore } from '../store/trainingStore';
 
 const RankIcon = ({ rank }: { rank: number }) => {
   if (rank === 1) return <Trophy className="text-yellow-400 fill-yellow-400/20" size={24} />;
@@ -55,6 +56,7 @@ const ScoreGauge = ({ score }: { score: number }) => {
 };
 
 export const ResponderLeaderboard: React.FC = () => {
+  const { records, currentStreak, getAverageScore } = useTrainingStore();
   const { responders, shuffleMetrics } = useLeaderboardStore();
   const [filterType, setFilterType] = useState<string>('ALL');
   const [sortKey, setSortKey] = useState<keyof Responder>('incidentsHandled');
@@ -77,7 +79,7 @@ export const ResponderLeaderboard: React.FC = () => {
 
   const sortedResponders = useMemo(() => {
     return [...responders]
-      .filter(r => filterType === 'ALL' || r.unitType === filterType)
+      .filter(r => filterType === 'ALL' || filterType === 'TRAINING' || r.unitType === filterType)
       .sort((a, b) => {
         const valA = a[sortKey];
         const valB = b[sortKey];
@@ -124,7 +126,7 @@ export const ResponderLeaderboard: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <div className="bg-white/5 border border-white/10 rounded-2xl p-1 flex">
-              {['ALL', 'ALS', 'BLS', 'Police', 'Fire'].map(type => (
+              {['ALL', 'ALS', 'BLS', 'Police', 'Fire', 'TRAINING'].map(type => (
                 <button
                   key={type}
                   onClick={() => setFilterType(type)}
@@ -194,19 +196,63 @@ export const ResponderLeaderboard: React.FC = () => {
         <div className="bg-slate-900/50 border border-white/5 rounded-[2.5rem] overflow-hidden backdrop-blur-xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/5 text-slate-500">
-                <th className="p-6 pl-10 text-[10px] font-black uppercase tracking-[0.2em]">Rank</th>
-                <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em]">Unit</th>
-                <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('incidentsHandled')}>Incidents</th>
-                <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('avgResponseTime')}>Response</th>
-                <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('aiCollaborationScore')}>AI Score</th>
-                <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('livesImpacted')}>Impact</th>
-                <th className="p-6 pr-10 text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
-              </tr>
+              {filterType === 'TRAINING' ? (
+                <tr className="border-b border-white/5 text-slate-500">
+                  <th className="p-6 pl-10 text-[10px] font-black uppercase tracking-[0.2em]">Scenario Type</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em]">Score</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em]">Time to Triage</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em]">Correct Unit</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em]">AI Compliance</th>
+                  <th className="p-6 pr-10 text-[10px] font-black uppercase tracking-[0.2em]">Date</th>
+                </tr>
+              ) : (
+                <tr className="border-b border-white/5 text-slate-500">
+                  <th className="p-6 pl-10 text-[10px] font-black uppercase tracking-[0.2em]">Rank</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em]">Unit</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('incidentsHandled')}>Incidents</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('avgResponseTime')}>Response</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('aiCollaborationScore')}>AI Score</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white" onClick={() => handleSort('livesImpacted')}>Impact</th>
+                  <th className="p-6 pr-10 text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
+                </tr>
+              )}
             </thead>
             <tbody>
               <AnimatePresence mode="popLayout">
-                {sortedResponders.map((r, index) => {
+                {filterType === 'TRAINING' ? (
+                  records.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-12 text-center text-slate-500 font-mono text-sm">No training records found.</td>
+                    </tr>
+                  ) : (
+                    records.map((r) => (
+                      <motion.tr 
+                        key={r.id}
+                        layout
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="group hover:bg-white/2 transition-colors"
+                      >
+                        <td className="p-6 pl-10 font-bold text-sm text-blue-400">{r.scenarioType}</td>
+                        <td className="p-6 font-black tabular-nums">{r.score}</td>
+                        <td className="p-6 font-mono text-sm text-slate-300">{r.timeToTriage}s</td>
+                        <td className="p-6">
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${r.correctUnitDispatched ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                            {r.correctUnitDispatched ? 'YES' : 'NO'}
+                          </span>
+                        </td>
+                        <td className="p-6">
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${r.aiCompliance ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                            {r.aiCompliance ? 'YES' : 'NO'}
+                          </span>
+                        </td>
+                        <td className="p-6 pr-10 text-slate-500 font-mono text-xs">{new Date(r.timestamp).toLocaleString()}</td>
+                      </motion.tr>
+                    ))
+                  )
+                ) : (
+                sortedResponders.map((r, index) => {
                   const isTop = index === 0 && filterType === 'ALL';
                   const isMyUnit = r.unitId === myUnitId;
 
@@ -290,31 +336,54 @@ export const ResponderLeaderboard: React.FC = () => {
                       </td>
                     </motion.tr>
                   );
-                })}
+                }))}
               </AnimatePresence>
             </tbody>
           </table>
         </div>
 
         {/* Footer Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pb-12">
-          <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Resolved</div>
-            <div className="text-3xl font-black italic tracking-tighter">1,242</div>
+        {filterType === 'TRAINING' ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pb-12">
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Simulations</div>
+              <div className="text-3xl font-black italic tracking-tighter text-blue-500">{records.length}</div>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Average Score</div>
+              <div className="text-3xl font-black italic tracking-tighter text-emerald-500">{getAverageScore()}</div>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Training Streak</div>
+              <div className="text-3xl font-black italic tracking-tighter text-yellow-400">{currentStreak} <span className="text-sm">Days</span></div>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Highest Score</div>
+              <div className="text-3xl font-black italic tracking-tighter text-purple-400">
+                {records.length > 0 ? Math.max(...records.map(r => r.score)) : 0}
+              </div>
+            </div>
           </div>
-          <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Golden Hour Success</div>
-            <div className="text-3xl font-black italic tracking-tighter text-emerald-500">92%</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pb-12">
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Resolved</div>
+              <div className="text-3xl font-black italic tracking-tighter">1,242</div>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Golden Hour Success</div>
+              <div className="text-3xl font-black italic tracking-tighter text-emerald-500">92%</div>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Avg Efficiency</div>
+              <div className="text-3xl font-black italic tracking-tighter text-blue-500">+34%</div>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Units</div>
+              <div className="text-3xl font-black italic tracking-tighter">84</div>
+            </div>
           </div>
-          <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Avg Efficiency</div>
-            <div className="text-3xl font-black italic tracking-tighter text-blue-500">+34%</div>
-          </div>
-          <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-2">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Units</div>
-            <div className="text-3xl font-black italic tracking-tighter">84</div>
-          </div>
-        </div>
+        )}
 
       </div>
 

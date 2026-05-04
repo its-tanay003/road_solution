@@ -24,7 +24,11 @@ interface AnalysisResult {
   confidence_score: number;
 }
 
-export const CrashPhotoAnalyzer = () => {
+interface CrashPhotoAnalyzerProps {
+  onClose?: () => void;
+}
+
+export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
   const [image, setImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -83,8 +87,12 @@ export const CrashPhotoAnalyzer = () => {
           </div>
         </div>
         
-        {image && (
+        {image ? (
           <button onClick={reset} title="Reset Scan" className="p-2 hover:bg-white/10 rounded-full text-slate-400 transition-colors">
+            <X size={20} />
+          </button>
+        ) : onClose && (
+          <button onClick={onClose} title="Close Vision Triage" className="p-2 hover:bg-white/10 rounded-full text-slate-400 transition-colors">
             <X size={20} />
           </button>
         )}

@@ -1,7 +1,9 @@
-import { Heart, Settings, Phone, Lock, Unlock, AlertTriangle, Edit2, Save, X, DownloadCloud, CheckCircle, ShieldAlert, Fingerprint, Database, Zap } from 'lucide-react';
+import { Heart, Settings, Phone, Lock, AlertTriangle, Edit2, Save, X, DownloadCloud, CheckCircle, Database, Zap, Fingerprint } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import { useUIStore, useUserStore, useAlertStore } from '../store';
+import { useUIStore, useUserStore } from '../store';
+import { useDistressStore } from '../store/distressStore';
 import { useCrashDetection } from '../hooks/useCrashDetection';
 import { Panel } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
@@ -15,8 +17,8 @@ export const Profile = () => {
   const [isLocked, setIsLocked] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const { setStressed } = useUIStore();
-  const { medicalInfo, updateMedicalInfo, isResponder, toggleResponderMode } = useUserStore();
-  const { triggerAlert } = useAlertStore();
+  const { medicalInfo, updateMedicalInfo, isResponder, toggleResponderMode, contacts } = useUserStore();
+  const { isActive: distressActive, toggleEngine: toggleDistressEngine } = useDistressStore();
 
   const [editForm, setEditForm] = useState(medicalInfo);
   
@@ -37,6 +39,22 @@ export const Profile = () => {
 
   const handleUnlockVault = () => {
     setIsLocked(false);
+  };
+
+  const [isAddingContact, setIsAddingContact] = useState(false);
+  const [newContact, setNewContact] = useState({ name: '', phone: '', relationship: '', notifySms: true, notifyPush: true, notifyEmail: false });
+
+  const handleAddContact = () => {
+    if (contacts.length >= 5) return;
+    if (newContact.name && newContact.phone) {
+      useUserStore.getState().addContact({ ...newContact, id: Date.now().toString() });
+      setIsAddingContact(false);
+      setNewContact({ name: '', phone: '', relationship: '', notifySms: true, notifyPush: true, notifyEmail: false });
+    }
+  };
+
+  const handleRemoveContact = (id: string) => {
+    useUserStore.getState().removeContact(id);
   };
 
   const handleEditClick = () => {
@@ -78,7 +96,7 @@ export const Profile = () => {
     for (const url of tilesToFetch) {
       try {
         await fetch(url, { mode: 'no-cors' });
-      } catch (e) {
+      } catch {
         console.error("Cache fetch failed for", url);
       }
       completed++;
@@ -91,18 +109,7 @@ export const Profile = () => {
     }, 500);
   };
 
-  const handleSimulateAlert = () => {
-    if (!isResponder) return;
-    triggerAlert({
-      id: `sos-${Date.now()}`,
-      type: 'Minor Cut / Injury',
-      lat: 28.6150,
-      lng: 77.2100,
-      distance: 400,
-      user: 'Anonymous Victim',
-      timestamp: Date.now()
-    });
-  };
+  /* Removed unused handleSimulateAlert */
 
   const qrPayload = JSON.stringify({
     v: 1,
@@ -113,7 +120,7 @@ export const Profile = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] p-6 lg:p-10 pb-24 lg:pb-10 overflow-y-auto">
+    <div className="min-h-screen bg-(--nx-bg-base) text-(--nx-text-primary) p-6 lg:p-10 pb-24 lg:pb-10 overflow-y-auto">
       <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Identity & Vault */}
@@ -123,20 +130,21 @@ export const Profile = () => {
               <div className="absolute top-0 right-0 p-4 opacity-5 font-mono text-[60px] font-black leading-none pointer-events-none select-none">
                  NX-9
               </div>
-              <div className="w-20 h-20 bg-[var(--nx-bg-elevated)] border border-[var(--nx-border)] rounded-sm flex items-center justify-center relative overflow-hidden group-hover:border-[var(--nx-red-primary)] transition-colors">
+            <div className="w-20 h-20 bg-(--nx-bg-elevated) border border-(--nx-border) rounded-sm flex items-center justify-center relative overflow-hidden group-hover:border-(--nx-red-primary) transition-colors">
                  <div className="text-2xl font-black text-white">JS</div>
-                 <div className="absolute inset-0 bg-[var(--nx-red-primary)] opacity-10 animate-pulse" />
+                 <div className="absolute inset-0 bg-(--nx-red-primary) opacity-10 animate-pulse" />
               </div>
               <div className="flex-1">
                  <h1 className="text-2xl font-bold text-white tracking-tighter">JOHN SMITH</h1>
                  <div className="flex items-center gap-3 mt-1.5">
-                    <span className="text-[10px] font-mono text-[var(--nx-text-dim)] uppercase tracking-widest">TACTICAL ID: RDS-8492-X</span>
+                    <span className="text-[10px] font-mono text-(--nx-text-dim) uppercase tracking-widest">TACTICAL ID: RDS-8492-X</span>
                     <Badge variant="active">VERIFIED</Badge>
                  </div>
               </div>
               <button 
                 onClick={() => setStressed(true)}
-                className="w-10 h-10 nexus-card flex items-center justify-center text-[var(--nx-red-primary)] hover:bg-[var(--nx-red-primary)] hover:text-white transition-all shadow-[0_0_10px_rgba(255,59,59,0.1)]"
+                title="TRIGGER DISTRESS SIGNAL"
+                className="w-10 h-10 nexus-card flex items-center justify-center text-(--nx-red-primary) hover:bg-(--nx-red-primary) hover:text-white transition-all shadow-[0_0_10px_rgba(255,59,59,0.1)]"
               >
                 <AlertTriangle size={18} />
               </button>
@@ -174,8 +182,8 @@ export const Profile = () => {
                     <QRCodeSVG value={qrPayload} size={160} level="Q" includeMargin={false} />
                   </div>
                   <div className="max-w-xs">
-                     <p className="text-[10px] font-bold text-[var(--nx-blue-primary)] uppercase tracking-widest mb-2">Passive Responder Access</p>
-                     <p className="text-[11px] text-[var(--nx-text-dim)] leading-relaxed font-mono">
+                     <p className="text-[10px] font-bold text-(--nx-blue-primary) uppercase tracking-widest mb-2">Passive Responder Access</p>
+                     <p className="text-[11px] text-(--nx-text-dim) leading-relaxed font-mono">
                        END-TO-END ENCRYPTED. DATA RESIDES LOCALLY. SCAN ONLY IN CRITICAL EVENTS.
                      </p>
                   </div>
@@ -186,27 +194,33 @@ export const Profile = () => {
                     <div className="grid grid-cols-1 gap-6">
                        <div className="flex flex-col gap-2">
                           <label className="nexus-label">BLOOD GROUP</label>
-                          <input 
-                            className="nexus-input" 
-                            value={editForm.bloodGroup} 
-                            onChange={(e) => setEditForm({...editForm, bloodGroup: e.target.value})}
-                          />
+                           <input 
+                             className="nexus-input" 
+                             value={editForm.bloodGroup} 
+                             placeholder="e.g. O+"
+                             title="BLOOD GROUP"
+                             onChange={(e) => setEditForm({...editForm, bloodGroup: e.target.value})}
+                           />
                        </div>
                        <div className="flex flex-col gap-2">
                           <label className="nexus-label">ALLERGIES</label>
-                          <input 
-                            className="nexus-input" 
-                            value={editForm.allergies} 
-                            onChange={(e) => setEditForm({...editForm, allergies: e.target.value})}
-                          />
+                           <input 
+                             className="nexus-input" 
+                             value={editForm.allergies} 
+                             placeholder="e.g. Peanuts, Penicillin"
+                             title="ALLERGIES"
+                             onChange={(e) => setEditForm({...editForm, allergies: e.target.value})}
+                           />
                        </div>
                        <div className="flex flex-col gap-2">
                           <label className="nexus-label">MEDICAL CONDITIONS</label>
-                          <textarea 
-                            className="nexus-input min-h-[100px]" 
-                            value={editForm.conditions} 
-                            onChange={(e) => setEditForm({...editForm, conditions: e.target.value})}
-                          />
+                           <textarea 
+                             className="nexus-input min-h-[100px]" 
+                             value={editForm.conditions} 
+                             placeholder="e.g. Diabetes, Hypertension"
+                             title="MEDICAL CONDITIONS"
+                             onChange={(e) => setEditForm({...editForm, conditions: e.target.value})}
+                           />
                        </div>
                        <div className="flex gap-4 pt-4">
                           <Button variant="primary" className="flex-1" onClick={handleSaveEdit}><Save size={16} className="mr-2" /> COMMIT CHANGES</Button>
@@ -215,18 +229,18 @@ export const Profile = () => {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-8">
-                       <div className="nexus-card p-4 bg-white/[0.01]">
-                          <div className="nexus-label mb-2">Blood Group</div>
-                          <div className="text-xl font-black text-[var(--nx-red-primary)] font-mono">{medicalInfo.bloodGroup}</div>
-                       </div>
-                       <div className="nexus-card p-4 bg-white/[0.01]">
-                          <div className="nexus-label mb-2">Allergies</div>
-                          <div className="text-sm font-bold text-white">{medicalInfo.allergies || 'NONE DETECTED'}</div>
-                       </div>
-                       <div className="col-span-full nexus-card p-4 bg-white/[0.01]">
-                          <div className="nexus-label mb-2">Chronic Conditions</div>
-                          <p className="text-xs text-[var(--nx-text-secondary)] leading-relaxed">{medicalInfo.conditions || 'CLEAN MEDICAL BILL'}</p>
-                       </div>
+                        <div className="nexus-card p-4 bg-white/1">
+                           <div className="nexus-label mb-2">Blood Group</div>
+                           <div className="text-xl font-black text-(--nx-red-primary) font-mono">{medicalInfo.bloodGroup}</div>
+                        </div>
+                        <div className="nexus-card p-4 bg-white/1">
+                           <div className="nexus-label mb-2">Allergies</div>
+                           <div className="text-sm font-bold text-white">{medicalInfo.allergies || 'NONE DETECTED'}</div>
+                        </div>
+                        <div className="col-span-full nexus-card p-4 bg-white/1">
+                           <div className="nexus-label mb-2">Chronic Conditions</div>
+                           <p className="text-xs text-(--nx-text-secondary) leading-relaxed">{medicalInfo.conditions || 'CLEAN MEDICAL BILL'}</p>
+                        </div>
                     </div>
                   )}
                </div>
@@ -236,23 +250,85 @@ export const Profile = () => {
 
         {/* Right Column: Protocols & Contacts */}
         <div className="lg:col-span-5 space-y-8">
-           <Panel title="Emergency Contacts" icon={Phone} subtitle="High-priority notification chain">
+           <Panel title="Emergency Contacts" icon={Phone} subtitle={`High-priority notification chain (${contacts.length}/5)`}>
               <div className="space-y-3">
-                 {[
-                   { name: 'Jane Smith', relation: 'Spouse', phone: '+1 555-0198' },
-                   { name: 'Robert Smith', relation: 'Father', phone: '+1 555-0199' }
-                 ].map((contact, i) => (
-                   <div key={i} className="p-4 nexus-card bg-white/[0.01] flex justify-between items-center group hover:border-[var(--nx-border-active)] transition-all">
-                      <div>
-                        <div className="text-xs font-bold text-white uppercase tracking-tight">{contact.name}</div>
-                        <div className="text-[10px] text-[var(--nx-text-dim)] uppercase mt-1">{contact.relation}</div>
-                      </div>
-                      <div className="text-xs font-mono text-[var(--nx-blue-primary)] group-hover:text-white transition-colors">{contact.phone}</div>
-                   </div>
+                 {contacts.map((contact, i) => (
+                    <div key={contact.id || i} className="p-4 nexus-card bg-white/1 flex flex-col group hover:border-(--nx-border-active) transition-all">
+                       <div className="flex justify-between items-center mb-2">
+                         <div>
+                           <div className="text-xs font-bold text-white uppercase tracking-tight">{contact.name}</div>
+                           <div className="text-[10px] text-(--nx-text-dim) uppercase mt-1">{contact.relationship}</div>
+                         </div>
+                         <div className="flex items-center gap-3">
+                           <div className="text-xs font-mono text-(--nx-blue-primary) group-hover:text-white transition-colors">{contact.phone}</div>
+                           <button onClick={() => handleRemoveContact(contact.id)} title="REMOVE CONTACT" className="text-(--nx-red-primary) hover:text-white"><X size={14} /></button>
+                         </div>
+                       </div>
+                       <div className="flex gap-3 mt-2 pt-2 border-t border-(--nx-border)/30 text-[9px] uppercase tracking-widest text-(--nx-text-dim)">
+                          <span className={contact.notifySms ? 'text-(--nx-green-primary)' : ''}>SMS {contact.notifySms ? 'ON' : 'OFF'}</span>
+                          <span className={contact.notifyPush ? 'text-(--nx-green-primary)' : ''}>PUSH {contact.notifyPush ? 'ON' : 'OFF'}</span>
+                          <span className={contact.notifyEmail ? 'text-(--nx-green-primary)' : ''}>EMAIL {contact.notifyEmail ? 'ON' : 'OFF'}</span>
+                       </div>
+                    </div>
                  ))}
-                 <button className="w-full py-4 border border-dashed border-[var(--nx-border)] rounded-sm text-[10px] font-bold text-[var(--nx-text-dim)] uppercase tracking-widest hover:border-[var(--nx-border-active)] hover:text-white transition-all mt-2">
-                   + ADD EMERGENCY ASSET
-                 </button>
+                 
+                 {isAddingContact ? (
+                    <div className="p-4 nexus-card bg-white/2 border-(--nx-border-active) space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="nexus-label">NAME</label>
+                          <input 
+                            className="nexus-input" 
+                            value={newContact.name} 
+                            onChange={e => setNewContact({...newContact, name: e.target.value})} 
+                            placeholder="Jane Doe" 
+                            title="CONTACT NAME"
+                          />
+                        </div>
+                        <div>
+                          <label className="nexus-label">PHONE</label>
+                          <input 
+                            className="nexus-input" 
+                            value={newContact.phone} 
+                            onChange={e => setNewContact({...newContact, phone: e.target.value})} 
+                            placeholder="+1 555-0000" 
+                            title="CONTACT PHONE"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="nexus-label">RELATIONSHIP</label>
+                          <input 
+                            className="nexus-input" 
+                            value={newContact.relationship} 
+                            onChange={e => setNewContact({...newContact, relationship: e.target.value})} 
+                            placeholder="Spouse" 
+                            title="RELATIONSHIP"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 text-[10px] text-white">
+                          <input type="checkbox" checked={newContact.notifySms} onChange={e => setNewContact({...newContact, notifySms: e.target.checked})} className="accent-(--nx-blue-primary)" /> SMS
+                        </label>
+                        <label className="flex items-center gap-2 text-[10px] text-white">
+                          <input type="checkbox" checked={newContact.notifyPush} onChange={e => setNewContact({...newContact, notifyPush: e.target.checked})} className="accent-(--nx-blue-primary)" /> PUSH
+                        </label>
+                        <label className="flex items-center gap-2 text-[10px] text-white">
+                          <input type="checkbox" checked={newContact.notifyEmail} onChange={e => setNewContact({...newContact, notifyEmail: e.target.checked})} className="accent-(--nx-blue-primary)" /> EMAIL
+                        </label>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="primary" className="flex-1 text-[10px]" onClick={handleAddContact}>SAVE</Button>
+                        <Button variant="secondary" className="flex-1 text-[10px]" onClick={() => setIsAddingContact(false)}>CANCEL</Button>
+                      </div>
+                    </div>
+                 ) : (
+                    contacts.length < 5 && (
+                      <button onClick={() => setIsAddingContact(true)} className="w-full py-4 border border-dashed border-(--nx-border) rounded-sm text-[10px] font-bold text-(--nx-text-dim) uppercase tracking-widest hover:border-(--nx-border-active) hover:text-white transition-all mt-2">
+                        + ADD EMERGENCY ASSET
+                      </button>
+                    )
+                 )}
               </div>
            </Panel>
 
@@ -263,76 +339,97 @@ export const Profile = () => {
                     <div className="max-w-[70%]">
                        <div className="text-xs font-bold text-white flex items-center gap-2">
                           ACTIVE RESPONDER MODE
-                          {isResponder && <div className="w-1.5 h-1.5 bg-[var(--nx-red-primary)] rounded-full animate-ping" />}
+                          {isResponder && <div className="w-1.5 h-1.5 bg-(--nx-red-primary) rounded-full animate-ping" />}
                        </div>
-                       <p className="text-[10px] text-[var(--nx-text-dim)] mt-1 uppercase leading-relaxed">Broadcast presence to nearby critical events (&lt;1KM)</p>
+                       <p className="text-[10px] text-(--nx-text-dim) mt-1 uppercase leading-relaxed">Broadcast presence to nearby critical events (&lt;1KM)</p>
                     </div>
                     <button 
-                      onClick={toggleResponderMode}
-                      className={`w-12 h-6 border transition-all relative ${isResponder ? 'border-[var(--nx-red-primary)] bg-[var(--nx-red-dim)]' : 'border-[var(--nx-border)] bg-transparent'}`}
-                    >
-                       <div className={`absolute top-1 bottom-1 w-4 transition-all ${isResponder ? 'right-1 bg-[var(--nx-red-primary)] shadow-[0_0_8px_var(--nx-red-primary)]' : 'left-1 bg-[var(--nx-border)]'}`} />
-                    </button>
+                       onClick={toggleResponderMode}
+                       title="TOGGLE ACTIVE RESPONDER MODE"
+                       className={`w-12 h-6 border transition-all relative ${isResponder ? 'border-(--nx-red-primary) bg-(--nx-red-dim)' : 'border-(--nx-border) bg-transparent'}`}
+                     >
+                        <div className={`absolute top-1 bottom-1 w-4 transition-all ${isResponder ? 'right-1 bg-(--nx-red-primary) shadow-[0_0_8px_var(--nx-red-primary)]' : 'left-1 bg-(--nx-border)'}`} />
+                     </button>
                  </div>
 
                  {/* Crash Detection */}
-                 <div className="flex justify-between items-center border-t border-[var(--nx-border)]/50 pt-6">
+                 <div className="flex justify-between items-center border-t border-(--nx-border)/50 pt-6">
                     <div className="max-w-[70%]">
                        <div className="text-xs font-bold text-white">AUTO IMPACT ANALYSIS</div>
-                       <p className="text-[10px] text-[var(--nx-text-dim)] mt-1 uppercase leading-relaxed">TRIGGER SOS PROTOCOL ON &gt;4G KINETIC IMPACT</p>
+                       <p className="text-[10px] text-(--nx-text-dim) mt-1 uppercase leading-relaxed">TRIGGER SOS PROTOCOL ON &gt;4G KINETIC IMPACT</p>
                     </div>
                     <button 
-                      onClick={() => setIsSimulatingCrash(!isSimulatingCrash)}
-                      className={`w-12 h-6 border transition-all relative ${isSimulatingCrash ? 'border-[var(--nx-amber-primary)] bg-[var(--nx-amber-dim)]' : 'border-[var(--nx-border)] bg-transparent'}`}
-                    >
-                       <div className={`absolute top-1 bottom-1 w-4 transition-all ${isSimulatingCrash ? 'right-1 bg-[var(--nx-amber-primary)] shadow-[0_0_8px_var(--nx-amber-primary)]' : 'left-1 bg-[var(--nx-border)]'}`} />
-                    </button>
+                       onClick={() => setIsSimulatingCrash(!isSimulatingCrash)}
+                       title="TOGGLE AUTO IMPACT ANALYSIS"
+                       className={`w-12 h-6 border transition-all relative ${isSimulatingCrash ? 'border-(--nx-amber-primary) bg-(--nx-amber-dim)' : 'border-(--nx-border) bg-transparent'}`}
+                     >
+                        <div className={`absolute top-1 bottom-1 w-4 transition-all ${isSimulatingCrash ? 'right-1 bg-(--nx-amber-primary) shadow-[0_0_8px_var(--nx-amber-primary)]' : 'left-1 bg-(--nx-border)'}`} />
+                     </button>
                  </div>
 
-                 {/* Offline Data Secure */}
-                 <div className="flex flex-col gap-4 border-t border-[var(--nx-border)]/50 pt-6">
-                    <div className="flex justify-between items-center">
-                       <div>
-                          <div className="text-xs font-bold text-white flex items-center gap-2">
-                             LOCAL RELAY CACHING
-                             {isCached && <CheckCircle size={14} className="text-[var(--nx-blue-primary)]" />}
-                          </div>
-                          <p className="text-[10px] text-[var(--nx-text-dim)] mt-1 uppercase">SECURE 10KM RADIUS FOR OFFLINE OPS</p>
+                 {/* Passive Distress Detection */}
+                 <div className="flex justify-between items-center border-t border-(--nx-border)/50 pt-6">
+                    <div className="max-w-[70%]">
+                       <div className="text-xs font-bold text-white flex items-center gap-2">
+                          PASSIVE DISTRESS DETECTION
+                          {distressActive && <div className="w-1.5 h-1.5 bg-(--nx-amber-primary) rounded-full animate-pulse" />}
                        </div>
-                       <Button 
-                         variant={isCached ? 'secondary' : 'primary'} 
-                         size="sm" 
-                         className="p-2 min-w-0" 
-                         onClick={handlePreCache}
-                         disabled={isCaching}
-                       >
-                          {isCaching ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Database size={16} />}
-                       </Button>
+                       <p className="text-[10px] text-(--nx-text-dim) mt-1 uppercase leading-relaxed">MONITOR DEVICE SENSORS TO AUTO-TRIGGER SOS IF INCAPACITATED</p>
+                       <p className="text-[9px] text-(--nx-green-primary) mt-1 uppercase font-bold tracking-widest">Your interactions never leave your device.</p>
                     </div>
-                    {isCaching && (
-                       <div className="w-full h-[2px] bg-white/5 overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-[var(--nx-blue-primary)]"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${cacheProgress}%` }}
-                          />
-                       </div>
-                    )}
+                    <button 
+                       onClick={() => toggleDistressEngine(!distressActive)}
+                       title="TOGGLE PASSIVE DISTRESS DETECTION"
+                       className={`w-12 h-6 border transition-all relative ${distressActive ? 'border-(--nx-amber-primary) bg-(--nx-amber-dim)' : 'border-(--nx-border) bg-transparent'}`}
+                     >
+                        <div className={`absolute top-1 bottom-1 w-4 transition-all ${distressActive ? 'right-1 bg-(--nx-amber-primary) shadow-[0_0_8px_var(--nx-amber-primary)]' : 'left-1 bg-(--nx-border)'}`} />
+                     </button>
                  </div>
 
-                 {/* First Aid Media */}
-                 <div className="flex justify-between items-center border-t border-[var(--nx-border)]/50 pt-6">
-                    <div>
-                       <div className="text-xs font-bold text-white uppercase">Neural Response Media</div>
-                       <p className="text-[10px] text-[var(--nx-text-dim)] mt-1 uppercase">HQ INSTRUCTIONAL ASSETS FOR OFFLINE TRIAGE</p>
-                    </div>
-                    <Button variant="secondary" size="sm" className="p-2 min-w-0"><DownloadCloud size={16} /></Button>
-                 </div>
+                  {/* Offline Data Secure */}
+                  <div className="flex flex-col gap-4 border-t border-(--nx-border)/50 pt-6">
+                     <div className="flex justify-between items-center">
+                        <div>
+                           <div className="text-xs font-bold text-white flex items-center gap-2">
+                              LOCAL RELAY CACHING
+                              {isCached && <CheckCircle size={14} className="text-(--nx-blue-primary)" />}
+                           </div>
+                           <p className="text-[10px] text-(--nx-text-dim) mt-1 uppercase">SECURE 10KM RADIUS FOR OFFLINE OPS</p>
+                        </div>
+                        <Button 
+                          variant={isCached ? 'secondary' : 'primary'} 
+                          size="sm" 
+                          className="p-2 min-w-0" 
+                          onClick={handlePreCache}
+                          disabled={isCaching}
+                        >
+                           {isCaching ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Database size={16} />}
+                        </Button>
+                     </div>
+                     {isCaching && (
+                        <div className="w-full h-[2px] bg-white/5 overflow-hidden">
+                           <motion.div 
+                             className="h-full bg-(--nx-blue-primary)"
+                             initial={{ width: 0 }}
+                             animate={{ width: `${cacheProgress}%` }}
+                           />
+                        </div>
+                     )}
+                  </div>
+
+                  {/* First Aid Media */}
+                  <div className="flex justify-between items-center border-t border-(--nx-border)/50 pt-6">
+                     <div>
+                        <div className="text-xs font-bold text-white uppercase">Neural Response Media</div>
+                        <p className="text-[10px] text-(--nx-text-dim) mt-1 uppercase">HQ INSTRUCTIONAL ASSETS FOR OFFLINE TRIAGE</p>
+                     </div>
+                     <Button variant="secondary" size="sm" className="p-2 min-w-0"><DownloadCloud size={16} /></Button>
+                  </div>
               </div>
            </Panel>
 
-           <div className="p-4 nexus-card bg-[var(--nx-blue-dim)] border-[var(--nx-blue-primary)]/20">
-              <div className="flex items-center gap-3 text-[var(--nx-blue-primary)] mb-2">
+           <div className="p-4 nexus-card bg-(--nx-blue-dim) border-(--nx-blue-primary)/20">
+              <div className="flex items-center gap-3 text-(--nx-blue-primary) mb-2">
                  <Zap size={14} />
                  <span className="text-[10px] font-bold uppercase tracking-widest">NEXUS STATUS</span>
               </div>

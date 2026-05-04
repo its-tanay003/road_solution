@@ -5,7 +5,7 @@ import http from 'http';
 import dotenv from 'dotenv';
 import { connectRedis } from './services/cacheService';
 import { initSocket } from './services/socketService';
-import { streamClaudeResponse, evaluateTriage } from './services/claudeService';
+import { streamClaudeResponse, evaluateTriage, streamDebriefResponse, streamTrainingScenario } from './services/claudeService';
 import sosRoutes from './routes/sos';
 import servicesRoutes from './routes/services';
 import integrationsRoutes from './routes/integrations';
@@ -79,6 +79,12 @@ app.get('/metrics', async (req, res) => {
 
 // Routes
 app.use('/api/sos', sosRoutes);
+// Alias for Offline Sync Provider
+app.get('/api/nearby-services', (req, res) => {
+  const query = new URLSearchParams(req.query as any).toString();
+  res.redirect(307, `/api/services/nearby-osm?${query}`);
+});
+
 app.use('/api/services', servicesRoutes);
 app.use('/api/integrations', integrationsRoutes);
 
@@ -164,6 +170,34 @@ app.post('/api/triage/chat', async (req, res) => {
   await streamClaudeResponse(messages, res, panicScore);
 });
 
+// Post-Incident Debrief Endpoint (Streaming)
+app.post('/api/debrief/stream', async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  await streamDebriefResponse(prompt, res);
+});
+
+// Training Scenario Endpoint (Streaming)
+app.post('/api/training/stream', async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  await streamTrainingScenario(prompt, res);
+});
+
 // Risk Forecast Summary Endpoint
 app.post('/api/risk/summary', async (req, res) => {
   const { patterns } = req.body;
@@ -210,7 +244,7 @@ app.post('/api/demo/reset', (req, res) => {
   res.json({ success: true, message: "Demo state reset successfully" });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log(`ROADSoS Backend running on port ${PORT}`);

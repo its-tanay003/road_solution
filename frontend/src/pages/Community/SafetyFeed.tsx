@@ -11,7 +11,6 @@ import {
   Bell,
   Filter
 } from 'lucide-react';
-import { Panel } from '../../components/ui/Panel';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 
@@ -61,20 +60,20 @@ export const SafetyFeed = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] pb-24 pt-24 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-(--nx-bg-base) text-(--nx-text-primary) pb-24 pt-24 px-6 relative overflow-hidden">
       {/* Background Ambience */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-[var(--nx-blue-primary)]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-(--nx-blue-primary)/5 blur-[120px] pointer-events-none" />
       
       <div className="max-w-3xl mx-auto relative z-10">
         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-[var(--nx-blue-primary)]/10 border border-[var(--nx-blue-primary)]/30 rounded-sm flex items-center justify-center text-[var(--nx-blue-primary)]">
+              <div className="w-10 h-10 bg-(--nx-blue-primary)/10 border border-(--nx-blue-primary)/30 rounded-sm flex items-center justify-center text-(--nx-blue-primary)">
                 <Shield size={24} />
               </div>
-              <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">COMMUNITY <span className="text-[var(--nx-blue-primary)]">INTEL</span></h1>
+              <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">COMMUNITY <span className="text-(--nx-blue-primary)">INTEL</span></h1>
             </div>
-            <p className="text-[var(--nx-text-dim)] text-xs font-mono uppercase tracking-widest">Sector Intelligence • 10KM Operational Radius</p>
+            <p className="text-(--nx-text-dim) text-xs font-mono uppercase tracking-widest">Sector Intelligence • 10KM Operational Radius</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -95,14 +94,14 @@ export const SafetyFeed = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <div className="nexus-card bg-[var(--nx-bg-surface)] hover:border-[var(--nx-border-active)] transition-all group overflow-hidden">
+              <div className="nexus-card bg-(--nx-bg-surface) hover:border-(--nx-border-active) transition-all group overflow-hidden">
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex gap-4">
                       <div className={`w-12 h-12 rounded-sm border flex items-center justify-center shrink-0 ${
-                        alert.severity === 'HIGH' ? 'bg-[var(--nx-red-dim)] border-[var(--nx-red-primary)]/30 text-[var(--nx-red-primary)] shadow-[0_0_15px_rgba(255,59,59,0.1)]' :
-                        alert.severity === 'MODERATE' ? 'bg-[var(--nx-amber-dim)] border-[var(--nx-amber-primary)]/30 text-[var(--nx-amber-primary)]' : 
-                        'bg-[var(--nx-blue-dim)] border-[var(--nx-blue-primary)]/30 text-[var(--nx-blue-primary)]'
+                        alert.severity === 'HIGH' ? 'bg-(--nx-red-dim) border-(--nx-red-primary)/30 text-(--nx-red-primary) shadow-[0_0_15px_rgba(255,59,59,0.1)]' :
+                        alert.severity === 'MODERATE' ? 'bg-(--nx-amber-dim) border-(--nx-amber-primary)/30 text-(--nx-amber-primary)' : 
+                        'bg-(--nx-blue-dim) border-(--nx-blue-primary)/30 text-(--nx-blue-primary)'
                       }`}>
                         <AlertTriangle size={24} />
                       </div>
@@ -113,36 +112,39 @@ export const SafetyFeed = () => {
                               {alert.severity} PRIORITY
                            </Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-[10px] font-mono text-[var(--nx-text-dim)] uppercase tracking-tighter">
-                          <span className="flex items-center gap-1.5"><MapPin size={12} className="text-[var(--nx-blue-primary)]" /> {alert.location}</span>
-                          <span className="w-1 h-1 bg-[var(--nx-border)] rounded-full" />
+                        <div className="flex items-center gap-4 text-[10px] font-mono text-(--nx-text-dim) uppercase tracking-tighter">
+                          <span className="flex items-center gap-1.5"><MapPin size={12} className="text-(--nx-blue-primary)" /> {alert.location}</span>
+                          <span className="w-1 h-1 bg-(--nx-border) rounded-full" />
                           <span>{alert.distance}</span>
                         </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono text-[var(--nx-text-dim)] uppercase font-bold">{alert.time}</span>
+                    <span className="text-[10px] font-mono text-(--nx-text-dim) uppercase font-bold">{alert.time}</span>
                   </div>
 
-                  <p className="text-[var(--nx-text-secondary)] text-sm mb-8 leading-relaxed font-sans border-l-2 border-[var(--nx-border)] pl-4">
+                  <p className="text-(--nx-text-secondary) text-sm mb-8 leading-relaxed font-sans border-l-2 border-(--nx-border) pl-4">
                     {alert.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-6 border-t border-[var(--nx-border)]">
+                  <div className="flex items-center justify-between pt-6 border-t border-(--nx-border)">
                     <div className="flex items-center gap-8">
-                      <button className="flex items-center gap-2 text-[10px] font-black text-[var(--nx-text-tertiary)] hover:text-[var(--nx-blue-primary)] transition-colors uppercase tracking-widest">
+                      <button className="flex items-center gap-2 text-[10px] font-black text-(--nx-text-tertiary) hover:text-(--nx-blue-primary) transition-colors uppercase tracking-widest">
                         <MessageSquare size={16} /> {alert.updates} INTEL RELAYS
                       </button>
-                      <button className="flex items-center gap-2 text-[10px] font-black text-[var(--nx-text-tertiary)] hover:text-[var(--nx-green-primary)] transition-colors uppercase tracking-widest">
+                      <button className="flex items-center gap-2 text-[10px] font-black text-(--nx-text-tertiary) hover:text-(--nx-green-primary) transition-colors uppercase tracking-widest">
                         <ThumbsUp size={16} /> VERIFY SIGNAL
                       </button>
                     </div>
-                    <button className="p-2.5 bg-white/[0.02] border border-[var(--nx-border)] rounded-sm hover:border-[var(--nx-border-active)] hover:text-white transition-all text-[var(--nx-text-dim)]">
+                    <button 
+                      className="p-2.5 bg-white/2 border border-(--nx-border) rounded-sm hover:border-(--nx-border-active) hover:text-white transition-all text-(--nx-text-dim)"
+                      title="Share Alert"
+                    >
                       <Share2 size={16} />
                     </button>
                   </div>
                 </div>
                 {/* Visual scanline */}
-                <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-[var(--nx-blue-primary)] to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
+                <div className="absolute top-0 right-0 w-1 h-full bg-linear-to-b from-transparent via-(--nx-blue-primary) to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
               </div>
             </motion.div>
           ))}
@@ -154,7 +156,7 @@ export const SafetyFeed = () => {
           transition={{ delay: 0.5 }}
           className="mt-12"
         >
-          <button className="w-full h-16 bg-[var(--nx-blue-primary)] text-navy font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-[0_0_30px_rgba(10,132,255,0.2)] group overflow-hidden">
+          <button className="w-full h-16 bg-(--nx-blue-primary) text-navy font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-[0_0_30px_rgba(10,132,255,0.2)] group overflow-hidden">
              BROADCAST FIELD ALERT <ChevronRight size={18} />
              <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12" />
           </button>

@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Activity, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mic, Activity, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { useUIStore } from '../store';
 
-export const VoiceStressAnalyzer = () => {
+interface VoiceStressAnalyzerProps {
+  onClose?: () => void;
+}
+
+export const VoiceStressAnalyzer = ({ onClose }: VoiceStressAnalyzerProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [panicScore, setPanicScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -201,16 +205,28 @@ export const VoiceStressAnalyzer = () => {
           </div>
         </div>
         
-        <button 
-          onClick={isRecording ? stopAnalysis : startAnalysis}
-          className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-            isRecording 
-              ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' 
-              : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'
-          }`}
-        >
-          {isRecording ? 'Stop Analysis' : 'Start Analysis'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={isRecording ? stopAnalysis : startAnalysis}
+            className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              isRecording 
+                ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' 
+                : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'
+            }`}
+          >
+            {isRecording ? 'Stop Analysis' : 'Start Analysis'}
+          </button>
+
+          {onClose && (
+            <button 
+              onClick={onClose}
+              title="Close Voice Stress Analyzer"
+              className="p-2 hover:bg-white/10 rounded-full text-slate-400 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="p-8 flex flex-col md:flex-row gap-8 items-center">

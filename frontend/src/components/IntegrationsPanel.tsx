@@ -63,6 +63,16 @@ const INTEGRATIONS: Integration[] = [
     type: 'Health'
   },
   {
+    id: 'blockchain',
+    name: 'Blockchain Audit',
+    description: 'Immutable, cryptographically sealed ledger for all incident actions and agency handshakes.',
+    icon: <ShieldCheck className="w-6 h-6" />,
+    status: 'CONNECTED',
+    color: 'emerald',
+    endpoint: '/audit',
+    type: 'Gov'
+  },
+  {
     id: 'hospital',
     name: 'Hospital HIE',
     description: 'Health Information Exchange for real-time trauma bed availability and ER wait times.',
@@ -144,7 +154,7 @@ export const IntegrationsPanel: React.FC = () => {
               whileHover={{ y: -4 }}
               className="group relative bg-slate-900/50 border border-white/5 p-6 rounded-3xl overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
               <div className="flex items-start justify-between mb-6">
                 <div className={`p-4 rounded-2xl bg-${integration.color}-500/10 text-${integration.color}-400 border border-${integration.color}-500/20 shadow-lg shadow-${integration.color}-500/5`}>
@@ -184,7 +194,7 @@ export const IntegrationsPanel: React.FC = () => {
         </div>
 
         {/* Live Event Feed */}
-        <div className="bg-slate-900/80 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl">
+        <div className="bg-slate-900/80 border border-white/10 rounded-4xl overflow-hidden shadow-2xl">
           <div className="bg-white/5 p-4 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
@@ -231,7 +241,7 @@ export const IntegrationsPanel: React.FC = () => {
           <div className="h-px bg-white/5 flex-1" />
           <div className="flex items-center gap-2 px-6 py-3 bg-slate-900 rounded-full border border-white/5 shadow-xl">
             <AlertCircle size={14} className="text-blue-400" />
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Note: In production environments, these connectors bridge to authenticated <span className="text-white">GovCloud</span> API Gateways.
             </p>
           </div>

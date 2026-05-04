@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useUIStore } from '../store';
+import { useDistressStore } from '../store/distressStore';
 
 export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) => {
   const { isStressed, setStressed } = useUIStore();
+  const { uiSimplified } = useDistressStore();
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
 
   // iOS 13+ requires explicit permission for DeviceMotionEvent
@@ -56,12 +58,15 @@ export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) =
 
   // Apply CSS class to body when stressed
   useEffect(() => {
-    if (isStressed) {
+    if (isStressed || uiSimplified) {
       document.body.classList.add('brutalist');
+      if (uiSimplified && !isStressed) {
+        setStressed(true);
+      }
     } else {
       document.body.classList.remove('brutalist');
     }
-  }, [isStressed]);
+  }, [isStressed, uiSimplified, setStressed]);
 
   return (
     <>

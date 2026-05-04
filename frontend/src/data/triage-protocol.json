@@ -1,0 +1,198 @@
+{
+  "start": {
+    "question": "Is the person conscious? (Responds to talk or touch)",
+    "yes": "conscious_breathing",
+    "no": "unconscious_check"
+  },
+  "unconscious_check": {
+    "action": "IMMEDIATE: Call 112/911. Do not move the victim unless necessary.",
+    "question": "Are they breathing normally?",
+    "yes": "recovery_position",
+    "no": "cpr_needed"
+  },
+  "cpr_needed": {
+    "priority": "CRITICAL",
+    "action": "START CPR NOW: 30 chest compressions (2 inches deep, 100-120 bpm), 2 rescue breaths. Repeat until ambulance arrives.",
+    "question": "Is there anyone else present to help?",
+    "yes": "cpr_with_help",
+    "no": "cpr_alone"
+  },
+  "cpr_with_help": {
+    "priority": "CRITICAL",
+    "action": "One person starts CPR. The other calls emergency services and finds an AED (Defibrillator).",
+    "question": "Has an AED arrived?",
+    "yes": "aed_use",
+    "no": "cpr_needed"
+  },
+  "cpr_alone": {
+    "priority": "CRITICAL",
+    "action": "Call emergency services on speakerphone. Start CPR immediately.",
+    "question": "Can you hear the person gasping?",
+    "yes": "cpr_needed",
+    "no": "cpr_needed"
+  },
+  "recovery_position": {
+    "action": "Place in recovery position: on their side, head tilted back, mouth downward.",
+    "question": "Is there visible heavy bleeding?",
+    "yes": "bleeding_control",
+    "no": "monitor_breathing"
+  },
+  "bleeding_control": {
+    "priority": "HIGH",
+    "action": "APPLY PRESSURE: Use cloth/clothing to press firmly on wound. Do not remove. Elevate limb if possible.",
+    "question": "Is bleeding from head or neck?",
+    "yes": "head_bleed",
+    "no": "limb_bleed"
+  },
+  "head_bleed": {
+    "priority": "HIGH",
+    "action": "Apply direct pressure with clean cloth. Keep head still. Do not apply pressure to neck or eyes.",
+    "question": "Is the person becoming pale or cold?",
+    "yes": "shock_protocol",
+    "no": "monitor_breathing"
+  },
+  "limb_bleed": {
+    "priority": "HIGH",
+    "action": "Apply direct pressure. If bleeding is life-threatening and pressure fails, use a tourniquet high and tight.",
+    "question": "Has the bleeding slowed down?",
+    "yes": "monitor_breathing",
+    "no": "bleeding_control"
+  },
+  "conscious_breathing": {
+    "question": "Can they speak normally?",
+    "yes": "walking_wounded",
+    "no": "altered_consciousness"
+  },
+  "altered_consciousness": {
+    "priority": "HIGH",
+    "action": "Keep person calm. Check for medical alert jewelry. Note any confusion or slurred speech.",
+    "question": "Are they showing stroke signs (Face drooping, Arm weakness, Speech difficulty)?",
+    "yes": "stroke_protocol",
+    "no": "shock_protocol"
+  },
+  "stroke_protocol": {
+    "priority": "CRITICAL",
+    "action": "Note time symptoms started. Call 112 immediately. Keep head slightly elevated.",
+    "question": "Are they still conscious?",
+    "yes": "monitor_breathing",
+    "no": "unconscious_check"
+  },
+  "shock_protocol": {
+    "priority": "CRITICAL",
+    "action": "Lay them flat. Raise legs 12 inches. Cover with a blanket. Do not give anything to drink.",
+    "question": "Is their breathing shallow or rapid?",
+    "yes": "monitor_breathing",
+    "no": "monitor_breathing"
+  },
+  "walking_wounded": {
+    "priority": "LOW",
+    "action": "Keep person calm. Clean minor wounds. Seek medical evaluation when possible.",
+    "question": "Is there any chest pain or difficulty breathing?",
+    "yes": "chest_pain_check",
+    "no": "stable_monitor"
+  },
+  "chest_pain_check": {
+    "priority": "HIGH",
+    "action": "Sit them down. Loosen tight clothing. If they have nitroglycerin, help them take it.",
+    "question": "Does pain radiate to arm or jaw?",
+    "yes": "heart_attack_protocol",
+    "no": "monitor_breathing"
+  },
+  "heart_attack_protocol": {
+    "priority": "CRITICAL",
+    "action": "Call 112 immediately. Keep them still. Be prepared to start CPR if they collapse.",
+    "question": "Is the person still awake?",
+    "yes": "monitor_breathing",
+    "no": "unconscious_check"
+  },
+  "aed_use": {
+    "priority": "CRITICAL",
+    "action": "Turn on AED and follow voice prompts. Do not touch victim while AED analyzes rhythm.",
+    "question": "Did AED advise a shock?",
+    "yes": "aed_shock",
+    "no": "cpr_needed"
+  },
+  "aed_shock": {
+    "priority": "CRITICAL",
+    "action": "Ensure no one is touching the victim. Press Shock button. Resume CPR immediately after shock.",
+    "question": "Is the person moving or responding?",
+    "yes": "recovery_position",
+    "no": "cpr_needed"
+  },
+  "monitor_breathing": {
+    "action": "Stay with them. Check breathing every 2 minutes. Keep them warm.",
+    "question": "Did their condition worsen?",
+    "yes": "start",
+    "no": "stable_monitor"
+  },
+  "stable_monitor": {
+    "priority": "LOW",
+    "action": "Situation stabilized. Continue monitoring until professional help arrives.",
+    "question": "Are there special hazards (EV fire, Chemical spill, Heatstroke)?",
+    "yes": "special_hazards",
+    "no": "final_wait"
+  },
+  "final_wait": {
+    "action": "Stay with them. Do not leave until help arrives.",
+    "question": "Has help arrived?",
+    "yes": "start",
+    "no": "final_wait"
+  },
+  "special_hazards": {
+    "question": "Is an Electric Vehicle (EV) involved in fire or smoking?",
+    "yes": "ev_fire_check",
+    "no": "hazmat_query"
+  },
+  "hazmat_query": {
+    "question": "Is there a chemical spill or colored hazardous material signs?",
+    "yes": "hazmat_check",
+    "no": "heat_query"
+  },
+  "heat_query": {
+    "question": "Are there signs of heatstroke (Hot, dry skin, confusion)?",
+    "yes": "heat_exhaustion_check",
+    "no": "stable_monitor"
+  },
+  "ev_fire_check": {
+    "priority": "CRITICAL",
+    "action": "EV FIRE: Retreat 50ft+. Battery fires release toxic gas and can restart. Use ONLY class D or tons of water. DO NOT approach if smoking.",
+    "question": "Is the battery venting/hissing?",
+    "yes": "ev_venting",
+    "no": "hazmat_check"
+  },
+  "ev_venting": {
+    "priority": "CRITICAL",
+    "action": "DANGER: Battery runaway imminent. Clear area. Alert fire services specifically it is an EV.",
+    "question": "Is everyone at safe distance?",
+    "yes": "stable_monitor",
+    "no": "ev_fire_check"
+  },
+  "hazmat_check": {
+    "priority": "HIGH",
+    "action": "HAZMAT: Identify placards (colored diamonds). Stay UPWIND. Do not touch spilled fluids.",
+    "question": "Are there colored diamond signs on the vehicle?",
+    "yes": "hazmat_placard",
+    "no": "heat_exhaustion_check"
+  },
+  "hazmat_placard": {
+    "priority": "HIGH",
+    "action": "Note the 4-digit number on the placard. Report this to emergency services immediately.",
+    "question": "Can you safely see the number?",
+    "yes": "stable_monitor",
+    "no": "hazmat_check"
+  },
+  "heat_exhaustion_check": {
+    "priority": "MEDIUM",
+    "action": "HEATSTROKE: Move to shade. Cool with water on skin/clothing. Fan vigorously. Sip water if conscious.",
+    "question": "Is the person very hot and NOT sweating?",
+    "yes": "heatstroke_protocol",
+    "no": "stable_monitor"
+  },
+  "heatstroke_protocol": {
+    "priority": "HIGH",
+    "action": "IMMEDIATE COOLING: Use ice packs on armpits/groin if available. This is a life-threatening emergency.",
+    "question": "Is their mental state confused?",
+    "yes": "stroke_protocol",
+    "no": "stable_monitor"
+  }
+}

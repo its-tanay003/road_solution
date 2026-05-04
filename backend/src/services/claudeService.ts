@@ -255,3 +255,100 @@ Summary format: "Based on current patterns, [Area] shows [Risk Level] risk due t
     return "Weather-related risk detected in high-density corridors. Exercise caution.";
   }
 };
+
+export const streamDebriefResponse = async (
+  prompt: string,
+  res: any // Express response object
+) => {
+  if (!process.env.OPENROUTER_API_KEY) {
+    // Mock streaming response for local development without key
+    const mockReply = "## 1. INCIDENT SUMMARY\nThis is a mock summary of the incident response. The situation was handled efficiently.\n\n## 2. RESPONSE TIMELINE ANALYSIS\n- 00:00: Incident reported.\n- 00:02: Units dispatched.\n\n## 3. AI PERFORMANCE REVIEW\nAI triage accurately predicted the required units.\n\n## 4. WHAT WENT WELL\n- Fast response time.\n- Accurate dispatch.\n- Good communication.\n\n## 5. AREAS FOR IMPROVEMENT\n- More details on weather conditions.\n- Better traffic routing.\n- Faster scene clearance.\n\n## 6. RECOMMENDATIONS FOR FUTURE INCIDENTS\nEnsure all units are updated with real-time weather data.\n\n## 7. ESTIMATED LIVES IMPACT\nEstimated 1 life saved.";
+    const chunks = mockReply.split(' ');
+    
+    for (let i = 0; i < chunks.length; i++) {
+      res.write(`data: ${JSON.stringify({ type: 'content_block_delta', delta: { text: chunks[i] + ' ' } })}\n\n`);
+      await new Promise(r => setTimeout(r, 50)); // simulate delay
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
+    return;
+  }
+
+  try {
+    const DEBRIEF_SYSTEM_PROMPT = `You are an expert emergency response analyst. Your job is to generate a comprehensive, professional, and data-driven post-incident debrief based on the provided incident data. Format your response strictly in the requested sections using Markdown formatting.`;
+
+    const stream = await (openrouter.chat.send as any)({
+      model: "google/gemma-4-31b-it:free",
+      messages: [
+        { role: "system", content: DEBRIEF_SYSTEM_PROMPT },
+        { role: "user", content: prompt }
+      ],
+      stream: true
+    });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        res.write(`data: ${JSON.stringify({ type: 'content_block_delta', delta: { text: content } })}\n\n`);
+      }
+
+      const usage = chunk.usage as any;
+      if (usage && usage.reasoningTokens) {
+        console.log(`[DEBRIEF] Reasoning tokens: ${usage.reasoningTokens}`);
+      }
+    }
+    
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (error) {
+    console.error("OpenRouter Debrief Error:", error);
+    res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to generate debrief via OpenRouter.' })}\n\n`);
+    res.end();
+  }
+};
+
+export const streamTrainingScenario = async (
+  prompt: string,
+  res: any // Express response object
+) => {
+  if (!process.env.OPENROUTER_API_KEY) {
+    // Mock streaming response
+    const mockReply = "## SCENARIO: HIGHWAY PILEUP\n**Time:** 14:30\n**Weather:** Heavy Rain, Low Visibility\n**Location:** I-95 Northbound, Mile Marker 42\n\n**Incoming Report:**\nMultiple 911 calls reporting a multi-vehicle collision involving a commercial semi-truck and at least 3 passenger vehicles. The semi is jackknifed across two lanes. One vehicle is trapped under the trailer. Witnesses report smoke coming from the trapped vehicle. Traffic is backing up rapidly.\n\n**Initial Assessment:**\n- At least 4 vehicles involved.\n- High probability of severe injuries/entrapment.\n- Fire hazard present.\n- Significant traffic disruption creating access challenges for responding units.\n\n**Required Actions:**\n1. Determine initial triage level.\n2. Dispatch appropriate units (ALS, BLS, Fire, Police).\n3. Provide initial instructions to callers.";
+    const chunks = mockReply.split(' ');
+    
+    for (let i = 0; i < chunks.length; i++) {
+      res.write(`data: ${JSON.stringify({ type: 'content_block_delta', delta: { text: chunks[i] + ' ' } })}\n\n`);
+      await new Promise(r => setTimeout(r, 50)); // simulate delay
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
+    return;
+  }
+
+  try {
+    const TRAINING_SYSTEM_PROMPT = `You are an emergency training scenario generator. Generate realistic, detailed, and challenging road accident training scenarios for dispatchers based on the provided parameters. Format your response clearly with headings. Make it feel like an urgent, incoming dispatch report.`;
+
+    const stream = await (openrouter.chat.send as any)({
+      model: "google/gemma-4-31b-it:free",
+      messages: [
+        { role: "system", content: TRAINING_SYSTEM_PROMPT },
+        { role: "user", content: prompt }
+      ],
+      stream: true
+    });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        res.write(`data: ${JSON.stringify({ type: 'content_block_delta', delta: { text: content } })}\n\n`);
+      }
+    }
+    
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (error) {
+    console.error("Training Stream Error:", error);
+    res.write(`data: ${JSON.stringify({ type: 'error', message: 'Stream failed' })}\n\n`);
+    res.end();
+  }
+};
