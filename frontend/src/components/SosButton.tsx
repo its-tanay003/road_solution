@@ -18,7 +18,7 @@ export const SosButton = () => {
         contactPhones: ['+919876543210']
       };
       
-      const response = await axios.post('http://localhost:3000/api/sos/trigger', payload).catch(() => {
+      const response = await axios.post('/api/sos/trigger', payload).catch(() => {
         console.warn("Backend not reachable, mocking SOS activation");
         return { data: { token: 'mock-token-123' } };
       });

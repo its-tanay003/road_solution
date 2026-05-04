@@ -26,7 +26,7 @@ export const ChatBot = () => {
 
     try {
       // Mocking streaming fetch for frontend
-      const response = await fetch('http://localhost:3000/api/triage/chat', {
+      const response = await fetch('/api/triage/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages })

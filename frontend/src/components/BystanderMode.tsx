@@ -78,7 +78,7 @@ export const BystanderMode: React.FC = () => {
   const progress = (step / STEP_COUNT) * 100;
 
   return (
-    <div className="fixed inset-0 z-100 bg-white text-black flex flex-col font-sans">
+    <div className="fixed inset-0 z-1000 bg-white text-black flex flex-col font-sans">
       {/* Progress Bar */}
       <div className="h-2 w-full bg-slate-100">
         <motion.div 

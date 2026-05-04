@@ -60,7 +60,7 @@ export const OfflineTriageOrchestrator: React.FC = () => {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-90 w-[90%] max-w-md"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-1000 w-[90%] max-w-md"
           >
             <div className="bg-slate-900 border-2 border-amber-500/50 rounded-2xl shadow-2xl p-4 overflow-hidden relative group">
               {/* Background Glow */}
@@ -117,7 +117,7 @@ export const OfflineTriageOrchestrator: React.FC = () => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setShowTriage(true)}
-            className="fixed bottom-24 right-6 z-90 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl shadow-red-900/40 border-4 border-white/20 group"
+            className="fixed bottom-24 right-6 z-1000 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl shadow-red-900/40 border-4 border-white/20 group"
             aria-label="Emergency Offline Triage"
           >
             <div className="absolute inset-0 rounded-full border-4 border-red-500 animate-ping opacity-20" />

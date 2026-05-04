@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { OpenRouter } from "@openrouter/sdk";
+import OpenAI from "openai";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -8,8 +8,13 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || 'mock_key',
 });
 
-const openrouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY || ''
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY || '',
+  defaultHeaders: {
+    "HTTP-Referer": "https://roadsos.app", // Optional, for OpenRouter rankings
+    "X-Title": "ROADSoS Emergency Assistant", // Optional
+  }
 });
 
 const SYSTEM_PROMPT = `You are ROADSoS Emergency Assistant. Your job is to quickly 
@@ -46,9 +51,9 @@ export const streamClaudeResponse = async (
       ? `${SYSTEM_PROMPT}\n\nCaller panic score: ${panicScore}/100 — adjust triage urgency to ${panicScore > 65 ? 'CRITICAL' : panicScore > 30 ? 'HIGH' : 'NORMAL'}.`
       : SYSTEM_PROMPT;
 
-    // Use OpenRouter with Gemma-4 for advanced reasoning
-    const stream = await (openrouter.chat.send as any)({
-      model: "google/gemma-4-31b-it:free",
+    // Use OpenAI SDK targeting OpenRouter
+    const stream = await openai.chat.completions.create({
+      model: "mistralai/mistral-7b-instruct:free",
       messages: [
         { role: "system", content: dynamicSystemPrompt },
         ...messages.map(m => ({ role: m.role, content: m.content }))
@@ -277,8 +282,8 @@ export const streamDebriefResponse = async (
   try {
     const DEBRIEF_SYSTEM_PROMPT = `You are an expert emergency response analyst. Your job is to generate a comprehensive, professional, and data-driven post-incident debrief based on the provided incident data. Format your response strictly in the requested sections using Markdown formatting.`;
 
-    const stream = await (openrouter.chat.send as any)({
-      model: "google/gemma-4-31b-it:free",
+    const stream = await openai.chat.completions.create({
+      model: "mistralai/mistral-7b-instruct:free",
       messages: [
         { role: "system", content: DEBRIEF_SYSTEM_PROMPT },
         { role: "user", content: prompt }
@@ -328,8 +333,8 @@ export const streamTrainingScenario = async (
   try {
     const TRAINING_SYSTEM_PROMPT = `You are an emergency training scenario generator. Generate realistic, detailed, and challenging road accident training scenarios for dispatchers based on the provided parameters. Format your response clearly with headings. Make it feel like an urgent, incoming dispatch report.`;
 
-    const stream = await (openrouter.chat.send as any)({
-      model: "google/gemma-4-31b-it:free",
+    const stream = await openai.chat.completions.create({
+      model: "mistralai/mistral-7b-instruct:free",
       messages: [
         { role: "system", content: TRAINING_SYSTEM_PROMPT },
         { role: "user", content: prompt }

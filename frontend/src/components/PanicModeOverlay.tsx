@@ -44,7 +44,7 @@ export const PanicModeOverlay: React.FC = () => {
   const textSize = 'text-[20px]';
 
   return (
-    <div className={`fixed inset-0 z-[200] ${baseBg} ${baseText} flex flex-col font-sans overflow-hidden select-none`}>
+    <div className={`fixed inset-0 z-1000 ${baseBg} ${baseText} flex flex-col font-sans overflow-hidden select-none`}>
       
       {/* Top Status Area (Information Only) */}
       <div className="h-1/3 p-8 flex flex-col items-center justify-center text-center">
@@ -83,7 +83,7 @@ export const PanicModeOverlay: React.FC = () => {
           <>
             <button
               onClick={() => {}} // Open AI Triage
-              className={`w-full ${targetSize} rounded-[2rem] bg-nx-blue-primary text-white flex items-center justify-between px-8 transition-transform active:scale-95 shadow-lg`}
+              className={`w-full ${targetSize} rounded-4xl bg-nx-blue-primary text-white flex items-center justify-between px-8 transition-transform active:scale-95 shadow-lg`}
             >
               <div className="flex items-center gap-4 text-left">
                 <MessageCircle size={32} />
@@ -94,7 +94,7 @@ export const PanicModeOverlay: React.FC = () => {
 
             <a
               href={`tel:${activeCountry.emergencyNumbers.main}`}
-              className={`w-full ${targetSize} rounded-[2rem] bg-red-600 text-white flex items-center justify-between px-8 transition-transform active:scale-95 shadow-lg`}
+              className={`w-full ${targetSize} rounded-4xl bg-red-600 text-white flex items-center justify-between px-8 transition-transform active:scale-95 shadow-lg`}
             >
               <div className="flex items-center gap-4 text-left">
                 <Phone size={32} />
@@ -115,11 +115,11 @@ export const PanicModeOverlay: React.FC = () => {
 
         {activeTab === 'CALL' && (
           <div className="grid grid-cols-1 gap-4">
-            <a href={`tel:${activeCountry.emergencyNumbers.ambulance || '108'}`} className={`w-full ${targetSize} rounded-[2rem] bg-red-600 text-white flex items-center gap-4 px-8 shadow-lg`}>
+            <a href={`tel:${activeCountry.emergencyNumbers.ambulance || '108'}`} className={`w-full ${targetSize} rounded-4xl bg-red-600 text-white flex items-center gap-4 px-8 shadow-lg`}>
               <Phone size={32} />
               <span className={`${textSize} font-black uppercase`}>Ambulance</span>
             </a>
-            <a href={`tel:${activeCountry.emergencyNumbers.police || '100'}`} className={`w-full ${targetSize} rounded-[2rem] bg-blue-600 text-white flex items-center gap-4 px-8 shadow-lg`}>
+            <a href={`tel:${activeCountry.emergencyNumbers.police || '100'}`} className={`w-full ${targetSize} rounded-4xl bg-blue-600 text-white flex items-center gap-4 px-8 shadow-lg`}>
               <Users size={32} />
               <span className={`${textSize} font-black uppercase`}>Police</span>
             </a>
@@ -129,7 +129,7 @@ export const PanicModeOverlay: React.FC = () => {
         {activeTab === 'CONTACTS' && (
           <div className="space-y-4">
             <p className="text-xs font-black uppercase opacity-40 px-4">Emergency Contacts notified</p>
-            <div className={`w-full ${targetSize} rounded-[2rem] bg-slate-100 text-black flex items-center justify-between px-8 border border-black/10`}>
+            <div className={`w-full ${targetSize} rounded-4xl bg-slate-100 text-black flex items-center justify-between px-8 border border-black/10`}>
               <span className={`${textSize} font-black`}>Family (Sarah)</span>
               <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest">SENT</span>
             </div>

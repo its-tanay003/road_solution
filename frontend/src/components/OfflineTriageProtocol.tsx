@@ -168,7 +168,7 @@ export const OfflineTriageProtocol: React.FC<OfflineTriageProtocolProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex flex-col bg-slate-950 text-white overflow-hidden font-sans">
+    <div className="fixed inset-0 z-[1000] flex flex-col bg-slate-950 text-white overflow-hidden font-sans">
       <div className="bg-amber-500 text-black px-4 py-2 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2">
           <ShieldAlert size={18} className="animate-pulse" />
