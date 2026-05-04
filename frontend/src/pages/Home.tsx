@@ -210,7 +210,7 @@ export const Home = () => {
       {/* Persistent Modals */}
       <AnimatePresence>
         {isWarRoomActive && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-nx-bg-base/80 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 flex items-center justify-center p-6 bg-nx-bg-base/80 backdrop-blur-sm">
             <div className="w-full h-full max-w-6xl max-h-[800px] relative">
               <button onClick={() => setIsWarRoomActive(false)} className="absolute -top-12 right-0 text-white flex items-center gap-2 hover:text-nx-red-primary transition-colors font-bold uppercase tracking-widest text-xs">
                 Close Tactical View <X size={16} />
@@ -221,7 +221,7 @@ export const Home = () => {
         )}
 
         {showHospitalDashboard && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-nx-bg-base/90 backdrop-blur-md">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 flex items-center justify-center p-6 bg-nx-bg-base/90 backdrop-blur-md">
             <div className="w-full h-full max-w-5xl max-h-[90vh] relative overflow-y-auto bg-slate-950 rounded-[2.5rem] border border-white/10 p-8 shadow-2xl nexus-scrollbar">
               <button 
                 onClick={() => setShowHospitalDashboard(false)} 
@@ -240,7 +240,7 @@ export const Home = () => {
         )}
 
         {showAccuracyDashboard && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-nx-bg-base/90 backdrop-blur-md">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 flex items-center justify-center p-6 bg-nx-bg-base/90 backdrop-blur-md">
             <div className="w-full h-full max-w-5xl max-h-[90vh] relative overflow-y-auto bg-slate-950 rounded-[2.5rem] border border-white/10 p-8 shadow-2xl nexus-scrollbar">
               <button 
                 onClick={() => setShowAccuracyDashboard(false)} 
