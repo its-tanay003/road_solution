@@ -80,7 +80,7 @@ export const NearbyServicesPanel: React.FC = () => {
 
       // Primary: Try Overpass API (OSM)
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/services/nearby-osm`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/nearby-osm`, {
           params: { lat, lng, radius: 10000 }
         });
         
@@ -100,7 +100,7 @@ export const NearbyServicesPanel: React.FC = () => {
       // Secondary: Try Google Places if OSM failed or returned no results
       if (fetchedServices.length === 0) {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/services/nearby-google`, {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/nearby-google`, {
             params: { lat, lng, radius: 10000 }
           });
           

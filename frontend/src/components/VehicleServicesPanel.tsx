@@ -75,7 +75,7 @@ export const VehicleServicesPanel: React.FC = () => {
 
       // Primary: Try OSM
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/services/nearby-osm`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/nearby-osm`, {
           params: { lat, lng, radius: r * 1000 }
         });
         if (response.data.services && response.data.services.length > 0) {
@@ -92,7 +92,7 @@ export const VehicleServicesPanel: React.FC = () => {
       // Secondary: Try Google if OSM failed or returned no results
       if (fetchedServices.length === 0) {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/services/vehicle-services`, {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/vehicle-services`, {
             params: { lat, lng, radius: r * 1000 }
           });
           fetchedServices = response.data.services.map((s: VehicleService) => ({

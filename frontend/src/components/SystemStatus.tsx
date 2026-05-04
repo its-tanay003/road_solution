@@ -33,7 +33,7 @@ export const SystemStatus: React.FC = () => {
 
   const fetchHealth = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/health`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/health`);
       const json = await res.json();
       setData(json);
     } catch (err) {
@@ -46,7 +46,7 @@ export const SystemStatus: React.FC = () => {
   const resetDemo = async () => {
     setResetting(true);
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/demo/reset`, { method: 'POST' });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/demo/reset`, { method: 'POST' });
       await fetchHealth();
     } catch (err) {
       console.error("Reset failed:", err);
