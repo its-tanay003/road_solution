@@ -6,8 +6,8 @@ export const EmergencyButton: React.FC = () => {
   const { triggerSos } = useSosStore();
   const { setUxMode, setCrackedScreen } = useUIStore();
   const [isHolding, setIsHolding] = useState(false);
-  const holdTimerRef = useRef<any>(null);
-  const hapticIntervalRef = useRef<any>(null);
+  const holdTimerRef = useRef<number | null>(null);
+  const hapticIntervalRef = useRef<number | null>(null);
   const controls = useAnimation();
 
   // Gyroscope detection for "Cracked Screen"
@@ -88,10 +88,9 @@ export const EmergencyButton: React.FC = () => {
           className={`
             relative z-10 w-48 h-48 rounded-full bg-red-600 
             flex flex-col items-center justify-center shadow-2xl 
-            transition-transform active:scale-90 select-none
+            transition-transform active:scale-90 select-none touch-none
             ${isHolding ? 'scale-95' : 'scale-100'}
           `}
-          style={{ touchAction: 'none' }}
         >
           <span className="text-5xl font-black text-white tracking-tighter">SOS</span>
           <p className="text-red-100 text-[10px] font-black uppercase mt-2 tracking-widest">Hold 2s</p>

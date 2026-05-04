@@ -53,7 +53,7 @@ export const streamClaudeResponse = async (
 
     // Use OpenAI SDK targeting OpenRouter
     const stream = await openai.chat.completions.create({
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "openrouter/auto",
       messages: [
         { role: "system", content: dynamicSystemPrompt },
         ...messages.map(m => ({ role: m.role, content: m.content }))
@@ -283,7 +283,7 @@ export const streamDebriefResponse = async (
     const DEBRIEF_SYSTEM_PROMPT = `You are an expert emergency response analyst. Your job is to generate a comprehensive, professional, and data-driven post-incident debrief based on the provided incident data. Format your response strictly in the requested sections using Markdown formatting.`;
 
     const stream = await openai.chat.completions.create({
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "openrouter/auto",
       messages: [
         { role: "system", content: DEBRIEF_SYSTEM_PROMPT },
         { role: "user", content: prompt }
@@ -334,7 +334,7 @@ export const streamTrainingScenario = async (
     const TRAINING_SYSTEM_PROMPT = `You are an emergency training scenario generator. Generate realistic, detailed, and challenging road accident training scenarios for dispatchers based on the provided parameters. Format your response clearly with headings. Make it feel like an urgent, incoming dispatch report.`;
 
     const stream = await openai.chat.completions.create({
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "openrouter/auto",
       messages: [
         { role: "system", content: TRAINING_SYSTEM_PROMPT },
         { role: "user", content: prompt }

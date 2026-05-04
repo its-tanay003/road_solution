@@ -61,13 +61,13 @@ export const ChatBot = () => {
                   return updated;
                 });
               }
-            } catch (e) {
+            } catch {
               // ignore parse errors for partial chunks
             }
           }
         }
       }
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: t('triage.fallback_error') }]);
     } finally {
       setIsTyping(false);
@@ -78,7 +78,7 @@ export const ChatBot = () => {
     <div className="flex flex-col h-[600px] w-full max-w-md bg-background/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(22,33,62,0.5)] border border-white/10 relative z-10">
       
       {/* AI Avatar Header */}
-      <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-navy/80 to-transparent border-b border-white/5">
+      <div className="flex flex-col items-center justify-center p-6 bg-linear-to-b from-navy/80 to-transparent border-b border-white/5">
         <motion.div 
           className="relative w-16 h-16 flex items-center justify-center"
           animate={{
@@ -87,10 +87,9 @@ export const ChatBot = () => {
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <motion.div 
-            className="absolute inset-0 rounded-full border-2 border-safe/30"
+            className="absolute inset-0 rounded-full border-2 border-safe/30 rotate-360 scale-100"
             animate={{ rotate: 360, scale: isTyping ? [1, 1.2, 1] : 1 }}
             transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 1, repeat: Infinity } }}
-            style={{ borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%" }}
           />
           <motion.div 
             className="absolute inset-2 rounded-full bg-safe/20 blur-md"
@@ -126,8 +125,8 @@ export const ChatBot = () => {
           >
             <div className="bg-navy/80 p-4 rounded-2xl rounded-bl-none flex space-x-2 border border-white/10 backdrop-blur-md">
               <div className="w-2 h-2 bg-safe rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-safe rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-2 h-2 bg-safe rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              <div className="w-2 h-2 bg-safe rounded-full animate-pulse delay-200"></div>
+              <div className="w-2 h-2 bg-safe rounded-full animate-pulse delay-400"></div>
             </div>
           </motion.div>
         )}
@@ -135,7 +134,10 @@ export const ChatBot = () => {
       </div>
       
       <div className="p-4 bg-navy/90 backdrop-blur-xl border-t border-white/10 flex items-center space-x-3">
-        <button className="p-3 bg-white/5 rounded-full text-safe hover:bg-safe/20 hover:text-safe transition-colors border border-safe/20">
+        <button 
+          title="Voice Command"
+          className="p-3 bg-white/5 rounded-full text-safe hover:bg-safe/20 hover:text-safe transition-colors border border-safe/20"
+        >
           <Mic size={20} />
         </button>
         <input 
@@ -148,6 +150,7 @@ export const ChatBot = () => {
         />
         <button 
           onClick={handleSend}
+          title="Send Message"
           className="p-3 bg-emergency text-white rounded-xl hover:bg-red-600 transition-colors shadow-[0_0_15px_rgba(215,38,56,0.4)]"
         >
           <Send size={20} />

@@ -30,9 +30,13 @@ interface SpeechRecognition extends EventTarget {
   interimResults: boolean;
   lang: string;
   onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: any) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
   start: () => void;
   stop: () => void;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
 }
 
 interface TriageNode {
@@ -103,7 +107,9 @@ export const OfflineTriageProtocol: React.FC<OfflineTriageProtocolProps> = ({
 
   // Speech Recognition
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    type SpeechRecognitionConstructor = new () => SpeechRecognition;
+    const SpeechRecognition = (window as unknown as { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor }).SpeechRecognition || 
+                           (window as unknown as { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor }).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
@@ -120,7 +126,7 @@ export const OfflineTriageProtocol: React.FC<OfflineTriageProtocolProps> = ({
         }
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
       };
@@ -168,7 +174,7 @@ export const OfflineTriageProtocol: React.FC<OfflineTriageProtocolProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex flex-col bg-slate-950 text-white overflow-hidden font-sans">
+    <div className="fixed inset-0 z-1000 flex flex-col bg-slate-950 text-white overflow-hidden font-sans">
       <div className="bg-amber-500 text-black px-4 py-2 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2">
           <ShieldAlert size={18} className="animate-pulse" />
