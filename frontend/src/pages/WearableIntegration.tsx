@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Watch, 
@@ -157,7 +157,7 @@ export const WearableIntegration = () => {
                         </div>
                       </div>
                       {device.status === 'DISCONNECTED' ? (
-                        <Button variant="secondary" size="xs" onClick={() => handlePair(device.id)} className="h-7">
+                        <Button variant="secondary" size="sm" onClick={() => handlePair(device.id)} className="h-7">
                           PAIR
                         </Button>
                       ) : device.status === 'CONNECTED' ? (

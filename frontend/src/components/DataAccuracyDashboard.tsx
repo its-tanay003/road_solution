@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
-  AlertCircle, 
-  Clock, 
-  Database, 
   ShieldCheck, 
   Activity,
-  Globe,
   Wifi,
   WifiOff
 } from 'lucide-react';

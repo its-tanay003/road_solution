@@ -2,11 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BrainCircuit, Activity, ShieldAlert, Zap, Terminal as TerminalIcon, CheckCircle2, Cpu,
-  Users, MessageSquare, AlertTriangle, Send, MousePointer2
+  Users, MessageSquare, AlertTriangle, Send, MousePointer2, Clock, Car
 } from 'lucide-react';
 import { getSocket } from '../lib/socket';
 import { PostIncidentDebrief } from './PostIncidentDebrief';
 import { DebriefHistory } from './DebriefHistory';
+import { VaahanLookup } from './VaahanLookup';
+import { runOfflineTriage } from '../lib/offlineTriage';
+import { useChaosStore } from '../store';
 
 interface AgentLog {
   agent: string;
@@ -45,6 +48,8 @@ interface RemoteCursor {
   userId: string;
   x: number;
   y: number;
+  role?: string;
+  name?: string;
 }
 
 export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) => void }) => {
@@ -65,7 +70,7 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
   const [remoteCursors, setRemoteCursors] = useState<RemoteCursor[]>([]);
   const [notes, setNotes] = useState<RoomNote[]>([]);
   const [newNote, setNewNote] = useState('');
-  const [conflict, setConflict] = useState<any>(null);
+  const [conflict, setConflict] = useState<{ userId: string; actionType: string; details: any } | null>(null);
   const [isResolved, setIsResolved] = useState(false);
   const [showDebrief, setShowDebrief] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -74,10 +79,98 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
   const [agents, setAgents] = useState<AgentState[]>([
     { id: 'crash', name: 'Crash Analyst', icon: Activity, color: 'text-red-500', status: 'IDLE', decision: null, logs: [], data: { gForce: '12.4G', speedDelta: '-48km/h', coords: '28.6139, 77.2090' } },
     { id: 'medical', name: 'Medical Triage', icon: BrainCircuit, color: 'text-purple-500', status: 'IDLE', decision: null, logs: [], data: { transcript: "I can't feel my legs... breathing is hard...", history: "Type 2 Diabetes, No drug allergies" } },
+    { id: 'vaahan', name: 'VAAHAN Intel', icon: Car, color: 'text-orange-500', status: 'IDLE', decision: null, logs: [], data: { plate: "TN 09 AZ 4521", status: "WAITING" } },
     { id: 'resource', name: 'Resource Optimizer', icon: Cpu, color: 'text-cyan-500', status: 'IDLE', decision: null, logs: [], data: { hospitals: "AIIMS (Load: 82%), Max (Load: 45%)", units: "Ambulance A47, B12" } }
   ]);
   const [consensus, setConsensus] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const [isFallback, setIsFallback] = useState(false);
+
+  const streamAgentResponse = async (agentId: string, prompt: string) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/triage/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+    });
+    if (!response.body) return;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.replace('data: ', '');
+          if (data === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.content) {
+              fullText += parsed.content;
+              const currentLines = fullText.split('\n').filter(l => l.trim().length > 0);
+              const lastLine = currentLines[currentLines.length - 1];
+              
+              setAgents(prev => prev.map(a => {
+                if (a.id === agentId) {
+                  const isDecision = lastLine.toUpperCase().includes('DECISION:');
+                  return {
+                    ...a,
+                    logs: currentLines.map(msg => ({ agent: agentId, message: msg.replace(/DECISION:/gi, ''), type: msg.toUpperCase().includes('DECISION:') ? 'decision' : 'thought' })),
+                    status: isDecision ? 'DECISION_MADE' : 'ANALYZING',
+                    decision: isDecision ? lastLine.replace(/DECISION:/gi, '').trim() : a.decision
+                  };
+                }
+                return a;
+              }));
+            }
+          } catch (e) {
+            console.error("Failed to parse chunk", e);
+          }
+        }
+      }
+    }
+  };
+
+  const startAnalysisLocal = async () => {
+    setIsActive(true);
+    setConsensus(null);
+    setAgents(prev => prev.map(a => ({ ...a, status: 'ANALYZING', logs: [], decision: null })));
+
+    const agentPrompts = [
+      { id: 'crash', prompt: "Analyze this crash data: G-Force: 12.4G, Speed Delta: -48km/h. End with DECISION: [High Severity]." },
+      { id: 'vaahan', prompt: "Query VAAHAN for TN 09 AZ 4521. End with DECISION: [Swift VXI, Insured, Rajesh Kumar]." },
+      { id: 'medical', prompt: "Triage: Transcript: 'I can't feel my legs'. End with DECISION: [Priority 1 - Spinal]." },
+      { id: 'resource', prompt: "Resource: Hospitals: AIIMS, Max. End with DECISION: [Unit A47 to Max]." }
+    ];
+
+    try {
+      if (useChaosStore.getState().internetKilled) {
+        throw new Error("Simulated Internet Failure");
+      }
+      await Promise.all(agentPrompts.map(p => streamAgentResponse(p.id, p.prompt)));
+      setConsensus("CRITICAL MULTI-SYSTEM TRAUMA DETECTED. Vehicle: Maruti Swift (RAJESH KUMAR) - Insured. Dispatching ALS Unit A47 to Max Hospital.");
+      if (onComplete) onComplete("CRITICAL MULTI-SYSTEM TRAUMA DETECTED");
+    } catch (error) {
+      console.error("War Room Error, activating offline fallback:", error);
+      setIsFallback(true);
+      const offlineResult = runOfflineTriage();
+      
+      // Simulate local processing delay
+      setTimeout(() => {
+        setAgents(prev => prev.map(a => ({
+          ...a,
+          status: 'DECISION_MADE',
+          decision: offlineResult.agentDecisions[a.id] || "LOCAL ANALYSIS COMPLETE",
+          logs: [{ agent: a.id, message: "LOCAL RULE ENGINE: AI API UNAVAILABLE. FALLING BACK TO DETERMINISTIC TRIAGE.", type: 'thought' },
+                 { agent: a.id, message: offlineResult.agentDecisions[a.id] || "LOCAL ANALYSIS COMPLETE", type: 'decision' }]
+        })));
+        setConsensus(offlineResult.consensus);
+        if (onComplete) onComplete(offlineResult.consensus);
+      }, 1500);
+    }
+  };
 
   // --- SOCKET EFFECTS ---
   useEffect(() => {
@@ -132,9 +225,8 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
       socket.off('ai_request_started');
       socket.off('action_conflict');
     };
-  }, [socket, localUser]);
+  }, [socket, localUser, consensus, isActive]);
 
-  // --- MOUSE MOVEMENT FOR CURSOR TRACKING ---
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!roomRef.current) return;
     const rect = roomRef.current.getBoundingClientRect();
@@ -163,73 +255,6 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
   const triggerAI = () => {
     socket.emit('ai_request', ROOM_ID);
     startAnalysisLocal(); // Start for self too
-  };
-
-  const startAnalysisLocal = async () => {
-    setIsActive(true);
-    setConsensus(null);
-    setAgents(prev => prev.map(a => ({ ...a, status: 'ANALYZING', logs: [], decision: null })));
-
-    const agentPrompts = [
-      { id: 'crash', prompt: `Analyze this crash data: G-Force: 12.4G, Speed Delta: -48km/h. Think step by step about vehicle deformation, impact vectors, and likely injury severity. End with a final DECISION: [Level of severity and likely trauma type].` },
-      { id: 'medical', prompt: `Medical Triage Analysis: Transcript: "I can't feel my legs... breathing is hard..." History: Type 2 Diabetes. Create an injury probability matrix (Head, Spinal, Internal). End with a final DECISION: [Triage Category and Primary Risk].` },
-      { id: 'resource', prompt: `Resource Optimization: Hospitals: AIIMS (82% load), Max (45% load). Available Units: A47 (ALS), B12 (BLS). Rank dispatch options based on ETA and hospital capability. End with a final DECISION: [Selected Unit and Destination].` }
-    ];
-
-    try {
-      await Promise.all(agentPrompts.map(p => streamAgentResponse(p.id, p.prompt)));
-      setTimeout(() => {
-        setConsensus("CRITICAL MULTI-SYSTEM TRAUMA DETECTED. Dispatching Unit A47 to Max Hospital (Trauma Center). ALS Protocol Initiated.");
-        if (onComplete) onComplete("CRITICAL MULTI-SYSTEM TRAUMA DETECTED");
-      }, 1000);
-    } catch (error) {
-      console.error("War Room Error:", error);
-    }
-  };
-
-  const streamAgentResponse = async (agentId: string, prompt: string) => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/triage/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
-    });
-    if (!response.body) return;
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = "";
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.replace('data: ', '');
-          if (data === '[DONE]') continue;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.content) {
-              fullText += parsed.content;
-              const currentLines = fullText.split('\n').filter(l => l.trim().length > 0);
-              const lastLine = currentLines[currentLines.length - 1];
-              
-              setAgents(prev => prev.map(a => {
-                if (a.id === agentId) {
-                  const isDecision = lastLine.toUpperCase().includes('DECISION:');
-                  return {
-                    ...a,
-                    logs: currentLines.map(msg => ({ agent: agentId, message: msg.replace(/DECISION:/gi, ''), type: msg.toUpperCase().includes('DECISION:') ? 'decision' : 'thought' })),
-                    status: isDecision ? 'DECISION_MADE' : 'ANALYZING',
-                    decision: isDecision ? lastLine.replace(/DECISION:/gi, '').trim() : a.decision
-                  };
-                }
-                return a;
-              }));
-            }
-          } catch {}
-        }
-      }
-    }
   };
 
   const simulateConflict = () => {
@@ -278,6 +303,17 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
               Logged in as: <span className="text-white font-bold" style={{ color: localUser.color }}>{localUser.name} ({localUser.role})</span>
             </div>
           </div>
+
+          {isFallback && (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-red-500/20 border border-red-500 text-red-500 px-3 py-1 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 animate-pulse"
+            >
+              <Zap size={12} fill="currentColor" />
+              OFFLINE RULE ENGINE ACTIVE
+            </motion.div>
+          )}
 
           <div className="w-px h-8 bg-white/10" />
 
@@ -419,10 +455,12 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
                 onChange={(e) => setNewNote(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendNote()}
                 placeholder="Add a note..." 
+                aria-label="New note text"
                 className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500/50"
               />
               <button 
                 onClick={handleSendNote}
+                aria-label="Send note"
                 className="bg-cyan-500/20 text-cyan-400 p-2 rounded-lg hover:bg-cyan-500/30 transition-colors"
               >
                 <Send size={14} />
@@ -512,7 +550,7 @@ const AgentPanel = ({ agent, index }: { agent: AgentState; index: number }) => {
           <div className={`p-1.5 bg-slate-950 rounded-lg ${agent.color}`}><agent.icon size={16} /></div>
           <div>
             <div className="text-[10px] font-black uppercase tracking-widest text-white">{agent.name}</div>
-            <div className="text-[8px] font-mono text-slate-500 uppercase tracking-tighter">AgentID: {agent.id.toUpperCase()}-00{index+1}</div>
+            <div className="text-[8px] font-mono text-slate-500 uppercase tracking-tighter">AgentID: {String(agent.id).toUpperCase()}-00{Number(index) + 1}</div>
           </div>
         </div>
         {agent.status === 'ANALYZING' && (
@@ -523,6 +561,11 @@ const AgentPanel = ({ agent, index }: { agent: AgentState; index: number }) => {
         )}
       </div>
       <div className="flex-1 p-3 font-mono text-[9px] overflow-y-auto bg-black/20 scrollbar-hide space-y-1.5">
+        {agent.id === 'vaahan' && agent.status !== 'IDLE' && (
+          <div className="mb-4">
+            <VaahanLookup />
+          </div>
+        )}
         {agent.logs.length === 0 && agent.status === 'IDLE' && <div className="text-slate-700 italic">Waiting for telemetry...</div>}
         {agent.logs.map((log, i) => (
           <div key={i} className={`flex items-start gap-2 ${log.type === 'decision' ? 'text-emerald-400 font-bold bg-emerald-500/5 p-1.5 rounded-md' : 'text-slate-300'}`}>

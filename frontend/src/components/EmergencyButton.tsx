@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useSosStore, useUIStore } from '../store';
+import { useTranslation } from 'react-i18next';
 
 export const EmergencyButton: React.FC = () => {
+  const { t } = useTranslation();
   const { triggerSos } = useSosStore();
   const { setUxMode, setCrackedScreen } = useUIStore();
   const [isHolding, setIsHolding] = useState(false);
@@ -38,17 +40,17 @@ export const EmergencyButton: React.FC = () => {
       transition: { duration: 2, ease: "linear" }
     });
 
-    hapticIntervalRef.current = setInterval(() => {
+    hapticIntervalRef.current = window.setInterval(() => {
       if ("vibrate" in navigator) {
         navigator.vibrate(100);
       }
-    }, 500);
+    }, 500) as unknown as number;
 
-    holdTimerRef.current = setTimeout(() => {
+    holdTimerRef.current = window.setTimeout(() => {
       stopHold();
       setUxMode('PANIC');
       triggerSos();
-    }, 2000);
+    }, 2000) as unknown as number;
   }, [controls, setUxMode, triggerSos, stopHold]);
 
   return (
@@ -93,12 +95,14 @@ export const EmergencyButton: React.FC = () => {
           `}
         >
           <span className="text-5xl font-black text-white tracking-tighter">SOS</span>
-          <p className="text-red-100 text-[10px] font-black uppercase mt-2 tracking-widest">Hold 2s</p>
+          <p className="text-red-100 text-[10px] font-black mt-2 tracking-widest text-center px-2 leading-tight">
+            {t('sos.help')}
+          </p>
         </button>
       </div>
       
       <p className="mt-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs max-w-[200px]">
-        Press and hold to trigger emergency protocols
+        {t('sos.trigger')}
       </p>
     </div>
   );

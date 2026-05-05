@@ -33,13 +33,13 @@ interface IntegrationEvent {
 
 const INTEGRATIONS: Integration[] = [
   {
-    id: 'nhtsa',
-    name: 'NHTSA FARS',
-    description: 'Federal Fatality Analysis Reporting System integration for historical risk modeling.',
+    id: 'irad',
+    name: 'iRAD (MoRTH)',
+    description: 'Integrated Road Accident Database (MoRTH India) integration for historical risk modeling.',
     icon: <ShieldCheck className="w-6 h-6" />,
     status: 'SIMULATED',
     color: 'blue',
-    endpoint: '/api/integrations/nhtsa/incidents',
+    endpoint: '/api/integrations/irad/incidents',
     type: 'Gov'
   },
   {
@@ -87,7 +87,7 @@ const INTEGRATIONS: Integration[] = [
 export const IntegrationsPanel: React.FC = () => {
   const getMockMessage = (id: string) => {
     switch(id) {
-      case 'nhtsa': return 'Pulled 12 regional crash records';
+      case 'irad': return 'Pulled 12 regional crash records from MoRTH';
       case 'cad': return 'Assigned Ticket #CAD-482910 to ALS-2';
       case 'who': return 'Reported incident SOS-789 (ICD-10)';
       case 'hospital': return 'Trauma Bay 1 confirmed available';

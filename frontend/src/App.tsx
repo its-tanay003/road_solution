@@ -1,161 +1,139 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
-import { MainLayout } from './components/MainLayout';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import './i18n/config';
 
-// Lazy load pages
-const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
-const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard').then(module => ({ default: module.Dashboard })));
-const TriageChat = lazy(() => import('./pages/TriageChat').then(module => ({ default: module.TriageChat })));
-const LiveMap = lazy(() => import('./pages/LiveMap').then(module => ({ default: module.LiveMap })));
-const ServiceDetail = lazy(() => import('./pages/ServiceDetail').then(module => ({ default: module.ServiceDetail })));
-const FirstAid = lazy(() => import('./pages/FirstAid').then(module => ({ default: module.FirstAid })));
-const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
-const RoutePlanner = lazy(() => import('./pages/RoutePlanner').then(module => ({ default: module.RoutePlanner })));
-const IncidentReport = lazy(() => import('./pages/IncidentReport').then(module => ({ default: module.IncidentReport })));
-const FamilyTracker = lazy(() => import('./pages/FamilyTracker').then(module => ({ default: module.FamilyTracker })));
-const B2BDashboard = lazy(() => import('./pages/B2B/Dashboard').then(module => ({ default: module.B2BDashboard })));
-const SafetyFeed = lazy(() => import('./pages/Community/SafetyFeed').then(module => ({ default: module.SafetyFeed })));
-const DemoCommandCenter = lazy(() => import('./components/DemoCommandCenter').then(module => ({ default: module.DemoCommandCenter })));
-const IncidentTimeline = lazy(() => import('./components/IncidentTimeline').then(module => ({ default: module.IncidentTimeline })));
-const MeshStatus = lazy(() => import('./components/MeshStatus').then(module => ({ default: module.MeshStatus })));
-const MetricsDashboard = lazy(() => import('./components/MetricsDashboard').then(module => ({ default: module.MetricsDashboard })));
-const MedicalVaultDemo = lazy(() => import('./components/MedicalVaultDemo').then(module => ({ default: module.MedicalVaultDemo })));
-const ImpactDashboard = lazy(() => import('./components/ImpactDashboard').then(module => ({ default: module.ImpactDashboard })));
-const ArchitectureDiagram = lazy(() => import('./components/ArchitectureDiagram').then(module => ({ default: module.ArchitectureDiagram })));
-const IntegrationsPanel = lazy(() => import('./components/IntegrationsPanel').then(module => ({ default: module.IntegrationsPanel })));
-const SoundControlPanel = lazy(() => import('./components/SoundControlPanel').then(module => ({ default: module.SoundControlPanel })));
-const JudgeInteractiveDemo = lazy(() => import('./components/JudgeInteractiveDemo').then(module => ({ default: module.JudgeInteractiveDemo })));
-const JudgeMobileView = lazy(() => import('./components/JudgeMobileView').then(module => ({ default: module.JudgeMobileView })));
-const ManifestoGenerator = lazy(() => import('./components/ManifestoGenerator').then(module => ({ default: module.ManifestoGenerator })));
-const ChaosEngineeringPanel = lazy(() => import('./components/ChaosEngineeringPanel').then(module => ({ default: module.ChaosEngineeringPanel })));
-const MultiLingualTriage = lazy(() => import('./components/MultiLingualTriage').then(module => ({ default: module.MultiLingualTriage })));
-const SystemStatus = lazy(() => import('./components/SystemStatus').then(module => ({ default: module.SystemStatus })));
-const PresentationOpeningScreen = lazy(() => import('./components/PresentationOpeningScreen').then(module => ({ default: module.PresentationOpeningScreen })));
-const ResponderLeaderboard = lazy(() => import('./components/ResponderLeaderboard').then(module => ({ default: module.ResponderLeaderboard })));
-const CrashPredictionEngine = lazy(() => import('./components/CrashPredictionEngine').then(module => ({ default: module.CrashPredictionEngine })));
-const AccessibilityPanel = lazy(() => import('./components/AccessibilityPanel').then(module => ({ default: module.AccessibilityPanel })));
-const BootScreen = lazy(() => import('./pages/BootScreen').then(module => ({ default: module.BootScreen })));
-const TrainingSimulator = lazy(() => import('./pages/TrainingSimulator').then(module => ({ default: module.TrainingSimulator })));
-const NotificationCenter = lazy(() => import('./pages/NotificationCenter').then(module => ({ default: module.NotificationCenter })));
-const WearableIntegration = lazy(() => import('./pages/WearableIntegration').then(module => ({ default: module.WearableIntegration })));
-const BlockchainAuditTrail = lazy(() => import('./components/BlockchainAuditTrail').then(module => ({ default: module.BlockchainAuditTrail })));
-const NearbyServicesPanel = lazy(() => import('./components/NearbyServicesPanel').then(module => ({ default: module.NearbyServicesPanel })));
-const VehicleServices = lazy(() => import('./pages/VehicleServices').then(module => ({ default: module.VehicleServices })));
-const EmergencyNumbers = lazy(() => import('./pages/EmergencyNumbers').then(module => ({ default: module.EmergencyNumbers })));
+// Screens & Components
+import HomeScreen from './screens/HomeScreen';
+import { Dashboard } from './screens/Dashboard';
+import { Dispatched } from './screens/Dispatched';
+import { OnboardingFlow } from './components/OnboardingFlow';
+import { AppLoadingScreen } from './components/AppLoadingScreen';
+import { GovernancePortal } from './screens/GovernancePortal';
+import { ImpactCalculator } from './screens/ImpactCalculator';
+import DemoOrchestrator from './components/DemoOrchestrator';
+import CrashPatternAnalytics from './screens/CrashPatternAnalytics';
+import FamilyPortal from './screens/FamilyPortal';
+import ResponderView from './screens/ResponderView';
+import { ARNavigationView } from './components/ARNavigationView';
+import { PitchDeckMode } from './components/PitchDeckMode';
+import { KeyboardShortcutOverlay } from './components/KeyboardShortcutOverlay';
 
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center w-full h-screen bg-(--nx-bg-base)">
-    <div className="w-12 h-12 border-4 border-(--nx-red-primary) border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
-
-const AnimatedRoutes = () => {
-  const location = useLocation();
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
-            <Route path="/chat" element={<PageWrapper><TriageChat /></PageWrapper>} />
-            <Route path="/map" element={<PageWrapper><LiveMap /></PageWrapper>} />
-            <Route path="/service/:id" element={<PageWrapper><ServiceDetail /></PageWrapper>} />
-            <Route path="/first-aid" element={<PageWrapper><FirstAid /></PageWrapper>} />
-            <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
-            <Route path="/route" element={<PageWrapper><RoutePlanner /></PageWrapper>} />
-            <Route path="/report" element={<PageWrapper><IncidentReport /></PageWrapper>} />
-            <Route path="/feed" element={<PageWrapper><SafetyFeed /></PageWrapper>} />
-            <Route path="/notifications" element={<PageWrapper><NotificationCenter /></PageWrapper>} />
-            <Route path="/demo" element={<DemoCommandCenter />} />
-            <Route path="/timeline" element={<PageWrapper><IncidentTimeline /></PageWrapper>} />
-            <Route path="/mesh" element={<PageWrapper><MeshStatus /></PageWrapper>} />
-            <Route path="/metrics" element={<PageWrapper><MetricsDashboard /></PageWrapper>} />
-            <Route path="/vault" element={<PageWrapper><MedicalVaultDemo /></PageWrapper>} />
-            <Route path="/impact" element={<PageWrapper><ImpactDashboard /></PageWrapper>} />
-            <Route path="/architecture" element={<PageWrapper><ArchitectureDiagram /></PageWrapper>} />
-            <Route path="/integrations" element={<PageWrapper><IntegrationsPanel /></PageWrapper>} />
-            <Route path="/sound" element={<PageWrapper><SoundControlPanel /></PageWrapper>} />
-            <Route path="/judge-presentation" element={<PageWrapper><JudgeInteractiveDemo /></PageWrapper>} />
-            <Route path="/judge-demo" element={<PageWrapper><JudgeMobileView /></PageWrapper>} />
-            <Route path="/manifesto" element={<PageWrapper><ManifestoGenerator /></PageWrapper>} />
-            <Route path="/multi-lingual" element={<PageWrapper><MultiLingualTriage /></PageWrapper>} />
-            <Route path="/status" element={<PageWrapper><SystemStatus /></PageWrapper>} />
-            <Route path="/present" element={<PageWrapper><PresentationOpeningScreen /></PageWrapper>} />
-            <Route path="/leaderboard" element={<PageWrapper><ResponderLeaderboard /></PageWrapper>} />
-            <Route path="/prediction" element={<PageWrapper><CrashPredictionEngine /></PageWrapper>} />
-            <Route path="/accessibility" element={<PageWrapper><AccessibilityPanel /></PageWrapper>} />
-            <Route path="/training" element={<PageWrapper><TrainingSimulator /></PageWrapper>} />
-            <Route path="/wearables" element={<PageWrapper><WearableIntegration /></PageWrapper>} />
-            <Route path="/audit" element={<PageWrapper><BlockchainAuditTrail /></PageWrapper>} />
-            <Route path="/services" element={<PageWrapper><NearbyServicesPanel /></PageWrapper>} />
-            <Route path="/vehicle" element={<PageWrapper><VehicleServices /></PageWrapper>} />
-            <Route path="/sos-global" element={<PageWrapper><EmergencyNumbers /></PageWrapper>} />
-          </Route>
-          <Route element={<><Outlet /><ChaosEngineeringPanel /></>}>
-            <Route path="/admin" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
-            <Route path="/b2b" element={<PageWrapper><B2BDashboard /></PageWrapper>} />
-          </Route>
-          <Route path="/track/:incidentId" element={<PageWrapper><FamilyTracker /></PageWrapper>} />
-        </Routes>
-      </AnimatePresence>
-    </Suspense>
-  );
-};
+// Stores
+import { useMedicalProfileStore } from './store/medicalProfileStore';
+import { VolunteerAlertScreen } from './components/VolunteerAlertScreen';
+import { VolunteerResponderNetwork } from './components/VolunteerResponderNetwork';
+import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';
+import { useDemoStore } from './store';
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.4, ease: "easeInOut" }}
-    className="w-full h-full min-h-screen"
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -20 }}
+    transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+    className="w-full h-full"
   >
     {children}
   </motion.div>
 );
 
-import { AmbientUIProvider } from './components/AmbientUIProvider';
-import { ResponderAlertOverlay } from './components/ResponderAlertOverlay';
-import CrashCountdownOverlay from './components/CrashCountdownOverlay';
-import { DistressDetectionProvider } from './components/DistressDetectionProvider';
-import { DistressStatusBar } from './components/DistressStatusBar';
-import { DistressAutoPrompt } from './components/DistressAutoPrompt';
-import { OfflineSyncProvider } from './components/OfflineSyncProvider';
-import { OfflineStatusBanner } from './components/OfflineStatusBanner';
-import { OfflineTriageOrchestrator } from './components/OfflineTriageOrchestrator';
+const AppContent = () => {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { onboardingComplete } = useMedicalProfileStore();
+  const [isLoading, setIsLoading] = useState(true);
 
-import { useState } from 'react';
+  // Check for demo mode in URL
+  const isDemo = searchParams.get('demo') === 'true';
+  const { isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario } = useDemoStore();
 
-function App() {
-  const [showBoot, setShowBoot] = useState(true);
+  useEffect(() => {
+    const handleGlobalKeydown = (e: KeyboardEvent) => {
+      // Toggle shortcuts with ?
+      if (e.key === '?') {
+        toggleShortcuts();
+        return;
+      }
 
-  if (showBoot) {
-    return (
-      <Suspense fallback={<LoadingSpinner />}>
-        <BootScreen onComplete={() => setShowBoot(false)} />
-      </Suspense>
-    );
+      // Shift+P for Presentation Mode
+      if (e.shiftKey && (e.key === 'P' || e.key === 'p')) {
+        togglePresentationMode();
+        return;
+      }
+
+      // Quick triggers for scenarios if in demo mode
+      if (isDemo && !isPresentationMode) {
+        if (e.key === '1') triggerScenario(1);
+        if (e.key === '2') triggerScenario(2);
+        if (e.key === '3') triggerScenario(3);
+        if (e.key === '0') triggerScenario(4); // Reset
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeydown);
+    return () => window.removeEventListener('keydown', handleGlobalKeydown);
+  }, [isDemo, isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario]);
+
+  if (isLoading) {
+    return <AppLoadingScreen onComplete={() => setIsLoading(false)} />;
+  }
+
+  if (!onboardingComplete && !isDemo) {
+    return <OnboardingFlow />;
   }
 
   return (
-    <AmbientUIProvider>
-      <OfflineSyncProvider>
-        <DistressDetectionProvider>
-          <Router>
-            <OfflineStatusBanner />
-            <OfflineTriageOrchestrator />
-            <CrashCountdownOverlay />
-            <ResponderAlertOverlay />
-            <DistressStatusBar />
-            <DistressAutoPrompt />
-            <AnimatedRoutes />
-          </Router>
-        </DistressDetectionProvider>
-      </OfflineSyncProvider>
-    </AmbientUIProvider>
+    <div className="w-full min-h-screen bg-[#080C14] text-[#E8EDF5] selection:bg-[#2979FF]/30 overflow-hidden font-sans">
+      {/* HUD Overlays */}
+      <div className="scanline-overlay pointer-events-none opacity-20" />
+      <div className="scanline-sweep pointer-events-none" />
+      
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<PageWrapper><HomeScreen /></PageWrapper>} />
+          <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
+          <Route path="/governance" element={<PageWrapper><GovernancePortal /></PageWrapper>} />
+          <Route path="/impact" element={<PageWrapper><ImpactCalculator /></PageWrapper>} />
+          <Route path="/volunteer" element={<PageWrapper><VolunteerResponderNetwork /></PageWrapper>} />
+          <Route path="/dispatched/:id" element={<PageWrapper><Dispatched /></PageWrapper>} />
+          <Route path="/analytics" element={<PageWrapper><CrashPatternAnalytics /></PageWrapper>} />
+          <Route path="/family/:incidentId" element={<PageWrapper><FamilyPortal /></PageWrapper>} />
+          <Route path="/responder/:unitId" element={<PageWrapper><ResponderView /></PageWrapper>} />
+          <Route path="/responder/:incidentId/ar" element={<PageWrapper><ARNavigationView /></PageWrapper>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AnimatePresence>
+
+      <VolunteerAlertScreen />
+      <NHAISmartHighwayPanel />
+
+      {/* Global Demo Tools */}
+      {isDemo && <DemoOrchestrator />}
+      
+      {/* Presentation & Shortcut Layers */}
+      <PitchDeckMode 
+        isOpen={isPresentationMode} 
+        onClose={togglePresentationMode} 
+        onStartDemo={() => {
+          togglePresentationMode();
+          triggerScenario(1);
+        }}
+      />
+      <KeyboardShortcutOverlay 
+        isOpen={useDemoStore(state => state.showShortcuts)} 
+        onClose={() => toggleShortcuts(false)}
+        isPaused={useDemoStore(state => state.isPaused)}
+      />
+    </div>
   );
-}
+};
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+};
 
 export default App;

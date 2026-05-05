@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { Panel } from './ui/Panel';
 import { useDebriefStore } from '../store';
 import ReactMarkdown from 'react-markdown';
+import { InsuranceClaimButton } from './InsuranceClaimButton';
 
 interface PostIncidentDebriefProps {
   incident: {
@@ -107,10 +108,6 @@ Be specific, professional, and data-driven. Format in clean sections.`;
     return () => { isMounted = false; };
   }, [incident]);
 
-  const handleExportPDF = () => {
-    window.print();
-  };
-
   const handleShare = () => {
     const debrief = {
       id: `deb-${Date.now()}`,
@@ -127,26 +124,26 @@ Be specific, professional, and data-driven. Format in clean sections.`;
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 print:p-0 print:bg-white print:block">
+    <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 print:p-0 print:bg-white print:block">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col print:max-h-none print:shadow-none print:w-full print:text-black"
       >
-        <Panel className="flex flex-col h-full bg-[var(--nx-bg-surface)] border-[var(--nx-border)] print:border-none print:bg-white">
-          <div className="p-6 border-b border-[var(--nx-border)] flex justify-between items-center print:border-b-2 print:border-gray-300">
+        <Panel className="flex flex-col h-full bg-(--nx-bg-surface) border-(--nx-border) print:border-none print:bg-white">
+          <div className="p-6 border-b border-(--nx-border) flex justify-between items-center print:border-b-2 print:border-gray-300">
             <div>
               <h2 className="text-2xl font-bold text-white tracking-tight print:text-black">Post-Incident Debrief</h2>
-              <p className="text-sm text-[var(--nx-text-tertiary)] mt-1 print:text-gray-600">ID: {incident.id} | Generated: {new Date().toLocaleString()}</p>
+              <p className="text-sm text-(--nx-text-tertiary) mt-1 print:text-gray-600">ID: {incident.id} | Generated: {new Date().toLocaleString()}</p>
             </div>
             <div className="flex gap-3 print:hidden">
-              <div className="px-3 py-1 bg-[var(--nx-bg-elevated)] border border-[var(--nx-border)] rounded-full text-xs text-[var(--nx-green-primary)] font-medium flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[var(--nx-green-primary)] animate-pulse"></span>
+              <div className="px-3 py-1 bg-(--nx-bg-elevated) border border-(--nx-border) rounded-full text-xs text-(--nx-green-primary) font-medium flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-(--nx-green-primary) animate-pulse"></span>
                 AI Confidence: 91%
               </div>
-              <Button variant="secondary" onClick={handleExportPDF} disabled={isGenerating}>Export PDF</Button>
+              <InsuranceClaimButton incidentId={incident.id} variant="secondary" />
               <Button variant="primary" onClick={handleShare} disabled={isGenerating}>Share</Button>
-              <Button variant="danger" onClick={onClose}>Close</Button>
+              <Button variant="danger-outline" onClick={onClose}>Close</Button>
             </div>
           </div>
           
@@ -162,8 +159,8 @@ Be specific, professional, and data-driven. Format in clean sections.`;
             </motion.div>
             
             {isGenerating && (
-              <div className="flex items-center gap-3 text-[var(--nx-text-tertiary)] mt-4 animate-pulse print:hidden">
-                <div className="w-4 h-4 border-2 border-[var(--nx-text-tertiary)] border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-3 text-(--nx-text-tertiary) mt-4 animate-pulse print:hidden">
+                <div className="w-4 h-4 border-2 border-(--nx-text-tertiary) border-t-transparent rounded-full animate-spin" />
                 Claude is analyzing incident data...
               </div>
             )}

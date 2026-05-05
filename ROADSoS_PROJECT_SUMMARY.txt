@@ -13,22 +13,34 @@ ROADSoS is a high-stakes, real-world ready Emergency Operating System designed t
 ### B. AI Triage & Decision Core
 - **Claude-Powered Triage**: Real-time conversational AI that assesses victim status, injury severity, and vehicle dynamics.
 - **Decision Transparency**: "AI Thinking" overlay that streams the system's logic (e.g., "Analyzing crash dynamics", "Selecting nearest ALS responder").
-- **Multi-lingual Support**: Integrated i18next support for global accessibility.
+- **Multilingual Support (India Focus)**: Integrated i18next support for **English, Hindi (हिन्दी), and Tamil (தமிழ்)** to ensure localized accessibility.
+- **Regional Compliance (India)**: Simulated integration with India's **112 emergency system** and **iRAD (Integrated Road Accident Database)** for MoRTH-aligned reporting.
 
 ### C. Real-Time Command & Control
 - **Dynamic Dashboard**: High-density view featuring live telemetry, incident timelines, and map-based tracking.
 - **Live Map Integration**: Dark-themed Leaflet maps with custom markers for Hospitals, Police, and Ambulances.
-- **Risk Heatmaps**: AI-generated risk overlays highlighting high-incident zones.
+- **India Black Spot Heatmaps**: iRAD-based risk overlays highlighting high-incident zones across Indian National Highways.
 
 ### D. Resilience & Privacy
 - **Mesh Mode Simulation**: P2P communication simulation for internet-deprived or rural environments.
 - **ZK-Medical Encryption**: Client-side AES-GCM encryption for sensitive medical profiles, ensuring privacy during transmission.
 - **Offline-First PWA**: Service Worker integration for sub-second UI responsiveness and map caching.
 
+### E. Tactical Drone & AR Recon
+- **Autonomous Drone Dispatch**: Simulated "Recon DR-1" drones with real-time video feeds for immediate scene assessment.
+- **Responder AR HUD**: 3D spatial guidance (Three.js) for responders, featuring turn-by-turn navigation and impact physics simulation.
+- **Vaahan Dynamic Context**: Real-time victim-vehicle telemetry (insurance, owner, RTO) for responders.
+
+### F. Presentation & Demo Orchestration
+- **Pitch Mode**: Integrated 5-slide immersive pitch deck for rapid hackathon storytelling.
+- **Global Orchestrator**: Centralized demo controller with time dilation (0.5x, 1x, 2x) and internet-kill scenarios.
+- **Hotkey Architecture**: Comprehensive keyboard-driven triggers for foolproof live demonstrations.
+
 ## 3. TECHNICAL ARCHITECTURE
 ### Frontend (The Nerve Center)
 - **Framework**: React 19 + Vite 8.
 - **Styling**: Tailwind CSS 4 + Framer Motion (for cinematic transitions).
+- **3D Visualization**: Three.js for AR navigation and vehicle impact modeling.
 - **State Management**: Zustand with persistent storage for demo telemetry and medical records.
 - **Logic**: Custom hooks for Geolocation, Wake-word detection, and Network monitoring.
 
@@ -44,10 +56,12 @@ ROADSoS is a high-stakes, real-world ready Emergency Operating System designed t
 - **Build Optimization**: Custom Rollup chunking strategy to optimize delivery of React, Leaflet, and UI components.
 - **Type Safety**: Harmonized TypeScript interfaces across the entire stack, ensuring 100% build stability.
 
-### Key Fixes Implemented
-- **TS5011 Resolution**: Fixed backend `tsconfig` root directory ambiguity.
+### Key Production Hardening Fixes
+- **TS2451 Resolution**: Resolved block-scoped variable redeclaration issues in `AgentWarRoom.tsx` for cleaner component state.
+- **Timer Type Safety**: Standardized `setInterval` and `setTimeout` return types (numeric casting) to resolve Node.js/Browser typing conflicts.
+- **Design System Sync**: Optimized Tailwind 4 `@theme` block in `tokens.css` to correctly resolve custom border and ring utilities.
+- **Accessibility Store Integration**: Fully synchronized the `AccessibilityState` interface with the UI panel for real-time visual/cognitive adjustments.
 - **API Orchestration**: Replaced local dev URLs with dynamic `VITE_API_URL` environment variables for seamless cloud transitions.
-- **Type Harmonization**: Updated `Service` and `DemoState` interfaces to support advanced metadata like GPS coordinates and AI confidence scores.
 
 ## 5. DEMO SCENARIOS (READY FOR SHOWCASE)
 1. **The Crash (Urban)**: Demonstrates G-Force detection, countdown, and autonomous dispatch.

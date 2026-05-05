@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X, Check } from 'lucide-react';
+import { AlertTriangle, Check } from 'lucide-react';
 import { useDistressStore } from '../store/distressStore';
 import { useSosStore } from '../store';
 
@@ -10,14 +10,13 @@ export const DistressAutoPrompt: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(10);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: number;
     
     if (autoPromptActive) {
-      setTimeLeft(10);
-      timer = setInterval(() => {
+      timer = window.setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            clearInterval(timer);
+            window.clearInterval(timer);
             // Time's up, auto-trigger SOS
             triggerSos();
             dismissAutoPrompt();
@@ -29,7 +28,7 @@ export const DistressAutoPrompt: React.FC = () => {
     }
 
     return () => {
-      if (timer) clearInterval(timer);
+      if (timer) window.clearInterval(timer);
     };
   }, [autoPromptActive, triggerSos, dismissAutoPrompt]);
 

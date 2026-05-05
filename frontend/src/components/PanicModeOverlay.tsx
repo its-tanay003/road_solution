@@ -10,11 +10,13 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
+  ShieldCheck,
   X as CloseIcon
 } from 'lucide-react';
+import { NearestTraumaCenter } from './NearestTraumaCenter';
 
 export const PanicModeOverlay: React.FC = () => {
-  const { isActive, cancelSos } = useSosStore();
+  const { isActive, cancelSos, countdownTime, india112Alerted } = useSosStore();
   const { isCrackedScreen, isGloveMode, setUxMode } = useUIStore();
   const { activeCountry } = useUserStore();
   const [activeTab, setActiveTab] = useState<'CALL' | 'MAP' | 'HELP' | 'CONTACTS'>('HELP');
@@ -63,9 +65,19 @@ export const PanicModeOverlay: React.FC = () => {
             <p className={`${textSize} font-black uppercase opacity-60`}>
               Responders dispatched
             </p>
-            <div className="mt-4 p-4 rounded-3xl bg-red-600 text-white inline-block">
-              <span className="text-2xl font-black">ETA: 4 MIN</span>
+            <div className="flex flex-col items-center gap-2 mt-4">
+              {india112Alerted && (
+                <div className="px-4 py-1 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                  <ShieldCheck size={14} />
+                  112 (India) Alerted
+                </div>
+              )}
+              <div className="p-4 rounded-3xl bg-red-600 text-white inline-block shadow-lg shadow-red-600/20">
+                <span className="text-2xl font-black">ETA: {Math.floor(countdownTime / 60)}:{(countdownTime % 60).toString().padStart(2, '0')}</span>
+              </div>
             </div>
+            
+            <NearestTraumaCenter />
           </motion.div>
         ) : (
           <div className="space-y-4">

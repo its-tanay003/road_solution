@@ -2,20 +2,20 @@ import express from 'express';
 
 const router = express.Router();
 
-// Mock NHTSA Incident Data
-router.get('/nhtsa/incidents', (req, res) => {
+// Mock iRAD Incident Data (MoRTH India)
+router.get('/irad/incidents', (req, res) => {
   const mockIncidents = Array.from({ length: 10 }).map((_, i) => ({
-    caseNumber: `NHTSA-2026-${1000 + i}`,
+    caseNumber: `IRAD-2026-${1000 + i}`,
     location: {
       lat: 28.6139 + (Math.random() - 0.5) * 0.1,
       lng: 77.2090 + (Math.random() - 0.5) * 0.1,
     },
     severity: Math.floor(Math.random() * 5) + 1,
-    vehicleType: ['Passenger Car', 'Light Truck', 'Motorcycle', 'Bus'][Math.floor(Math.random() * 4)],
+    vehicleType: ['2 Wheeler', 'Car', 'Truck', 'Bus', 'Pedestrian'][Math.floor(Math.random() * 5)],
     timestamp: new Date().toISOString(),
   }));
   
-  res.json({ source: 'NHTSA FARS (Fatality Analysis Reporting System)', incidents: mockIncidents });
+  res.json({ source: 'iRAD (Integrated Road Accident Database, MoRTH India)', incidents: mockIncidents });
 });
 
 // Mock CAD (Computer-Aided Dispatch) Integration

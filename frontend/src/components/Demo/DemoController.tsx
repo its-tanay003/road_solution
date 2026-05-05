@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   WifiOff, 
-  Zap, 
   AlertOctagon, 
   ChevronRight,
   BrainCircuit,
@@ -12,7 +11,6 @@ import {
   History
 } from 'lucide-react';
 import { useDemoStore, useSosStore, useNetworkStore, useUIStore } from '../../store';
-import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 
 export const DemoController = () => {
@@ -99,6 +97,7 @@ export const DemoController = () => {
   if (!isDemoMode) return (
     <button 
       onClick={() => setDemoMode(true)}
+      aria-label="Enter Demo Mode"
       className="fixed bottom-24 right-8 w-12 h-12 bg-[var(--nx-blue-primary)]/10 border border-[var(--nx-blue-primary)]/30 rounded-sm flex items-center justify-center text-[var(--nx-blue-primary)] hover:bg-[var(--nx-blue-primary)]/20 transition-all z-50 group shadow-[0_0_20px_rgba(10,132,255,0.2)]"
     >
       <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500" />
@@ -269,7 +268,14 @@ export const DemoController = () => {
   );
 };
 
-const ScenarioButton = ({ onClick, icon, title, desc }: any) => (
+interface ScenarioButtonProps {
+  onClick: () => void;
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}
+
+const ScenarioButton = ({ onClick, icon, title, desc }: ScenarioButtonProps) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center gap-4 p-4 bg-white/[0.02] hover:bg-white/[0.05] border border-[var(--nx-border)] rounded-sm group transition-all text-left"
@@ -284,14 +290,26 @@ const ScenarioButton = ({ onClick, icon, title, desc }: any) => (
   </button>
 );
 
-const DecisionCard = ({ label, icon, color, data }: any) => (
+interface DecisionCardProps {
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+  data: {
+    id?: string;
+    name?: string;
+    reason: string;
+    confidence: number;
+  };
+}
+
+const DecisionCard = ({ label, icon, color, data }: DecisionCardProps) => (
   <div className="p-4 bg-white/[0.01] border border-[var(--nx-border)] rounded-sm">
     <div className="flex justify-between items-center mb-3">
       <div className="flex items-center gap-2">
          <span className={`text-[var(--nx-${color}-primary)]`}>{icon}</span>
          <span className="text-[9px] font-black text-[var(--nx-text-dim)] uppercase tracking-widest">{label}</span>
       </div>
-      <Badge variant={color === 'blue' ? 'active' : 'success'} className="text-[8px] py-0 px-2 h-4">
+      <Badge variant={color === 'blue' ? 'info' : 'active'} className="text-[8px] py-0 px-2 h-4">
         {Math.round(data.confidence * 100)}% CONFIDENCE
       </Badge>
     </div>

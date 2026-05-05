@@ -4,7 +4,6 @@ import {
   Building2, 
   Activity, 
   Clock, 
-  Map as MapIcon, 
   Users, 
   AlertCircle, 
   CheckCircle2, 
@@ -12,7 +11,6 @@ import {
   Filter,
   BarChart3,
   Download,
-  Shield,
   Zap,
   Globe
 } from 'lucide-react';
@@ -83,7 +81,7 @@ export const B2BDashboard = () => {
              action={<Badge variant="critical" className="animate-pulse">LIVE FEED</Badge>}
            >
               <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
-                {incidents.map((incident) => (
+                {incidents.map((incident: Incident) => (
                   <motion.div 
                     key={incident.id}
                     layout
@@ -92,7 +90,7 @@ export const B2BDashboard = () => {
                     className="nexus-card p-4 group hover:border-[var(--nx-border-active)] transition-all cursor-pointer bg-white/[0.01]"
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <Badge variant={incident.severity as any}>{incident.severity}</Badge>
+                      <Badge variant={incident.severity}>{incident.severity}</Badge>
                       <span className="text-[10px] font-mono text-[var(--nx-text-dim)]">{incident.timestamp}</span>
                     </div>
                     <h3 className="font-bold text-white text-md mb-2 group-hover:text-[var(--nx-blue-primary)] transition-colors">{incident.type}</h3>
@@ -183,7 +181,14 @@ export const B2BDashboard = () => {
   );
 };
 
-const MetricCard = ({ label, value, icon, variant }: any) => {
+interface MetricCardProps {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  variant: 'critical' | 'active' | 'mesh' | 'info';
+}
+
+const MetricCard = ({ label, value, icon, variant }: MetricCardProps) => {
   const styles = {
     critical: 'border-[var(--nx-red-primary)]/20 bg-[var(--nx-red-dim)] text-[var(--nx-red-primary)]',
     active: 'border-[var(--nx-green-primary)]/20 bg-[var(--nx-green-dim)] text-[var(--nx-green-primary)]',
@@ -202,7 +207,7 @@ const MetricCard = ({ label, value, icon, variant }: any) => {
   );
 };
 
-const MapPin = ({ size, className }: any) => (
+const MapPin = ({ size, className }: { size: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
     <circle cx="12" cy="10" r="3" />

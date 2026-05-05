@@ -6,16 +6,20 @@ export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> 
   
   const lastTapRef = useRef<number>(0);
   const scrollYRef = useRef<number>(window.scrollY);
-  const lastActionRef = useRef<number>(Date.now());
-  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActionRef = useRef<number>(0);
+  const inactivityTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    lastActionRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     // Start interval to constantly recalculate the rolling window
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       recalculate();
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [recalculate]);
 
   useEffect(() => {
@@ -27,7 +31,7 @@ export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> 
         clearTimeout(inactivityTimerRef.current);
       }
       // If no interaction for 15s after doing something, flag inactivity.
-      inactivityTimerRef.current = setTimeout(() => {
+      inactivityTimerRef.current = window.setTimeout(() => {
         addEvent('INACTIVITY', 25);
       }, 15000);
     };
@@ -67,10 +71,17 @@ export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> 
       }
     };
 
+    interface BatteryManager extends EventTarget {
+      charging: boolean;
+      level: number;
+      addEventListener(type: 'chargingchange', listener: (this: BatteryManager, ev: Event) => void): void;
+    }
+
     const setupBattery = async () => {
       try {
-        if ('getBattery' in navigator) {
-          const battery: any = await (navigator as any).getBattery();
+        const nav = navigator as unknown as { getBattery: () => Promise<BatteryManager> };
+        if ('getBattery' in nav) {
+          const battery = await nav.getBattery();
           
           battery.addEventListener('chargingchange', () => {
             if (battery.charging && battery.level <= 0.15) {
@@ -102,7 +113,7 @@ export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> 
       window.removeEventListener('keydown', handleInteraction);
       window.removeEventListener('devicemotion', handleDeviceMotion);
       if (inactivityTimerRef.current) {
-        clearTimeout(inactivityTimerRef.current);
+        window.clearTimeout(inactivityTimerRef.current);
       }
     };
   }, [isActive, addEvent]);

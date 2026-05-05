@@ -7,6 +7,7 @@ import { RiskForecastLayer } from './RiskForecastLayer';
 import { ShieldAlert, Info } from 'lucide-react';
 import { DroneDispatchLayer } from './DroneDispatchLayer';
 import { HospitalMapLayer } from './HospitalMapLayer';
+import { IndiaBlackSpots } from './IndiaBlackSpots';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -43,7 +44,7 @@ const MapUpdater = ({ center }: { center: [number, number] }) => {
   return null;
 };
 
-export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean }) => {
+export const MapView = ({ showRiskHeatmap = false, showBlackSpots = false }: { showRiskHeatmap?: boolean, showBlackSpots?: boolean }) => {
   const { location } = useSosStore();
   const { services } = useServicesStore();
   const [internalShowRisk, setInternalShowRisk] = useState(showRiskHeatmap);
@@ -105,6 +106,9 @@ export const MapView = ({ showRiskHeatmap = false }: { showRiskHeatmap?: boolean
 
         {/* Advanced AI Risk Forecast Layer */}
         {internalShowRisk && <RiskForecastLayer />}
+
+        {/* India Black Spots Overlay */}
+        {showBlackSpots && <IndiaBlackSpots />}
 
         {/* Drone Dispatch System */}
         <DroneDispatchLayer />

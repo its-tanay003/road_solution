@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSosStore } from '../store';
 import { ShieldAlert, Radio, Zap } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 export const LiveCore: React.FC = () => {
-  const { t } = useTranslation();
   const { isActive, triggerSos, cancelSos } = useSosStore();
   const [isHovered, setIsHovered] = useState(false);
 

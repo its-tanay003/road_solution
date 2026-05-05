@@ -1,0 +1,349 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { IndiaStatsTicker } from '../components/IndiaStatsTicker';
+import { Settings, Shield, Activity, Monitor, Globe, Navigation2, BookOpen, X, Building2 } from 'lucide-react';
+import { RoadSafetyAwareness } from '../components/RoadSafetyAwareness';
+
+// --- Particle Canvas Background ---
+const ParticleCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let particles: Particle[] = [];
+
+    class Particle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+
+      constructor() {
+        this.x = Math.random() * canvas!.width;
+        this.y = Math.random() * canvas!.height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.size = Math.random() * 2;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0) this.x = canvas!.width;
+        if (this.x > canvas!.width) this.x = 0;
+        if (this.y < 0) this.y = canvas!.height;
+        if (this.y > canvas!.height) this.y = 0;
+      }
+
+      draw() {
+        ctx!.fillStyle = 'rgba(41, 121, 255, 0.35)';
+        ctx!.beginPath();
+        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+    }
+
+    const init = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = Array.from({ length: 150 }, () => new Particle());
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.update();
+        p.draw();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 100) {
+            ctx.strokeStyle = `rgba(41, 121, 255, ${0.35 * (1 - dist / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      });
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    init();
+    animate();
+
+    window.addEventListener('resize', init);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', init);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-50" />;
+};
+
+// --- SOS Button with Hold Mechanic ---
+const SOSButton = ({ onTrigger }: { onTrigger: () => void }) => {
+  const [isHolding, setIsHolding] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressRef = useRef<number>(0);
+
+  const startHold = () => {
+    setIsHolding(true);
+    if (navigator.vibrate) navigator.vibrate([100]);
+    
+    const startTime = Date.now();
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const newProgress = Math.min(elapsed / 3000, 1);
+      setProgress(newProgress);
+      progressRef.current = newProgress;
+
+      if (newProgress >= 1) {
+        clearInterval(timerRef.current!);
+        onTrigger();
+      }
+    }, 16);
+  };
+
+  const endHold = () => {
+    if (!isHolding) return;
+    setIsHolding(false);
+    clearInterval(timerRef.current!);
+    if (progressRef.current < 1 && progressRef.current > 0.05) {
+      // Trigger amber cancel toast logic here if needed
+    }
+    setProgress(0);
+    progressRef.current = 0;
+  };
+
+  return (
+    <div className="relative flex flex-col items-center">
+      <motion.div 
+        className="text-[10px] font-mono text-(--clr-text-2) mb-4 flex items-center gap-2"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--clr-red)] pulse-dot" />
+        CRITICAL MONITORING ACTIVE
+      </motion.div>
+
+      <div 
+        className="relative cursor-pointer select-none"
+        onMouseDown={startHold}
+        onMouseUp={endHold}
+        onMouseLeave={endHold}
+        onTouchStart={startHold}
+        onTouchEnd={endHold}
+      >
+        {/* Progress Ring */}
+        <svg className="absolute -inset-4 w-[212px] h-[212px] -rotate-90 pointer-events-none">
+          <circle
+            cx="106"
+            cy="106"
+            r="94"
+            fill="none"
+            stroke="var(--clr-border)"
+            strokeWidth="2"
+          />
+          <motion.circle
+            cx="106"
+            cy="106"
+            r="94"
+            fill="none"
+            stroke="var(--clr-red)"
+            strokeWidth="4"
+            strokeDasharray="590"
+            strokeDashoffset={590 - (590 * progress)}
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* The Button */}
+        <motion.button
+          className="w-[180px] h-[180px] rounded-full border-2 border-[var(--clr-red)] bg-[var(--clr-bg)] flex flex-col items-center justify-center relative overflow-hidden z-10"
+          style={{ boxShadow: isHolding ? '0 0 80px var(--clr-glow-red)' : '0 0 50px var(--clr-glow-red)' }}
+          animate={{ scale: isHolding ? 0.95 : 1 }}
+        >
+          <span className="text-[var(--clr-red)] text-3xl font-bold tracking-tighter mb-1">SOS</span>
+          <span className="text-[var(--clr-text-2)] text-[9px] font-mono tracking-widest">HOLD FOR 3S</span>
+          
+          {isHolding && (
+            <motion.div 
+              className="absolute inset-0 bg-[var(--clr-red)]/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            />
+          )}
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+// --- Main HomeScreen Component ---
+const HomeScreen: React.FC = () => {
+  const navigate = useNavigate();
+  const [gForce, setGForce] = useState(0.9);
+  const [showAwareness, setShowAwareness] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGForce(0.9 + (Math.random() - 0.5) * 0.2);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative w-full h-screen flex flex-col bg-[var(--clr-bg)] text-[var(--clr-text)] overflow-hidden">
+      <ParticleCanvas />
+
+      {/* Top Bar */}
+      <header className="h-12 border-b border-[var(--clr-border)] flex items-center justify-between px-4 z-20 bg-[var(--clr-bg)]/80 backdrop-blur-md">
+        <div className="flex flex-col">
+          <h1 className="text-xl font-bold hologram-text leading-none">ROADSoS</h1>
+          <span className="text-[10px] font-mono text-[var(--clr-s saffron)] tracking-widest mt-0.5">
+            EMERGENCY INTELLIGENCE PLATFORM
+          </span>
+        </div>
+
+        <div className="flex-1 max-w-xl mx-8">
+          <IndiaStatsTicker />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex gap-1">
+            {['EN', 'हि', 'த'].map(lang => (
+              <button key={lang} className="w-8 h-6 flex items-center justify-center text-[10px] font-bold border border-[var(--clr-border)] hover:border-[var(--clr-blue)] transition-colors rounded">
+                {lang}
+              </button>
+            ))}
+          </div>
+          <button 
+            title="System Settings"
+            className="p-1.5 border border-[var(--clr-border)] rounded hover:bg-white/5 transition-colors"
+          >
+            <Settings size={16} className="text-(--clr-text-2)" />
+          </button>
+          <div className="flex gap-1.5 ml-2">
+            <div className="w-2 h-2 rounded-full bg-[var(--clr-green)] pulse-dot" />
+            <div className="w-2 h-2 rounded-full bg-[var(--clr-blue)]" />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-center relative z-10 pb-20">
+        {/* G-Force Display */}
+        <motion.div 
+          className="font-mono text-sm text-(--clr-text-2) mb-8 flex flex-col items-center"
+          animate={{ y: [0, -2, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <span className="text-[10px] tracking-[0.3em] opacity-50 mb-1">IMPACT TELEMETRY</span>
+          <span className="text-xl tracking-tighter">
+            G: <span className="text-[var(--clr-text)]">{gForce.toFixed(1)}G</span> ±0.1
+          </span>
+        </motion.div>
+
+        <SOSButton onTrigger={() => navigate('/sos-active')} />
+
+      {/* Action Cards */}
+        <div className="mt-16 flex flex-wrap justify-center gap-4">
+          {[
+            { id: 'report', label: 'BYSTANDER REPORT', icon: Shield, path: '/report/new' },
+            { id: 'profile', label: 'MEDICAL PROFILE', icon: Activity, path: '/profile' },
+            { id: 'dashboard', label: 'COMMAND CENTER', icon: Monitor, path: '/dashboard' },
+            { id: 'impact', label: 'IMPACT ANALYSIS', icon: Activity, path: '/impact', color: 'text-(--clr-blue)' },
+            { id: 'governance', label: 'GOV INTELLIGENCE', icon: Building2, path: '/governance', color: 'text-(--clr-blue)' },
+            { id: 'awareness', label: 'ROAD SAFETY IQ', icon: BookOpen, path: '#', color: 'text-(--clr-saffron)' }
+          ].map((card) => (
+            <motion.button
+              key={card.id}
+              whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.03)' }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                if (card.id === 'awareness') setShowAwareness(true);
+                else navigate(card.path);
+              }}
+              className="w-[140px] h-[88px] border border-[var(--clr-border)] rounded-lg flex flex-col items-center justify-center gap-2 group transition-all"
+            >
+              <card.icon size={20} className={`${card.color || 'text-(--clr-blue)'} group-hover:text-[var(--clr-text)] transition-colors`} />
+              <span className="text-[9px] font-mono tracking-widest text-(--clr-text-2)">{card.label}</span>
+            </motion.button>
+          ))}
+        </div>
+
+        <AnimatePresence>
+          {showAwareness && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-(--clr-bg) border border-(--clr-border) rounded-[2.5rem] p-8 relative shadow-2xl"
+              >
+                <button 
+                  onClick={() => setShowAwareness(false)}
+                  title="Open Road Safety IQ Hub"
+                  className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+                <RoadSafetyAwareness />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Bottom Status Bar */}
+      <footer className="h-9 border-t border-[var(--clr-border)] bg-[var(--clr-bg)]/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-2 py-0.5 bg-[var(--clr-green)]/10 border border-[var(--clr-green)]/20 rounded">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--clr-green)]" />
+            <span className="text-[9px] font-mono font-bold text-[var(--clr-green)] tracking-wider">MESH READY / ONLINE</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-mono text-(--clr-text-2)">
+            <Globe size={12} />
+            <span>CHENNAI_DC_01</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 text-[10px] font-mono text-(--clr-text-2)">
+          <div className="flex items-center gap-2">
+            <Navigation2 size={12} className="rotate-45" />
+            <span>ACCURACY: <span className="text-[var(--clr-text)]">±2.4M</span></span>
+          </div>
+          <div className="flex items-center gap-2 border-l border-[var(--clr-border)] pl-6">
+            <span className="opacity-50">LAST SYNC:</span>
+            <span className="text-[var(--clr-text)]">14:02:55.042</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* CRT Scanline Texture Layer */}
+      <div className="fixed inset-0 pointer-events-none z-[10001] opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] blend-multiply" />
+    </div>
+  );
+};
+
+export default HomeScreen;

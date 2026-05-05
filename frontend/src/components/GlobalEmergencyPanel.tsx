@@ -4,13 +4,11 @@ import {
   Shield, 
   Flame, 
   Ambulance, 
-  AlertCircle, 
-  Search, 
-  Globe, 
   MapPin, 
-  Navigation,
   RefreshCw,
-  PhoneCall
+  PhoneCall,
+  ChevronDown,
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emergencyData from '../data/emergency-numbers.json';
@@ -31,7 +29,6 @@ export const GlobalEmergencyPanel: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<string>('IN');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDetecting, setIsDetecting] = useState(true);
-  const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
   const [showSelector, setShowSelector] = useState(false);
 
   useEffect(() => {
@@ -41,7 +38,6 @@ export const GlobalEmergencyPanel: React.FC = () => {
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         if (data.country_code && EMERGENCY_NUMBERS[data.country_code]) {
-          setDetectedCountry(data.country_code);
           setSelectedCountry(data.country_code);
         }
       } catch (error) {
@@ -67,30 +63,22 @@ export const GlobalEmergencyPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-(--nx-bg-base) text-white font-sans overflow-hidden">
-      {/* Header with Auto-Detection Status */}
-      <div className="p-6 bg-(--nx-bg-surface) border-b border-(--nx-border) space-y-4">
+    <div className="flex flex-col h-full bg-(--app-bg) text-(--app-text) font-sans overflow-hidden">
+      {/* Header */}
+      <div className="p-8 bg-(--app-surface) border-b-4 border-(--app-border) space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-black tracking-tighter uppercase flex items-center gap-2">
-              <Globe className="text-nx-blue-primary animate-pulse" size={24} />
-              Global SOS
-            </h1>
-            <div className="flex items-center gap-2 mt-1">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none">WORLD SOS</h1>
+            <div className="flex items-center gap-2">
               {isDetecting ? (
-                <div className="flex items-center gap-2 text-[10px] text-nx-text-dim uppercase tracking-widest">
-                  <RefreshCw size={12} className="animate-spin" />
-                  Detecting Geo-Zone...
-                </div>
-              ) : detectedCountry ? (
-                <div className="flex items-center gap-2 text-[10px] text-emerald-400 uppercase tracking-widest font-bold">
-                  <MapPin size={12} />
-                  Detected: {EMERGENCY_NUMBERS[detectedCountry].name}
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest opacity-40">
+                  <RefreshCw size={14} className="animate-spin" />
+                  Locating...
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-[10px] text-nx-red-primary uppercase tracking-widest font-bold">
-                  <AlertCircle size={12} />
-                  Detection Failed — Manual Select
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-safe">
+                  <MapPin size={14} />
+                  GPS ACTIVE: {currentNumbers.name}
                 </div>
               )}
             </div>
@@ -98,53 +86,53 @@ export const GlobalEmergencyPanel: React.FC = () => {
           
           <button 
             onClick={() => setShowSelector(!showSelector)}
-            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-tight"
+            className="h-16 px-6 bg-(--app-bg) border-4 border-(--app-border) rounded-2xl flex items-center gap-4 text-2xl"
           >
-            {currentNumbers.flag} {currentNumbers.name}
-            <Navigation size={14} className={showSelector ? 'rotate-180 transition-transform' : 'transition-transform'} />
+            <span className="text-3xl">{currentNumbers.flag}</span>
+            <ChevronDown size={28} className={showSelector ? 'rotate-180' : ''} />
           </button>
         </div>
 
-        {/* Searchable Country Selector */}
         <AnimatePresence>
           {showSelector && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
+              className="space-y-4 pt-4"
             >
-              <div className="pt-4 space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-nx-text-dim" size={16} />
-                  <input 
-                    type="text"
-                    placeholder="Search countries..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-nx-blue-primary transition-all"
-                  />
-                </div>
-                
-                <div className="max-h-60 overflow-y-auto grid grid-cols-2 md:grid-cols-3 gap-2 pr-2 scrollbar-thin scrollbar-thumb-white/10">
-                  {filteredCountries.map(([code, country]) => (
-                    <button
-                      key={code}
-                      onClick={() => {
-                        setSelectedCountry(code);
-                        setShowSelector(false);
-                      }}
-                      className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left ${
-                        selectedCountry === code 
-                        ? 'bg-nx-blue-primary/20 border-nx-blue-primary text-nx-blue-primary' 
-                        : 'bg-white/2 border-white/5 text-nx-text-dim hover:bg-white/5'
-                      }`}
-                    >
-                      <span className="text-xl">{country.flag}</span>
-                      <span className="text-[10px] font-black uppercase tracking-tight truncate">{country.name}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="relative">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 opacity-30" size={24} />
+                <input 
+                  type="text"
+                  placeholder="SEARCH COUNTRY..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-20 bg-(--app-bg) border-4 border-(--app-border) rounded-3xl pl-16 pr-6 text-xl font-black uppercase focus:border-navy transition-all"
+                />
+              </div>
+              
+              <div className="max-h-80 overflow-y-auto grid grid-cols-1 gap-3 pr-2 custom-scrollbar">
+                {filteredCountries.map(([code, country]) => (
+                  <button
+                    key={code}
+                    onClick={() => {
+                      setSelectedCountry(code);
+                      setShowSelector(false);
+                    }}
+                    className={`flex items-center justify-between p-6 rounded-3xl border-4 transition-all text-left ${
+                      selectedCountry === code 
+                      ? 'bg-navy text-white border-navy' 
+                      : 'bg-(--app-bg) border-(--app-border)'
+                    }`}
+                  >
+                    <div className="flex items-center gap-6">
+                      <span className="text-4xl">{country.flag}</span>
+                      <span className="text-2xl font-black uppercase italic tracking-tighter">{country.name}</span>
+                    </div>
+                    <span className="text-lg font-mono opacity-50">{country.emergency}</span>
+                  </button>
+                ))}
               </div>
             </motion.div>
           )}
@@ -152,85 +140,72 @@ export const GlobalEmergencyPanel: React.FC = () => {
       </div>
 
       {/* Main SOS Panel */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* BIG RED SOS BUTTON */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+      <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
+        <button
           onClick={() => callService(currentNumbers.emergency)}
-          className="w-full group relative overflow-hidden bg-nx-red-primary p-8 rounded-3xl flex flex-col items-center justify-center gap-4 shadow-2xl shadow-nx-red-primary/40 border border-white/20"
+          className="w-full h-56 bg-emergency text-white rounded-[3rem] flex flex-col items-center justify-center gap-4 shadow-2xl active:scale-95 transition-transform relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent opacity-50" />
-          <div className="relative z-10 w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
-            <PhoneCall size={48} className="text-white animate-bounce" />
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <PhoneCall size={120} />
           </div>
-          <div className="relative z-10 text-center">
-            <span className="block text-3xl font-black text-white uppercase tracking-tighter leading-none">Universal SOS</span>
-            <span className="text-lg font-mono text-white/80 mt-2 block">{currentNumbers.emergency}</span>
-          </div>
-          <div className="absolute top-0 left-0 w-full h-full bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-        </motion.button>
+          <span className="text-5xl font-black tracking-tighter italic uppercase leading-none">DIAL {currentNumbers.emergency}</span>
+          <span className="text-xl font-black uppercase tracking-[0.3em] opacity-80">Universal Emergency</span>
+        </button>
 
-        {/* SERVICE GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ServiceCard 
-            label="Police" 
+        <div className="grid grid-cols-1 gap-6">
+          <ServiceRow 
+            label="POLICE" 
             number={currentNumbers.police} 
             icon={Shield} 
-            color="amber" 
+            color="bg-navy" 
             onClick={() => callService(currentNumbers.police)} 
           />
-          <ServiceCard 
-            label="Ambulance" 
+          <ServiceRow 
+            label="AMBULANCE" 
             number={currentNumbers.ambulance} 
             icon={Ambulance} 
-            color="emerald" 
+            color="bg-safe" 
             onClick={() => callService(currentNumbers.ambulance)} 
           />
-          <ServiceCard 
-            label="Fire Dept" 
+          <ServiceRow 
+            label="FIRE" 
             number={currentNumbers.fire} 
             icon={Flame} 
-            color="orange" 
+            color="bg-amber" 
             onClick={() => callService(currentNumbers.fire)} 
           />
         </div>
 
-        {/* ADDITIONAL SERVICES */}
+        {/* Extended Services */}
         <div className="space-y-4">
-          <h3 className="text-[10px] font-black text-nx-text-dim uppercase tracking-widest pl-2">Extended Local Services</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <h3 className="text-sm font-black opacity-40 uppercase tracking-widest px-2">Extended Local Help</h3>
+          <div className="grid grid-cols-1 gap-4">
             {Object.entries(currentNumbers).map(([key, value]) => {
               if (['name', 'flag', 'ambulance', 'police', 'fire', 'emergency'].includes(key)) return null;
               return (
                 <button
                   key={key}
                   onClick={() => callService(value)}
-                  className="bg-white/2 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:bg-white/5 transition-all text-left"
+                  className="bg-(--app-surface) border-4 border-(--app-border) rounded-4xl p-6 flex items-center justify-between active:scale-95 transition-transform"
                 >
-                  <div className="space-y-1">
-                    <span className="block text-[8px] text-nx-text-dim uppercase font-black tracking-widest">{key.replace('_', ' ')}</span>
-                    <span className="block text-sm font-black text-white">{value}</span>
+                  <div>
+                    <span className="block text-xs font-black opacity-40 uppercase tracking-widest">{key.replace('_', ' ')}</span>
+                    <span className="block text-2xl font-black text-(--app-text) italic">{value}</span>
                   </div>
-                  <Phone size={14} className="text-nx-blue-primary opacity-50" />
+                  <div className="w-16 h-16 bg-navy/10 rounded-2xl flex items-center justify-center">
+                    <Phone size={32} className="text-navy" />
+                  </div>
                 </button>
               );
             })}
           </div>
         </div>
       </div>
-
-      {/* Footer / Info */}
-      <div className="p-4 bg-black/40 text-center border-t border-white/5">
-        <p className="text-[8px] text-nx-text-dim uppercase tracking-[0.2em] font-black">
-          ROADSoS Global Mesh v4.2 • Offline Encrypted Database Verified
-        </p>
-      </div>
     </div>
   );
 };
 
-interface ServiceCardProps {
+interface ServiceRowProps {
   label: string;
   number: string;
   icon: React.ElementType;
@@ -238,19 +213,22 @@ interface ServiceCardProps {
   onClick: () => void;
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ label, number, icon: Icon, color, onClick }) => (
-  <motion.button
-    whileHover={{ y: -4, backgroundColor: 'rgba(255,255,255,0.05)' }}
-    whileTap={{ scale: 0.98 }}
+const ServiceRow: React.FC<ServiceRowProps> = ({ label, number, icon: Icon, color, onClick }) => (
+  <button
     onClick={onClick}
-    className="bg-white/2 border border-white/10 rounded-2xl p-6 flex flex-col items-center gap-4 transition-all"
+    className="w-full h-32 bg-(--app-surface) border-4 border-(--app-border) rounded-[2.5rem] p-8 flex items-center justify-between active:scale-95 transition-transform group shadow-lg"
   >
-    <div className={`w-14 h-14 rounded-2xl bg-${color}-500/10 flex items-center justify-center border border-${color}-500/20`}>
-      <Icon className={`text-${color}-500`} size={28} />
+    <div className="flex items-center gap-8">
+      <div className={`w-20 h-20 ${color} rounded-3xl flex items-center justify-center text-white shadow-lg`}>
+        <Icon size={40} strokeWidth={3} />
+      </div>
+      <div className="text-left">
+        <span className="block text-sm font-black opacity-40 uppercase tracking-widest">{label}</span>
+        <span className="block text-4xl font-black italic tracking-tighter text-(--app-text)">{number}</span>
+      </div>
     </div>
-    <div className="text-center">
-      <span className="block text-[10px] text-nx-text-dim uppercase font-black tracking-widest mb-1">{label}</span>
-      <span className="block text-xl font-mono font-bold text-white tracking-tight">{number}</span>
+    <div className="w-16 h-16 bg-(--app-bg) border-4 border-(--app-border) rounded-full flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-colors">
+      <PhoneCall size={28} />
     </div>
-  </motion.button>
+  </button>
 );

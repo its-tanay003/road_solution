@@ -17,6 +17,7 @@ export interface HealthData {
   steps: number;
   sleepStatus: 'AWAKE' | 'LIGHT' | 'DEEP';
   ecgStatus: 'NORMAL' | 'AFIB' | 'INCONCLUSIVE';
+  spO2: number;
 }
 
 export interface VehicleData {
@@ -65,7 +66,8 @@ export const useWearableStore = create<WearableState>()(
         })),
         steps: 8421,
         sleepStatus: 'AWAKE',
-        ecgStatus: 'NORMAL'
+        ecgStatus: 'NORMAL',
+        spO2: 98
       },
       vehicle: {
         model: 'Honda City 2022',

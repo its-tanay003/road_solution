@@ -7,16 +7,14 @@ import {
   Pill, 
   MapPin, 
   Phone, 
-  ExternalLink, 
-  Star, 
   Navigation,
   Clock,
   CheckCircle2,
-  AlertTriangle,
   RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../lib/db';
+import { getSocket } from '../lib/socket';
 
 interface Service {
   id: string;
@@ -27,20 +25,20 @@ interface Service {
   lng: number;
   address: string;
   rating?: number;
-  user_ratings_total?: number;
   isOpen?: boolean;
   phone?: string | null;
-  website?: string | null;
-  photo?: string | null;
   distance?: number;
-  source?: 'OpenStreetMap' | 'Google' | 'Cached';
+  source?: string;
+  bedsAvailable?: number;
+  icuBedsAvailable?: number;
+  fetchedAt?: string;
 }
 
 const SERVICE_TYPES = [
-  { id: 'Hospital', label: 'Hospitals', icon: Hospital, color: 'red' },
-  { id: 'Police Station', label: 'Police', icon: Shield, color: 'blue' },
-  { id: 'Fire Station', label: 'Fire', icon: Flame, color: 'orange' },
-  { id: 'Pharmacy', label: 'Pharmacies', icon: Pill, color: 'emerald' }
+  { id: 'Hospital', label: 'HOSPITALS', icon: Hospital, color: 'text-emergency', bg: 'bg-emergency/10' },
+  { id: 'Police Station', label: 'POLICE', icon: Shield, color: 'text-navy', bg: 'bg-navy/10' },
+  { id: 'Fire Station', label: 'FIRE', icon: Flame, color: 'text-amber', bg: 'bg-amber/10' },
+  { id: 'Pharmacy', label: 'DRUGS', icon: Pill, color: 'text-safe', bg: 'bg-safe/10' }
 ];
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -56,8 +54,8 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number) {
 }
 
 const formatDistance = (km: number) => {
-  if (km < 1) return `${Math.round(km * 1000)} m`;
-  return `${km.toFixed(1)} km`;
+  if (km < 1) return `${Math.round(km * 1000)}m`;
+  return `${km.toFixed(1)}km`;
 };
 
 export const NearbyServicesPanel: React.FC = () => {
@@ -65,302 +63,196 @@ export const NearbyServicesPanel: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sourceInfo, setSourceInfo] = useState<{ source: string; fetchedAt: string } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [isCached, setIsCached] = useState(false);
 
   const fetchNearbyServices = async (lat: number, lng: number) => {
     try {
       setLoading(true);
       setError(null);
-      
       let fetchedServices: Service[] = [];
-      let source = '';
-      let fetchedAt = '';
 
-      // Primary: Try Overpass API (OSM)
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/nearby-osm`, {
-          params: { lat, lng, radius: 10000 }
+        const hospRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/hospitals/nearby`, {
+          params: { lat, lng }
         });
-        
-        if (response.data.services && response.data.services.length > 0) {
-          fetchedServices = response.data.services.map((s: any) => ({
+        if (hospRes.data.services) {
+          fetchedServices = hospRes.data.services.map((s: any) => ({
             ...s,
-            source: 'OpenStreetMap',
             distance: haversine(lat, lng, s.lat, s.lng)
           }));
-          source = response.data.source;
-          fetchedAt = response.data.fetchedAt;
         }
-      } catch (osmErr) {
-        console.warn('OSM Fetch failed, falling back to Google:', osmErr);
-      }
+      } catch(e) { console.error(e); }
 
-      // Secondary: Try Google Places if OSM failed or returned no results
+      // Fallback/Hybrid fetch
       if (fetchedServices.length === 0) {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/nearby-google`, {
+          const osmRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/nearby-osm`, {
             params: { lat, lng, radius: 10000 }
           });
-          
-          fetchedServices = response.data.services.map((s: any) => ({
-            ...s,
-            source: 'Google',
-            distance: haversine(lat, lng, s.lat, s.lng)
-          }));
-          source = response.data.source;
-          fetchedAt = response.data.fetchedAt;
-        } catch (googleErr) {
-          console.error('Google Fetch failed:', googleErr);
-        }
+          if (osmRes.data.services) {
+            fetchedServices = osmRes.data.services.map((s: any) => ({
+              ...s,
+              distance: haversine(lat, lng, s.lat, s.lng)
+            }));
+          }
+        } catch(e) { console.error(e); }
       }
 
-      if (fetchedServices.length > 0) {
-        const sortedServices = fetchedServices.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-        setServices(sortedServices);
-        setSourceInfo({ source, fetchedAt });
-        setIsCached(false);
+      const sorted = fetchedServices.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      setServices(sorted);
+      
+      // Cache
+      await db.nearbyServices.clear();
+      await db.nearbyServices.bulkAdd(sorted.map(s => ({ ...s, fetchedAt: new Date().toISOString() })));
 
-        // Cache in IndexedDB
-        await db.nearbyServices.clear();
-        await db.nearbyServices.bulkAdd(sortedServices.map((s: any) => ({
-          ...s,
-          fetchedAt: fetchedAt || new Date().toISOString()
-        })));
-      } else {
-        throw new Error('No services found from any provider');
-      }
-
-    } catch (err: any) {
-      console.error('Failed to fetch nearby services:', err);
-      // Fallback to cache
+    } catch (err) {
+      console.error(err);
       const cached = await db.nearbyServices.toArray();
-      if (cached.length > 0) {
-        const sortedCached = cached.map(s => ({
-          ...s,
-          source: 'Cached' as const,
-          distance: haversine(lat, lng, s.lat, s.lng)
-        })).sort((a, b) => (a.distance || 0) - (b.distance || 0));
-        
-        setServices(sortedCached);
-        setSourceInfo({ source: 'Local Cache', fetchedAt: cached[0].fetchedAt });
-        setIsCached(true);
-      } else {
-        setError('Failed to fetch nearby services and no cached data found.');
-      }
+      if (cached.length > 0) setServices(cached as Service[]);
+      else setError('No services found.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
-          fetchNearbyServices(latitude, longitude);
-        },
-        () => {
-          setError("Location access denied. Using default coordinates.");
-          const defaultLat = 28.6139; // Delhi
-          const defaultLng = 77.2090;
-          setUserLocation({ lat: defaultLat, lng: defaultLng });
-          fetchNearbyServices(defaultLat, defaultLng);
-        }
-      );
-    } else {
-      setError("Geolocation not supported by your browser.");
-    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        fetchNearbyServices(pos.coords.latitude, pos.coords.longitude);
+      },
+      () => {
+        const def = { lat: 13.0617, lng: 80.2520 };
+        setUserLocation(def);
+        fetchNearbyServices(def.lat, def.lng);
+      }
+    );
+
+    const socket = getSocket();
+    socket.on('hospital_updates', (updates: any[]) => {
+      setServices(prev => prev.map(s => {
+        const u = updates.find(update => update.id === s.id);
+        return u ? { ...s, ...u } : s;
+      }));
+    });
+    return () => { socket.off('hospital_updates'); };
   }, []);
 
-  const filteredServices = services.filter(s => s.type === activeTab);
+  const filtered = services.filter(s => s.type === activeTab);
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Header with Verification Badge */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Verified Local Support</h2>
+    <div className="p-6 space-y-10 max-w-4xl mx-auto pb-32">
+      <header className="flex flex-col gap-2 pt-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
-              <CheckCircle2 size={12} className="text-blue-400" />
-              <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">OSM Community Verified ✓</span>
+            <div className="w-14 h-14 bg-safe rounded-2xl flex items-center justify-center shadow-lg">
+              <CheckCircle2 size={32} className="text-white" />
             </div>
-            {isCached && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
-                <AlertTriangle size={12} className="text-amber-400" />
-                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Tactical Cache</span>
-              </div>
-            )}
+            <div>
+              <h1 className="text-3xl font-black tracking-tight leading-none text-(--app-text)">NEARBY HELP</h1>
+              <p className="text-sm font-bold opacity-60 uppercase tracking-widest mt-1">Verified Medical & Safety</p>
+            </div>
           </div>
+          <button 
+            onClick={() => userLocation && fetchNearbyServices(userLocation.lat, userLocation.lng)}
+            className="w-14 h-14 bg-(--app-surface) border-4 border-(--app-border) rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
+            title="Refresh Services"
+          >
+            <RefreshCw size={24} className={loading ? 'animate-spin' : ''} />
+          </button>
         </div>
-        <button 
-          onClick={() => userLocation && fetchNearbyServices(userLocation.lat, userLocation.lng)}
-          disabled={loading}
-          className="p-2 text-slate-400 hover:text-white transition-colors disabled:opacity-50"
-          title="Refresh Services"
-          aria-label="Refresh nearby services list"
-        >
-          <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-        </button>
-      </div>
+      </header>
 
-      {/* Type Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Tabs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {SERVICE_TYPES.map((type) => (
           <button
             key={type.id}
             onClick={() => setActiveTab(type.id)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs transition-all border whitespace-nowrap ${
+            className={`flex flex-col items-center justify-center p-6 rounded-4xl border-4 transition-all active:scale-95 ${
               activeTab === type.id
-              ? `bg-${type.color}-500/20 border-${type.color}-500/40 text-${type.color}-400 shadow-lg shadow-${type.color}-500/10`
-              : 'bg-slate-900 border-white/5 text-slate-500 hover:text-slate-300'
+              ? `bg-(--app-surface) border-navy text-navy shadow-xl`
+              : 'bg-(--app-surface) border-(--app-border) text-(--app-text) opacity-40'
             }`}
           >
-            <type.icon size={16} />
-            {type.label}
+            <type.icon size={32} strokeWidth={3} />
+            <span className="text-[10px] font-black mt-2 tracking-widest uppercase">{type.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Results List */}
-      <div className="space-y-4">
+      {/* List */}
+      <div className="space-y-6">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-40 bg-slate-900 animate-pulse rounded-3xl border border-white/5" />
+          <div className="space-y-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-48 bg-(--app-surface) animate-pulse rounded-[2.5rem] border-4 border-(--app-border)" />
             ))}
           </div>
-        ) : filteredServices.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filteredServices.map((service) => (
-                <motion.div
-                  key={service.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="group bg-slate-900/50 border border-white/5 hover:border-white/20 p-5 rounded-3xl transition-all relative overflow-hidden"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500">
-                          <MapPin size={12} className="text-blue-400" />
-                          {service.distance ? formatDistance(service.distance) : 'Calculating...'}
+        ) : filtered.length > 0 ? (
+          <AnimatePresence mode="popLayout">
+            {filtered.map((service) => (
+              <motion.div
+                key={service.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-(--app-surface) p-8 rounded-[3rem] border-4 border-(--app-border) shadow-xl space-y-6"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="px-3 py-1 bg-navy/10 text-navy text-xs font-black rounded-xl uppercase tracking-widest">
+                        {service.distance ? formatDistance(service.distance) : '...'}
+                      </div>
+                      {service.isOpen && (
+                        <div className="px-3 py-1 bg-safe/10 text-safe text-xs font-black rounded-xl uppercase tracking-widest flex items-center gap-1">
+                          <Clock size={12} /> OPEN
                         </div>
-                        {service.source && (
-                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest ${
-                            service.source === 'OpenStreetMap' 
-                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                            : service.source === 'Google'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          }`}>
-                            {service.source === 'OpenStreetMap' ? 'OSM' : service.source === 'Google' ? 'GOOGLE' : 'OFFLINE'}
-                          </div>
-                        )}
-                        {service.isOpen !== undefined && (
-                          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest ${
-                            service.isOpen 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                          }`}>
-                            <Clock size={10} />
-                            {service.isOpen ? 'OPEN NOW' : 'CLOSED'}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-black text-white uppercase leading-tight tracking-tight">{service.name}</h3>
-                        <p className="text-slate-400 text-xs mt-1 line-clamp-1">{service.address}</p>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        {service.rating && (
-                          <div className="flex items-center gap-1 text-amber-400">
-                            <Star size={12} fill="currentColor" />
-                            <span className="text-xs font-bold">{service.rating}</span>
-                            <span className="text-[10px] text-slate-600">({service.user_ratings_total})</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-2">
-                        {service.phone && (
-                          <a 
-                            href={`tel:${service.phone}`}
-                            className="flex-1 flex items-center justify-center gap-2 p-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
-                          >
-                            <Phone size={14} />
-                            Call
-                          </a>
-                        )}
-                        <a 
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${service.lat},${service.lng}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-2 p-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
-                        >
-                          <Navigation size={14} />
-                          Navigate
-                        </a>
-                        {service.website && (
-                          <a 
-                            href={service.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl transition-all"
-                            title="Visit Website"
-                            aria-label={`Visit website for ${service.name}`}
-                          >
-                            <ExternalLink size={14} />
-                          </a>
-                        )}
-                      </div>
+                      )}
                     </div>
-
-                    {service.photo && (
-                      <div className="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 hidden sm:block">
-                        <img 
-                          src={service.photo} 
-                          alt={service.name} 
-                          className="w-full h-full object-cover"
-                        />
+                    <h3 className="text-3xl font-black text-(--app-text) leading-tight tracking-tight uppercase italic">{service.name}</h3>
+                    <p className="text-base font-bold opacity-50">{service.address}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-3">
+                    {service.bedsAvailable !== undefined && (
+                      <div className={`px-4 py-2 rounded-2xl text-lg font-black tracking-tighter shadow-sm border-2 ${
+                        service.bedsAvailable > 5 ? 'bg-safe/10 border-safe/20 text-safe' : 'bg-emergency/10 border-emergency/20 text-emergency'
+                      }`}>
+                        {service.bedsAvailable} BEDS
                       </div>
                     )}
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {service.phone && (
+                    <a 
+                      href={`tel:${service.phone}`}
+                      className="h-20 bg-navy text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
+                    >
+                      <Phone size={28} /> CALL
+                    </a>
+                  )}
+                  <a 
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${service.lat},${service.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-20 bg-safe text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
+                  >
+                    <Navigation size={28} /> GO
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         ) : (
-          <div className="py-20 text-center space-y-4 bg-slate-900/20 rounded-4xl border border-dashed border-white/5">
-            <MapPin size={48} className="mx-auto text-slate-800" />
-            <div className="space-y-1">
-              <p className="text-white font-bold">No results found in your area</p>
-              <p className="text-slate-500 text-xs">Try increasing search radius or checking location permissions.</p>
-            </div>
+          <div className="py-20 text-center space-y-6 bg-(--app-surface) rounded-[3rem] border-4 border-dashed border-(--app-border)">
+            <MapPin size={64} className="mx-auto opacity-20" />
+            <p className="text-xl font-black opacity-40 uppercase tracking-widest">No results nearby</p>
           </div>
         )}
       </div>
-
-      {/* Attribution Footer */}
-      {sourceInfo && (
-        <div className="flex flex-col items-center gap-2 pt-4 border-t border-white/5">
-          <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">
-            Data from {sourceInfo.source} — Updated: {new Date(sourceInfo.fetchedAt).toLocaleString()}
-          </p>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Live Telemetry Active</span>
-          </div>
-        </div>
-      )}
 
       {error && (
         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">

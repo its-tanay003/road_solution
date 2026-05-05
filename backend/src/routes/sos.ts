@@ -177,4 +177,39 @@ router.get('/track/:token', async (req, res) => {
   }
 });
 
+// India 112 Emergency Simulation
+router.post('/112', async (req, res) => {
+  const { lat, lng, severityLevel, vehicleType } = req.body;
+  
+  if (!lat || !lng) {
+    return res.status(400).json({ error: 'Missing GPS coordinates' });
+  }
+
+  // Mock iRAD incident generation (MoRTH Format)
+  const timestamp = new Date().toISOString();
+  const iradIncident = {
+    incidentId: `IRAD-UP-${Date.now()}`,
+    source: "ROADSoS App",
+    timestamp,
+    location: {
+      latitude: lat,
+      longitude: lng,
+      nearestHighway: "NH-48" // Simulated
+    },
+    victimDetails: {
+      injurySeverity: severityLevel || "UNKNOWN",
+      vehicleInvolved: vehicleType || "UNKNOWN"
+    },
+    dispatchStatus: "112_ALERTED_SUCCESSFULLY",
+    nodalOfficerNotified: true
+  };
+
+  // For the hackathon, we simulate the 200 OK response from the actual 112 system.
+  res.json({
+    success: true,
+    message: "112 Emergency Services Alerted",
+    iradReport: iradIncident
+  });
+});
+
 export default router;

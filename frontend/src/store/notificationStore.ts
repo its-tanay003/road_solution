@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { sendLocalPush } from '../lib/pushService';
 
 export type NotificationType = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 
@@ -103,7 +104,13 @@ export const useNotificationStore = create<NotificationState>()(
           notifications: [newNotification, ...state.notifications]
         }));
 
-        // Trigger audio (implemented in component)
+        // Trigger System Push if permission granted
+        if (n.type === 'CRITICAL' || n.type === 'HIGH') {
+          sendLocalPush(n.title, {
+            body: n.message,
+            tag: 'roadsos-alert'
+          });
+        }
       },
 
       markAsRead: (id) => set((state) => ({

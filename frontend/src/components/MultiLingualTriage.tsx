@@ -74,56 +74,73 @@ export const MultiLingualTriage: React.FC = () => {
     setInputText('');
     setIsTyping(true);
 
-    // Simulate Claude API response in user's language
-    setTimeout(() => {
-      const aiResponse = getMockAIResponse(currentLang.code);
+    try {
+      const response = await fetch('/api/triage/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          messages: [...messages, userMsg].map(m => ({
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.originalText
+          })),
+          language: currentLang.code.toUpperCase()
+        })
+      });
+
+      if (!response.ok) throw new Error('API Error');
+
+      // Simple streaming handler (or just collect it for this component's complexity level)
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let aiText = '';
+
+      const aiMsgId = crypto.randomUUID();
       const aiMsg: Message = {
-        id: crypto.randomUUID(),
+        id: aiMsgId,
         sender: 'ai',
-        originalText: aiResponse.text,
-        translatedText: aiResponse.en,
+        originalText: '',
+        translatedText: 'Translating...',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMsg]);
-      setIsTyping(false);
-    }, 1500);
-  };
 
-  const getMockAIResponse = (langCode: string) => {
-    switch (langCode) {
-      case 'hi': return { text: 'क्या आप मुझे बता सकते हैं कि आपको कहाँ चोट लगी है? एम्बुलेंस रास्ते में है।', en: 'Can you tell me where you are hurt? The ambulance is on the way.' };
-      case 'es': return { text: '¿Puede decirme dónde le duele? La ambulancia está en camino.', en: 'Can you tell me where it hurts? The ambulance is on the way.' };
-      case 'ar': return { text: 'هل يمكنك إخباري أين تتألم؟ سيارة الإسعاف في طريقها إليك.', en: 'Can you tell me where you are hurting? The ambulance is on its way to you.' };
-      case 'zh': return { text: '你能告诉我你哪里受伤了吗？救护车正在赶来的路上。', en: 'Can you tell me where you are injured? The ambulance is on the way.' };
-      default: return { text: 'Can you tell me where you are hurt? The ambulance is on the way.', en: 'Can you tell me where you are hurt? The ambulance is on the way.' };
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        aiText += chunk;
+        
+        setMessages(prev => prev.map(m => 
+          m.id === aiMsgId ? { ...m, originalText: aiText } : m
+        ));
+      }
+
+      // Final cleanup/translation mock
+      setMessages(prev => prev.map(m => 
+        m.id === aiMsgId ? { ...m, translatedText: 'Verification complete. Dispatcher notified.' } : m
+      ));
+
+    } catch (err) {
+      console.error(err);
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        sender: 'ai',
+        originalText: 'Error connecting to triage engine.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
+
   const simulateHindiSpeaker = () => {
     handleLanguageChange('hi');
+    setInputText('मदद करो! मेरा एक्सीडेंट हो गया है और बहुत खून बह रहा है।');
     setTimeout(() => {
-      const msg: Message = {
-        id: crypto.randomUUID(),
-        sender: 'user',
-        originalText: 'मदद करो! मेरा एक्सीडेंट हो गया है और बहुत खून बह रहा है।',
-        translatedText: 'HELP! I had an accident and I am bleeding a lot.',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, msg]);
-      setIsTyping(true);
-      
-      setTimeout(() => {
-        const aiMsg: Message = {
-          id: Math.random().toString(),
-          sender: 'ai',
-          originalText: 'शांत रहें। मैंने आपकी लोकेशन ट्रैक कर ली है। क्या आप खून वाली जगह पर दबाव डाल सकते हैं?',
-          translatedText: 'Stay calm. I have tracked your location. Can you apply pressure to the bleeding area?',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, aiMsg]);
-        setIsTyping(false);
-      }, 2000);
-    }, 1000);
+      handleSend();
+    }, 500);
   };
 
   return (

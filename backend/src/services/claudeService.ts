@@ -24,17 +24,30 @@ type of vehicle, special needs. Then provide a prioritised list of services need
 After triage, always provide relevant first-aid guidance.
 IMPORTANT: Consider meteorological conditions (e.g., Heavy Rain, Fog, Ice) if mentioned or detected. 
 Adjust safety protocols for secondary collision risks or environmental hazards.
-Respond in the user's language. Keep responses SHORT (under 50 words each turn).
+Respond in the user's language, with special support for English, Hindi, and Tamil. Keep responses SHORT (under 50 words each turn).
 Always end with actionable recommendations. Never delay emergency action.`;
 
 export const streamClaudeResponse = async (
   messages: any[],
   res: any, // Express response object
-  panicScore?: number
+  language: 'EN' | 'HI' | 'TA' = 'EN',
+  panicScore?: number,
+  biometricContext?: any
 ) => {
+  const languageInstructions = {
+    EN: "Respond in English.",
+    HI: "Respond in Hindi (हिन्दी). Use Devanagari script.",
+    TA: "Respond in Tamil (தமிழ்). Use Tamil script."
+  };
+
   if (!process.env.OPENROUTER_API_KEY) {
     // Mock streaming response for local development without key
-    const mockReply = "This is a mock response. Please seek immediate medical attention if injured. We recommend calling an ambulance (108) and police (112).";
+    const mockReply = language === 'HI' 
+      ? "यह एक नकली प्रतिक्रिया है। यदि घायल हो तो कृपया तत्काल चिकित्सा सहायता लें।" 
+      : language === 'TA'
+      ? "இது ஒரு போலி பதில். காயம் ஏற்பட்டால் உடனடியாக மருத்துவ உதவியை நாடவும்."
+      : "This is a mock response. Please seek immediate medical attention if injured.";
+    
     const chunks = mockReply.split(' ');
     
     for (let i = 0; i < chunks.length; i++) {
@@ -47,9 +60,18 @@ export const streamClaudeResponse = async (
   }
 
   try {
-    const dynamicSystemPrompt = panicScore 
+    let dynamicSystemPrompt = panicScore 
       ? `${SYSTEM_PROMPT}\n\nCaller panic score: ${panicScore}/100 — adjust triage urgency to ${panicScore > 65 ? 'CRITICAL' : panicScore > 30 ? 'HIGH' : 'NORMAL'}.`
       : SYSTEM_PROMPT;
+
+    dynamicSystemPrompt += `\n\nLANGUAGE_INSTRUCTION: ${languageInstructions[language]}`;
+
+    if (biometricContext) {
+      const bioStr = typeof biometricContext === 'string' 
+        ? biometricContext 
+        : `Heart Rate: ${biometricContext.heartRate || 'N/A'}, ECG: ${biometricContext.ecgStatus || 'N/A'}, Vehicle: ${JSON.stringify(biometricContext.vehicle || {})}`;
+      dynamicSystemPrompt += `\n\nLIVE_BIOMETRICS_FEED: ${bioStr}`;
+    }
 
     // Use OpenAI SDK targeting OpenRouter
     const stream = await openai.chat.completions.create({
@@ -87,6 +109,7 @@ export interface TriageInput {
   description: string;
   medicalProfile: any;
   hasImage: boolean;
+  biometricsContext?: string;
 }
 
 export interface TriageResult {
@@ -95,6 +118,13 @@ export interface TriageResult {
   recommendedActions: string[];
   requiredServices: ('ambulance' | 'police' | 'fire' | 'towing')[];
   confidenceScore: number;
+}
+
+export interface RiskForecast {
+  score: number;
+  level: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  reasoning: string;
+  recommendations: string[];
 }
 
 export const evaluateTriage = async (input: TriageInput): Promise<TriageResult> => {
@@ -132,6 +162,7 @@ export const evaluateTriage = async (input: TriageInput): Promise<TriageResult> 
 Description: ${input.description}
 Medical Profile: ${JSON.stringify(input.medicalProfile)}
 Image Provided: ${input.hasImage ? 'Yes' : 'No'}
+Biometrics: ${input.biometricsContext || 'No biometric data available'}
 
 Respond ONLY with a JSON object matching this structure:
 {
@@ -355,5 +386,119 @@ export const streamTrainingScenario = async (
     console.error("Training Stream Error:", error);
     res.write(`data: ${JSON.stringify({ type: 'error', message: 'Stream failed' })}\n\n`);
     res.end();
+  }
+};
+
+export const predictRisk = async (segment: string, weather: string): Promise<RiskForecast> => {
+  if (!process.env.OPENROUTER_API_KEY) {
+    // Mock risk prediction for local dev
+    const score = Math.floor(Math.random() * 40) + 40; // 40-80
+    return {
+      score,
+      level: score > 75 ? 'CRITICAL' : score > 55 ? 'HIGH' : score > 35 ? 'MODERATE' : 'LOW',
+      reasoning: `Analysis of ${segment} under ${weather} conditions indicates elevated risk patterns consistent with historical incident data. Visibility and traction are significantly compromised.`,
+      recommendations: [
+        "Reduce speed by 20% below posted limit",
+        "Enable low-beam headlights immediately",
+        "Increase following distance to 4 seconds"
+      ]
+    };
+  }
+
+  const prompt = `Predict road accident risk for the following:
+Segment: ${segment}
+Weather/Condition: ${weather}
+
+Respond ONLY with a JSON object:
+{
+  "score": number 0-100,
+  "level": "LOW" | "MODERATE" | "HIGH" | "CRITICAL",
+  "reasoning": "string max 80 words",
+  "recommendations": ["string", "string", "string"]
+}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "openrouter/auto",
+      messages: [
+        { role: "system", content: "You are a road safety predictive engine that outputs ONLY valid JSON." },
+        { role: "user", content: prompt }
+      ]
+    });
+
+    const content = response.choices[0]?.message?.content || '{}';
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]) as RiskForecast;
+    }
+    throw new Error("JSON parse failed");
+  } catch (error) {
+    console.error("Risk Prediction Error:", error);
+    return {
+      score: 50,
+      level: 'MODERATE',
+      reasoning: "Predictive analysis link temporarily unstable. Baseline moderate caution advised for selected segment and conditions.",
+      recommendations: [
+        "Maintain standard safety protocols",
+        "Monitor local traffic broadcasts",
+        "Stay alert for environmental changes"
+      ]
+    };
+  }
+};
+
+export const predictRouteSafety = async (source: string, destination: string, weather: any) => {
+  const systemPrompt = `You are a road safety AI. Return ONLY valid JSON, no markdown:
+{ 
+  "overallScore": number 0-100, 
+  "riskLevel": "LOW"|"MODERATE"|"HIGH"|"CRITICAL", 
+  "dangerSegments": [{"name": string, "km": string, "reason": string, "accidents2023": number}], 
+  "safestDepartureTime": string, 
+  "avoidanceAdvice": string 
+}`;
+
+  const userPrompt = `Analyse route from ${source} to ${destination}. 
+  Current Weather: ${JSON.stringify(weather)}. 
+  Consider Indian National Highways (NH-48, NH-44, NH-66) and common black spots.`;
+
+  if (!process.env.OPENROUTER_API_KEY) {
+    return {
+      overallScore: 72,
+      riskLevel: "MODERATE",
+      dangerSegments: [
+        { name: "NH-48 Sector 4", km: "342-358", reason: "High-speed heavy vehicle merging", accidents2023: 14 }
+      ],
+      safestDepartureTime: "05:30 AM",
+      avoidanceAdvice: "Avoid night travel through the Krishnagiri bypass segment."
+    };
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "openrouter/auto",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      temperature: 0.1
+    });
+
+    const content = response.choices[0]?.message?.content || '{}';
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error("JSON parse failed");
+  } catch (error) {
+    console.error('Route Safety Error:', error);
+    return {
+      overallScore: 68,
+      riskLevel: "MODERATE",
+      dangerSegments: [
+        { name: "NH-48 Sector 4", km: "342-358", reason: "High-speed heavy vehicle merging", accidents2023: 14 }
+      ],
+      safestDepartureTime: "05:30 AM",
+      avoidanceAdvice: "Avoid night travel through the Krishnagiri bypass segment."
+    };
   }
 };

@@ -5,10 +5,18 @@ import http from 'http';
 import dotenv from 'dotenv';
 import { connectRedis } from './services/cacheService';
 import { initSocket } from './services/socketService';
-import { streamClaudeResponse, evaluateTriage, streamDebriefResponse, streamTrainingScenario } from './services/claudeService';
+import { 
+  streamClaudeResponse, 
+  evaluateTriage, 
+  streamDebriefResponse, 
+  streamTrainingScenario,
+  predictRisk,
+  predictRouteSafety 
+} from './services/claudeService';
 import sosRoutes from './routes/sos';
 import servicesRoutes from './routes/services';
 import integrationsRoutes from './routes/integrations';
+import pushRoutes from './routes/push';
 import { observabilityMiddleware, metrics } from './middleware/observability';
 import { processFusionTriage } from './services/fusionEngine';
 import { getRiskHeatmap } from './services/riskEngine';
@@ -87,6 +95,7 @@ app.get('/api/nearby-services', (req, res) => {
 
 app.use('/api/services', servicesRoutes);
 app.use('/api/integrations', integrationsRoutes);
+app.use('/api/push', pushRoutes);
 
 // Predictive Risk Engine Endpoint
 app.get('/api/risk/heatmap', (req, res) => {
@@ -127,7 +136,7 @@ app.post('/api/fusion-triage', async (req, res) => {
 
 // AI Triage Evaluation Endpoint
 app.post('/api/triage', async (req, res) => {
-  const { description, medicalProfile, hasImage } = req.body;
+  const { description, medicalProfile, hasImage, biometricsContext } = req.body;
   
   if (!description) {
     return res.status(400).json({ error: 'Description is required' });
@@ -139,6 +148,22 @@ app.post('/api/triage', async (req, res) => {
   } catch (error) {
     console.error('Triage Endpoint Error:', error);
     res.status(500).json({ error: 'Failed to process triage' });
+  }
+});
+
+// AI Predictive Risk Forecast
+app.post('/api/predict-risk', async (req, res) => {
+  const { segment, weather } = req.body;
+  if (!segment || !weather) {
+    return res.status(400).json({ error: 'Road segment and weather condition required' });
+  }
+
+  try {
+    const result = await predictRisk(segment, weather);
+    res.json(result);
+  } catch (error) {
+    console.error('Predict Risk Error:', error);
+    res.status(500).json({ error: 'Predictive engine currently unavailable' });
   }
 });
 
@@ -158,7 +183,7 @@ app.post('/api/triage/analyze-photo', async (req, res) => {
 
 // Chatbot Triage Endpoint (Streaming)
 app.post('/api/triage/chat', async (req, res) => {
-  const { messages, panicScore } = req.body;
+  const { messages, language, panicScore, biometricContext } = req.body;
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Messages array is required' });
   }
@@ -167,7 +192,22 @@ app.post('/api/triage/chat', async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  await streamClaudeResponse(messages, res, panicScore);
+  await streamClaudeResponse(messages, res, language, panicScore, biometricContext);
+});
+
+// Route Safety Prediction
+app.post('/api/route/safety', async (req, res) => {
+  const { source, destination, weather } = req.body;
+  if (!source || !destination) {
+    return res.status(400).json({ error: 'Source and destination are required' });
+  }
+
+  try {
+    const result = await predictRouteSafety(source, destination, weather);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Route analysis failed' });
+  }
 });
 
 // Post-Incident Debrief Endpoint (Streaming)

@@ -1,169 +1,103 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useSosStore } from '../store';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import React, { useState, useRef } from 'react';
+import { motion, useAnimation } from 'framer-motion';
+import { useSettingsStore } from '../store/settingsStore';
 
-export const SosButton = () => {
-  const { t } = useTranslation();
-  const { isTriggering, isActive, triggerSos, cancelSos, setTrackingToken, location } = useSosStore();
-  const [countdown, setCountdown] = useState(3);
+interface SOSButtonProps {
+  onActivate: () => void;
+}
 
-  const fireSosApi = useCallback(async () => {
-    try {
-      const payload = {
-        deviceId: 'local-test-device',
-        lat: location?.lat || 28.6139,
-        lng: location?.lng || 77.2090,
-        contactPhones: ['+919876543210']
-      };
-      
-      const response = await axios.post('/api/sos/trigger', payload).catch(() => {
-        console.warn("Backend not reachable, mocking SOS activation");
-        return { data: { token: 'mock-token-123' } };
-      });
-      
-      setTrackingToken(response.data.token);
-      window.location.href = 'tel:108';
-    } catch (err) {
-      console.error(err);
-      cancelSos();
-    }
-  }, [location, cancelSos, setTrackingToken]);
+export const SOSButton: React.FC<SOSButtonProps> = ({ onActivate }) => {
+  const [isHolding, setIsHolding] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const { hapticFeedback, sosMode } = useSettingsStore();
+  const timerRef = useRef<number | null>(null);
+  const controls = useAnimation();
 
-  const handlePress = useCallback(() => {
-    if (!isTriggering && !isActive) {
-      if ("vibrate" in navigator) {
-        navigator.vibrate([200, 100, 200]);
+  const handleStart = () => {
+    if (sosMode !== 'hold3s') return;
+    setIsHolding(true);
+    setProgress(0);
+    
+    const startTime = Date.now();
+    const duration = 3000;
+
+    timerRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const nextProgress = Math.min((elapsed / duration) * 100, 100);
+      setProgress(nextProgress);
+
+      if (hapticFeedback && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
       }
-      setCountdown(3);
-      triggerSos();
-    }
-  }, [isTriggering, isActive, triggerSos]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !isTriggering && !isActive) {
-        e.preventDefault();
-        handlePress();
+      if (nextProgress === 100) {
+        window.clearInterval(timerRef.current!);
+        onActivate();
+        setIsHolding(false);
+        setProgress(0);
       }
-      if (e.code === 'Escape' && isTriggering) {
-        cancelSos();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isTriggering, isActive, cancelSos, handlePress]);
+    }, 50) as unknown as number;
+  };
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (isTriggering && countdown > 0) {
-      timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-    } else if (isTriggering && countdown === 0) {
-      fireSosApi();
-    }
-    return () => clearTimeout(timer);
-  }, [isTriggering, countdown, fireSosApi]);
+  const handleEnd = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setIsHolding(false);
+    setProgress(0);
+  };
+
+  // SVG Progress Ring calculations
+  const radius = 94;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center justify-center p-8">
-      <AnimatePresence mode="wait">
-        {!isActive ? (
-          <div className="relative flex items-center justify-center w-80 h-80">
-            {/* Radar Sweep Effect */}
-            {!isTriggering && (
-              <>
-                <motion.div 
-                  className="absolute inset-0 rounded-full border border-emergency opacity-20"
-                  animate={{ scale: [1, 2.5], opacity: [0.5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                />
-                <motion.div 
-                  className="absolute inset-0 rounded-full border border-emergency opacity-20"
-                  animate={{ scale: [1, 2.5], opacity: [0.5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1 }}
-                />
-                <div className="absolute inset-0 rounded-full bg-emergency/5 blur-xl"></div>
-              </>
-            )}
+    <div className="relative flex items-center justify-center">
+      {/* Outer pulsing ring */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.15, 0.05, 0.15]
+        }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="absolute w-[280px] h-[280px] bg-sos-red rounded-full"
+      />
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={isTriggering ? cancelSos : handlePress}
-              aria-label={isTriggering ? `Cancel emergency signal. Countdown at ${countdown} seconds.` : "Trigger Emergency SOS"}
-              aria-describedby="sos-instructions"
-              className={`relative z-10 flex items-center justify-center w-72 h-72 rounded-full text-white font-condensed text-6xl font-bold tracking-wider shadow-[0_0_40px_rgba(215,38,56,0.5)] transition-colors border-4 ${isTriggering ? 'bg-amber-600 border-amber-400 shadow-[0_0_40px_rgba(244,162,97,0.5)]' : 'bg-linear-to-b from-emergency to-red-900 border-white/20'}`}
-              style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
-              animate={!isTriggering ? {
-                boxShadow: ["0px 0px 40px rgba(215,38,56,0.4)", "0px 0px 80px rgba(215,38,56,0.8)", "0px 0px 40px rgba(215,38,56,0.4)"]
-              } : {}}
-              transition={!isTriggering ? { duration: 1.5, repeat: Infinity } : {}}
-            >
-              <div className="absolute inset-2 rounded-full border border-white/10"></div>
-              {isTriggering ? (
-                <div className="flex flex-col items-center" role="timer" aria-live="assertive">
-                  <span className="text-8xl">{countdown}</span>
-                  <span className="text-xl mt-2 font-sans tracking-normal uppercase font-black">{t('sos.cancel')}</span>
-                </div>
-              ) : (
-                <span className="drop-shadow-lg uppercase font-black">{t('sos.button')}</span>
-              )}
-            </motion.button>
-            
-            <p id="sos-instructions" className="sr-only">
-              Press the center button or hit SPACE to trigger a 3-second countdown for emergency services.
-            </p>
+      {/* Middle static ring */}
+      <div className="absolute w-[240px] h-[240px] border-2 border-sos-red/40 rounded-full" />
 
-            {isTriggering && (
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => setCountdown(c => c + 5)}
-                className="absolute -bottom-16 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-xs font-black uppercase tracking-widest text-white backdrop-blur-md pointer-events-auto z-20"
-              >
-                +5 Seconds (Need More Time)
-              </motion.button>
-            )}
-          </div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8, rotateX: 20 }}
-            animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="flex flex-col items-center justify-center w-full max-w-sm text-center space-y-6 bg-navy/80 backdrop-blur-xl p-8 rounded-3xl border border-safe/30 shadow-[0_0_50px_rgba(46,196,182,0.15)]"
-            style={{ perspective: 1000 }}
-          >
-            <div className="text-4xl font-condensed font-bold text-safe drop-shadow-[0_0_10px_rgba(46,196,182,0.8)]">
-              {t('sos.help_coming')}
-            </div>
-            
-            <div className="space-y-4 text-lg font-mono text-left w-full text-card">
-              <motion.div className="flex items-center space-x-3 bg-black/40 p-3 rounded-lg border border-white/5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
-                <span className="text-safe text-2xl">⚡</span> <span>{t('sos.status.ambulance')}</span>
-              </motion.div>
-              <motion.div className="flex items-center space-x-3 bg-black/40 p-3 rounded-lg border border-white/5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 1.0 }}>
-                <span className="text-amber text-2xl">📡</span> <span>{t('sos.status.contacts')}</span>
-              </motion.div>
-              <motion.div className="flex items-center space-x-3 bg-black/40 p-3 rounded-lg border border-white/5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 1.5 }}>
-                <span className="text-blue-400 text-2xl">🛰️</span> <span>{t('sos.status.location')}</span>
-              </motion.div>
-            </div>
+      {/* Main Button */}
+      <motion.button
+        onPointerDown={handleStart}
+        onPointerUp={handleEnd}
+        onPointerLeave={handleEnd}
+        animate={controls}
+        whileTap={{ scale: 0.95 }}
+        className="sos-button-outer z-10"
+        aria-label="SOS Emergency Button. Press and hold for 3 seconds."
+      >
+        {/* Progress Arc */}
+        <svg className="absolute inset-0 w-full h-full -rotate-90">
+          <circle
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="transparent"
+            stroke="white"
+            strokeWidth="8"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className={`transition-all duration-75 ${isHolding ? 'opacity-100' : 'opacity-0'}`}
+          />
+        </svg>
 
-            <motion.div 
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="mt-6 p-4 rounded-xl bg-safe/10 border border-safe/20 text-safe font-sans font-semibold tracking-wide"
-            >
-              {t('sos.stay_calm')}
-            </motion.div>
-
-            <button onClick={cancelSos} className="mt-6 w-full py-3 bg-transparent border border-muted text-muted hover:bg-muted/10 hover:text-white transition-colors rounded-xl font-bold uppercase tracking-wider">
-              Abort Signal
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <div className="sos-button-inner">
+          <span className="text-5xl font-black font-rajdhani tracking-tighter mb-1">SOS</span>
+          <span className="text-xs font-bold uppercase tracking-widest opacity-80">
+            {isHolding ? 'RELEASE TO CANCEL' : 'PRESS & HOLD'}
+          </span>
+        </div>
+      </motion.button>
     </div>
   );
 };

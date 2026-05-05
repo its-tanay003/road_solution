@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './nexus.css'
+import './i18n/config'
 import { registerSW } from 'virtual:pwa-register'
 
 const updateSW = registerSW({

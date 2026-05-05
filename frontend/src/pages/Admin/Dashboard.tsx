@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Activity, Users, MapPin, 
-  AlertTriangle, Clock, Radio, BarChart3, 
-  Terminal, Zap, Globe, Cpu, Server, Lock
+  AlertTriangle, Clock, Radio, 
+  Zap, Globe, Cpu, Server, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
@@ -192,7 +192,7 @@ export const Dashboard = () => {
            </Panel>
 
            <div className="mt-auto">
-             <Panel title="Critical Alerts" icon={AlertTriangle} variant="critical">
+             <Panel title="Critical Alerts" icon={AlertTriangle} variant="danger">
                 <div className="p-3 bg-[var(--nx-red-dim)] border border-[var(--nx-red-primary)]/20 rounded-sm">
                    <div className="text-[10px] font-bold text-[var(--nx-red-primary)] uppercase mb-1">Severe Weather Warning</div>
                    <p className="text-[11px] text-white/80 leading-relaxed">

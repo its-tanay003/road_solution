@@ -24,6 +24,12 @@
       "short_name": "SOS",
       "url": "/?trigger=sos",
       "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Responder Dashboard",
+      "short_name": "Responder",
+      "url": "/responder/AMB-01",
+      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
     }
   ]
 }

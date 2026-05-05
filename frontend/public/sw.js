@@ -3,6 +3,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/favicon.svg',
+  '/pwa-192x192.svg',
   '/manifest.webmanifest'
 ];
 

@@ -8,15 +8,21 @@ import {
   CheckCircle2, 
   Clock, 
   Radio, 
-  Terminal as TerminalIcon,
+  Terminal,
   Cpu,
-  Link2
+  Link2,
+  Play,
+  RotateCcw
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
-import { useJudgeStore, useChaosStore } from '../store';
+import { useJudgeStore, useChaosStore, useEmergencyStore } from '../store';
 import 'leaflet/dist/leaflet.css';
+import { GoldenHourTimer } from './GoldenHourTimer';
+import { DownloadReportButton } from './DownloadReportButton';
+import { CrashReconstruction3D } from './CrashReconstruction3D';
+import { WearableBiometrics } from './WearableBiometrics';
 
 // Fix leaflet icon issues
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -56,10 +62,17 @@ export const DemoCommandCenter = () => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
+  const [victimLoc, setVictimLoc] = useState<[number, number]>(VICTIM_LOC);
   // Responder's simulated location
   const [unitLoc, setUnitLoc] = useState<[number, number]>(INITIAL_UNIT_LOC);
   const { activeIncidents, addIncident } = useJudgeStore();
   const { internetKilled, backendKilled } = useChaosStore();
+  const { 
+    setCrashDetectedAt, 
+    setGoldenHourActive,
+    setCrashTriggered,
+    setGForceData
+  } = useEmergencyStore();
 
   const handleDispatchActivation = useCallback((data: { location: [number, number] }) => {
     setDispatchEvents(prev => [...prev, `[${new Date().toLocaleTimeString()}] INCOMING SOS: TOKEN_ALPHA_9`]);
@@ -77,13 +90,13 @@ export const DemoCommandCenter = () => {
       // Animate unit movement
       const interval = setInterval(() => {
         setUnitLoc(prev => [
-          prev[0] - (prev[0] - VICTIM_LOC[0]) * 0.1,
-          prev[1] - (prev[1] - VICTIM_LOC[1]) * 0.1
+          prev[0] - (prev[0] - victimLoc[0]) * 0.1,
+          prev[1] - (prev[1] - victimLoc[1]) * 0.1
         ]);
       }, 500);
       setTimeout(() => clearInterval(interval), 10000);
     }, 3000);
-  }, []);
+  }, [victimLoc]);
 
   useEffect(() => {
     const s = io(SOCKET_URL);
@@ -136,26 +149,49 @@ export const DemoCommandCenter = () => {
   const triggerSOS = () => {
     setSosActive(true);
     let count = 5;
+    setCountdown(count);
     const timer = setInterval(() => {
       count -= 1;
       setCountdown(count);
-      if (count === 0) {
+      if (count <= 0) {
         clearInterval(timer);
         finalizeSOS();
       }
     }, 1000);
   };
 
+  const resetDemo = () => {
+    setUnitLoc(INITIAL_UNIT_LOC);
+    setCrashDetectedAt(null);
+    setGoldenHourActive(false);
+    setCrashTriggered(false);
+    setGForceData(null);
+  };
+
+  const playScenario = (type: 'CRASH' | 'RURAL' | 'MULTI') => {
+    resetDemo();
+    const loc = type === 'CRASH' ? [28.6139, 77.2090] : type === 'RURAL' ? [28.8, 76.9] : [28.5, 77.3];
+    setVictimLoc(loc as [number, number]);
+    
+    setTimeout(() => {
+      triggerSOS();
+    }, 500);
+  };
+
   const finalizeSOS = () => {
     setIsSendingData(true);
     socket?.emit('sos:triggered', {
       type: 'CRASH_DEMO',
-      location: VICTIM_LOC,
+      location: victimLoc,
       severity: 'CRITICAL'
     });
 
     setTimeout(() => {
       setIsSendingData(false);
+      setCrashDetectedAt(Date.now());
+      setGoldenHourActive(true);
+      setCrashTriggered(true);
+      setGForceData({ x: 12.4, y: 2.1, z: -3.2 });
       setChatMessages([
         { sender: 'AI', text: 'Emergency detected. Analyzers active. Stay calm, help is being routed.' }
       ]);
@@ -198,6 +234,14 @@ export const DemoCommandCenter = () => {
         </div>
         
         <div className="flex items-center gap-2 bg-slate-900 border border-white/5 px-3 py-1 rounded-lg">
+          <div className="flex items-center gap-1 mr-2">
+            <button onClick={() => playScenario('CRASH')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Crash</button>
+            <button onClick={() => playScenario('RURAL')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Rural</button>
+            <button onClick={() => playScenario('MULTI')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Multi</button>
+            <div className="w-px h-4 bg-white/20 mx-1"></div>
+            <button onClick={resetDemo} className="text-[10px] font-mono text-slate-400 hover:text-red-400 uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><RotateCcw size={10}/> Reset</button>
+          </div>
+          <div className="w-px h-4 bg-white/10 mr-2" />
           <Cpu size={14} className="text-blue-400" />
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Neural Link: ACTIVE</span>
         </div>
@@ -290,7 +334,7 @@ export const DemoCommandCenter = () => {
                   <div className="px-4 py-2 bg-emerald-50 border-t border-emerald-100 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-700">
                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                      GPS ACQUIRED: 28.61, 77.21
+                      GPS ACQUIRED: {victimLoc[0].toFixed(2)}, {victimLoc[1].toFixed(2)}
                     </div>
                     <CheckCircle2 size={12} className="text-emerald-500" />
                   </div>
@@ -340,7 +384,7 @@ export const DemoCommandCenter = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-black tracking-widest uppercase flex items-center gap-2">
-                <TerminalIcon size={18} className="text-emerald-500" />
+                <Terminal size={18} className="text-emerald-500" />
                 Incident Command Center
               </h2>
               <div className="text-[10px] text-slate-500 font-mono">NODE_CLUSTER: ASIA-SOUTH-1</div>
@@ -351,6 +395,17 @@ export const DemoCommandCenter = () => {
               </div>
             )}
           </div>
+
+          {/* Golden Hour Timer Integration */}
+          {sosActive && countdown === 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="px-2"
+            >
+              <GoldenHourTimer />
+            </motion.div>
+          )}
 
           <div className="grid grid-cols-2 gap-4 h-[220px]">
             {/* Live Queue */}
@@ -376,7 +431,7 @@ export const DemoCommandCenter = () => {
                       <span className="text-[9px] font-mono text-slate-500">JUST NOW</span>
                     </div>
                     <div className="text-xs font-bold text-slate-200">Vehicle Collision</div>
-                    <div className="text-[10px] text-slate-500 mt-1">28.6139, 77.2090</div>
+                    <div className="text-[10px] text-slate-500 mt-1">{victimLoc[0].toFixed(4)}, {victimLoc[1].toFixed(4)}</div>
                   </motion.div>
                 )}
               </div>
@@ -426,20 +481,20 @@ export const DemoCommandCenter = () => {
               </div>
             </div>
 
-            <MapContainer center={VICTIM_LOC} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+            <MapContainer key={victimLoc.join(',')} center={victimLoc} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={false}>
               <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
               {unitStatus !== 'IDLE' && (
                 <>
-                  <Marker position={VICTIM_LOC}>
+                  <Marker position={victimLoc}>
                     <Popup>Emergency Site</Popup>
                   </Marker>
                   <Marker position={unitLoc} icon={unitIcon}>
                     <Popup>Unit A47</Popup>
                   </Marker>
-                  <Polyline positions={[unitLoc, VICTIM_LOC]} color="#ef4444" weight={2} dashArray="5, 10" />
+                  <Polyline positions={[unitLoc, victimLoc]} color="#ef4444" weight={2} dashArray="5, 10" />
                 </>
               )}
               {activeIncidents.map((incident) => (
@@ -465,6 +520,36 @@ export const DemoCommandCenter = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Report Generation Integration */}
+          <div className="mt-auto pt-6 border-t border-white/5 flex flex-col gap-4">
+            {/* 3D Reconstruction and Biometrics */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Physics Reconstruction</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    <span className="text-[9px] text-emerald-500 font-mono">LIVE_FEED</span>
+                  </div>
+                </div>
+                <CrashReconstruction3D />
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Telemetry Dashboard</h3>
+                  <div className="text-[9px] text-slate-400 font-mono">ENCRYPTED_SSL</div>
+                </div>
+                <WearableBiometrics />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-2">
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Post-Incident Operations</div>
+              <div className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">V2.4.0-STABLE</div>
+            </div>
+            <DownloadReportButton />
           </div>
         </div>
 

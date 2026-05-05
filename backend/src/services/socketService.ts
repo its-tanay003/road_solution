@@ -10,6 +10,7 @@ import {
   RoomUser,
   RoomNote
 } from './incidentRoomStore';
+import { volunteerService } from './volunteerService';
 
 let io: SocketIOServer;
 
@@ -142,12 +143,46 @@ export const initSocket = (server: HttpServer) => {
     });
 
     socket.on('judge:sos', (data: { name: string; location: [number, number]; sessionId: string }) => {
-      io.emit('judge:sos', {
+      const incidentId = `judge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+      const payload = {
         ...data,
-        id: `judge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        id: incidentId,
         timestamp: new Date(),
         socketId: socket.id
+      };
+      
+      io.emit('judge:sos', payload);
+
+      // Notify nearby volunteers
+      const nearbyVolunteers = volunteerService.getNearbyVolunteers(data.location[0], data.location[1], 1.5); // 1.5km radius
+      nearbyVolunteers.forEach(v => {
+        io.to(v.id).emit('volunteer:nearby_incident', {
+          incidentId,
+          type: 'Road Crash',
+          location: { lat: data.location[0], lng: data.location[1] },
+          severity: 'HIGH',
+          distance: 0.5 // Mock distance
+        });
       });
+      
+      console.log(`SOS Alert sent to ${nearbyVolunteers.length} volunteers`);
+    });
+
+    // --- Volunteer Events ---
+    socket.on('volunteer:register', (data: { name: string, location: { lat: number, lng: number }, skills: string[] }) => {
+      volunteerService.addVolunteer({
+        id: socket.id,
+        name: data.name,
+        location: data.location,
+        skills: data.skills,
+        status: 'active'
+      });
+      socket.join('volunteers_active');
+      console.log(`Volunteer registered: ${data.name} (${socket.id})`);
+    });
+
+    socket.on('volunteer:location_update', (location: { lat: number, lng: number }) => {
+      volunteerService.updateLocation(socket.id, location);
     });
 
     socket.on('disconnect', async () => {
@@ -159,8 +194,24 @@ export const initSocket = (server: HttpServer) => {
         await removeUserFromRoom(socket.data.roomId, socket.id);
         io.to(`incident:${socket.data.roomId}`).emit('incident_user_left', socket.id);
       }
+      
+      // Remove from volunteers
+      volunteerService.removeVolunteer(socket.id);
     });
   });
+
+  // Task 5: Live Hospital Bed Availability Updates
+  setInterval(() => {
+    if (io) {
+      const updates = [
+        { id: 'hosp-1', bedsAvailable: Math.floor(Math.random() * 50) + 10, icuBedsAvailable: Math.floor(Math.random() * 10) },
+        { id: 'hosp-2', bedsAvailable: Math.floor(Math.random() * 150) + 50, icuBedsAvailable: Math.floor(Math.random() * 20) },
+        { id: 'hosp-3', bedsAvailable: Math.floor(Math.random() * 40) + 5, icuBedsAvailable: Math.floor(Math.random() * 8) },
+        { id: 'hosp-4', bedsAvailable: Math.floor(Math.random() * 30) + 5, icuBedsAvailable: Math.floor(Math.random() * 5) }
+      ];
+      io.emit('hospital_updates', updates);
+    }
+  }, 10000); // Push updates every 10 seconds
 
   return io;
 };
