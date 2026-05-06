@@ -5,7 +5,7 @@ export type Theme = 'dark-hud' | 'dark-soft' | 'high-contrast' | 'light-clean';
 export type TextSize = 'small' | 'medium' | 'large' | 'xl' | 'xxl';
 export type FontStyle = 'inter' | 'rajdhani' | 'atkinson';
 export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn';
-export type SosMode = 'hold3s' | 'tap5x' | 'voice' | 'shake';
+export type SosMode = 'hold3s' | 'tap3x' | 'voice' | 'shake';
 export type ColorScheme = 'default' | 'protanopia' | 'deuteranopia';
 
 interface SettingsState {
@@ -19,7 +19,9 @@ interface SettingsState {
   emergencyContact: string;
   colorScheme: ColorScheme;
   showTutorial: boolean;
-  
+  bloodGroup: string;
+  allergies: string[];
+
   setTheme: (theme: Theme) => void;
   setTextSize: (size: TextSize) => void;
   setFontStyle: (font: FontStyle) => void;
@@ -30,20 +32,51 @@ interface SettingsState {
   setEmergencyContact: (contact: string) => void;
   setColorScheme: (scheme: ColorScheme) => void;
   setShowTutorial: (show: boolean) => void;
+  setBloodGroup: (v: string) => void;
+  setAllergies: (v: string[]) => void;
 }
 
-const fontSizeMap: Record<TextSize, string> = {
-  small: '14px',
-  medium: '16px',
-  large: '20px',
-  xl: '24px',
-  xxl: '28px',
+const FONT_SIZE_MAP: Record<TextSize, string> = {
+  small: '13px',
+  medium: '15px',
+  large: '18px',
+  xl: '22px',
+  xxl: '26px',
 };
 
-const fontFamilyMap: Record<FontStyle, string> = {
-  inter: '"Inter", sans-serif',
-  rajdhani: '"Rajdhani", sans-serif',
-  atkinson: '"Atkinson Hyperlegible", sans-serif',
+const FONT_FAMILY_MAP: Record<FontStyle, string> = {
+  inter: "'Inter', sans-serif",
+  rajdhani: "'Rajdhani', sans-serif",
+  atkinson: "'Atkinson Hyperlegible', sans-serif",
+};
+
+// Apply settings to DOM — called on every change and on rehydration
+export const applySettingsToDOM = (state: Partial<SettingsState>) => {
+  const root = document.documentElement;
+
+  if (state.theme) {
+    root.setAttribute('data-theme', state.theme);
+    // Remove all theme classes first, then add the active one
+    root.classList.remove('theme-dark-hud', 'theme-dark-soft', 'theme-high-contrast', 'theme-light-clean');
+    root.classList.add(`theme-${state.theme}`);
+  }
+
+  if (state.textSize) {
+    root.style.setProperty('--app-font-size', FONT_SIZE_MAP[state.textSize]);
+  }
+
+  if (state.fontStyle) {
+    root.style.setProperty('--app-font-family', FONT_FAMILY_MAP[state.fontStyle]);
+  }
+
+  if (state.reducedMotion !== undefined) {
+    root.classList.toggle('reduce-motion', state.reducedMotion);
+    root.setAttribute('data-reduce-motion', String(state.reducedMotion));
+  }
+
+  if (state.colorScheme) {
+    root.setAttribute('data-color-scheme', state.colorScheme);
+  }
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -59,45 +92,51 @@ export const useSettingsStore = create<SettingsState>()(
       emergencyContact: '',
       colorScheme: 'default',
       showTutorial: true,
+      bloodGroup: '',
+      allergies: [],
 
       setTheme: (theme) => {
         set({ theme });
-        document.documentElement.setAttribute('data-theme', theme);
+        applySettingsToDOM({ theme });
       },
       setTextSize: (textSize) => {
         set({ textSize });
-        document.documentElement.style.setProperty('--app-font-size', fontSizeMap[textSize]);
+        applySettingsToDOM({ textSize });
       },
       setFontStyle: (fontStyle) => {
         set({ fontStyle });
-        document.documentElement.style.setProperty('--app-font-family', fontFamilyMap[fontStyle]);
+        applySettingsToDOM({ fontStyle });
       },
       setLanguage: (language) => set({ language }),
       setReducedMotion: (reducedMotion) => {
         set({ reducedMotion });
-        document.documentElement.setAttribute('data-reduce-motion', String(reducedMotion));
+        applySettingsToDOM({ reducedMotion });
       },
       setHapticFeedback: (hapticFeedback) => set({ hapticFeedback }),
       setSosMode: (sosMode) => set({ sosMode }),
       setEmergencyContact: (emergencyContact) => set({ emergencyContact }),
       setColorScheme: (colorScheme) => {
         set({ colorScheme });
-        document.documentElement.setAttribute('data-color-scheme', colorScheme);
+        applySettingsToDOM({ colorScheme });
       },
       setShowTutorial: (showTutorial) => set({ showTutorial }),
+      setBloodGroup: (bloodGroup) => set({ bloodGroup }),
+      setAllergies: (allergies) => set({ allergies }),
     }),
     {
       name: 'roadsos-settings-v2',
       onRehydrateStorage: () => (state) => {
         if (state) {
-          // Re-apply settings on load
-          document.documentElement.setAttribute('data-theme', state.theme);
-          document.documentElement.style.setProperty('--app-font-size', fontSizeMap[state.textSize]);
-          document.documentElement.style.setProperty('--app-font-family', fontFamilyMap[state.fontStyle]);
-          document.documentElement.setAttribute('data-reduce-motion', String(state.reducedMotion));
-          document.documentElement.setAttribute('data-color-scheme', state.colorScheme);
+          // Re-apply ALL stored settings to DOM on every page load
+          applySettingsToDOM({
+            theme: state.theme,
+            textSize: state.textSize,
+            fontStyle: state.fontStyle,
+            reducedMotion: state.reducedMotion,
+            colorScheme: state.colorScheme,
+          });
         }
-      }
+      },
     }
   )
 );

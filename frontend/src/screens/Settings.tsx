@@ -38,7 +38,7 @@ export const Settings: React.FC = () => {
 
   const sosModes: { id: SosMode; label: string; desc: string }[] = [
     { id: 'hold3s', label: 'Hold 3 Seconds', desc: 'Recommended security' },
-    { id: 'tap5x', label: 'Triple Tap', desc: 'Fast discreet alert' },
+    { id: 'tap3x', label: 'Triple Tap', desc: 'Fast discreet alert' },
     { id: 'voice', label: 'Voice Command', desc: '"Hey ROADSoS"' },
     { id: 'shake', label: 'Shake Phone', desc: 'Panic movement' },
   ];

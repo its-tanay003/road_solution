@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { useSettingsStore, applySettingsToDOM } from './store/settingsStore';
+import { useAuthStore } from './store/authStore';
 
 // Screens & Components
 import HomeScreen from './screens/HomeScreen';
@@ -32,6 +35,35 @@ import { VolunteerAlertScreen } from './components/VolunteerAlertScreen';
 import { VolunteerResponderNetwork } from './components/VolunteerResponderNetwork';
 import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';
 import { useDemoStore } from './store';
+import { LoginPage } from './pages/LoginPage';
+import { SecurityDashboard } from './pages/SecurityDashboard';
+
+// Re-apply persisted settings to DOM on every page load
+function AppInitializer() {
+  const settings = useSettingsStore();
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    applySettingsToDOM({
+      theme: settings.theme,
+      textSize: settings.textSize,
+      fontStyle: settings.fontStyle,
+      reducedMotion: settings.reducedMotion,
+      colorScheme: settings.colorScheme,
+    });
+    if (i18n.language !== settings.language) {
+      i18n.changeLanguage(settings.language);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return null;
+}
+
+// Protect routes behind auth
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+}
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
   <motion.div
@@ -115,7 +147,8 @@ const AppContent = () => {
       
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageWrapper><HomeScreen /></PageWrapper>} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<ProtectedRoute><PageWrapper><HomeScreen /></PageWrapper></ProtectedRoute>} />
           <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
           <Route path="/governance" element={<PageWrapper><GovernancePortal /></PageWrapper>} />
           <Route path="/impact" element={<PageWrapper><ImpactCalculator /></PageWrapper>} />
@@ -132,6 +165,7 @@ const AppContent = () => {
           <Route path="/technical" element={<PageWrapper><EvaluationLayout><Technical /></EvaluationLayout></PageWrapper>} />
           <Route path="/good-samaritan" element={<PageWrapper><EvaluationLayout><GoodSamaritanGuide /></EvaluationLayout></PageWrapper>} />
           <Route path="/incident-report" element={<PageWrapper><IncidentTimeline /></PageWrapper>} />
+          <Route path="/security" element={<PageWrapper><EvaluationLayout><SecurityDashboard /></EvaluationLayout></PageWrapper>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
@@ -163,6 +197,7 @@ const AppContent = () => {
 const App = () => {
   return (
     <BrowserRouter>
+      <AppInitializer />
       <AppContent />
     </BrowserRouter>
   );

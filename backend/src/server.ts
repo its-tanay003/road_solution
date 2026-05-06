@@ -1,6 +1,7 @@
 import { register, apiRequestDuration } from './services/metricsService';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import http from 'http';
 import dotenv from 'dotenv';
 import { connectRedis } from './services/cacheService';
@@ -26,6 +27,8 @@ import { observabilityMiddleware, metrics } from './middleware/observability';
 import { processFusionTriage } from './services/fusionEngine';
 import { getRiskHeatmap } from './services/riskEngine';
 import { ResponderService } from './services/responderService';
+import authRouter from './auth/authRouter';
+import { authRateLimiter, requireAuth, sosRateLimiter } from './middleware/auth';
 
 dotenv.config();
 
@@ -44,9 +47,35 @@ app.use((req, res, next) => {
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'accounts.google.com', 'apis.google.com'],
+      connectSrc: ["'self'", 'api.anthropic.com', '*.vercel.app', 'tile.openstreetmap.org'],
+      imgSrc: ["'self'", 'data:', '*.openstreetmap.org'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
+      fontSrc: ["'self'", 'fonts.gstatic.com'],
+      frameSrc: ["'none'"],
+    },
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true },
+}));
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    'http://localhost:5173',
+    'https://roadsos.vercel.app',
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 app.use(observabilityMiddleware);
+
+// --- Auth Routes ---
+app.use('/auth', authRateLimiter, authRouter);
 
 // Prometheus Metrics Endpoint
 app.get('/metrics', (req, res) => {
@@ -93,7 +122,7 @@ app.get('/metrics', async (req, res) => {
 });
 
 // Routes
-app.use('/api/sos', sosRoutes);
+app.use('/api/sos', sosRateLimiter, sosRoutes);
 // Alias for Offline Sync Provider
 app.get('/api/nearby-services', (req, res) => {
   const query = new URLSearchParams(req.query as any).toString();
@@ -103,8 +132,8 @@ app.get('/api/nearby-services', (req, res) => {
 app.use('/api/services', servicesRoutes);
 app.use('/api/integrations', integrationsRoutes);
 app.use('/api/push', pushRoutes);
-app.use('/api/dispatch', dispatchRoutes);
-app.use('/api/dispatch/108', dispatch108Routes);
+app.use('/api/dispatch', requireAuth, dispatchRoutes);
+app.use('/api/dispatch/108', requireAuth, dispatch108Routes);
 app.use('/api/vaahan', vaahanRoutes);
 
 // Predictive Risk Engine Endpoint

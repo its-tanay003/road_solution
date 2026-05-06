@@ -27,6 +27,103 @@
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+/* ============================================================
+   THEME DEFINITIONS — activated by data-theme attr or class
+   ============================================================ */
+
+/* Default / dark-hud */
+:root,
+:root.theme-dark-hud,
+[data-theme="dark-hud"] {
+  --bg-primary: #050A14;
+  --bg-secondary: #0A1628;
+  --bg-surface: #0F2040;
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --accent: #00E5FF;
+  --border: rgba(0, 229, 255, 0.12);
+  --sos-red: #FF1744;
+
+  /* Map to existing app vars so both systems work */
+  --app-bg: #050A14;
+  --app-surface: #0A1628;
+  --app-text: #FFFFFF;
+  --app-border: rgba(0, 229, 255, 0.12);
+}
+
+:root.theme-dark-soft,
+[data-theme="dark-soft"] {
+  --bg-primary: #0D0D1A;
+  --bg-secondary: #141428;
+  --bg-surface: #1A1A35;
+  --text-primary: #E8E8F0;
+  --text-secondary: rgba(232, 232, 240, 0.6);
+  --accent: #7B86FF;
+  --border: rgba(123, 134, 255, 0.15);
+  --sos-red: #FF4444;
+  --app-bg: #0D0D1A;
+  --app-surface: #141428;
+  --app-text: #E8E8F0;
+  --app-border: rgba(123, 134, 255, 0.15);
+}
+
+:root.theme-high-contrast,
+[data-theme="high-contrast"] {
+  --bg-primary: #000000;
+  --bg-secondary: #0A0A0A;
+  --bg-surface: #111111;
+  --text-primary: #FFFF00;
+  --text-secondary: #FFFFFF;
+  --accent: #FFFF00;
+  --border: rgba(255, 255, 0, 0.4);
+  --sos-red: #FF0000;
+  --app-bg: #000000;
+  --app-surface: #111111;
+  --app-text: #FFFF00;
+  --app-border: rgba(255, 255, 0, 0.4);
+}
+
+:root.theme-light-clean,
+[data-theme="light-clean"] {
+  --bg-primary: #F8F9FA;
+  --bg-secondary: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --text-primary: #0D1117;
+  --text-secondary: rgba(13, 17, 23, 0.65);
+  --accent: #0066CC;
+  --border: rgba(0, 0, 0, 0.1);
+  --sos-red: #CC0000;
+  --app-bg: #F8F9FA;
+  --app-surface: #FFFFFF;
+  --app-text: #0D1117;
+  --app-border: rgba(0, 0, 0, 0.1);
+  --clr-bg: #F8F9FA;
+  --clr-text: #0D1117;
+  --clr-text-2: #4B5563;
+  --clr-border: rgba(0, 0, 0, 0.1);
+}
+
+/* Font size + family controlled by settings store */
+html {
+  font-size: var(--app-font-size, 15px);
+}
+* {
+  font-family: var(--app-font-family, 'Inter', sans-serif);
+}
+
+/* Reduced motion */
+:root.reduce-motion *,
+:root.reduce-motion *::before,
+:root.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ============================================================
+   ANIMATION KEYFRAMES
+   ============================================================ */
+
 @keyframes pulse-emergency {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5); }
   50% { box-shadow: 0 0 0 20px rgba(255, 59, 59, 0); }
