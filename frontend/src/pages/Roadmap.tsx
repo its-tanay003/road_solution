@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Milestone, 
@@ -6,15 +5,13 @@ import {
   TrendingUp, 
   ShieldCheck, 
   Globe, 
-  Activity,
   ChevronRight,
   IndianRupee,
-  Users,
   Target
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area
+  AreaChart, Area
 } from 'recharts';
 
 const roadmapData = [

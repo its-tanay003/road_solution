@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+
 import { 
   ClipboardCheck, 
   Users, 
@@ -7,14 +6,13 @@ import {
   BarChart3, 
   AlertCircle, 
   FileText,
-  MessageSquare,
   HelpCircle,
   Lightbulb,
   CheckCircle2
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend
+  Cell
 } from 'recharts';
 
 const surveyData = [

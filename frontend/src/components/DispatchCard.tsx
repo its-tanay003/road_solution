@@ -125,7 +125,7 @@ export const DispatchCard: React.FC = () => {
             userLng={location?.lng || 77.2090}
             incidentLat={location?.lat}
             incidentLng={location?.lng}
-            drones={dispatch108.currentLat ? [{ id: unit.unitId, lat: dispatch108.currentLat, lng: dispatch108.currentLng }] : []}
+            drones={(dispatch108.currentLat && dispatch108.currentLng) ? [{ id: unit.unitId, lat: dispatch108.currentLat, lng: dispatch108.currentLng }] : []}
           />
           <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent pointer-events-none" />
           <div className="absolute bottom-3 left-3 flex items-center gap-2">
