@@ -5,6 +5,7 @@ import { Panel } from './ui/Panel';
 import { useDebriefStore } from '../store';
 import ReactMarkdown from 'react-markdown';
 import { InsuranceClaimButton } from './InsuranceClaimButton';
+import { logger } from '../lib/logger';
 
 interface PostIncidentDebriefProps {
   incident: {
@@ -96,7 +97,7 @@ Be specific, professional, and data-driven. Format in clean sections.`;
           }
         }
       } catch (err) {
-        console.error('Debrief stream error:', err);
+        logger.error('Debrief stream error:', err);
         if (isMounted) {
           setError('Failed to connect to debrief service.');
           setIsGenerating(false);
@@ -117,10 +118,10 @@ Be specific, professional, and data-driven. Format in clean sections.`;
     };
     saveDebrief(debrief);
     
-    // Mock copy link
-    const mockLink = `https://roadsos.app/debrief/${debrief.id}`;
-    navigator.clipboard.writeText(mockLink);
-    alert(`Debrief saved! Shareable link copied to clipboard:\n${mockLink}`);
+    // Generate shareable reference link
+    const shareableLink = `https://roadsos.app/debrief/${debrief.id}`;
+    navigator.clipboard.writeText(shareableLink);
+    alert(`Debrief saved! Shareable link copied to clipboard:\n${shareableLink}`);
   };
 
   return (

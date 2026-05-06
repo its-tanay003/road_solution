@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+// DroneStatus — exported type for dispatch state machine
 export type DroneStatus = 'IDLE' | 'TAKEOFF' | 'CRUISING' | 'EN_ROUTE' | 'HOVERING' | 'LIVE';
 
 interface DroneState {

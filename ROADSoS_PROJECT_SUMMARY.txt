@@ -36,39 +36,30 @@ ROADSoS is a high-stakes, real-world ready Emergency Operating System designed t
 - **Global Orchestrator**: Centralized demo controller with time dilation (0.5x, 1x, 2x) and internet-kill scenarios.
 - **Hotkey Architecture**: Comprehensive keyboard-driven triggers for foolproof live demonstrations.
 
-## 3. TECHNICAL ARCHITECTURE
+## 3. SIH 2026 STRATEGIC EVALUATION LAYERS
+- **Deployment Roadmap**: A dedicated `/roadmap` page outlining a 3-phase national rollout, comprehensive cost models (Infrastructure vs SaaS), and MoRTH integration diagrams.
+- **Impact Research**: A `/research` page detailing our primary survey of 87 respondents, identifying the 48% "Fear of Legal Trouble" gap, and validating our Good Samaritan features.
+- **Technical Manifesto**: A `/technical` page documenting our security posture (AES-256), OWASP Top 10 mitigation, and accessibility (WCAG 2.1) compliance.
+- **Evaluation Assets**: Includes `JUDGES_README.md` (rubric-aligned guide) and `PITCH_VIDEO_SCRIPT.md` (timed pitch narrative).
+
+## 4. TECHNICAL ARCHITECTURE
 ### Frontend (The Nerve Center)
 - **Framework**: React 19 + Vite 8.
 - **Styling**: Tailwind CSS 4 + Framer Motion (for cinematic transitions).
 - **3D Visualization**: Three.js for AR navigation and vehicle impact modeling.
-- **State Management**: Zustand with persistent storage for demo telemetry and medical records.
-- **Logic**: Custom hooks for Geolocation, Wake-word detection, and Network monitoring.
+- **State Management**: Zustand with persistent storage.
 
 ### Backend (The Intelligence Core)
-- **Engine**: Node.js + Express.
-- **Real-Time**: Socket.io for bi-directional emergency updates.
-- **AI Integration**: Anthropic Claude API for sophisticated triage and response planning.
-- **Observability**: Built-in Prometheus metrics endpoint for system health monitoring.
+- **Engine**: Node.js (Express) + Socket.io.
+- **Dispatch Simulation**: Robust mock engine for **108 GVK EMRI** dispatching, featuring automated resource assignment and real-time ETA countdowns via WebSockets.
+- **Notifications**: Integrated WhatsApp alert simulation and iRAD-compliant JSON report generation.
 
-## 4. PRODUCTION HARDENING & DEPLOYMENT
-### Vercel Integration
-- **Multi-Service Architecture**: Configured as an experimental monorepo deployment handling both Frontend (`/`) and Backend (`/_/backend`).
-- **Build Optimization**: Custom Rollup chunking strategy to optimize delivery of React, Leaflet, and UI components.
-- **Type Safety**: Harmonized TypeScript interfaces across the entire stack, ensuring 100% build stability.
-
-### Key Production Hardening Fixes
-- **TS2451 Resolution**: Resolved block-scoped variable redeclaration issues in `AgentWarRoom.tsx` for cleaner component state.
-- **Timer Type Safety**: Standardized `setInterval` and `setTimeout` return types (numeric casting) to resolve Node.js/Browser typing conflicts.
-- **Design System Sync**: Optimized Tailwind 4 `@theme` block in `tokens.css` to correctly resolve custom border and ring utilities.
-- **Accessibility Store Integration**: Fully synchronized the `AccessibilityState` interface with the UI panel for real-time visual/cognitive adjustments.
-- **API Orchestration**: Replaced local dev URLs with dynamic `VITE_API_URL` environment variables for seamless cloud transitions.
-
-## 5. DEMO SCENARIOS (READY FOR SHOWCASE)
-1. **The Crash (Urban)**: Demonstrates G-Force detection, countdown, and autonomous dispatch.
-2. **The Rural Failure**: Showcases the system's transition to "Mesh Mode" when internet is lost.
-3. **The Multi-User Crisis**: Demonstrates the backend's ability to handle parallel incident streams and AI triage.
+## 5. STABILITY & PRODUCTION HARDENING
+- **Dependency-Lean Logic**: Replaced unstable third-party plugins (react-hot-toast, chartjs-annotation) with custom, lightweight Framer Motion and CSS solutions to ensure 100% demo uptime.
+- **Type-Safe HMR**: Enforced `import type` for state machines to resolve Vite bundling edge cases.
+- **Accessibility Fixes**: Resolved critical missing hook and title attribute lints for a judge-ready presentation.
 
 ---
-**Status**: PRODUCTION READY / DEMO OPTIMIZED
+**Status**: SIH COMPLIANT / PRODUCTION READY
 **Repository**: its-tanay003/road_solution
 **Build Signature**: Verified stable across Vite 8 and Vercel Multi-Service runtimes.

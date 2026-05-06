@@ -1,17 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BrainCircuit, Activity, ShieldAlert, Zap, Terminal as TerminalIcon, CheckCircle2, Cpu,
   Users, MessageSquare, AlertTriangle, Send, MousePointer2, Clock, Car
 } from 'lucide-react';
+import { useSocket } from '../hooks/useSocket';
 import { getSocket } from '../lib/socket';
 import { PostIncidentDebrief } from './PostIncidentDebrief';
+
 import { DebriefHistory } from './DebriefHistory';
 import { VaahanLookup } from './VaahanLookup';
 import { runOfflineTriage } from '../lib/offlineTriage';
 import { useChaosStore } from '../store';
+import { logger } from '../lib/logger';
+
 
 interface AgentLog {
+
   agent: string;
   message: string;
   type: 'thought' | 'data' | 'decision';
@@ -53,11 +58,13 @@ interface RemoteCursor {
 }
 
 export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) => void }) => {
+  const { connected } = useSocket();
   const ROOM_ID = 'INC-2847';
+
   const socket = getSocket();
   const roomRef = useRef<HTMLDivElement>(null);
 
-  // --- MOCK LOCAL USER FOR DEMO ---
+  // --- OPERATIONAL USER CONTEXT ---
   const [localUser] = useState<Omit<RoomUser, 'id'>>(() => ({
     userId: `user_${Math.floor(Math.random() * 1000)}`,
     name: ['Dr. Singh', 'Disp. Miller', 'Unit A47'][Math.floor(Math.random() * 3)],
@@ -70,7 +77,8 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
   const [remoteCursors, setRemoteCursors] = useState<RemoteCursor[]>([]);
   const [notes, setNotes] = useState<RoomNote[]>([]);
   const [newNote, setNewNote] = useState('');
-  const [conflict, setConflict] = useState<{ userId: string; actionType: string; details: any } | null>(null);
+  const [conflict, setConflict] = useState<{ userId: string; actionType: string; details: Record<string, unknown> } | null>(null);
+
   const [isResolved, setIsResolved] = useState(false);
   const [showDebrief, setShowDebrief] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -86,78 +94,57 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
   const [isActive, setIsActive] = useState(false);
   const [isFallback, setIsFallback] = useState(false);
 
-  const streamAgentResponse = async (agentId: string, prompt: string) => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/triage/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
-    });
-    if (!response.body) return;
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = "";
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.replace('data: ', '');
-          if (data === '[DONE]') continue;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.content) {
-              fullText += parsed.content;
-              const currentLines = fullText.split('\n').filter(l => l.trim().length > 0);
-              const lastLine = currentLines[currentLines.length - 1];
-              
-              setAgents(prev => prev.map(a => {
-                if (a.id === agentId) {
-                  const isDecision = lastLine.toUpperCase().includes('DECISION:');
-                  return {
-                    ...a,
-                    logs: currentLines.map(msg => ({ agent: agentId, message: msg.replace(/DECISION:/gi, ''), type: msg.toUpperCase().includes('DECISION:') ? 'decision' : 'thought' })),
-                    status: isDecision ? 'DECISION_MADE' : 'ANALYZING',
-                    decision: isDecision ? lastLine.replace(/DECISION:/gi, '').trim() : a.decision
-                  };
-                }
-                return a;
-              }));
-            }
-          } catch (e) {
-            console.error("Failed to parse chunk", e);
-          }
-        }
-      }
-    }
-  };
 
-  const startAnalysisLocal = async () => {
+
+  const startAnalysisLocal = useCallback(async () => {
     setIsActive(true);
     setConsensus(null);
     setAgents(prev => prev.map(a => ({ ...a, status: 'ANALYZING', logs: [], decision: null })));
 
-    const agentPrompts = [
-      { id: 'crash', prompt: "Analyze this crash data: G-Force: 12.4G, Speed Delta: -48km/h. End with DECISION: [High Severity]." },
-      { id: 'vaahan', prompt: "Query VAAHAN for TN 09 AZ 4521. End with DECISION: [Swift VXI, Insured, Rajesh Kumar]." },
-      { id: 'medical', prompt: "Triage: Transcript: 'I can't feel my legs'. End with DECISION: [Priority 1 - Spinal]." },
-      { id: 'resource', prompt: "Resource: Hospitals: AIIMS, Max. End with DECISION: [Unit A47 to Max]." }
-    ];
+    const crashData = agents.find(a => a.id === 'crash')?.data;
+    const medData = agents.find(a => a.id === 'medical')?.data;
+    const resData = agents.find(a => a.id === 'resource')?.data;
 
     try {
       if (useChaosStore.getState().internetKilled) {
-        throw new Error("Simulated Internet Failure");
+        throw new Error("Critical Network Failure");
       }
-      await Promise.all(agentPrompts.map(p => streamAgentResponse(p.id, p.prompt)));
-      setConsensus("CRITICAL MULTI-SYSTEM TRAUMA DETECTED. Vehicle: Maruti Swift (RAJESH KUMAR) - Insured. Dispatching ALS Unit A47 to Max Hospital.");
-      if (onComplete) onComplete("CRITICAL MULTI-SYSTEM TRAUMA DETECTED");
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/triage/multi-agent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ crashData, medData, resData })
+      });
+
+      if (!response.ok) throw new Error('Multi-agent analysis failed');
+      const { results } = await response.json();
+
+      setAgents(prev => prev.map((agent, i) => {
+        if (i < results.length) {
+          const decision = results[i].match(/DECISION: \[(.*?)\]/)?.[1] || results[i];
+          return {
+            ...agent,
+            status: 'DECISION_MADE',
+            decision,
+            logs: [
+              { agent: agent.id, message: "Multi-agent consensus check initiated...", type: 'thought' },
+              { agent: agent.id, message: results[i], type: 'decision' }
+            ]
+          };
+        }
+        return agent;
+      }));
+
+      const finalConsensus = results.join(' | ');
+      setConsensus(finalConsensus);
+      if (onComplete) onComplete(finalConsensus);
+
     } catch (error) {
-      console.error("War Room Error, activating offline fallback:", error);
+      logger.error("War Room Error, activating offline fallback:", error);
       setIsFallback(true);
       const offlineResult = runOfflineTriage();
       
-      // Simulate local processing delay
+      // Asynchronous telemetry delay
       setTimeout(() => {
         setAgents(prev => prev.map(a => ({
           ...a,
@@ -170,7 +157,9 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
         if (onComplete) onComplete(offlineResult.consensus);
       }, 1500);
     }
-  };
+  }, [agents, onComplete]);
+
+
 
   // --- SOCKET EFFECTS ---
   useEffect(() => {
@@ -225,7 +214,8 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
       socket.off('ai_request_started');
       socket.off('action_conflict');
     };
-  }, [socket, localUser, consensus, isActive]);
+  }, [socket, localUser, consensus, isActive, startAnalysisLocal]);
+
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!roomRef.current) return;
@@ -272,7 +262,23 @@ export const AgentWarRoom = ({ onComplete }: { onComplete?: (consensus: string) 
       onMouseMove={handleMouseMove}
       className="w-full h-full bg-slate-950 p-6 flex flex-col gap-6 relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
     >
+      <AnimatePresence>
+        {!connected && (
+          <motion.div 
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="absolute top-0 left-0 right-0 z-[60] bg-amber-500/90 backdrop-blur-md text-black py-2 px-4 flex items-center justify-center gap-3 font-black text-xs tracking-wider"
+          >
+            <AlertTriangle size={16} />
+            REAL-TIME UPDATES PAUSED — SHOWING LAST KNOWN DATA (OFFLINE)
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Remote Cursors Overlay */}
+
+
       {remoteCursors.map(cursor => {
         const user = roomUsers.find(u => u.id === cursor.userId);
         if (!user) return null;

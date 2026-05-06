@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { logger } from '../lib/logger';
 
 // Extend the Window interface to include webkitSpeechRecognition
 declare global {
@@ -39,7 +40,7 @@ export const useWakeWord = (
       const current = event.resultIndex;
       const transcript = event.results[current][0].transcript.toLowerCase().trim();
       
-      console.log("Heard:", transcript);
+      logger.log("Heard:", transcript);
 
       // Check if any wake word is in the transcript
       for (const word of wakeWords) {
@@ -51,7 +52,7 @@ export const useWakeWord = (
     };
 
     recognition.onerror = (event: any) => {
-      console.error("Speech Recognition Error:", event.error);
+      logger.error("Speech Recognition Error:", event.error);
       if (event.error !== 'no-speech') {
         setError(event.error);
         setIsListening(false);
@@ -76,7 +77,7 @@ export const useWakeWord = (
     try {
       recognition.start();
     } catch (e) {
-      console.error("Could not start recognition:", e);
+      logger.error("Could not start recognition:", e);
     }
 
     return () => {

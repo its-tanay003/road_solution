@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, BellOff, Send, ShieldCheck, AlertCircle } from 'lucide-react';
 import { usePushNotificationStore } from '../store/pushNotificationStore';
+import { logger } from '../lib/logger';
 
 export const PushNotificationSetup: React.FC = () => {
   const { isSubscribed, setSubscribed, setResponderId } = usePushNotificationStore();
@@ -47,7 +48,7 @@ export const PushNotificationSetup: React.FC = () => {
           setSubscribed(true, null);
         }
       } catch (swErr) {
-        console.warn('ServiceWorker push subscription failed, falling back to local notification state for demo.', swErr);
+        logger.warn('ServiceWorker push subscription failed, falling back to local notification state for demo.', swErr);
         setSubscribed(true, null);
       }
 
@@ -72,7 +73,7 @@ export const PushNotificationSetup: React.FC = () => {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (err) {
-      console.error('Test notification failed:', err);
+      logger.error('Test notification failed:', err);
     }
   };
 

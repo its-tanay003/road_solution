@@ -5,6 +5,7 @@ import {
   CheckCircle2, Medal, Trophy
 } from 'lucide-react';
 import { useTrainingStore } from '../store/trainingStore';
+import { logger } from '../lib/logger';
 
 type Phase = 'SETUP' | 'ACTIVE' | 'DEBRIEF';
 
@@ -86,7 +87,7 @@ export const TrainingSimulator: React.FC = () => {
         }
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setScenarioText("Error loading scenario. Please try again.");
       setIsStreaming(false);
     }

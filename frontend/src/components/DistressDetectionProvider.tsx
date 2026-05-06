@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useDistressStore } from '../store/distressStore';
+import { logger } from '../lib/logger';
 
 export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isActive, addEvent, recalculate } = useDistressStore();
@@ -91,7 +92,7 @@ export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> 
           });
         }
       } catch (err) {
-        console.warn('Battery API not supported or permission denied', err);
+        logger.warn('Battery API not supported or permission denied', err);
       }
     };
 

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Hospital, Navigation, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getSocket } from '../lib/socket';
+import { logger } from '../lib/logger';
 
 interface TraumaCenter {
   id: string;
@@ -34,7 +35,7 @@ export const NearestTraumaCenter: React.FC = () => {
             lat = pos.coords.latitude;
             lng = pos.coords.longitude;
           } catch {
-            console.warn("Using default location for trauma center");
+            logger.warn("Using default location for trauma center");
           }
         }
 
@@ -52,7 +53,7 @@ export const NearestTraumaCenter: React.FC = () => {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch nearest trauma center", err);
+        logger.error("Failed to fetch nearest trauma center", err);
       } finally {
         setLoading(false);
       }

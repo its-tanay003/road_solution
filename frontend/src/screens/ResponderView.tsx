@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
-import L from 'leaflet';
 import { 
   Phone, 
   Activity, 
@@ -18,32 +16,11 @@ import {
   useAmbulanceStore, 
   useAccessibilityStore,
 } from '../store';
-import { useDroneStore } from '../store/droneStore';
 import { GoldenHourTimer } from '../components/GoldenHourTimer';
-import { DroneMapMarker } from '../components/DroneMapMarker';
 import { DroneVideoFeed } from '../components/DroneVideoFeed';
 import { ARIntroCard } from '../components/ARIntroCard';
-
-// Custom Marker Icons
-const responderIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1066/1066987.png', // Blue ambulance icon
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
-
-const incidentIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/564/564619.png', // Red pulse/alert icon
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
-
-const RecenterMap = ({ coords }: { coords: [number, number] }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(coords, 15);
-  }, [coords, map]);
-  return null;
-};
+import { LiveMap as LiveMapComponent } from '../components/LiveMap';
+import { logger } from '../lib/logger';
 
 const ResponderView: React.FC = () => {
   const { unitId } = useParams();
@@ -60,7 +37,7 @@ const ResponderView: React.FC = () => {
   const handleArrived = () => {
     setArrived(true);
     // In a real app, this would emit a socket event
-    console.log(`Responder ${unitId} arrived on scene`);
+    logger.log(`Responder ${unitId} arrived on scene`);
   };
 
   const triageData = {
@@ -96,19 +73,15 @@ const ResponderView: React.FC = () => {
 
       {/* Map Section */}
       <div className="flex-1 relative">
-        <MapContainer 
-          center={currentPos} 
-          zoom={15} 
-          style={{ height: '100%', width: '100%', filter: 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
-          zoomControl={false}
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={currentPos} icon={responderIcon} />
-          <Marker position={targetPos} icon={incidentIcon} />
-          <Polyline positions={[currentPos, targetPos]} color="#3B82F6" weight={4} dashArray="10, 10" />
-          <DroneMapMarker target={targetPos} />
-          <RecenterMap coords={currentPos} />
-        </MapContainer>
+        <LiveMapComponent 
+          userLat={currentPos[0]}
+          userLng={currentPos[1]}
+          incidentLat={targetPos[0]}
+          incidentLng={targetPos[1]}
+          services={[]}
+          route={[currentPos, targetPos]}
+          drones={[{ id: 'D-01', lat: targetPos[0], lng: targetPos[1] }]}
+        />
 
         {/* Floating ETA */}
         {!arrived && (

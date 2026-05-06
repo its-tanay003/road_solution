@@ -6,6 +6,7 @@ import { useUIStore } from '../store';
 import { useWearableStore } from '../store/wearableStore';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { logger } from '../lib/logger';
 
 export const TriageChat = () => {
   const { panicScore } = useUIStore();
@@ -151,7 +152,7 @@ export const TriageChat = () => {
       speakMessage(streamedResponse);
       setIsOfflineMode(false);
     } catch (error) {
-      console.error("Chat Error:", error);
+      logger.error("Chat Error:", error);
       setIsOfflineMode(true);
       const offlineResponse = "PROTOCOL 404: AI offline. Are they breathing? Start CPR if needed. Apply pressure to bleeding.";
       setMessages(prev => [...prev, { role: 'assistant', content: offlineResponse }]);

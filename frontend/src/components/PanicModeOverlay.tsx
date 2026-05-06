@@ -14,6 +14,7 @@ import {
   X as CloseIcon
 } from 'lucide-react';
 import { NearestTraumaCenter } from './NearestTraumaCenter';
+import { logger } from '../lib/logger';
 
 export const PanicModeOverlay: React.FC = () => {
   const { isActive, cancelSos, countdownTime, india112Alerted } = useSosStore();
@@ -30,7 +31,7 @@ export const PanicModeOverlay: React.FC = () => {
           wakeLock = await (navigator as any).wakeLock.request('screen');
         }
       } catch (err) {
-        console.error('Wake Lock error:', err);
+        logger.error('Wake Lock error:', err);
       }
     };
     requestWakeLock();

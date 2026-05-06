@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSosStore } from '../store';
 import { socket } from '../services/socket';
+import { logger } from '../lib/logger';
 
 export const useWebRTC = () => {
   const { isActive, updateDeliveryStatus } = useSosStore();
@@ -86,13 +87,13 @@ export const useWebRTC = () => {
 
   const setupDataChannel = (channel: RTCDataChannel, peerId: string) => {
     channel.onopen = () => {
-      console.log(`WebRTC Data Channel OPEN with ${peerId}`);
+      logger.log(`WebRTC Data Channel OPEN with ${peerId}`);
       dataChannels.current.set(peerId, channel);
       updateDeliveryStatus('mesh', 'CONNECTED');
     };
 
     channel.onclose = () => {
-      console.log(`WebRTC Data Channel CLOSED with ${peerId}`);
+      logger.log(`WebRTC Data Channel CLOSED with ${peerId}`);
       dataChannels.current.delete(peerId);
       if (dataChannels.current.size === 0) {
         updateDeliveryStatus('mesh', 'DISCONNECTED');
@@ -100,7 +101,7 @@ export const useWebRTC = () => {
     };
 
     channel.onmessage = (event) => {
-      console.log('Received P2P Message:', event.data);
+      logger.log('Received P2P Message:', event.data);
       // In a real scenario, if this peer receives an SOS from another, 
       // they can relay it to the backend if they have internet.
     };
@@ -121,7 +122,7 @@ export const useWebRTC = () => {
 
   const broadcastMeshSos = (encryptedPayload: any) => {
     if (dataChannels.current.size === 0) {
-      console.warn('No active mesh peers to broadcast to.');
+      logger.warn('No active mesh peers to broadcast to.');
       return false;
     }
 
@@ -129,7 +130,7 @@ export const useWebRTC = () => {
     dataChannels.current.forEach((channel, peerId) => {
       if (channel.readyState === 'open') {
         channel.send(JSON.stringify(encryptedPayload));
-        console.log(`Sent SOS via Mesh to ${peerId}`);
+        logger.log(`Sent SOS via Mesh to ${peerId}`);
         success = true;
       }
     });

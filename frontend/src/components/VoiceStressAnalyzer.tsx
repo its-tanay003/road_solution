@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Activity, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { useUIStore } from '../store';
+import { logger } from '../lib/logger';
 
 interface VoiceStressAnalyzerProps {
   onClose?: () => void;
@@ -50,7 +51,7 @@ export const VoiceStressAnalyzer = ({ onClose }: VoiceStressAnalyzerProps) => {
       setError(null);
       analyze();
     } catch (err) {
-      console.error("Mic access error:", err);
+      logger.error("Mic access error:", err);
       setError("Microphone access denied. Enable permissions to start stress analysis.");
     }
   };

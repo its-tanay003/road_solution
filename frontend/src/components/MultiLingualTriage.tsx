@@ -10,6 +10,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { logger } from '../lib/logger';
 
 interface Message {
   id: string;
@@ -121,7 +122,7 @@ export const MultiLingualTriage: React.FC = () => {
       ));
 
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       const errorMsg: Message = {
         id: crypto.randomUUID(),
         sender: 'ai',

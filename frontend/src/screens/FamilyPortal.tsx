@@ -14,6 +14,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { logger } from '../lib/logger';
 
 // Mock Leaflet Icon
 const redIcon = new L.Icon({
@@ -47,7 +48,7 @@ export const FamilyPortal: React.FC = () => {
   const handleEnRoute = () => {
     setEnRoute(true);
     // In real app, emit socket event here
-    console.log("Emitting familyMember:enRoute for token:", incidentToken);
+    logger.log("Emitting familyMember:enRoute for token:", incidentToken);
   };
 
   return (

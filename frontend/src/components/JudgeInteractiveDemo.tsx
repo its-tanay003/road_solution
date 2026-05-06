@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useJudgeStore } from '../store';
+import { logger } from '../lib/logger';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const APP_URL = window.location.origin;
@@ -34,7 +35,7 @@ export const JudgeInteractiveDemo: React.FC = () => {
 
     const s = io(SOCKET_URL);
     s.on('connect', () => {
-      console.log('Presentation socket connected');
+      logger.log('Presentation socket connected');
     });
 
     s.on('judge:sos', (incident: { sessionId: string; name: string; location: [number, number]; timestamp: string; id: string }) => {

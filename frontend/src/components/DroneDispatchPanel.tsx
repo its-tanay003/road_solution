@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useDroneStore, DroneStatus } from '../store/droneStore';
+import React, { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useDroneStore } from '../store/droneStore';
+import type { DroneStatus } from '../store/droneStore';
 import { CheckCircle2, Navigation, Radio, Activity, Eye } from 'lucide-react';
 
-const STATUS_CONFIG: Record<DroneStatus, { label: string; icon: any; color: string }> = {
+const STATUS_CONFIG: Record<DroneStatus, { label: string; icon: React.ElementType; color: string }> = {
   IDLE: { label: 'Standby', icon: Radio, color: 'text-gray-400' },
   TAKEOFF: { label: 'Takeoff — Chennai Guindy Hub', icon: Navigation, color: 'text-(--clr-green)' },
   CRUISING: { label: 'Altitude: 120m AGL — cruising', icon: Activity, color: 'text-(--clr-green)' },
@@ -14,6 +15,10 @@ const STATUS_CONFIG: Record<DroneStatus, { label: string; icon: any; color: stri
 
 export const DroneDispatchPanel: React.FC = () => {
   const { isDispatched, status, eta, setStatus, updateEta } = useDroneStore();
+
+  // Track ETA via ref to avoid stale closure in setInterval
+  const etaRef = useRef(eta);
+  useEffect(() => { etaRef.current = eta; }, [eta]);
 
   useEffect(() => {
     if (!isDispatched) return;
@@ -32,7 +37,7 @@ export const DroneDispatchPanel: React.FC = () => {
     sequence();
 
     const timer = setInterval(() => {
-      updateEta(Math.max(0, eta - 1));
+      updateEta(Math.max(0, etaRef.current - 1));
     }, 1000);
 
     return () => clearInterval(timer);

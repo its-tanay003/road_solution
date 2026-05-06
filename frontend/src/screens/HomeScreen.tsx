@@ -216,7 +216,7 @@ const HomeScreen: React.FC = () => {
       <header className="h-12 border-b border-[var(--clr-border)] flex items-center justify-between px-4 z-20 bg-[var(--clr-bg)]/80 backdrop-blur-md">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold hologram-text leading-none">ROADSoS</h1>
-          <span className="text-[10px] font-mono text-[var(--clr-s saffron)] tracking-widest mt-0.5">
+          <span className="text-[10px] font-mono text-[var(--clr-saffron)] tracking-widest mt-0.5">
             EMERGENCY INTELLIGENCE PLATFORM
           </span>
         </div>

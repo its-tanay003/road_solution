@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, BrainCircuit, Loader2 } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 import { fetchWeather, type WeatherData } from '../utils/weatherEngine';
+import { logger } from '../lib/logger';
 
 interface Incident {
   lat: number;
@@ -61,7 +62,7 @@ export const RiskForecastLayer = () => {
         // Minimal training for the layer specifically if it can't find the main one
         setTfModel(model);
       } catch (e) {
-        console.error("TF Load Error", e);
+        logger.error("TF Load Error", e);
       }
     };
     loadModel();

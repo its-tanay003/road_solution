@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Wind, Eye, Droplets, Thermometer, ShieldCheck, Activity } from 'lucide-react';
 import { useWeatherStore } from '../store/weatherStore';
 import axios from 'axios';
+import { logger } from '../lib/logger';
 
 export const PredictiveRiskEngine: React.FC = () => {
   const { currentWeather, setWeather } = useWeatherStore();
@@ -53,7 +54,7 @@ export const PredictiveRiskEngine: React.FC = () => {
       setRiskScore(newScore);
 
     } catch (error) {
-      console.error("Open-Meteo Fetch Error:", error);
+      logger.error("Open-Meteo Fetch Error:", error);
     }
   }, [setWeather]);
 

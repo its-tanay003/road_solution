@@ -17,10 +17,15 @@ let io: SocketIOServer;
 export const initSocket = (server: HttpServer) => {
   io = new SocketIOServer(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || '*',
-      methods: ['GET', 'POST']
-    }
+      origin: process.env.VITE_APP_URL || process.env.FRONTEND_URL || '*',
+      methods: ['GET', 'POST'],
+    },
+    transports: ['polling'], // Force polling for Vercel serverless stability
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    upgradeTimeout: 30000,
   });
+
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);

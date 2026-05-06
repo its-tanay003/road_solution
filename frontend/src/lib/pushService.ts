@@ -1,3 +1,4 @@
+import { logger } from './logger';
 /**
  * Web Push API Service for ROADSoS
  * Handles local browser notifications for the PWA.
@@ -5,7 +6,7 @@
 
 export const requestNotificationPermission = async () => {
   if (!('Notification' in window)) {
-    console.error('This browser does not support desktop notifications');
+    logger.error('This browser does not support desktop notifications');
     return false;
   }
 
@@ -66,7 +67,7 @@ export const notifyNearbyResponders = async (
         tag: 'incident-alert',
         data: { url: '/war-room' }
       });
-      console.log(`PWA Push sent to ${responder.unitId} (${dist.toFixed(1)}km away)`);
+      logger.log(`PWA Push sent to ${responder.unitId} (${dist.toFixed(1)}km away)`);
     }
   });
 };

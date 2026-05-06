@@ -58,12 +58,6 @@ export const AppLoadingScreen: React.FC<Props> = ({ onComplete }) => {
       onClick={handleSkip}
       className="fixed inset-0 z-[9999] bg-[#080C14] flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
     >
-      {/* Hackathon Badge */}
-      <div className="absolute top-8 right-8 px-3 py-1 bg-[#FF9933]/20 border border-[#FF9933]/40 rounded-full">
-        <span className="text-[10px] font-black text-[#FF9933] tracking-[0.2em] uppercase">
-          Hackathon Demo Mode
-        </span>
-      </div>
 
       {/* Center Content */}
       <div className="text-center relative">

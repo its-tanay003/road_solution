@@ -10,6 +10,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
+import { logger } from '../lib/logger';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -29,7 +30,7 @@ export const JudgeMobileView: React.FC = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => setLocation([pos.coords.latitude, pos.coords.longitude]),
         (err) => {
-          console.error(err);
+          logger.error(err);
           setError('GPS Access Denied. Using mock location.');
           setLocation([28.6139, 77.2090]); // Fallback Delhi
         }
@@ -38,7 +39,7 @@ export const JudgeMobileView: React.FC = () => {
 
     const s = io(SOCKET_URL);
     s.on('connect', () => {
-      console.log('Mobile socket connected');
+      logger.log('Mobile socket connected');
       setSocket(s);
     });
 

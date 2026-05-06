@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
+import { logger } from '../lib/logger';
 
 export const generateJudgeHandout = async () => {
   const doc = new jsPDF({
@@ -71,7 +72,7 @@ export const generateJudgeHandout = async () => {
     doc.setFontSize(7);
     doc.text('Scan for Live Deployment', 15, 205);
   } catch (err) {
-    console.error('QR Gen failed', err);
+    logger.error('QR Gen failed', err);
   }
 
   doc.setFontSize(8);

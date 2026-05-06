@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSosStore, useNetworkStore } from '../store';
+import { logger } from '../lib/logger';
 
 export interface TelemetryPoint {
   time: number;
@@ -58,7 +59,7 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
 
       // 1. Crash Detection (>4.0g)
       if (gForce > 4.0) {
-        console.warn(`HIGH IMPACT DETECTED! G-Force: ${gForce.toFixed(2)}G`);
+        logger.warn(`HIGH IMPACT DETECTED! G-Force: ${gForce.toFixed(2)}G`);
         setImpactDetected(true);
         setLowBandwidth(true); // Disable animations to save processing
         startCountdown();
@@ -90,7 +91,7 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
       // Setup a simulated high-g impact after 5 seconds if simulating
       const timer = setTimeout(() => {
         if (!isActive && !countdownActive) {
-          console.warn('SIMULATED CRASH: 5.2G impact detected.');
+          logger.warn('SIMULATED CRASH: 5.2G impact detected.');
           setImpactDetected(true);
           setLowBandwidth(true);
           startCountdown();
@@ -101,7 +102,7 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
       window.addEventListener('devicemotion', handleMotion);
       // Add debug listener for E2E tests
       const handleSimulateCrash = () => {
-        console.log('Simulated crash triggered via event');
+        logger.log('Simulated crash triggered via event');
         setImpactDetected(true);
         setLowBandwidth(true);
         startCountdown();

@@ -8,6 +8,7 @@ import { ShieldAlert, Info } from 'lucide-react';
 import { DroneDispatchLayer } from './DroneDispatchLayer';
 import { HospitalMapLayer } from './HospitalMapLayer';
 import { IndiaBlackSpots } from './IndiaBlackSpots';
+import { logger } from '../lib/logger';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -63,7 +64,7 @@ export const MapView = ({ showRiskHeatmap = false, showBlackSpots = false }: { s
         .then(data => {
           if (data.points) setHeatpoints(data.points);
         })
-        .catch(err => console.error('Failed to load risk heatmap', err));
+        .catch(err => logger.error('Failed to load risk heatmap', err));
     }
   }, [showRiskHeatmap, centerLat, centerLng]);
 

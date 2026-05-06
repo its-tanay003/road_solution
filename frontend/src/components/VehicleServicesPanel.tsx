@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../lib/db';
+import { logger } from '../lib/logger';
 
 interface VehicleService {
   id: string;
@@ -81,7 +82,7 @@ export const VehicleServicesPanel: React.FC = () => {
           }));
         }
       } catch (osmErr) {
-        console.warn('OSM Fetch failed for vehicle services:', osmErr);
+        logger.warn('OSM Fetch failed for vehicle services:', osmErr);
       }
 
       if (fetchedServices.length === 0) {
@@ -95,7 +96,7 @@ export const VehicleServicesPanel: React.FC = () => {
             distance: haversine(lat, lng, s.lat, s.lng)
           }));
         } catch (googleErr) {
-          console.error('Google Fetch failed for vehicle services:', googleErr);
+          logger.error('Google Fetch failed for vehicle services:', googleErr);
         }
       }
 
@@ -108,7 +109,7 @@ export const VehicleServicesPanel: React.FC = () => {
       }
 
     } catch (err: unknown) {
-      console.error('Failed to fetch vehicle services:', err);
+      logger.error('Failed to fetch vehicle services:', err);
       const cached = await db.nearbyServices.where('category').anyOf(['Towing', 'Puncture', 'Mechanic', 'Fuel']).toArray();
       if (cached.length > 0) {
         setServices(cached.map(s => ({ ...s, source: 'Cached' as const })) as unknown as VehicleService[]);
@@ -147,7 +148,7 @@ export const VehicleServicesPanel: React.FC = () => {
         fetchedAt: new Date().toISOString()
       })));
     } catch (err) {
-      console.error("Failed to save area:", err);
+      logger.error("Failed to save area:", err);
     }
   };
 

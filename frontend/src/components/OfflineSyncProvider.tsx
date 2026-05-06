@@ -5,6 +5,7 @@ import emergencyData from '../data/emergency-numbers.json';
 import { Database, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { haversine } from '../utils/geo';
+import { logger } from '../lib/logger';
 
 interface OfflineSyncContextType {
   isCaching: boolean;
@@ -51,7 +52,7 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setIsReady(true);
       setTimeout(() => setIsCaching(false), 2000);
     } catch (err) {
-      console.error('Pre-cache failed:', err);
+      logger.error('Pre-cache failed:', err);
       setIsCaching(false);
     }
   };

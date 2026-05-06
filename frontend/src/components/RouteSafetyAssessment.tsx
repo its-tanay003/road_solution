@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeatherStore } from '../store/weatherStore';
 import { useRouteStore } from '../store/routeStore';
+import { logger } from '../lib/logger';
 
 interface DangerSegment {
   name: string;
@@ -92,7 +93,7 @@ export const RouteSafetyAssessment: React.FC = () => {
         setMapZoom(9);
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     } finally {
       setIsAnalyzing(false);
     }

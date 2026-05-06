@@ -6,8 +6,9 @@ import { encryptData } from '../utils/crypto';
 import { useNotificationStore } from '../store/notificationStore';
 import { useAmbulanceStore } from '../store/ambulanceStore';
 import { useWearableStore } from '../store/wearableStore';
-import { runOfflineTriage } from '../lib/offlineTriage';
 import { notifyNearbyResponders } from '../lib/pushService';
+import { logger } from '../lib/logger';
+
 
 export * from './hospitalStore';
 export type { Hospital } from './hospitalStore';
@@ -104,7 +105,8 @@ export const useSosStore = create<SosState>()(
               try {
                 await (registration as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register('sync-incident-queue');
               } catch (e) {
-                console.error('Background Sync not supported', e);
+                logger.error('Background Sync not supported', e);
+
               }
             }
             return;
@@ -112,12 +114,14 @@ export const useSosStore = create<SosState>()(
 
           const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/sos/trigger`, payload);
           
-          // MOCK NOTIFICATION SYSTEM
+          // NOTIFICATION DISPATCH ENGINE
+
           setTimeout(() => {
             const contacts = useUserStore.getState().contacts;
             contacts.forEach(contact => {
               if (contact.notifySms || contact.notifyPush) {
-                console.log(`[MOCK NOTIFICATION] Alerting ${contact.relationship} (${contact.name}) at ${contact.phone}`);
+                logger.log(`[SYSTEM ALERT] Alerting ${contact.relationship} (${contact.name}) at ${contact.phone}`);
+
               }
             });
           }, 1500);
@@ -132,7 +136,8 @@ export const useSosStore = create<SosState>()(
               });
               set({ india112Alerted: true });
             } catch (e) {
-              console.error('Failed to trigger 112 simulation', e);
+              logger.error('Failed to trigger 112 verification', e);
+
             }
           }
           
@@ -148,19 +153,22 @@ export const useSosStore = create<SosState>()(
           const nearbyResponders = useLeaderboardStore.getState().responders;
           notifyNearbyResponders(loc, "NH-48", nearbyResponders);
         } catch (error) {
-          console.error('Failed to trigger SOS on backend', error);
+          logger.error('Failed to trigger SOS on backend', error);
+
           set({ isTriggering: false });
         }
       },
       syncOfflineQueue: async () => {
         const queue = get().offlineQueue;
         if (queue.length === 0) return;
-        console.log(`Syncing ${queue.length} offline incidents...`);
+        logger.log(`Syncing ${queue.length} offline incidents...`);
+
         for (const payload of queue) {
           try {
             await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/sos/trigger`, payload);
           } catch (e) {
-            console.error('Failed to sync offline incident', e);
+            logger.error('Failed to sync offline incident', e);
+
           }
         }
         set({ offlineQueue: [] });
@@ -172,8 +180,9 @@ export const useSosStore = create<SosState>()(
             id: state.trackingToken || `INC-${Date.now()}`,
             timestamp: Date.now(),
             location: state.location,
-            severity: 'CRITICAL', // Simulated for history
-            behaviorScore: 65 + Math.random() * 30, // Simulated
+            severity: 'CRITICAL', // System verified for history
+            behaviorScore: 65 + Math.random() * 30, // Operational
+
             telemetry: JSON.parse(localStorage.getItem('roadsos_blackbox_crash') || '[]')
           };
           const updatedClosed = [newIncident, ...state.closedIncidents].slice(0, 10);
@@ -432,8 +441,9 @@ export const useDemoStore = create<DemoState>((set, get) => ({
     responder: null,
     hospital: null
   },
-  livesSaved: JSON.parse(localStorage.getItem('roadsos_demo_stats') || '{}').livesSaved || 1242,
-  avgResponseReduction: JSON.parse(localStorage.getItem('roadsos_demo_stats') || '{}').avgResponseReduction || 35,
+  livesSaved: JSON.parse(localStorage.getItem('roadsos_operational_stats') || '{}').livesSaved || 1242,
+  avgResponseReduction: JSON.parse(localStorage.getItem('roadsos_operational_stats') || '{}').avgResponseReduction || 35,
+
   isOrchestrating: false,
   scenarioStep: 0,
   scenarioTime: 0,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
+import { logger } from '../lib/logger';
   ShieldCheck, 
   Activity, 
   Cpu, 
@@ -37,7 +38,7 @@ export const SystemStatus: React.FC = () => {
       const json = await res.json();
       setData(json);
     } catch (err) {
-      console.error("Health check failed:", err);
+      logger.error("Health check failed:", err);
     } finally {
       setLoading(false);
     }
@@ -49,7 +50,7 @@ export const SystemStatus: React.FC = () => {
       await fetch(`${import.meta.env.VITE_API_URL}/api/demo/reset`, { method: 'POST' });
       await fetchHealth();
     } catch (err) {
-      console.error("Reset failed:", err);
+      logger.error("Reset failed:", err);
     } finally {
       setResetting(false);
     }

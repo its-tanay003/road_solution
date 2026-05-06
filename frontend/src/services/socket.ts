@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { logger } from '../lib/logger';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -10,9 +11,9 @@ export const socket = io(SOCKET_URL, {
 });
 
 socket.on('connect', () => {
-  console.log('Connected to ROADSoS Signaling Server');
+  logger.log('Connected to ROADSoS Signaling Server');
 });
 
 socket.on('disconnect', () => {
-  console.log('Disconnected from ROADSoS Signaling Server');
+  logger.log('Disconnected from ROADSoS Signaling Server');
 });

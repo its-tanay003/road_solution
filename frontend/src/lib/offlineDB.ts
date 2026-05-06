@@ -1,4 +1,5 @@
 import { haversine } from '../utils/geo';
+import { logger } from './logger';
 
 const DB_NAME = 'roadsos_offline';
 const DB_VERSION = 2;
@@ -127,7 +128,7 @@ export async function syncIncidentQueue(syncFn: (incident: QueuedIncident) => Pr
       await syncFn(incident);
       await deleteQueuedIncident(incident.incidentId);
     } catch (err) {
-      console.error(`Failed to sync incident ${incident.incidentId}:`, err);
+      logger.error(`Failed to sync incident ${incident.incidentId}:`, err);
     }
   }
   return queue.length;

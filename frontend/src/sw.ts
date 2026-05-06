@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute } from 'workbox-precaching';
+import { logger } from './lib/logger';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -30,7 +31,7 @@ self.addEventListener('push', (event: PushEvent) => {
       self.registration.showNotification(title || '🚨 ROADSoS ALERT', options)
     );
   } catch (err) {
-    console.error('Push payload parsing failed:', err);
+    logger.error('Push payload parsing failed:', err);
   }
 });
 

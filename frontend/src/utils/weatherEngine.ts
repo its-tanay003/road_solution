@@ -1,3 +1,4 @@
+import { logger } from '../lib/logger';
 /**
  * ROADSoS Weather & Road Condition Engine
  * Integrated with Open-Meteo (Free, No Key Required)
@@ -54,7 +55,7 @@ export const fetchWeather = async (lat: number, lng: number): Promise<WeatherDat
       precipitation: current.precipitation,
     };
   } catch (error) {
-    console.error('Failed to fetch weather data:', error);
+    logger.error('Failed to fetch weather data:', error);
     // Fallback to optimal
     return {
       temperature: 20,

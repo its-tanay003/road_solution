@@ -6,8 +6,8 @@ import { ShareCardGenerator } from './ShareCardGenerator';
 
 /**
  * DemoOrchestrator
- * High-impact command center for hackathon presentations.
- * Allows judges/presenters to control time, trigger scenarios, and toggle HUD.
+ * High-impact command center for system validation and audit.
+ * Allows administrators to control time, trigger scenarios, and toggle HUD.
  */
 export const DemoOrchestrator = () => {
   const { isPaused, playbackSpeed, isScreenshotMode, togglePause, setSpeed, toggleScreenshot, togglePresentationMode, toggleShortcuts, showShortcuts } = useDemoStore();
@@ -108,7 +108,7 @@ export const DemoOrchestrator = () => {
           <button 
             onClick={togglePresentationMode}
             className="p-2 rounded-xl hover:bg-white/5 text-[#FF9933] transition-all"
-            title="Pitch Deck Mode (Shift+P)"
+            title="Administrator Protocol (Shift+P)"
           >
             <Monitor size={18} />
           </button>
@@ -178,15 +178,15 @@ export const DemoOrchestrator = () => {
                   <Monitor size={24} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Demo Controls</h2>
-                  <p className="text-[10px] font-mono text-[#FF9933] uppercase tracking-widest">Presenter Mode v4.0</p>
+                  <h2 className="text-2xl font-bold">Operational Controls</h2>
+                  <p className="text-[10px] font-mono text-[#FF9933] uppercase tracking-widest">Administrator Protocol v4.0</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 font-mono text-xs">
                 {[
                   { key: '1', label: 'Trigger Urban Crash', icon: Siren },
-                  { key: '2', label: 'Simulate Mesh Failover', icon: Zap },
+                  { key: '2', label: 'Mesh Protocol Test', icon: Zap },
                   { key: '3', label: 'Bystander Intervention', icon: Shield },
                   { key: '0', label: 'Kill Internet (AI Failover)', icon: Zap },
                   { key: 'P', label: 'Pause/Play (Q&A Mode)', icon: isPaused ? Play : Pause },
@@ -206,7 +206,8 @@ export const DemoOrchestrator = () => {
               </div>
 
               <p className="mt-8 text-[9px] text-center text-white/20 uppercase tracking-[0.2em]">
-                Exclusively for IIT Madras Road Safety Hackathon 2026
+                Exclusively for National Road Safety Network
+
               </p>
             </motion.div>
           </motion.div>

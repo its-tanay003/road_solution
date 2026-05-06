@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { MapView } from '../components/MapView';
+import { LiveMap as LiveMapComponent } from '../components/LiveMap';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Phone, Navigation, Activity, Shield, Map as MapIcon, Layers, Hospital } from 'lucide-react';
-import { useServicesStore } from '../store';
+import { useServicesStore, useSosStore } from '../store';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -10,11 +10,25 @@ import { HospitalCapacityPanel } from '../components/HospitalCapacityPanel';
 
 export const LiveMap = () => {
   const { services } = useServicesStore();
+  const { location } = useSosStore();
   const [sheetState, setSheetState] = useState<'peek' | 'half' | 'full'>('peek');
   const [showRiskHeatmap, setShowRiskHeatmap] = useState(false);
   const [showBlackSpots, setShowBlackSpots] = useState(false);
   const [showHospitalPanel, setShowHospitalPanel] = useState(false);
   const navigate = useNavigate();
+
+  const userLat = location?.lat || 28.6139;
+  const userLng = location?.lng || 77.2090;
+
+  // Map services to format expected by LiveMapComponent
+  const mapServices = services.map((s, idx) => ({
+    id: s.id || `svc-${idx}`,
+    name: s.name,
+    type: s.type,
+    lat: s.lat || userLat,
+    lng: s.lng || userLng,
+    phone: s.phone_primary
+  }));
 
   const getSheetY = () => {
     switch (sheetState) {
@@ -29,7 +43,13 @@ export const LiveMap = () => {
     <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden bg-(--nx-bg-base)">
       {/* Full Bleed Map with Scanline Filter */}
       <div className="absolute inset-0 z-0">
-        <MapView showRiskHeatmap={showRiskHeatmap} showBlackSpots={showBlackSpots} />
+        <LiveMapComponent 
+          services={mapServices}
+          userLat={userLat}
+          userLng={userLng}
+          showRiskHeatmap={showRiskHeatmap}
+          showBlackSpots={showBlackSpots}
+        />
         {/* CRT/Scanline Overlay specifically for map to give it tactical feel */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-10" />
       </div>
@@ -83,7 +103,7 @@ export const LiveMap = () => {
                <Hospital size={14} />
                HOSPITAL CAPACITY: {showHospitalPanel ? 'ENABLED' : 'DISABLED'}
              </Button>
-             <div className="nexus-card bg-[var(--nx-bg-surface)]/90 backdrop-blur-md p-2 flex gap-1">
+             <div className="nexus-card bg-(--nx-bg-surface)/90 backdrop-blur-md p-2 flex gap-1">
                 {[MapIcon, Activity, Shield].map((Icon, i) => (
                    <Button key={i} variant="ghost" size="sm" className="p-2 min-w-0 hover:bg-white/5">
                       <Icon size={16} />

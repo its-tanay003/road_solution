@@ -17,6 +17,11 @@ import ResponderView from './screens/ResponderView';
 import { ARNavigationView } from './components/ARNavigationView';
 import { PitchDeckMode } from './components/PitchDeckMode';
 import { KeyboardShortcutOverlay } from './components/KeyboardShortcutOverlay';
+import RoadmapPage from './screens/RoadmapPage';
+import ResearchPage from './screens/ResearchPage';
+import TechnicalPage from './screens/TechnicalPage';
+import { LiveMap } from './pages/LiveMap';
+import { HospitalFinder } from './screens/HospitalFinder';
 
 // Stores
 import { useMedicalProfileStore } from './store/medicalProfileStore';
@@ -44,8 +49,27 @@ const AppContent = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for demo mode in URL
-  const isDemo = searchParams.get('demo') === 'true';
-  const { isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario } = useDemoStore();
+  const isDemoMode = searchParams.get('demo') === 'true';
+  const [isDemoControlOpen, setDemoControlOpen] = useState(false);
+  const { 
+    isPresentationMode, 
+    togglePresentationMode, 
+    toggleShortcuts, 
+    triggerScenario, 
+    showShortcuts, 
+    isPaused 
+  } = useDemoStore();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ctrl+Shift+D to toggle demo controls
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setDemoControlOpen(v => !v);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   useEffect(() => {
     const handleGlobalKeydown = (e: KeyboardEvent) => {
@@ -62,7 +86,7 @@ const AppContent = () => {
       }
 
       // Quick triggers for scenarios if in demo mode
-      if (isDemo && !isPresentationMode) {
+      if (isDemoMode && !isPresentationMode) {
         if (e.key === '1') triggerScenario(1);
         if (e.key === '2') triggerScenario(2);
         if (e.key === '3') triggerScenario(3);
@@ -72,13 +96,13 @@ const AppContent = () => {
 
     window.addEventListener('keydown', handleGlobalKeydown);
     return () => window.removeEventListener('keydown', handleGlobalKeydown);
-  }, [isDemo, isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario]);
+  }, [isDemoMode, isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario]);
 
   if (isLoading) {
     return <AppLoadingScreen onComplete={() => setIsLoading(false)} />;
   }
 
-  if (!onboardingComplete && !isDemo) {
+  if (!onboardingComplete && !isDemoMode) {
     return <OnboardingFlow />;
   }
 
@@ -100,6 +124,11 @@ const AppContent = () => {
           <Route path="/family/:incidentId" element={<PageWrapper><FamilyPortal /></PageWrapper>} />
           <Route path="/responder/:unitId" element={<PageWrapper><ResponderView /></PageWrapper>} />
           <Route path="/responder/:incidentId/ar" element={<PageWrapper><ARNavigationView /></PageWrapper>} />
+          <Route path="/map" element={<PageWrapper><LiveMap /></PageWrapper>} />
+          <Route path="/hospitals" element={<PageWrapper><HospitalFinder /></PageWrapper>} />
+          <Route path="/roadmap" element={<PageWrapper><RoadmapPage /></PageWrapper>} />
+          <Route path="/research" element={<PageWrapper><ResearchPage /></PageWrapper>} />
+          <Route path="/technical" element={<PageWrapper><TechnicalPage /></PageWrapper>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
@@ -108,7 +137,7 @@ const AppContent = () => {
       <NHAISmartHighwayPanel />
 
       {/* Global Demo Tools */}
-      {isDemo && <DemoOrchestrator />}
+      {isDemoMode && isDemoControlOpen && <DemoOrchestrator />}
       
       {/* Presentation & Shortcut Layers */}
       <PitchDeckMode 
@@ -120,9 +149,9 @@ const AppContent = () => {
         }}
       />
       <KeyboardShortcutOverlay 
-        isOpen={useDemoStore(state => state.showShortcuts)} 
+        isOpen={showShortcuts} 
         onClose={() => toggleShortcuts(false)}
-        isPaused={useDemoStore(state => state.isPaused)}
+        isPaused={isPaused}
       />
     </div>
   );

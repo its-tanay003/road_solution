@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useUIStore } from '../store';
 import { useDistressStore } from '../store/distressStore';
+import { logger } from '../lib/logger';
 
 export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) => {
   const { isStressed, setStressed } = useUIStore();
@@ -14,7 +15,7 @@ export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) =
         const permission = await (DeviceMotionEvent as any).requestPermission();
         setPermissionGranted(permission === 'granted');
       } catch (error) {
-        console.error('Error requesting motion permission:', error);
+        logger.error('Error requesting motion permission:', error);
         setPermissionGranted(false);
       }
     } else {
@@ -45,7 +46,7 @@ export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) =
         const delta = Math.abs(acceleration - 9.8);
 
         if (delta > SHAKE_THRESHOLD && !isStressed) {
-          console.warn('CRASH DETECTED: Triggering Ambient UI Brutalist Mode');
+          logger.warn('CRASH DETECTED: Triggering Ambient UI Brutalist Mode');
           setStressed(true);
         }
       }

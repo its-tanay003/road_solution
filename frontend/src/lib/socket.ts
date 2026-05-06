@@ -1,24 +1,15 @@
 import { io, Socket } from 'socket.io-client';
 
-const URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-let socket: Socket | null = null;
+export const socket: Socket = io(URL, {
+  transports: ['polling'],
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000,
+  autoConnect: false,
+});
 
-export const getSocket = (): Socket => {
-  if (!socket) {
-    socket = io(URL, {
-      autoConnect: true,
-      reconnection: true,
-      transports: ['websocket', 'polling']
-    });
-
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket?.id);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-  }
-  return socket;
-};
+// For compatibility with existing components
+export const getSocket = (): Socket => socket;

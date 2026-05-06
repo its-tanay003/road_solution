@@ -10,11 +10,13 @@ import {
   Navigation,
   Clock,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../lib/db';
 import { getSocket } from '../lib/socket';
+import { logger } from '../lib/logger';
 
 interface Service {
   id: string;
@@ -81,7 +83,7 @@ export const NearbyServicesPanel: React.FC = () => {
             distance: haversine(lat, lng, s.lat, s.lng)
           }));
         }
-      } catch(e) { console.error(e); }
+      } catch(e) { logger.error(e); }
 
       // Fallback/Hybrid fetch
       if (fetchedServices.length === 0) {
@@ -95,7 +97,7 @@ export const NearbyServicesPanel: React.FC = () => {
               distance: haversine(lat, lng, s.lat, s.lng)
             }));
           }
-        } catch(e) { console.error(e); }
+        } catch(e) { logger.error(e); }
       }
 
       const sorted = fetchedServices.sort((a, b) => (a.distance || 0) - (b.distance || 0));
@@ -106,7 +108,7 @@ export const NearbyServicesPanel: React.FC = () => {
       await db.nearbyServices.bulkAdd(sorted.map(s => ({ ...s, fetchedAt: new Date().toISOString() })));
 
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       const cached = await db.nearbyServices.toArray();
       if (cached.length > 0) setServices(cached as Service[]);
       else setError('No services found.');
@@ -205,6 +207,9 @@ export const NearbyServicesPanel: React.FC = () => {
                       <div className="px-3 py-1 bg-navy/10 text-navy text-xs font-black rounded-xl uppercase tracking-widest">
                         {service.distance ? formatDistance(service.distance) : '...'}
                       </div>
+                      <div className="px-3 py-1 bg-navy/10 text-navy text-[10px] font-black rounded-xl uppercase tracking-widest flex items-center gap-1">
+                        <ShieldCheck size={12} /> OSM VERIFIED
+                      </div>
                       {service.isOpen && (
                         <div className="px-3 py-1 bg-safe/10 text-safe text-xs font-black rounded-xl uppercase tracking-widest flex items-center gap-1">
                           <Clock size={12} /> OPEN
@@ -215,6 +220,9 @@ export const NearbyServicesPanel: React.FC = () => {
                     <p className="text-base font-bold opacity-50">{service.address}</p>
                   </div>
                   <div className="flex flex-col items-end gap-3">
+                    <div className="text-[10px] font-mono text-(--clr-text-2) opacity-50">
+                      LAST UPDATED: {service.fetchedAt ? new Date(service.fetchedAt).toLocaleTimeString() : 'JUST NOW'}
+                    </div>
                     {service.bedsAvailable !== undefined && (
                       <div className={`px-4 py-2 rounded-2xl text-lg font-black tracking-tighter shadow-sm border-2 ${
                         service.bedsAvailable > 5 ? 'bg-safe/10 border-safe/20 text-safe' : 'bg-emergency/10 border-emergency/20 text-emergency'

@@ -1,7 +1,26 @@
-import React from 'react';
+import { useSocket } from '../hooks/useSocket';
 import { useSettingsStore } from '../store/settingsStore';
 import { Settings, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+
+
+
+function ConnectionDot() {
+  const { connected, reconnectCount } = useSocket();
+  const color = connected ? '#32D74B' : reconnectCount > 0 ? '#FF9F0A' : '#FF3B3B';
+  const title = connected ? 'Live' : reconnectCount > 0 ? `Reconnecting (${reconnectCount})` : 'Disconnected';
+  return (
+    <div
+      title={title}
+      style={{
+        width: 7, height: 7, borderRadius: '50%', background: color,
+        boxShadow: connected ? `0 0 10px ${color}80` : 'none',
+        animation: connected ? 'none' : 'pulse 1s ease-in-out infinite',
+        flexShrink: 0,
+        transition: 'background 0.3s ease'
+      }}
+    />
+  );
+}
 
 interface HUDBarProps {
   onSettingsClick: () => void;
@@ -9,6 +28,8 @@ interface HUDBarProps {
 
 export const HUDBar: React.FC<HUDBarProps> = ({ onSettingsClick }) => {
   const { language } = useSettingsStore();
+  const { connected, reconnectCount } = useSocket();
+
 
   const langMap: Record<string, { label: string; flag: string }> = {
     en: { label: 'EN', flag: '🇺🇸' },
@@ -31,13 +52,12 @@ export const HUDBar: React.FC<HUDBarProps> = ({ onSettingsClick }) => {
 
       {/* Center: Live Status */}
       <div className="hidden md:flex items-center gap-3 bg-night-3/50 px-4 py-1.5 rounded-full border border-white/5">
-        <motion.div 
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-2 h-2 bg-safe-green rounded-full shadow-[0_0_8px_rgba(0,230,118,0.6)]" 
-        />
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-safe-green">System Active</span>
+        <ConnectionDot />
+        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${connected ? 'text-safe-green' : reconnectCount > 0 ? 'text-amber-500' : 'text-sos-red'}`}>
+          {connected ? 'System Active' : reconnectCount > 0 ? `Reconnecting (${reconnectCount})` : 'Offline Mode'}
+        </span>
       </div>
+
 
       {/* Right: Actions */}
       <div className="flex items-center gap-4">

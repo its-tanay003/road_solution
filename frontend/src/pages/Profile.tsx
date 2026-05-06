@@ -8,6 +8,7 @@ import { useCrashDetection } from '../hooks/useCrashDetection';
 import { Panel } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { logger } from '../lib/logger';
 
 // Helper: Calculate slippy map tile coordinates
 const lon2tile = (lon: number, zoom: number) => (Math.floor((lon + 180) / 360 * Math.pow(2, zoom)));
@@ -97,7 +98,7 @@ export const Profile = () => {
       try {
         await fetch(url, { mode: 'no-cors' });
       } catch {
-        console.error("Cache fetch failed for", url);
+        logger.error("Cache fetch failed for", url);
       }
       completed++;
       setCacheProgress(Math.round((completed / tilesToFetch.length) * 100));

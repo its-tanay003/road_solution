@@ -5,6 +5,7 @@ import type { InsuranceClaimData } from '../utils/generateClaimPDF';
 import { generateClaimPDF } from '../utils/generateClaimPDF';
 import { useSosStore, useDemoStore } from '../store';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '../lib/logger';
 
 interface InsuranceClaimButtonProps {
   incidentId: string;
@@ -77,7 +78,7 @@ export const InsuranceClaimButton: React.FC<InsuranceClaimButtonProps> = ({
       setIsDone(true);
       setTimeout(() => setIsDone(false), 3000);
     } catch (err) {
-      console.error("PDF Generation failed:", err);
+      logger.error("PDF Generation failed:", err);
       setError("Generation failed");
     } finally {
       setIsGenerating(false);

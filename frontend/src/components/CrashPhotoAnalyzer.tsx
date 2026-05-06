@@ -12,6 +12,7 @@ import {
   X
 } from 'lucide-react';
 import axios from 'axios';
+import { logger } from '../lib/logger';
 
 interface AnalysisResult {
   deformation_severity: number;
@@ -61,7 +62,7 @@ export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
       });
       setResult(data);
     } catch (err) {
-      console.error("Analysis Error:", err);
+      logger.error("Analysis Error:", err);
       setError("AI analysis failed. Please check network connectivity.");
     } finally {
       setIsAnalyzing(false);

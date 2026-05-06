@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { logger } from '../lib/logger';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -29,7 +30,7 @@ export const useMeshMode = () => {
   const setupDataChannel = useCallback((channel: RTCDataChannel) => {
     dc.current = channel;
     
-    channel.onopen = () => console.log('Data Channel Open');
+    channel.onopen = () => logger.log('Data Channel Open');
     channel.onmessage = (event) => {
       const startTime = performance.now();
       const packet: MeshPacket = JSON.parse(event.data);
@@ -96,7 +97,7 @@ export const useMeshMode = () => {
       try {
         await pc.current?.addIceCandidate(new RTCIceCandidate(data.candidate));
       } catch (e) {
-        console.error('Error adding ice candidate', e);
+        logger.error('Error adding ice candidate', e);
       }
     });
 

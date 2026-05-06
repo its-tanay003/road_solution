@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAmbulanceStore, useSosStore, type Ambulance } from '../store';
 import 'leaflet/dist/leaflet.css';
+import { logger } from '../lib/logger';
 
 // Fix for default Leaflet icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -122,7 +123,7 @@ export const AmbulanceTracker: React.FC = () => {
   const { location } = useSosStore();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
-  const simulationInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const telemetryInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Initialize fleet near user
   useEffect(() => {
@@ -131,17 +132,17 @@ export const AmbulanceTracker: React.FC = () => {
     }
   }, [location, ambulances.length, initializeFleet]);
 
-  // Simulation Loop
+  // Operational Telemetry Loop
   useEffect(() => {
     if (dispatchedUnitId) {
-      simulationInterval.current = setInterval(() => {
+      telemetryInterval.current = setInterval(() => {
         tick();
       }, 500);
     } else {
-      if (simulationInterval.current) clearInterval(simulationInterval.current);
+      if (telemetryInterval.current) clearInterval(telemetryInterval.current);
     }
     return () => {
-      if (simulationInterval.current) clearInterval(simulationInterval.current);
+      if (telemetryInterval.current) clearInterval(telemetryInterval.current);
     };
   }, [dispatchedUnitId, tick]);
 
@@ -170,7 +171,7 @@ export const AmbulanceTracker: React.FC = () => {
         setTimeout(() => setNotification(null), 5000);
       }
     } catch (err) {
-      console.error('Routing failed:', err);
+      logger.error('Routing failed:', err);
     }
   };
 
@@ -180,7 +181,7 @@ export const AmbulanceTracker: React.FC = () => {
   return (
     <div className={`relative ${isFullScreen ? 'fixed inset-0 z-200 bg-slate-950' : 'w-full h-[400px] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl'}`}>
       
-      {/* Simulation Map */}
+      {/* Operational Telemetry Map */}
       <MapContainer 
         center={mapCenter} 
         zoom={13} 
@@ -300,6 +301,7 @@ export const AmbulanceTracker: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-2 h-2 rounded-full ${a.status === 'AVAILABLE' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{a.unitId}</span>
+                <span className="text-[8px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30">MoRTH SOURCE</span>
               </div>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-500/20 transition-all">

@@ -20,6 +20,7 @@ import {
   Area
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '../lib/logger';
 
 interface HistoryPoint {
   time: string;
@@ -72,7 +73,7 @@ export const MetricsDashboard: React.FC = () => {
         return newHistory;
       });
     } catch (error) {
-      console.error('Error fetching metrics:', error);
+      logger.error('Error fetching metrics:', error);
     } finally {
       setTimeout(() => setIsRefreshing(false), 500);
     }

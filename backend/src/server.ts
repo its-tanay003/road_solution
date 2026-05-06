@@ -13,10 +13,13 @@ import {
   predictRisk,
   predictRouteSafety 
 } from './services/claudeService';
+import { claudeMultiAgent } from './lib/claude';
+
 import sosRoutes from './routes/sos';
 import servicesRoutes from './routes/services';
 import integrationsRoutes from './routes/integrations';
 import pushRoutes from './routes/push';
+import dispatchRoutes, { attachDispatchIo } from './routes/dispatch';
 import { observabilityMiddleware, metrics } from './middleware/observability';
 import { processFusionTriage } from './services/fusionEngine';
 import { getRiskHeatmap } from './services/riskEngine';
@@ -73,7 +76,8 @@ roadsos_ai_triage_latency_avg ${avgLatency}
 
 // Init services
 connectRedis();
-initSocket(server);
+const ioInstance = initSocket(server);
+attachDispatchIo(ioInstance as any);
 
 // --- Metrics Endpoint ---
 app.get('/metrics', async (req, res) => {
@@ -96,6 +100,7 @@ app.get('/api/nearby-services', (req, res) => {
 app.use('/api/services', servicesRoutes);
 app.use('/api/integrations', integrationsRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/dispatch', dispatchRoutes);
 
 // Predictive Risk Engine Endpoint
 app.get('/api/risk/heatmap', (req, res) => {
@@ -194,6 +199,28 @@ app.post('/api/triage/chat', async (req, res) => {
 
   await streamClaudeResponse(messages, res, language, panicScore, biometricContext);
 });
+
+// Multi-Agent War Room Consensus Endpoint
+app.post('/api/triage/multi-agent', async (req, res) => {
+  const { crashData, medData, resData } = req.body;
+
+  const CRASH_SYSTEM = "You are a Crash Analyst. Analyze telemetry and determine impact severity. End with DECISION: [result].";
+  const MED_SYSTEM = "You are a Medical Triage Officer. Analyze victim state and determine priority. End with DECISION: [result].";
+  const RES_SYSTEM = "You are a Resource Optimizer. Allocate nearest units and hospitals. End with DECISION: [result].";
+
+  try {
+    const results = await claudeMultiAgent([
+      { system: CRASH_SYSTEM, user: JSON.stringify(crashData) },
+      { system: MED_SYSTEM, user: JSON.stringify(medData) },
+      { system: RES_SYSTEM, user: JSON.stringify(resData) }
+    ]);
+    res.json({ results });
+  } catch (error) {
+    console.error('Multi-Agent Error:', error);
+    res.status(500).json({ error: 'Multi-agent analysis failed' });
+  }
+});
+
 
 // Route Safety Prediction
 app.post('/api/route/safety', async (req, res) => {

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import triageData from '../data/triage-protocol.json';
+import { logger } from '../lib/logger';
 
 // Define SpeechRecognition types for browsers that support it
 interface SpeechRecognitionEvent extends Event {
@@ -127,7 +128,7 @@ export const OfflineTriageProtocol: React.FC<OfflineTriageProtocolProps> = ({
       };
 
       recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error:', event.error);
+        logger.error('Speech recognition error:', event.error);
         setIsListening(false);
       };
     }
@@ -150,7 +151,7 @@ export const OfflineTriageProtocol: React.FC<OfflineTriageProtocolProps> = ({
         recognitionRef.current.start();
         setIsListening(true);
       } catch (e) {
-        console.error("Failed to start speech recognition:", e);
+        logger.error("Failed to start speech recognition:", e);
       }
     }
   };

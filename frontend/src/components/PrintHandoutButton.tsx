@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Printer, Loader2, FileText } from 'lucide-react';
 import { generateJudgeHandout } from '../utils/generateJudgeHandout';
 import { toast } from 'react-hot-toast';
+import { logger } from '../lib/logger';
 
 export const PrintHandoutButton: React.FC<{ className?: string }> = ({ className }) => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -31,7 +32,7 @@ export const PrintHandoutButton: React.FC<{ className?: string }> = ({ className
         toast.success("PDF Downloaded (Popup blocked)");
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast.error("Failed to generate PDF");
     } finally {
       setIsGenerating(false);

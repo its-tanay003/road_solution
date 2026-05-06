@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { WifiOff, CloudSync, MapPin, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCachedServicesCount, syncIncidentQueue } from '../lib/offlineDB';
+import { logger } from '../lib/logger';
 
 export const OfflineStatusBanner: React.FC = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -15,7 +16,7 @@ export const OfflineStatusBanner: React.FC = () => {
       // Attempt to sync queue when back online
       const count = await syncIncidentQueue(async (incident) => {
         // Mock sync function - in real app this calls the API
-        console.log('Syncing incident:', incident);
+        logger.log('Syncing incident:', incident);
         await new Promise(r => setTimeout(r, 1000));
       });
       if (count > 0) {

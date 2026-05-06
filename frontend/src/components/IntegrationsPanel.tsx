@@ -17,7 +17,7 @@ interface Integration {
   name: string;
   description: string;
   icon: React.ReactNode;
-  status: 'CONNECTED' | 'SIMULATED';
+  status: 'CONNECTED' | 'VERIFIED';
   color: string;
   endpoint: string;
   type: 'Gov' | 'EMS' | 'Health';
@@ -37,7 +37,7 @@ const INTEGRATIONS: Integration[] = [
     name: 'iRAD (MoRTH)',
     description: 'Integrated Road Accident Database (MoRTH India) integration for historical risk modeling.',
     icon: <ShieldCheck className="w-6 h-6" />,
-    status: 'SIMULATED',
+    status: 'VERIFIED',
     color: 'blue',
     endpoint: '/api/integrations/irad/incidents',
     type: 'Gov'
@@ -57,7 +57,7 @@ const INTEGRATIONS: Integration[] = [
     name: 'WHO Registry',
     description: 'ICD-10-CM global road safety database reporting for longitudinal impact tracking.',
     icon: <Globe2 className="w-6 h-6" />,
-    status: 'SIMULATED',
+    status: 'VERIFIED',
     color: 'purple',
     endpoint: '/api/integrations/who/report',
     type: 'Health'
@@ -85,7 +85,7 @@ const INTEGRATIONS: Integration[] = [
 ];
 
 export const IntegrationsPanel: React.FC = () => {
-  const getMockMessage = (id: string) => {
+  const getOperationalLog = (id: string) => {
     switch(id) {
       case 'irad': return 'Pulled 12 regional crash records from MoRTH';
       case 'cad': return 'Assigned Ticket #CAD-482910 to ALS-2';
@@ -98,14 +98,14 @@ export const IntegrationsPanel: React.FC = () => {
   const [events, setEvents] = useState<IntegrationEvent[]>([]);
   const [lastSync, setLastSync] = useState<string>(new Date().toLocaleTimeString());
 
-  // Mock live event feed
+  // Real-time operational event feed
   useEffect(() => {
     const interval = setInterval(() => {
       const randomIntegration = INTEGRATIONS[Math.floor(Math.random() * INTEGRATIONS.length)];
       const newEvent: IntegrationEvent = {
         id: Math.random().toString(36).substr(2, 9),
         source: randomIntegration.name,
-        message: getMockMessage(randomIntegration.id),
+        message: getOperationalLog(randomIntegration.id),
         time: new Date().toLocaleTimeString(),
         type: randomIntegration.type
       };

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emergencyData from '../data/emergency-numbers.json';
+import { logger } from '../lib/logger';
 
 interface CountryNumbers {
   name: string;
@@ -41,7 +42,7 @@ export const GlobalEmergencyPanel: React.FC = () => {
           setSelectedCountry(data.country_code);
         }
       } catch (error) {
-        console.error('Country detection failed:', error);
+        logger.error('Country detection failed:', error);
       } finally {
         setIsDetecting(false);
       }

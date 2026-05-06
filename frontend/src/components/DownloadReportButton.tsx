@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileText, Loader2, Download } from 'lucide-react';
 import { generateIncidentPDF, type IncidentReportData } from '../utils/generateIncidentPDF';
 import { useSosStore } from '../store';
+import { logger } from '../lib/logger';
 
 const MOCK_INCIDENT_DATA: IncidentReportData = {
   id: "RS-2026-CH-9921",
@@ -43,7 +44,7 @@ export const DownloadReportButton: React.FC = () => {
     try {
       await generateIncidentPDF(MOCK_INCIDENT_DATA);
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
+      logger.error('Failed to generate PDF:', error);
     } finally {
       setIsGenerating(false);
     }
