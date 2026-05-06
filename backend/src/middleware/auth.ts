@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { supabaseAdmin } from '../services/supabaseClient';
 import rateLimit from 'express-rate-limit';
 
 export interface AuthRequest extends Request {
@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET ?? 'roadsos_dev_secret_change_in_produ
 /**
  * Middleware: Require a valid Bearer JWT to access a route.
  */
-export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const requireAuth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Authentication required' });
@@ -19,11 +19,18 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
   }
 
   try {
-    const decoded = jwt.verify(auth.slice(7), JWT_SECRET) as { userId: string };
-    req.userId = decoded.userId;
+    const token = auth.slice(7);
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    
+    if (error || !user) {
+      res.status(401).json({ error: 'Invalid or expired token' });
+      return;
+    }
+
+    req.userId = user.id;
     next();
   } catch {
-    res.status(401).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: 'Authentication check failed' });
   }
 };
 

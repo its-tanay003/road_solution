@@ -1,5 +1,6 @@
 import { register, apiRequestDuration } from './services/metricsService';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import http from 'http';
@@ -29,6 +30,7 @@ import { getRiskHeatmap } from './services/riskEngine';
 import { ResponderService } from './services/responderService';
 import authRouter from './auth/authRouter';
 import { authRateLimiter, requireAuth, sosRateLimiter } from './middleware/auth';
+import { supabaseSsrMiddleware } from './middleware/supabaseSsr';
 
 dotenv.config();
 
@@ -72,6 +74,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(supabaseSsrMiddleware);
 app.use(observabilityMiddleware);
 
 // --- Auth Routes ---

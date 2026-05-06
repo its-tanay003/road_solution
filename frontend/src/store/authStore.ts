@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '../lib/supabaseClient';
+import type { Session } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -12,33 +14,50 @@ interface User {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  session: Session | null;
   isAuthenticated: boolean;
-  login: (token: string, user: User) => void;
-  logout: () => void;
+  setSession: (session: Session | null) => void;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
+      session: null,
       isAuthenticated: false,
 
-      login: (token, user) => {
-        localStorage.setItem('roadsos_token', token);
-        set({ user, token, isAuthenticated: true });
+      setSession: (session) => {
+        if (!session) {
+          set({ user: null, session: null, isAuthenticated: false });
+          return;
+        }
+
+        const user: User = {
+          id: session.user.id,
+          email: session.user.email,
+          phone: session.user.phone,
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'User',
+          avatar: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+          provider: session.user.app_metadata?.provider || 'email',
+        };
+
+        set({ user, session, isAuthenticated: true });
       },
 
-      logout: () => {
-        localStorage.removeItem('roadsos_token');
-        set({ user: null, token: null, isAuthenticated: false });
+      logout: async () => {
+        await supabase.auth.signOut();
+        set({ user: null, session: null, isAuthenticated: false });
       },
     }),
     {
       name: 'roadsos-auth',
-      // Only persist user and token — isAuthenticated is derived on rehydration
-      partialize: (s) => ({ user: s.user, token: s.token, isAuthenticated: s.isAuthenticated }),
+      partialize: (s) => ({ user: s.user, session: s.session, isAuthenticated: s.isAuthenticated }),
     }
   )
 );
+
+// Initialize auth listener
+supabase.auth.onAuthStateChange((_event, session) => {
+  useAuthStore.getState().setSession(session);
+});

@@ -27,6 +27,7 @@ interface MedicalProfileState {
   
   // Encryption wrapper
   getEncryptedPayload: () => Promise<{ cipherText: string, iv: string }>;
+  syncWithSupabase: () => Promise<void>;
 }
 
 export const useMedicalProfileStore = create<MedicalProfileState>()(
@@ -52,6 +53,23 @@ export const useMedicalProfileStore = create<MedicalProfileState>()(
         const { name, age, bloodType, conditions, contacts } = get();
         const payload = { name, age, bloodType, conditions, contacts };
         return await encryptData(payload);
+      },
+
+      syncWithSupabase: async () => {
+        const { getEncryptedPayload } = get();
+        const { supabase } = await import('../lib/supabaseClient');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) return;
+
+        const encrypted = await getEncryptedPayload();
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update({ medical_data: encrypted })
+          .eq('id', session.user.id);
+
+        if (error) throw error;
       }
     }),
     {

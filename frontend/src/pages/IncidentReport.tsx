@@ -17,10 +17,14 @@ import { Panel } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { VaahanLookup } from '../components/VaahanLookup';
+import { supabase } from '../lib/supabaseClient';
+import { uploadCrashPhoto } from '../services/storageService';
 
 export const IncidentReport = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form State
   const [vehicles, setVehicles] = useState(0);
@@ -37,6 +41,7 @@ export const IncidentReport = () => {
 
     const url = URL.createObjectURL(file);
     setPhotoUrl(url);
+    setPhotoFile(file);
     setIsAnalyzing(true);
     setAiAnalyzed(false);
 
@@ -59,8 +64,53 @@ export const IncidentReport = () => {
     if (value > 0) setter(value - 1);
   };
   
-  const handleSubmit = () => {
-    alert("Report committed to blockchain.");
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // 1. Create SOS Event
+      const { data: event, error: eventError } = await supabase
+        .from('sos_events')
+        .insert({
+          user_id: isAnonymous ? null : session?.user?.id,
+          device_id: 'WEB_CLIENT_' + Math.random().toString(36).slice(2, 7),
+          location: `POINT(77.2090 28.6139)`, // Mocked location for now
+          severity: injuries > 0 ? 'CRITICAL' : 'MODERATE',
+          confidence_score: 0.95
+        })
+        .select()
+        .single();
+
+      if (eventError) throw eventError;
+
+      // 2. Upload Photo if exists
+      let publicPhotoUrl = '';
+      if (photoFile && event) {
+        publicPhotoUrl = await uploadCrashPhoto(photoFile, event.id);
+      }
+
+      // 3. Add Incident Log
+      await supabase.from('incident_logs').insert({
+        sos_event_id: event.id,
+        action_type: 'REPORT_SUBMITTED',
+        description: description,
+        metadata: {
+          vehicles,
+          injuries,
+          photo_url: publicPhotoUrl,
+          is_anonymous: isAnonymous
+        }
+      });
+
+      alert("Report committed to decentralized cloud infrastructure.");
+      // Reset form or redirect
+    } catch (err) {
+      console.error('Failed to submit incident:', err);
+      alert('Failed to submit report. Please check your connection.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

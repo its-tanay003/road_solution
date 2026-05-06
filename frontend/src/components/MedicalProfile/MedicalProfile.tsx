@@ -1,19 +1,35 @@
 import { useState } from 'react';
-import { useSettingsStore } from '../../store/settingsStore';
+import { useMedicalProfileStore } from '../../store/medicalProfileStore';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'Unknown'];
 const COMMON_ALLERGIES = ['Penicillin', 'Aspirin', 'Latex', 'Iodine', 'Sulfa drugs', 'None'];
 
 export function MedicalProfile() {
-  const { bloodGroup, setBloodGroup, allergies, setAllergies, emergencyContact, setEmergencyContact } = useSettingsStore();
-  const [saved, setSaved] = useState(false);
-  const [localAllergies, setLocalAllergies] = useState<string[]>(allergies);
+  const { 
+    bloodType, setBloodType, 
+    conditions, setConditions, 
+    contacts, setContacts,
+    syncWithSupabase 
+  } = useMedicalProfileStore();
 
-  const handleSave = () => {
-    setAllergies(localAllergies);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-    if (navigator.vibrate) navigator.vibrate(100);
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [localAllergies, setLocalAllergies] = useState<string[]>(conditions);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      setConditions(localAllergies);
+      await syncWithSupabase();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      if (navigator.vibrate) navigator.vibrate(100);
+    } catch (error) {
+      console.error('Failed to sync medical profile:', error);
+      alert('Failed to save to cloud. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleAllergy = (a: string) => {
@@ -52,12 +68,12 @@ export function MedicalProfile() {
           {BLOOD_GROUPS.map(bg => (
             <button
               key={bg}
-              onClick={() => setBloodGroup(bg)}
+              onClick={() => setBloodType(bg)}
               style={{
                 padding: '10px 18px', borderRadius: 12, fontSize: 15, fontWeight: 500,
-                border: `2px solid ${bloodGroup === bg ? '#FF1744' : 'rgba(255,255,255,0.15)'}`,
-                background: bloodGroup === bg ? 'rgba(255,23,68,0.15)' : 'transparent',
-                color: bloodGroup === bg ? '#FF6B7A' : 'inherit',
+                border: `2px solid ${bloodType === bg ? '#FF1744' : 'rgba(255,255,255,0.15)'}`,
+                background: bloodType === bg ? 'rgba(255,23,68,0.15)' : 'transparent',
+                color: bloodType === bg ? '#FF6B7A' : 'inherit',
                 cursor: 'pointer', minWidth: 64, minHeight: 48,
                 transition: 'all 0.15s ease',
               }}
@@ -71,7 +87,7 @@ export function MedicalProfile() {
       {/* Allergy selector */}
       <div style={{ marginBottom: 24 }}>
         <label style={{ fontSize: 13, opacity: 0.7, display: 'block', marginBottom: 10 }}>
-          Known allergies
+          Known allergies / Conditions
         </label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {COMMON_ALLERGIES.map(a => (
@@ -109,8 +125,11 @@ export function MedicalProfile() {
           </div>
           <input
             type="tel"
-            value={emergencyContact}
-            onChange={e => setEmergencyContact(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            value={contacts[0]?.phone || ''}
+            onChange={e => {
+              const phone = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setContacts([{ name: 'Emergency', phone, relationship: 'Contact' }]);
+            }}
             placeholder="10-digit number"
             style={inputStyle}
           />
@@ -120,18 +139,20 @@ export function MedicalProfile() {
       {/* Save */}
       <button
         onClick={handleSave}
+        disabled={loading}
         style={{
           width: '100%', height: 58, borderRadius: 16, fontSize: 17, fontWeight: 600,
           background: saved ? '#1D9E75' : '#FF1744', border: 'none',
           color: '#fff', cursor: 'pointer', transition: 'background 0.3s',
+          opacity: loading ? 0.7 : 1,
         }}
       >
-        {saved ? '✓ Saved successfully' : 'Save medical profile'}
+        {loading ? 'Saving to cloud...' : saved ? '✓ Saved successfully' : 'Save medical profile'}
       </button>
 
       <p style={{ fontSize: 12, opacity: 0.45, textAlign: 'center', marginTop: 16, lineHeight: 1.6 }}>
         Your data is encrypted with AES-GCM-256 before storage.
-        Never uploaded without your active SOS trigger.
+        Synced securely to your private cloud profile.
       </p>
     </div>
   );

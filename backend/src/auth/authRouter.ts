@@ -1,30 +1,16 @@
 import { Router, Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { supabaseAdmin } from '../services/supabaseClient';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET ?? 'roadsos_dev_secret_change_in_production';
-const JWT_EXPIRES = '30d';
 
-interface StoredUser {
-  id: string;
-  email?: string;
-  phone?: string;
-  passwordHash?: string;
-  name: string;
-  provider: string;
-  avatar?: string;
-}
-
-// In-memory store for demo — swap for MongoDB/PostgreSQL in production
-const users = new Map<string, StoredUser>();
-const otpStore = new Map<string, { otp: string; expiry: number }>();
-
-const generateToken = (userId: string): string =>
-  jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-
-const makeUser = (u: StoredUser) => ({
-  id: u.id, email: u.email, phone: u.phone, name: u.name, provider: u.provider, avatar: u.avatar,
+// Helper to format user response
+const makeUser = (supabaseUser: any) => ({
+  id: supabaseUser.id,
+  email: supabaseUser.email,
+  phone: supabaseUser.phone,
+  name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || 'User',
+  provider: supabaseUser.app_metadata?.provider || 'email',
+  avatar: supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture,
 });
 
 // POST /auth/register — email + password
@@ -32,35 +18,47 @@ router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) return res.status(400).json({ error: 'email, password, name are required' });
-    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    if (users.has(email)) return res.status(409).json({ error: 'Email already registered' });
 
-    const passwordHash = await bcrypt.hash(password, 12);
-    const id = `u_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    users.set(email, { id, email, passwordHash, name, provider: 'email' });
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      user_metadata: { full_name: name },
+      email_confirm: true
+    });
 
-    const token = generateToken(id);
-    return res.status(201).json({ token, user: makeUser(users.get(email)!) });
-  } catch {
+    if (error) return res.status(400).json({ error: error.message });
+
+    // Sync to public.profiles table
+    await supabaseAdmin.from('profiles').insert({
+      id: data.user.id,
+      email: data.user.email,
+      name: name
+    });
+
+    return res.status(201).json({ user: makeUser(data.user) });
+  } catch (err) {
+    console.error('Registration error:', err);
     return res.status(500).json({ error: 'Registration failed' });
   }
 });
 
-// POST /auth/login — email + password
+// POST /auth/login — Handled by Supabase on the frontend usually, 
+// but we can provide a proxy if needed. Here we assume frontend uses supabase directly 
+// for login, but this endpoint can be used for server-side auth.
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'email and password required' });
 
-    const user = users.get(email);
-    if (!user?.passwordHash) return res.status(401).json({ error: 'Invalid credentials' });
+    const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (error) return res.status(401).json({ error: error.message });
 
-    const token = generateToken(user.id);
-    return res.json({ token, user: makeUser(user) });
-  } catch {
+    return res.json({ session: data.session, user: makeUser(data.user) });
+  } catch (err) {
     return res.status(500).json({ error: 'Login failed' });
   }
 });
@@ -68,92 +66,73 @@ router.post('/login', async (req: Request, res: Response) => {
 // POST /auth/phone/send-otp
 router.post('/phone/send-otp', async (req: Request, res: Response) => {
   try {
-    const { phone } = req.body; // format: +91XXXXXXXXXX
+    const { phone } = req.body;
     if (!phone) return res.status(400).json({ error: 'phone required' });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore.set(phone, { otp, expiry: Date.now() + 10 * 60 * 1000 }); // 10 min TTL
+    const { error } = await supabaseAdmin.auth.signInWithOtp({
+      phone,
+    });
 
-    // Production: send via Twilio/MSG91
-    // const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
-    // await client.messages.create({ body: `ROADSoS OTP: ${otp}`, from: process.env.TWILIO_FROM, to: phone });
+    if (error) return res.status(400).json({ error: error.message });
 
-    console.log(`[AUTH] OTP for ${phone}: ${otp}`); // dev only
-
-    // Return OTP in dev so frontend can pre-fill
-    const response: Record<string, string> = { message: 'OTP sent' };
-    if (process.env.NODE_ENV !== 'production') response.otp = otp;
-    return res.json(response);
-  } catch {
+    return res.json({ message: 'OTP sent' });
+  } catch (err) {
     return res.status(500).json({ error: 'Failed to send OTP' });
   }
 });
 
 // POST /auth/phone/verify-otp
-router.post('/phone/verify-otp', (req: Request, res: Response) => {
+router.post('/phone/verify-otp', async (req: Request, res: Response) => {
   const { phone, otp, name } = req.body;
   if (!phone || !otp) return res.status(400).json({ error: 'phone and otp required' });
 
-  const record = otpStore.get(phone);
-  if (!record) return res.status(401).json({ error: 'OTP not found or expired — request a new one' });
-  if (record.otp !== otp) return res.status(401).json({ error: 'Invalid OTP' });
-  if (Date.now() > record.expiry) return res.status(401).json({ error: 'OTP expired' });
+  try {
+    const { data, error } = await supabaseAdmin.auth.verifyOtp({
+      phone,
+      token: otp,
+      type: 'sms'
+    });
 
-  otpStore.delete(phone);
+    if (error) return res.status(401).json({ error: error.message });
 
-  let user = [...users.values()].find(u => u.phone === phone);
-  if (!user) {
-    const id = `u_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    user = { id, phone, name: (name as string) ?? 'User', provider: 'phone' };
-    users.set(phone, user);
+    // If it's a new user, update their metadata
+    if (name && data.user && !data.user.user_metadata?.full_name) {
+      await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
+        user_metadata: { full_name: name }
+      });
+      
+      // Ensure profile exists
+      await supabaseAdmin.from('profiles').upsert({
+        id: data.user.id,
+        phone: data.user.phone,
+        name: name
+      });
+    }
+
+    return res.json({ session: data.session, user: makeUser(data.user) });
+  } catch (err) {
+    return res.status(500).json({ error: 'Verification failed' });
   }
-
-  const token = generateToken(user.id);
-  return res.json({ token, user: makeUser(user) });
 });
 
 // POST /auth/oauth/google
 router.post('/oauth/google', async (req: Request, res: Response) => {
-  try {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: 'Google credential required' });
-
-    const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-    if (!googleRes.ok) return res.status(401).json({ error: 'Invalid Google token' });
-
-    const profile = await googleRes.json() as { email: string; name: string; picture?: string; aud: string };
-
-    // Verify audience matches our client ID
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID;
-    if (expectedClientId && profile.aud !== expectedClientId) {
-      return res.status(401).json({ error: 'Token audience mismatch' });
-    }
-
-    const email = profile.email;
-    let user = users.get(email) ?? [...users.values()].find(u => u.email === email);
-    if (!user) {
-      const id = `u_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      user = { id, email, name: profile.name, provider: 'google', avatar: profile.picture };
-      users.set(email, user);
-    }
-
-    const token = generateToken(user.id);
-    return res.json({ token, user: makeUser(user) });
-  } catch {
-    return res.status(500).json({ error: 'Google auth failed' });
-  }
+  // In Supabase, Google OAuth is typically handled on the frontend.
+  // This endpoint might be used for mobile or specific flows.
+  return res.status(501).json({ error: 'Use frontend Supabase client for Google OAuth' });
 });
 
-// POST /auth/refresh — extend a valid token
-router.post('/refresh', (req: Request, res: Response) => {
-  const auth = req.headers.authorization;
-  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'No token provided' });
+// POST /auth/refresh
+router.post('/refresh', async (req: Request, res: Response) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) return res.status(400).json({ error: 'refresh_token required' });
+  
   try {
-    const decoded = jwt.verify(auth.slice(7), JWT_SECRET) as { userId: string };
-    const token = generateToken(decoded.userId);
-    return res.json({ token });
-  } catch {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    const { data, error } = await supabaseAdmin.auth.refreshSession({ refresh_token });
+    if (error) return res.status(401).json({ error: error.message });
+    return res.json({ session: data.session });
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
   }
 });
 
