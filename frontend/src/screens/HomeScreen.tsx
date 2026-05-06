@@ -344,7 +344,7 @@ const HomeScreen: React.FC = () => {
       </footer>
 
       {/* CRT Scanline Texture Layer */}
-      <div className="fixed inset-0 pointer-events-none z-[10001] opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] blend-multiply" />
+      <div className="fixed inset-0 pointer-events-none z-[10001] opacity-[0.03] bg-[url('/noise.svg')] blend-multiply" />
     </div>
   );
 };

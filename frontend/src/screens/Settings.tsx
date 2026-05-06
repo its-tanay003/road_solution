@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { PushNotificationSetup } from '../components/PushNotificationSetup';
 import { DriverBehaviorScore } from '../components/DriverBehaviorScore';
 import { SettingsPreview } from '../components/SettingsPreview';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 export const Settings: React.FC = () => {
   const { 
@@ -18,6 +19,7 @@ export const Settings: React.FC = () => {
     hapticFeedback, setHapticFeedback,
     emergencyContact, setEmergencyContact
   } = useSettingsStore();
+  const { installable, handleInstallClick } = usePWAInstall();
 
   const themes: { id: Theme; label: string; color: string }[] = [
     { id: 'dark-hud', label: 'Mission Control', color: '#050A14' },
@@ -246,6 +248,27 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* SECTION: PWA INSTALLATION */}
+        {installable && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 text-[var(--color-safe)] font-black uppercase tracking-[0.2em] text-xs">
+              <Smartphone size={16} /> App Experience
+            </div>
+            <button
+              onClick={handleInstallClick}
+              className="w-full p-6 bg-night-2 border-2 border-[var(--color-safe)] rounded-4xl flex items-center gap-6 group hover:bg-[var(--color-safe)]/5 transition-all"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-[var(--color-safe)] flex items-center justify-center shadow-lg shadow-safe/20">
+                <Smartphone size={28} className="text-night" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-white font-bold text-lg">Install ROADSoS App</span>
+                <span className="text-text-muted text-sm">Add to home screen for faster access & offline mode</span>
+              </div>
+            </button>
+          </section>
+        )}
 
         {/* FOOTER */}
         <footer className="pt-8 space-y-4 text-center">
