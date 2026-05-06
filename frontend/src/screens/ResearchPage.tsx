@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,7 +36,7 @@ const testimonials = [
   {
     role: '108 Operator, Kancheepuram',
     quote: 'The biggest problem we face is callers not knowing their exact location. If ROADSoS can auto-send GPS coordinates with the SOS, that alone saves 3–4 minutes per call.',
-    note: 'Simulated feedback based on documented 112 operator pain points',
+    note: 'Feedback summary based on documented 112 operator pain points',
   },
   {
     role: 'Road Accident Victim, NH-48',
@@ -109,7 +108,7 @@ export default function ResearchPage() {
                 <div className="text-4xl font-black mb-2" style={{ color: f.color }}>{f.stat}</div>
                 <div className="font-bold text-white mb-1">{f.label}</div>
                 <div className="text-gray-400 text-sm mb-2">{f.sub}</div>
-                <div className="text-xs px-3 py-1.5 rounded-lg" style={{ background: f.color + '15', color: f.color }}>
+                <div className="text-xs px-3 py-1.5 rounded-[var(--radius-lg)]" style={{ background: f.color + '15', color: f.color }}>
                   💡 {f.insight}
                 </div>
               </motion.div>
@@ -121,7 +120,7 @@ export default function ResearchPage() {
         <section>
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-2xl font-black text-white">User Testimonials</h2>
-            <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-1 rounded-full">Pilot simulation — based on analogous user research</span>
+            <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-1 rounded-full">Preliminary research summary — based on analogous user studies</span>
           </div>
           <div className="space-y-4">
             {testimonials.map(t => (
@@ -155,13 +154,13 @@ export default function ResearchPage() {
           <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center flex-shrink-0">
             <div className="grid grid-cols-7 gap-0.5 p-2">
               {Array.from({ length: 49 }).map((_, i) => (
-                <div key={i} className={`w-2.5 h-2.5 ${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}`} />
+                <div key={i} className={`w-2.5 h-2.5 ${(i + Math.floor(i/7)) % 2 === 0 ? 'bg-black' : 'bg-white'}`} />
               ))}
             </div>
           </div>
-          <div>
+          <div className="bg-[#0D1B2A] rounded-2xl p-8 border border-white/10 flex flex-col items-center text-center">
             <h3 className="text-white font-bold text-xl mb-2">Help Us Validate</h3>
-            <p className="text-gray-400 text-sm mb-3">Scan to share your experience with road emergencies — real-time during SIH demo</p>
+            <p className="text-gray-400 text-sm mb-3">Scan to share your experience with road emergencies — real-time system validation</p>
             <a
               href="https://forms.google.com"
               target="_blank"

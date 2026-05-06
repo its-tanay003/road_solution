@@ -1,4 +1,5 @@
-import { Heart, Settings, Phone, Lock, AlertTriangle, Edit2, Save, X, DownloadCloud, CheckCircle, Database, Zap, Fingerprint } from 'lucide-react';
+import { Heart, Settings, Phone, Lock, AlertTriangle, Edit2, Save, X, DownloadCloud, CheckCircle, Database, Zap, Fingerprint, MessageCircle } from 'lucide-react';
+import { openWhatsApp } from '../lib/whatsappAlert';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
@@ -43,14 +44,32 @@ export const Profile = () => {
   };
 
   const [isAddingContact, setIsAddingContact] = useState(false);
-  const [newContact, setNewContact] = useState({ name: '', phone: '', relationship: '', notifySms: true, notifyPush: true, notifyEmail: false });
+  const [newContact, setNewContact] = useState({ 
+    name: '', 
+    phone: '', 
+    relationship: '', 
+    notifySms: true, 
+    notifyPush: true, 
+    notifyEmail: false,
+    alertViaWhatsApp: false,
+    alertOnSos: true
+  });
 
   const handleAddContact = () => {
     if (contacts.length >= 5) return;
     if (newContact.name && newContact.phone) {
       useUserStore.getState().addContact({ ...newContact, id: Date.now().toString() });
       setIsAddingContact(false);
-      setNewContact({ name: '', phone: '', relationship: '', notifySms: true, notifyPush: true, notifyEmail: false });
+      setNewContact({ 
+        name: '', 
+        phone: '', 
+        relationship: '', 
+        notifySms: true, 
+        notifyPush: true, 
+        notifyEmail: false,
+        alertViaWhatsApp: false,
+        alertOnSos: true
+      });
     }
   };
 
@@ -109,8 +128,6 @@ export const Profile = () => {
       setIsCached(true);
     }, 500);
   };
-
-  /* Removed unused handleSimulateAlert */
 
   const qrPayload = JSON.stringify({
     v: 1,
@@ -265,10 +282,18 @@ export const Profile = () => {
                            <button onClick={() => handleRemoveContact(contact.id)} title="REMOVE CONTACT" className="text-(--nx-red-primary) hover:text-white"><X size={14} /></button>
                          </div>
                        </div>
-                       <div className="flex gap-3 mt-2 pt-2 border-t border-(--nx-border)/30 text-[9px] uppercase tracking-widest text-(--nx-text-dim)">
-                          <span className={contact.notifySms ? 'text-(--nx-green-primary)' : ''}>SMS {contact.notifySms ? 'ON' : 'OFF'}</span>
-                          <span className={contact.notifyPush ? 'text-(--nx-green-primary)' : ''}>PUSH {contact.notifyPush ? 'ON' : 'OFF'}</span>
-                          <span className={contact.notifyEmail ? 'text-(--nx-green-primary)' : ''}>EMAIL {contact.notifyEmail ? 'ON' : 'OFF'}</span>
+                       <div className="flex justify-between items-center mt-3 pt-3 border-t border-(--nx-border)/30">
+                         <div className="flex gap-3 text-[9px] uppercase tracking-widest text-(--nx-text-dim)">
+                            <span className={contact.notifySms ? 'text-(--nx-green-primary)' : ''}>SMS {contact.notifySms ? 'ON' : 'OFF'}</span>
+                            <span className={contact.alertViaWhatsApp ? 'text-(--nx-green-primary)' : ''}>WA {contact.alertViaWhatsApp ? 'ON' : 'OFF'}</span>
+                            <span className={contact.alertOnSos ? 'text-(--nx-amber-primary)' : ''}>SOS {contact.alertOnSos ? 'ON' : 'OFF'}</span>
+                         </div>
+                         <button 
+                           onClick={() => openWhatsApp(contact.phone, "This is a test from ROADSoS. Your contact has set you as an emergency contact. No action needed.")}
+                           className="text-[9px] font-black uppercase tracking-widest text-(--nx-blue-primary) hover:text-white flex items-center gap-1.5"
+                         >
+                            <MessageCircle size={10} /> TEST ALERT
+                         </button>
                        </div>
                     </div>
                  ))}
@@ -307,15 +332,15 @@ export const Profile = () => {
                           />
                         </div>
                       </div>
-                      <div className="flex gap-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <label className="flex items-center gap-2 text-[10px] text-white">
                           <input type="checkbox" checked={newContact.notifySms} onChange={e => setNewContact({...newContact, notifySms: e.target.checked})} className="accent-(--nx-blue-primary)" /> SMS
                         </label>
                         <label className="flex items-center gap-2 text-[10px] text-white">
-                          <input type="checkbox" checked={newContact.notifyPush} onChange={e => setNewContact({...newContact, notifyPush: e.target.checked})} className="accent-(--nx-blue-primary)" /> PUSH
+                          <input type="checkbox" checked={newContact.alertViaWhatsApp} onChange={e => setNewContact({...newContact, alertViaWhatsApp: e.target.checked})} className="accent-(--nx-blue-primary)" /> WHATSAPP
                         </label>
                         <label className="flex items-center gap-2 text-[10px] text-white">
-                          <input type="checkbox" checked={newContact.notifyEmail} onChange={e => setNewContact({...newContact, notifyEmail: e.target.checked})} className="accent-(--nx-blue-primary)" /> EMAIL
+                          <input type="checkbox" checked={newContact.alertOnSos} onChange={e => setNewContact({...newContact, alertOnSos: e.target.checked})} className="accent-(--nx-blue-primary)" /> ALERT ON SOS
                         </label>
                       </div>
                       <div className="flex gap-2">

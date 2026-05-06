@@ -182,7 +182,7 @@ export const ChaosEngineeringPanel: React.FC = () => {
                       step="100"
                       value={chaos.latencyMs}
                       onChange={(e) => chaos.setLatency(parseInt(e.target.value))}
-                      className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                      className="w-full h-2 bg-slate-800 rounded-[var(--radius-lg)] appearance-none cursor-pointer accent-yellow-500"
                     />
                     <div className="flex justify-between text-[8px] font-black text-slate-600 uppercase tracking-widest">
                       <span>Instant</span>

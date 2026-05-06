@@ -115,7 +115,7 @@ export const CrashReconstruction3D: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-[0.2em] animate-pulse shadow-lg shadow-red-500/20 border border-red-400/50"
+                className="bg-red-600 text-white px-4 py-1.5 rounded-[var(--radius-lg)] text-xs font-black uppercase tracking-[0.2em] animate-pulse shadow-lg shadow-red-500/20 border border-red-400/50"
               >
                 SEVERITY: CRITICAL
               </motion.div>

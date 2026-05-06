@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Navigation, Clock, ShieldCheck, Phone, Siren, Activity, Users } from 'lucide-react';
+import { Navigation, Clock, ShieldCheck, Phone, Siren, Activity, Users, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { VaahanLookup } from '../components/VaahanLookup';
 import { useOfflineTriage } from '../hooks/useOfflineTriage';
 import { OfflineTriageBadge } from '../components/OfflineTriageBadge';
@@ -126,9 +127,15 @@ export const Dispatched: React.FC = () => {
       </main>
 
       <footer className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-(--clr-bg) to-transparent z-20">
-        <button className="w-full py-4 border border-white/10 rounded-xl font-mono text-[10px] tracking-widest text-white/40 hover:text-white transition-all uppercase">
-          Cancel Emergency Dispatch
-        </button>
+          <Link 
+            to="/incident-report"
+            className="w-full py-4 border border-white/10 rounded-xl font-mono text-[10px] tracking-widest text-(--clr-green) hover:bg-(--clr-green)/10 transition-all uppercase flex items-center justify-center gap-2 mb-4"
+          >
+            <FileText size={14} /> View Official iRAD / MoRTH Filing
+          </Link>
+          <button className="w-full py-4 border border-white/10 rounded-xl font-mono text-[10px] tracking-widest text-white/40 hover:text-white transition-all uppercase">
+            Cancel Emergency Dispatch
+          </button>
       </footer>
 
       <DroneDispatchPanel />

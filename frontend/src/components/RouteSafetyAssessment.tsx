@@ -225,7 +225,7 @@ export const RouteSafetyAssessment: React.FC = () => {
                       whileHover={{ x: 4 }}
                       className="p-4 bg-(--clr-red)/5 border border-(--clr-red)/20 rounded-xl flex gap-3"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-(--clr-red)/20 flex items-center justify-center text-(--clr-red) shrink-0">
+                      <div className="w-8 h-8 rounded-[var(--radius-lg)] bg-(--clr-red)/20 flex items-center justify-center text-(--clr-red) shrink-0">
                         {seg.accidents2023}
                       </div>
                       <div>

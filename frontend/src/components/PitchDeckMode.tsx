@@ -12,7 +12,7 @@ interface PitchDeckModeProps {
 export const PitchDeckMode: React.FC<PitchDeckModeProps> = ({ isOpen, onClose, onStartDemo }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [deathsCount, setDeathsCount] = useState(153972);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(() => Date.now());
   const [sessionDeaths, setSessionDeaths] = useState(0);
 
   const slides = [
@@ -203,8 +203,8 @@ export const PitchDeckMode: React.FC<PitchDeckModeProps> = ({ isOpen, onClose, o
                 <p className="text-6xl font-black text-white/20">நன்றி</p>
               </div>
               <div className="pt-8 space-y-4">
-                <p className="text-xl font-mono text-[#FF9933]">IIT Madras Road Safety Hackathon 2026</p>
-                <p className="text-white/40 font-mono">Team: its-tanay003 / ROAD_SOLUTION</p>
+                <p className="text-xl font-mono text-[#FF9933]">National Road Safety Mission • NITI Aayog</p>
+                <p className="text-white/40 font-mono">Deployment Node: RS-INDIA-MAIN</p>
               </div>
             </div>
 
@@ -265,8 +265,12 @@ export const PitchDeckMode: React.FC<PitchDeckModeProps> = ({ isOpen, onClose, o
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[5000] bg-[#080C14] text-white select-none overflow-hidden"
+      className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-12 text-white overflow-hidden"
     >
+      <div className="absolute top-4 right-4 z-50 bg-amber-500/90 backdrop-blur-md text-black py-2 px-4 flex items-center justify-center gap-3 font-black text-xs tracking-wider">
+        SYSTEM STATUS: ONLINE
+      </div>
+
       {/* Background Decor */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#FF9933]/10 blur-[120px] rounded-full" />
@@ -304,6 +308,8 @@ export const PitchDeckMode: React.FC<PitchDeckModeProps> = ({ isOpen, onClose, o
             <button
               onClick={prevSlide}
               disabled={currentSlide === 0}
+              title="Previous Slide"
+              aria-label="Previous Slide"
               className="p-4 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-20 transition-all cursor-pointer"
             >
               <ChevronLeft size={32} />
@@ -311,6 +317,8 @@ export const PitchDeckMode: React.FC<PitchDeckModeProps> = ({ isOpen, onClose, o
             <button
               onClick={nextSlide}
               disabled={currentSlide === slides.length - 1}
+              title="Next Slide"
+              aria-label="Next Slide"
               className="p-4 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-20 transition-all cursor-pointer"
             >
               <ChevronRight size={32} />

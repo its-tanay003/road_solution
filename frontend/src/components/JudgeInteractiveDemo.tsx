@@ -63,7 +63,7 @@ export const JudgeInteractiveDemo: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
+              <div className="p-2 bg-blue-500/20 rounded-[var(--radius-lg)]">
                 <Users className="text-blue-400 w-6 h-6" />
               </div>
               <h1 className="text-5xl font-black tracking-tighter uppercase italic">Audience Participation</h1>

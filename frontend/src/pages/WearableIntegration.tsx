@@ -132,7 +132,7 @@ export const WearableIntegration = () => {
                   <div key={device.id} className="nexus-card p-4 border-nx-border/50 bg-white/2 hover:bg-white/5 transition-all group">
                     <div className="flex items-start justify-between">
                       <div className="flex gap-3">
-                        <div className={`p-2 rounded-lg ${device.status === 'CONNECTED' ? 'bg-nx-blue-primary/10 text-nx-blue-primary' : 'bg-white/5 text-nx-text-tertiary'}`}>
+                        <div className={`p-2 rounded-[var(--radius-lg)] ${device.status === 'CONNECTED' ? 'bg-nx-blue-primary/10 text-nx-blue-primary' : 'bg-white/5 text-nx-text-tertiary'}`}>
                           {device.type === 'WATCH' && <Watch size={20} />}
                           {device.type === 'TRACKER' && <Activity size={20} />}
                           {device.type === 'VEHICLE' && <Car size={20} />}
@@ -255,7 +255,7 @@ export const WearableIntegration = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="flex items-center justify-between p-3 rounded-lg bg-nx-red-primary/10 border border-nx-red-primary/20"
+                        className="flex items-center justify-between p-3 rounded-[var(--radius-lg)] bg-nx-red-primary/10 border border-nx-red-primary/20"
                       >
                         <div className="flex items-center gap-3">
                           <AlertTriangle className="text-nx-red-primary" size={18} />

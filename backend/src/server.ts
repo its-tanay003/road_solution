@@ -20,6 +20,8 @@ import servicesRoutes from './routes/services';
 import integrationsRoutes from './routes/integrations';
 import pushRoutes from './routes/push';
 import dispatchRoutes, { attachDispatchIo } from './routes/dispatch';
+import dispatch108Routes from './routes/dispatch108';
+import vaahanRoutes from './routes/vaahan';
 import { observabilityMiddleware, metrics } from './middleware/observability';
 import { processFusionTriage } from './services/fusionEngine';
 import { getRiskHeatmap } from './services/riskEngine';
@@ -77,6 +79,7 @@ roadsos_ai_triage_latency_avg ${avgLatency}
 // Init services
 connectRedis();
 const ioInstance = initSocket(server);
+app.set('io', ioInstance);
 attachDispatchIo(ioInstance as any);
 
 // --- Metrics Endpoint ---
@@ -101,6 +104,8 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/integrations', integrationsRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/dispatch', dispatchRoutes);
+app.use('/api/dispatch/108', dispatch108Routes);
+app.use('/api/vaahan', vaahanRoutes);
 
 // Predictive Risk Engine Endpoint
 app.get('/api/risk/heatmap', (req, res) => {

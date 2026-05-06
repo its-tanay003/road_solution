@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import axios from 'axios';
 import { encryptData } from '../utils/crypto';
 
+import { generateiRADReport, submitiRADReport, type iRADReport } from '../lib/iradReporter';
 import { useNotificationStore } from '../store/notificationStore';
 import { useAmbulanceStore } from '../store/ambulanceStore';
 import { useWearableStore } from '../store/wearableStore';
@@ -18,6 +19,44 @@ export * from './notificationStore';
 export * from './trainingStore';
 export * from './wearableStore';
 export * from './ambulanceStore';
+  
+export interface SosIncident {
+  id: string;
+  timestamp: number;
+  location: { lat: number; lng: number } | null;
+  severity: string;
+  behaviorScore: number;
+  telemetry: Record<string, any>;
+  weather?: string;
+  triageScore?: number;
+  timeline?: { time: string; event: string; responder?: string; status: string }[];
+  iradReport?: iRADReport;
+  iradAckId?: string;
+}
+
+export interface Dispatch108 {
+  dispatched: boolean;
+  dispatchId: string;
+  dispatchTime: string;
+  callCenter: string;
+  unit: {
+    unitId: string;
+    type: string;
+    paramedic: string;
+    driver: string;
+    vehicle: string;
+    certifications: string[];
+    status: string;
+  };
+  eta: {
+    seconds: number;
+    minutes: number;
+    display: string;
+  };
+  distanceKm: number;
+  currentLat?: number;
+  currentLng?: number;
+}
 
 interface SosState {
   isActive: boolean;
@@ -32,8 +71,10 @@ interface SosState {
   countdownActive: boolean;
   countdownTime: number;
   india112Alerted: boolean;
-  offlineQueue: Record<string, unknown>[];
-  closedIncidents: any[];
+  iradReport: iRADReport | null;
+  iradAckId: string | null;
+  offlineQueue: unknown[];
+  closedIncidents: SosIncident[];
   triggerSos: () => void;
   startCountdown: () => void;
   cancelCountdown: () => void;
@@ -41,7 +82,11 @@ interface SosState {
   cancelSos: () => void;
   setLocation: (lat: number, lng: number) => void;
   setTrackingToken: (token: string) => void;
+  updateIradReport: (report: iRADReport, ackId: string) => void;
   updateDeliveryStatus: (channel: 'internet' | 'sms' | 'mesh', status: string) => void;
+  dispatch108: Dispatch108 | null;
+  setDispatch108: (data: Dispatch108) => void;
+  updateDispatchPosition: (lat: number, lng: number, etaSeconds: number, status: string) => void;
   syncOfflineQueue: () => Promise<void>;
 }
 
@@ -55,6 +100,8 @@ export const useSosStore = create<SosState>()(
       countdownActive: false,
       countdownTime: 10,
       india112Alerted: false,
+      iradReport: null,
+      iradAckId: null,
       offlineQueue: [],
       closedIncidents: JSON.parse(localStorage.getItem('roadsos_closed_incidents') || '[]'),
       deliveryStatus: {
@@ -62,6 +109,25 @@ export const useSosStore = create<SosState>()(
         sms: 'PENDING',
         mesh: 'PENDING'
       },
+      dispatch108: null,
+      setDispatch108: (data) => set({ dispatch108: data }),
+      updateDispatchPosition: (lat, lng, etaSeconds, status) => set((state) => ({
+        dispatch108: state.dispatch108 ? {
+          ...state.dispatch108,
+          currentLat: lat,
+          currentLng: lng,
+          eta: {
+            ...state.dispatch108.eta,
+            seconds: etaSeconds,
+            minutes: Math.floor(etaSeconds / 60),
+            display: `${Math.floor(etaSeconds / 60)}m ${etaSeconds % 60}s`
+          },
+          unit: {
+            ...state.dispatch108.unit,
+            status
+          }
+        } : null
+      })),
       startCountdown: () => set({ countdownActive: true, countdownTime: 10 }),
       cancelCountdown: () => set({ countdownActive: false, countdownTime: 10 }),
       decrementCountdown: () => set((state) => ({ countdownTime: Math.max(0, state.countdownTime - 1) })),
@@ -149,6 +215,19 @@ export const useSosStore = create<SosState>()(
             countdownTime: 240
           });
 
+          // Trigger 108 GVK EMRI Dispatch Simulation
+          try {
+            const dispatchRes = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/dispatch/108`, {
+              incidentLat: loc.lat,
+              incidentLng: loc.lng,
+              severity: 'CRITICAL',
+              requiresALS: true
+            });
+            set({ dispatch108: dispatchRes.data });
+          } catch (e) {
+            logger.error('Failed to trigger 108 dispatch', e);
+          }
+
           // Alert Nearby Responders Proactively
           const nearbyResponders = useLeaderboardStore.getState().responders;
           notifyNearbyResponders(loc, "NH-48", nearbyResponders);
@@ -196,11 +275,15 @@ export const useSosStore = create<SosState>()(
           trackingToken: null,
           countdownActive: false,
           india112Alerted: false,
-          deliveryStatus: { internet: 'PENDING', sms: 'PENDING', mesh: 'PENDING' }
+          iradReport: null,
+          iradAckId: null,
+          deliveryStatus: { internet: 'PENDING', sms: 'PENDING', mesh: 'PENDING' },
+          dispatch108: null
         });
       },
       setLocation: (lat, lng) => set({ location: { lat, lng } }),
       setTrackingToken: (token) => set({ trackingToken: token, isActive: true, isTriggering: false }),
+      updateIradReport: (report, ackId) => set({ iradReport: report, iradAckId: ackId }),
       updateDeliveryStatus: (channel, status) => set((state) => ({
         deliveryStatus: {
           ...state.deliveryStatus,
@@ -223,6 +306,8 @@ export interface EmergencyContact {
   notifySms: boolean;
   notifyPush: boolean;
   notifyEmail: boolean;
+  alertViaWhatsApp: boolean;
+  alertOnSos: boolean;
 }
 
 import { COUNTRY_PROFILES, type CountryProfile } from '../data/countries';
@@ -276,7 +361,11 @@ export const useUserStore = create<UserState>()(
       },
       contacts: [],
       addContact: (contact) => set((state) => ({ 
-        contacts: state.contacts.length < 5 ? [...state.contacts, contact] : state.contacts 
+        contacts: state.contacts.length < 5 ? [...state.contacts, {
+          ...contact,
+          alertViaWhatsApp: contact.alertViaWhatsApp ?? false,
+          alertOnSos: contact.alertOnSos ?? true
+        }] : state.contacts 
       })),
       removeContact: (id) => set((state) => ({
         contacts: state.contacts.filter(c => c.id !== id)
@@ -385,7 +474,7 @@ export const useNetworkStore = create<NetworkState>((set) => ({
 }));
 
 interface DemoState {
-  isDemoMode: boolean;
+  isDemoControlOpen: boolean;
   currentScenario: 'CRASH' | 'RURAL' | 'MULTI' | null;
   aiThinking: string[];
   decisionExplanations: {
@@ -402,8 +491,10 @@ interface DemoState {
   isScreenshotMode: boolean;
   isPresentationMode: boolean;
   showShortcuts: boolean;
+  isDemoMode: boolean;
   
-  setDemoMode: (isDemo: boolean) => void;
+  setDemoMode: (val: boolean) => void;
+  setDemoControlOpen: (isOpen: boolean) => void;
   startScenario: (scenario: 'CRASH' | 'RURAL' | 'MULTI') => void;
   setOrchestrating: (val: boolean) => void;
   setScenarioStep: (step: number) => void;
@@ -434,7 +525,7 @@ interface DemoState {
 }
 
 export const useDemoStore = create<DemoState>((set, get) => ({
-  isDemoMode: false,
+  isDemoControlOpen: false,
   currentScenario: null,
   aiThinking: [],
   decisionExplanations: {
@@ -452,6 +543,9 @@ export const useDemoStore = create<DemoState>((set, get) => ({
   isScreenshotMode: false,
   isPresentationMode: false,
   showShortcuts: false,
+  isDemoMode: false,
+  
+  setDemoMode: (val) => set({ isDemoMode: val }),
   vaahanData: {
     plate: 'TN 09 AZ 4521',
     model: 'Maruti Suzuki Swift VXI (2019)',
@@ -461,7 +555,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
     status: 'IDLE'
   },
 
-  setDemoMode: (isDemo) => set({ isDemoMode: isDemo }),
+  setDemoControlOpen: (isOpen) => set({ isDemoControlOpen: isOpen }),
   startScenario: (scenario) => set({ currentScenario: scenario, aiThinking: [], scenarioStep: 0, scenarioTime: 0 }),
   setOrchestrating: (val) => set({ isOrchestrating: val }),
   setScenarioStep: (step) => set({ scenarioStep: step }),
@@ -533,6 +627,21 @@ export const useDemoStore = create<DemoState>((set, get) => ({
           title: 'AMBULANCE DISPATCHED',
           message: 'Unit MH-108-A47 en route to Urban Crash scene.'
         });
+
+        // iRAD MoRTH Submission - Auto Filed
+        const incidentLoc = sosStore.location || { lat: 28.6139, lng: 77.2090 };
+        const incidentData = { lat: incidentLoc.lat, lng: incidentLoc.lng, roadType: 'NH', nhNumber: 'NH-44', state: 'Karnataka' };
+        const triageData = { score: 87, confidence: 91 };
+        const report = generateiRADReport(incidentData, triageData);
+        submitiRADReport(report).then(ack => {
+          sosStore.updateIradReport(report, ack.ackId);
+          useNotificationStore.getState().addNotification({
+            type: 'HIGH',
+            title: 'iRAD REPORT FILED',
+            message: `MoRTH iRAD Reference: ${ack.ackId}`
+          });
+        });
+
         setScenarioStep(3);
       }, 11000 * speedFactor);
 

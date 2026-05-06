@@ -6,10 +6,11 @@ import { useSosStore } from '../store';
 import { useOfflineTriage } from '../hooks/useOfflineTriage';
 import { OfflineTriageBadge } from '../components/OfflineTriageBadge';
 import { VaahanLookup } from '../components/VaahanLookup';
+import { DispatchCard } from '../components/DispatchCard';
 import type { TriageInput } from '../logic/offlineTriageEngine';
 
 export const SOSActive: React.FC = () => {
-  const { cancelSos, location } = useSosStore();
+  const { cancelSos, location, dispatch108 } = useSosStore();
   const [seconds, setSeconds] = useState(0);
 
   // Simulated telemetry for triage
@@ -35,7 +36,7 @@ export const SOSActive: React.FC = () => {
       
       {/* Background Pulsing Grid */}
       <div className="fixed inset-0 opacity-10 pointer-events-none">
-        <div className="w-full h-full" style={{ backgroundImage: 'radial-gradient(var(--clr-red) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <div className="w-full h-full bg-[radial-gradient(var(--clr-red)_1px,transparent_1px)] bg-size-[40px_40px]" />
       </div>
 
       <motion.div
@@ -93,7 +94,14 @@ export const SOSActive: React.FC = () => {
         </div>
 
         {/* VAAHAN Lookup */}
-        <VaahanLookup />
+        <div className="w-full mb-6">
+          <VaahanLookup />
+        </div>
+
+        {/* 108 Dispatch Tracking */}
+        <div className="w-full mb-6">
+          <DispatchCard />
+        </div>
 
         <div className="w-full grid grid-cols-2 gap-4 my-6">
           <div className="p-4 rounded-2xl bg-white/5 border border-(--clr-border) text-left">
@@ -106,31 +114,33 @@ export const SOSActive: React.FC = () => {
           </div>
         </div>
 
-        <div className="w-full p-6 rounded-3xl bg-white/5 border border-(--clr-border) mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-(--clr-green) animate-ping" />
-              <span className="text-[10px] font-mono text-(--clr-green) tracking-widest uppercase">Dispatcher Connected</span>
-            </div>
-            <span className="text-sm font-mono text-white">{Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}</span>
-          </div>
-          
-          <div className="text-left space-y-4">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                <Phone size={20} />
+        {!dispatch108 && (
+          <div className="w-full p-6 rounded-3xl bg-white/5 border border-(--clr-border) mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-(--clr-green) animate-ping" />
+                <span className="text-[10px] font-mono text-(--clr-green) tracking-widest uppercase">Dispatcher Connected</span>
               </div>
-              <div>
-                <p className="text-xs font-bold">112 EMERGENCY LINE</p>
-                <p className="text-[10px] text-(--clr-text-2)">Automatic hand-off in 10s</p>
+              <span className="text-sm font-mono text-white">{Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}</span>
+            </div>
+            
+            <div className="text-left space-y-4">
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                  <Phone size={20} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold">112 EMERGENCY LINE</p>
+                  <p className="text-[10px] text-(--clr-text-2)">Automatic hand-off in 10s</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="w-full flex flex-col gap-4">
           <FamilyStatusPanel 
-            incidentId="DEMO-123" 
+            incidentId="RS-2026-CH-9921" 
             location={location || { lat: 13.0827, lng: 80.2707 }} 
           />
           

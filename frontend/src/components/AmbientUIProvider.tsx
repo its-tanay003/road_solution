@@ -80,7 +80,7 @@ export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) =
             </p>
             <button 
               onClick={requestMotionPermission}
-              className="w-full bg-safe text-navy font-bold py-3 rounded-xl hover:bg-safe/80 transition-colors"
+              className="w-full bg-[var(--color-safe)] text-navy font-bold py-3 rounded-xl hover:bg-safe/80 transition-colors"
             >
               Grant Sensor Access
             </button>

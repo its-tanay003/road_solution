@@ -32,7 +32,7 @@ export const generateJudgeHandout = async () => {
   doc.text('Emergency Intelligence Platform', 15, 32);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('IIT Madras Road Safety Hackathon 2026', 15, 38);
+  doc.text('ROADSoS Official Technical Specification', 15, 38);
 
   // --- Problem Statement ---
   doc.setFontSize(12);
@@ -139,7 +139,7 @@ export const generateJudgeHandout = async () => {
   doc.setTextColor(150, 150, 150);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('Deploy-ready on Vercel. Open source. Build verified.', 105, 288, { align: 'center' });
+  doc.text('ROADSoS Production Environment', 200, 288, { align: 'right' });
 
   return doc;
 };

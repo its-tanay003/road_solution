@@ -39,7 +39,7 @@ export const SoundControlPanel: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-500/20 rounded-lg">
+              <div className="p-2 bg-indigo-500/20 rounded-[var(--radius-lg)]">
                 <Music className="text-indigo-400 w-6 h-6" />
               </div>
               <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">Sound Design</h1>
@@ -70,7 +70,7 @@ export const SoundControlPanel: React.FC = () => {
                   step="0.01"
                   value={masterVolume}
                   onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  className="w-full h-1 bg-slate-800 rounded-[var(--radius-lg)] appearance-none cursor-pointer accent-indigo-500"
                 />
               </div>
             </div>

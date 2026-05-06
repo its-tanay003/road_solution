@@ -7,8 +7,10 @@ import {
   AlertCircle,
   User,
   Bot,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle
 } from 'lucide-react';
+import { useSocket } from '../hooks/useSocket';
 import { useTranslation } from 'react-i18next';
 import { logger } from '../lib/logger';
 
@@ -31,6 +33,7 @@ const LANGUAGES = [
 ];
 
 export const MultiLingualTriage: React.FC = () => {
+  const { connected } = useSocket();
   const { i18n } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -145,7 +148,20 @@ export const MultiLingualTriage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-slate-950 p-4 md:p-8 font-sans relative">
+      <AnimatePresence>
+        {!connected && (
+          <motion.div 
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="absolute top-4 right-4 z-60 bg-amber-500/90 backdrop-blur-md text-black py-2 px-4 flex items-center justify-center gap-3 font-black text-xs tracking-wider"
+          >
+            <AlertTriangle size={16} />
+            REAL-TIME TRANSLATION SYNC PAUSED — LOCAL MODE ACTIVE
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8">
         
         {/* Main Chat Interface */}

@@ -5,6 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IndiaStatsTicker } from './IndiaStatsTicker';
 import { ImpactBanner } from './ImpactBanner';
 
+import { EvaluationSidebar } from './EvaluationSidebar';
+
+import { useNavigate } from 'react-router-dom';
+
 interface MainLayoutProps {
   children: React.ReactNode;
   activeTab?: string;
@@ -18,13 +22,30 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   onTabChange = () => {},
   onSettingsClick = () => {} 
 }) => {
+  const navigate = useNavigate();
+
+  const handleTabChange = (tabId: string) => {
+    if (tabId === 'eval') {
+      navigate('/roadmap');
+    } else if (tabId === 'stats') {
+      navigate('/india-stats');
+    } else if (tabId === 'home') {
+      navigate('/');
+    } else if (tabId === 'map') {
+      navigate('/map');
+    } else {
+      onTabChange(tabId);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-night">
+      <EvaluationSidebar />
       <IndiaStatsTicker />
       <HUDBar onSettingsClick={onSettingsClick} />
       <ImpactBanner />
       
-      <main className="flex-1 flex flex-col mt-[100px] pb-[72px]">
+      <main className="flex-1 flex flex-col mt-[100px] pb-[72px] lg:pl-64">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -39,7 +60,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         </AnimatePresence>
       </main>
 
-      <Navigation activeTab={activeTab} onTabChange={onTabChange} />
+      <Navigation activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );
 };

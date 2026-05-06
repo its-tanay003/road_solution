@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { IndiaStatsTicker } from '../components/IndiaStatsTicker';
-import { Settings, Shield, Activity, Monitor, Globe, Navigation2, BookOpen, X, Building2 } from 'lucide-react';
+import { Settings, Shield, Activity, Monitor, Globe, Navigation2, BookOpen, X, Building2, ShieldCheck } from 'lucide-react';
 import { RoadSafetyAwareness } from '../components/RoadSafetyAwareness';
+import { useSocket } from '../hooks/useSocket';
 
 // --- Particle Canvas Background ---
 const ParticleCanvas = () => {
@@ -197,6 +198,7 @@ const SOSButton = ({ onTrigger }: { onTrigger: () => void }) => {
 
 // --- Main HomeScreen Component ---
 const HomeScreen: React.FC = () => {
+  const { connected } = useSocket();
   const navigate = useNavigate();
   const [gForce, setGForce] = useState(0.9);
   const [showAwareness, setShowAwareness] = useState(false);
@@ -240,8 +242,8 @@ const HomeScreen: React.FC = () => {
             <Settings size={16} className="text-(--clr-text-2)" />
           </button>
           <div className="flex gap-1.5 ml-2">
-            <div className="w-2 h-2 rounded-full bg-[var(--clr-green)] pulse-dot" />
-            <div className="w-2 h-2 rounded-full bg-[var(--clr-blue)]" />
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-[var(--clr-green)]' : 'bg-amber-500'} pulse-dot`} />
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-[var(--clr-blue)]' : 'bg-white/10'}`} />
           </div>
         </div>
       </header>
@@ -270,6 +272,7 @@ const HomeScreen: React.FC = () => {
             { id: 'dashboard', label: 'COMMAND CENTER', icon: Monitor, path: '/dashboard' },
             { id: 'impact', label: 'IMPACT ANALYSIS', icon: Activity, path: '/impact', color: 'text-(--clr-blue)' },
             { id: 'governance', label: 'GOV INTELLIGENCE', icon: Building2, path: '/governance', color: 'text-(--clr-blue)' },
+            { id: 'eval', label: 'SIH EVALUATION', icon: ShieldCheck, path: '/roadmap', color: 'text-(--clr-green)' },
             { id: 'awareness', label: 'ROAD SAFETY IQ', icon: BookOpen, path: '#', color: 'text-(--clr-saffron)' }
           ].map((card) => (
             <motion.button

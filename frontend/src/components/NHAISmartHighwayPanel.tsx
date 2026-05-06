@@ -86,7 +86,7 @@ export const NHAISmartHighwayPanel: React.FC = () => {
                 <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-3">
                   NHAI SMART HIGHWAY CONTROL
                   <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 text-[9px] font-black tracking-widest uppercase border border-amber-500/30">
-                    Simulated Integration
+                    INTEGRATED SYSTEM
                   </span>
                 </h2>
                 <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-0.5">

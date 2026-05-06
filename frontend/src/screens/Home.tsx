@@ -40,7 +40,7 @@ export const Home: React.FC<HomeProps> = ({ onSOS, onNavigate }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-amber-alert text-lg font-bold uppercase tracking-widest text-center px-6"
+              className="text-[var(--color-warning)] text-lg font-bold uppercase tracking-widest text-center px-6"
             >
               {STATS[statIndex]}
             </motion.p>
@@ -53,7 +53,7 @@ export const Home: React.FC<HomeProps> = ({ onSOS, onNavigate }) => {
         {/* Action Grid */}
         <div className="grid grid-cols-2 gap-4 w-full px-6 mt-16 max-w-2xl">
           <button onClick={() => onNavigate('map')} className="action-tile">
-            <Hospital size={32} className="text-sos-red mb-2" />
+            <Hospital size={32} className="text-[var(--color-emergency)] mb-2" />
             <span className="text-white font-bold">Hospitals</span>
             <span className="text-text-muted text-xs">12 nearby</span>
           </button>
@@ -65,13 +65,13 @@ export const Home: React.FC<HomeProps> = ({ onSOS, onNavigate }) => {
           </button>
           
           <button onClick={() => onNavigate('ai')} className="action-tile">
-            <Brain size={32} className="text-safe-green mb-2" />
+            <Brain size={32} className="text-[var(--color-safe)]-green mb-2" />
             <span className="text-white font-bold">AI Triage</span>
             <span className="text-text-muted text-xs">Talk to AI</span>
           </button>
           
           <button onClick={() => onNavigate('stats')} className="action-tile">
-            <MapIcon size={32} className="text-amber-alert mb-2" />
+            <MapIcon size={32} className="text-[var(--color-warning)] mb-2" />
             <span className="text-white font-bold">Black Spots</span>
             <span className="text-text-muted text-xs">Road heatmap</span>
           </button>

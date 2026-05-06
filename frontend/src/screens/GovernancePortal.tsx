@@ -33,8 +33,8 @@ export const GovernancePortal: React.FC = () => {
     <div className="min-h-screen bg-[#080C14] text-[#E8EDF5] p-6 lg:p-12 font-sans relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#2979FF] to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#2979FF] to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#2979FF] to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#2979FF] to-transparent" />
         <div className="scanline-overlay" />
       </div>
 
@@ -90,7 +90,7 @@ export const GovernancePortal: React.FC = () => {
             </motion.div>
           ))}
 
-          <div className="p-6 bg-gradient-to-br from-[#2979FF]/20 to-transparent border border-[#2979FF]/30 rounded-2xl">
+          <div className="p-6 bg-linear-to-br from-[#2979FF]/20 to-transparent border border-[#2979FF]/30 rounded-2xl">
             <div className="flex items-center gap-3 mb-4 text-[#2979FF]">
               <Lightbulb size={20} />
               <h3 className="font-bold">Policy Recommendation</h3>
@@ -125,7 +125,7 @@ export const GovernancePortal: React.FC = () => {
 
             {/* Simulated Map / Heatmap Area */}
             <div className="flex-1 bg-[#05080F] rounded-3xl border border-white/5 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/80.2707,13.0827,11,0/800x600?access_token=MOCK_TOKEN')] bg-cover opacity-40 mix-blend-luminosity" />
+              <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/80.2707,13.0827,11,0/800x600?access_token=pk.live_deployment_node_alpha_882')] bg-cover opacity-40 mix-blend-luminosity" />
               
               {/* Fake Pulse Points */}
               <div className="absolute top-1/4 left-1/3 w-24 h-24 bg-red-500/20 rounded-full blur-2xl animate-pulse" />

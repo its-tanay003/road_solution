@@ -94,7 +94,7 @@ export const SafetyFeed = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <div className="nexus-card bg-(--nx-bg-surface) hover:border-(--nx-border-active) transition-all group overflow-hidden">
+              <div className="nexus-card bg-(--nx-bg-[var(--color-surface)]) hover:border-(--nx-border-active) transition-all group overflow-hidden">
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex gap-4">

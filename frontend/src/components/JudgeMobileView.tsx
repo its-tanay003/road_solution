@@ -100,7 +100,7 @@ export const JudgeMobileView: React.FC = () => {
 
           <div className="bg-slate-900/50 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-slate-800 rounded-lg">
+              <div className="p-2 bg-slate-800 rounded-[var(--radius-lg)]">
                 <MapPin size={18} className="text-blue-400" />
               </div>
               <div>

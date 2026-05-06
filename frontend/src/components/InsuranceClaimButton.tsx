@@ -39,7 +39,7 @@ export const InsuranceClaimButton: React.FC<InsuranceClaimButtonProps> = ({
       const claimData: InsuranceClaimData = {
         incidentId: incident.id,
         timestamp: new Date(incident.timestamp).getTime(),
-        location: incident.location,
+        location: incident.location || { lat: 0, lng: 0 },
         vaahan: {
           plate: vaahanData.plate,
           model: vaahanData.model,
@@ -55,7 +55,7 @@ export const InsuranceClaimButton: React.FC<InsuranceClaimButtonProps> = ({
           roadType: 'National Highway (NH-48)'
         },
         triage: {
-          severity: incident.triageScore > 70 ? 'CRITICAL' : 'MODERATE',
+          severity: (incident.triageScore || 0) > 70 ? 'CRITICAL' : 'MODERATE',
           confidence: 94,
           summary: "Automated collision detection triggered. High G-force recorded. Multi-unit dispatch initiated via ROADSoS emergency protocol.",
           injuries: ['Lacerations', 'Potential Concussion'],

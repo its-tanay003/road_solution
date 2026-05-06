@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-emergency: #FF3B3B;
+  --color-emergency-dim: rgba(255, 59, 59, 0.12);
+  --color-emergency-glow: rgba(255, 59, 59, 0.25);
+  --color-safe: #32D74B;
+  --color-safe-dim: rgba(50, 215, 75, 0.12);
+  --color-warning: #FF9F0A;
+  --color-warning-dim: rgba(255, 159, 10, 0.12);
+  --color-ai: #BF5AF2;
+  --color-ai-dim: rgba(191, 90, 242, 0.12);
+  --color-mesh: #5AC8FA;
+  --color-info: #0A84FF;
+  --color-surface: #111827;
+  --color-elevated: #1A2236;
+  --color-glass: rgba(17, 24, 39, 0.72);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  --shadow-glow-red: 0 0 16px rgba(255, 59, 59, 0.4);
+  --shadow-glow-green: 0 0 16px rgba(50, 215, 75, 0.4);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+@keyframes pulse-emergency {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5); }
+  50% { box-shadow: 0 0 0 20px rgba(255, 59, 59, 0); }
+}
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes aurora {
+  0%, 100% { border-color: rgba(255,59,59,0.5); box-shadow: 0 0 12px rgba(255,59,59,0.2); }
+  33% { border-color: rgba(191,90,242,0.5); box-shadow: 0 0 12px rgba(191,90,242,0.2); }
+  66% { border-color: rgba(10,132,255,0.5); box-shadow: 0 0 12px rgba(10,132,255,0.2); }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
 import { logger } from '../lib/logger';
+import { 
   ShieldCheck, 
   Activity, 
   Cpu, 
@@ -44,10 +44,10 @@ export const SystemStatus: React.FC = () => {
     }
   };
 
-  const resetDemo = async () => {
+  const resetSystem = async () => {
     setResetting(true);
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/demo/reset`, { method: 'POST' });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/system/reset`, { method: 'POST' });
       await fetchHealth();
     } catch (err) {
       logger.error("Reset failed:", err);
@@ -87,12 +87,12 @@ export const SystemStatus: React.FC = () => {
 
           <div className="flex items-center gap-4">
             <button 
-              onClick={resetDemo}
+              onClick={resetSystem}
               disabled={resetting}
               className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50"
             >
               <RefreshCcw size={18} className={resetting ? 'animate-spin' : ''} />
-              <span className="text-xs font-black uppercase tracking-widest">Reset Demo State</span>
+              <span className="text-xs font-black uppercase tracking-widest">Reset System State</span>
             </button>
             <div className="px-6 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />

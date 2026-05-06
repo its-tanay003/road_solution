@@ -21,7 +21,7 @@ export const ServiceDetail = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)]">
       {/* Tactical Hero Header */}
-      <div className="h-64 bg-[var(--nx-bg-surface)] relative border-b border-[var(--nx-border)] overflow-hidden">
+      <div className="h-64 bg-[var(--nx-bg-[var(--color-surface)])] relative border-b border-[var(--nx-border)] overflow-hidden">
         <div className="absolute top-6 left-6 z-30">
           <Button variant="secondary" size="sm" className="min-w-0 p-2 bg-black/40 backdrop-blur-md" onClick={() => navigate(-1)}>
             <ChevronLeft size={20} />
@@ -31,7 +31,7 @@ export const ServiceDetail = () => {
         {/* Ambient Map Decoration */}
         <div className="absolute inset-0 opacity-20 grayscale contrast-125">
            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" alt="Tactical Background" className="w-full h-full object-cover" />
-           <div className="absolute inset-0 bg-gradient-to-t from-[var(--nx-bg-surface)] to-transparent" />
+           <div className="absolute inset-0 bg-gradient-to-t from-[var(--nx-bg-[var(--color-surface)])] to-transparent" />
         </div>
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

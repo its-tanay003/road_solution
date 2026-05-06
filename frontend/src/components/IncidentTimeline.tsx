@@ -6,9 +6,12 @@ import {
   Clock, 
   Zap, 
   CheckCircle2,
-  Activity
+  Activity,
+  Globe
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useSosStore } from '../store';
+import { IRADReportCard } from './iRADReportCard';
 
 interface TimelineEvent {
   time: string;
@@ -31,6 +34,7 @@ const timelineData: TimelineEvent[] = [
 ];
 
 export const IncidentTimeline: React.FC = () => {
+  const { iradReport, iradAckId } = useSosStore();
   const handleExport = () => {
     window.print();
   };
@@ -65,7 +69,7 @@ export const IncidentTimeline: React.FC = () => {
           
           <button 
             onClick={handleExport}
-            className="no-print flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-lg font-bold text-sm transition-all"
+            className="no-print flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-[var(--radius-lg)] font-bold text-sm transition-all"
           >
             <Download size={16} />
             EXPORT PDF
@@ -145,6 +149,21 @@ export const IncidentTimeline: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* iRAD MoRTH Filing Section */}
+        {iradReport && iradAckId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-12"
+          >
+            <div className="flex items-center gap-2 mb-6 px-4">
+              <Globe size={18} className="text-emerald-500" />
+              <h2 className="font-bold text-lg uppercase tracking-tight text-white">Government Compliance Filing</h2>
+            </div>
+            <IRADReportCard report={iradReport} ackId={iradAckId} />
+          </motion.div>
+        )}
 
         {/* Footer */}
         <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 uppercase font-bold tracking-widest gap-4 print:border-slate-200">

@@ -4,7 +4,8 @@ import { useHospitalStore } from '../store';
 import type { Hospital } from '../store';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
-import { ShieldPlus, Clock, Activity, CheckCircle2, XCircle, Zap, ShieldAlert } from 'lucide-react';
+import { ShieldPlus, Clock, Activity, CheckCircle2, XCircle, Zap, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { useSocket } from '../hooks/useSocket';
 
 interface HospitalCapacityDashboardProps {
   onClose: () => void;
@@ -16,6 +17,7 @@ export const HospitalCapacityDashboard: React.FC<HospitalCapacityDashboardProps>
   incidentLocation = { lat: 28.6139, lng: 77.2090 }, // Default near New Delhi
   incidentConditions = ['head trauma'] // Default for demo
 }) => {
+  const { connected } = useSocket();
   const { startSimulation, stopSimulation, computeBestMatches, preAlertHospital } = useHospitalStore();
   const [matches, setMatches] = useState<Hospital[]>(() => 
     computeBestMatches(incidentLocation.lat, incidentLocation.lng, incidentConditions)
@@ -40,7 +42,13 @@ export const HospitalCapacityDashboard: React.FC<HospitalCapacityDashboardProps>
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-(--nx-bg-surface) overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-(--nx-bg-[var(--color-surface)]) overflow-hidden relative">
+      {!connected && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-1000 bg-amber-500/90 backdrop-blur-md text-black px-4 py-1.5 rounded-full flex items-center gap-2 border border-amber-600 shadow-xl pointer-events-none">
+          <AlertTriangle size={14} className="animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Real-time updates paused — showing last known data</span>
+        </div>
+      )}
       {/* Header */}
       <div className="h-16 border-b border-(--nx-border) px-6 flex items-center justify-between bg-(--nx-bg-base)">
         <div className="flex items-center gap-3">
@@ -111,7 +119,7 @@ export const HospitalCapacityDashboard: React.FC<HospitalCapacityDashboardProps>
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
                       </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center z-1">
                         <span className="text-[9px] text-(--nx-text-tertiary) leading-none uppercase">Load</span>
                         <span className="text-xs font-bold text-white leading-none mt-1">{Math.round(capacityRatio)}%</span>
                       </div>

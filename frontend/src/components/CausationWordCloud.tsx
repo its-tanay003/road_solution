@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { Hash } from 'lucide-react';
 
 declare global {
@@ -24,21 +23,8 @@ const words = [
 export const CausationWordCloud: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null);
 
-  useEffect(() => {
-    // Dynamically load D3 from CDN as requested
-    const script = document.createElement('script');
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js";
-    script.async = true;
-    script.onload = () => initCloud();
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   const initCloud = () => {
-    const d3 = window.d3;
+    const d3 = (window as any).d3;
     if (!d3 || !svgRef.current) return;
 
     const width = 500;
@@ -98,6 +84,21 @@ export const CausationWordCloud: React.FC = () => {
       .style("opacity", 0.2)
       .text("ROOT CAUSES");
   };
+
+  useEffect(() => {
+    // Dynamically load D3 from CDN as requested
+    const script = document.createElement('script');
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js";
+    script.async = true;
+    script.onload = () => initCloud();
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   return (
     <div className="p-8 rounded-[2.5rem] bg-[#0A0F1A] border border-white/10 shadow-2xl overflow-hidden relative group h-full flex flex-col">

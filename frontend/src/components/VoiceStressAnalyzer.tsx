@@ -193,7 +193,7 @@ export const VoiceStressAnalyzer = ({ onClose }: VoiceStressAnalyzerProps) => {
     <div className="w-full bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
       <div className="p-6 border-b border-white/10 flex justify-between items-center bg-slate-950/50">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isRecording ? 'bg-red-500/20 text-red-500' : 'bg-slate-500/20 text-slate-400'}`}>
+          <div className={`p-2 rounded-[var(--radius-lg)] ${isRecording ? 'bg-red-500/20 text-red-500' : 'bg-slate-500/20 text-slate-400'}`}>
             <Mic size={20} className={isRecording ? 'animate-pulse' : ''} />
           </div>
           <div>

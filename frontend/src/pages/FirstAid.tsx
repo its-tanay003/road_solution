@@ -50,7 +50,7 @@ export const FirstAid = () => {
         <div className="relative group">
            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-nx-text-dim group-focus-within:text-nx-blue-primary transition-colors" size={18} />
            <input 
-              className="nexus-input w-full pl-12 py-4 bg-nx-bg-surface border border-nx-border/50 focus:border-nx-blue-primary/50 text-sm"
+              className="nexus-input w-full pl-12 py-4 bg-nx-bg-[var(--color-surface)] border border-nx-border/50 focus:border-nx-blue-primary/50 text-sm"
               placeholder="SEARCH PROTOCOLS (E.G. BLEEDING, CPR, CHOKING)..."
               title="SEARCH PROTOCOLS"
               aria-label="SEARCH PROTOCOLS"
@@ -66,7 +66,7 @@ export const FirstAid = () => {
         </div>
 
         {/* Tactical Instructions Panel */}
-        <div className="nexus-card bg-nx-bg-surface border-nx-border overflow-hidden shadow-2xl">
+        <div className="nexus-card bg-nx-bg-[var(--color-surface)] border-nx-border overflow-hidden shadow-2xl">
            <div className="bg-nx-red-primary p-5 flex justify-between items-center">
               <div className="flex items-center gap-4">
                  <AlertTriangle className="text-white" size={24} />

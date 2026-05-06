@@ -5,6 +5,7 @@ import { Check, Heart, Eye, Move, Smartphone, Globe, Shield } from 'lucide-react
 import { motion } from 'framer-motion';
 import { PushNotificationSetup } from '../components/PushNotificationSetup';
 import { DriverBehaviorScore } from '../components/DriverBehaviorScore';
+import { SettingsPreview } from '../components/SettingsPreview';
 
 export const Settings: React.FC = () => {
   const { 
@@ -67,8 +68,11 @@ export const Settings: React.FC = () => {
                 onClick={() => setTheme(t.id)}
                 className={`relative h-24 rounded-3xl overflow-hidden border-2 transition-all ${
                   theme === t.id ? 'border-cyan' : 'border-white/10'
+                } ${
+                  t.id === 'dark-hud' ? 'bg-[#050A14]' : 
+                  t.id === 'dark-soft' ? 'bg-[#0D1B2A]' : 
+                  t.id === 'high-contrast' ? 'bg-black' : 'bg-[#F8FAFC]'
                 }`}
-                style={{ backgroundColor: t.color }}
               >
                 {theme === t.id && (
                   <div className="absolute top-2 right-2 w-6 h-6 bg-cyan rounded-full flex items-center justify-center">
@@ -90,13 +94,13 @@ export const Settings: React.FC = () => {
                 <button
                   key={size}
                   onClick={() => setTextSize(size)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center font-bold transition-all ${
+                  className={`shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center font-bold transition-all ${
                     textSize === size 
                     ? 'bg-cyan text-night' 
                     : 'bg-night-2 border border-white/10 text-white'
                   }`}
                 >
-                  <span style={{ fontSize: size === 'small' ? '12px' : size === 'xxl' ? '24px' : '18px' }}>A</span>
+                  <span className={size === 'small' ? 'text-xs' : size === 'xxl' ? 'text-2xl' : 'text-lg'}>A</span>
                 </button>
               ))}
             </div>
@@ -114,9 +118,9 @@ export const Settings: React.FC = () => {
                     fontStyle === font ? 'border-cyan bg-cyan/5' : 'border-white/10 bg-night-2'
                   }`}
                 >
-                  <span className="text-white font-bold" style={{ 
-                    fontFamily: font === 'inter' ? 'Inter' : font === 'rajdhani' ? 'Rajdhani' : 'Atkinson Hyperlegible' 
-                  }}>
+                  <span className={`text-white font-bold ${
+                    font === 'inter' ? 'font-inter' : font === 'rajdhani' ? 'font-rajdhani' : 'font-atkinson'
+                  }`}>
                     ROADSoS Help
                   </span>
                   <span className="text-text-muted text-xs uppercase tracking-widest">{font}</span>
@@ -149,7 +153,7 @@ export const Settings: React.FC = () => {
 
         {/* SECTION: EMERGENCY SETTINGS */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 text-sos-red font-black uppercase tracking-[0.2em] text-xs">
+          <div className="flex items-center gap-3 text-[var(--color-emergency)] font-black uppercase tracking-[0.2em] text-xs">
             <Heart size={16} /> Emergency Control
           </div>
           
@@ -161,10 +165,10 @@ export const Settings: React.FC = () => {
                   key={mode.id}
                   onClick={() => setSosMode(mode.id)}
                   className={`w-full h-20 rounded-3xl px-6 flex items-center gap-4 border-2 transition-all ${
-                    sosMode === mode.id ? 'border-sos-red bg-sos-red/5' : 'border-white/10 bg-night-2'
+                    sosMode === mode.id ? 'border-[var(--color-emergency)] bg-sos-red/5' : 'border-white/10 bg-night-2'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${sosMode === mode.id ? 'bg-sos-red' : 'bg-white/10'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${sosMode === mode.id ? 'bg-[var(--color-emergency)]' : 'bg-white/10'}`}>
                     <Smartphone size={20} className={sosMode === mode.id ? 'text-white' : 'text-text-muted'} />
                   </div>
                   <div className="flex flex-col items-start">
@@ -172,7 +176,7 @@ export const Settings: React.FC = () => {
                     <span className="text-text-muted text-xs">{mode.desc}</span>
                   </div>
                   {mode.id === 'hold3s' && (
-                    <span className="ml-auto text-[10px] font-black bg-safe-green text-night px-2 py-0.5 rounded-full">BEST</span>
+                    <span className="ml-auto text-[10px] font-black bg-[var(--color-safe)] text-night px-2 py-0.5 rounded-full">BEST</span>
                   )}
                 </button>
               ))}
@@ -213,7 +217,7 @@ export const Settings: React.FC = () => {
           <div className="flex items-center gap-3 text-cyan font-black uppercase tracking-[0.2em] text-xs">
             <Move size={16} /> Advanced Accessibility
           </div>
-          <div className="bg-night-2 rounded-[2rem] border border-white/10 p-2">
+          <div className="bg-night-2 rounded-4xl border border-white/10 p-2">
             <div className="flex items-center justify-between p-4 px-6 border-b border-white/5">
               <span className="text-white font-bold">Reduce Motion</span>
               <button 
@@ -246,8 +250,8 @@ export const Settings: React.FC = () => {
         {/* FOOTER */}
         <footer className="pt-8 space-y-4 text-center">
           <div className="flex justify-center items-center gap-3">
-            <span className="bg-amber-alert/10 text-amber-alert text-[10px] font-black px-3 py-1 rounded-full border border-amber-alert/20">
-              IIT MADRAS HACKATHON 2026
+            <span className="bg-[var(--color-warning)]/10 text-[var(--color-warning)] text-[10px] font-black px-3 py-1 rounded-full border border-[var(--color-warning)]/20">
+              NATIONAL ROAD SAFETY NETWORK
             </span>
           </div>
           <p className="text-text-muted text-[10px] font-bold uppercase tracking-widest">

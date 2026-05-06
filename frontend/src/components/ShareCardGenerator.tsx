@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Download, X, Check, Heart, Shield, Zap } from 'lucide-react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Share2, Download, X, Heart, Shield, Zap } from 'lucide-react';
 
 interface ShareCardProps {
   data: {
@@ -15,13 +15,9 @@ interface ShareCardProps {
 
 export const ShareCardGenerator: React.FC<ShareCardProps> = ({ data, onClose }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isGenerated, setIsGenerated] = useState(false);
+  const [isGenerated, setIsGenerated] = useState<boolean>(false);
 
-  useEffect(() => {
-    generateCanvas();
-  }, [data]);
-
-  const generateCanvas = () => {
+  const generateCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -107,7 +103,11 @@ export const ShareCardGenerator: React.FC<ShareCardProps> = ({ data, onClose }) 
     ctx.fillText('SCAN TO VERIFY', 500, 375);
 
     setIsGenerated(true);
-  };
+  }, [data, setIsGenerated, canvasRef]);
+
+  useEffect(() => {
+    generateCanvas();
+  }, [generateCanvas]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;

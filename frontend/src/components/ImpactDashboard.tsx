@@ -92,7 +92,7 @@ export const ImpactDashboard: React.FC = () => {
               className="bg-slate-900/50 border border-white/5 p-6 rounded-2xl group hover:border-white/10 transition-colors"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg bg-slate-950 border border-white/5 ${stat.color} group-hover:scale-110 transition-transform`}>
+                <div className={`p-2 rounded-[var(--radius-lg)] bg-slate-950 border border-white/5 ${stat.color} group-hover:scale-110 transition-transform`}>
                   {stat.icon}
                 </div>
                 <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{stat.sub}</div>
@@ -133,7 +133,7 @@ export const ImpactDashboard: React.FC = () => {
                 step="100"
                 value={deployments}
                 onChange={(e) => setDeployments(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 transition-all hover:h-2"
+                className="w-full h-1.5 bg-slate-800 rounded-[var(--radius-lg)] appearance-none cursor-pointer accent-emerald-500 transition-all hover:h-2"
               />
                 <div className="flex justify-between text-[10px] font-mono text-slate-600 uppercase tracking-widest">
                   <span>Pilot Mode</span>

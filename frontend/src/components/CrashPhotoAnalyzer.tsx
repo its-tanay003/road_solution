@@ -79,7 +79,7 @@ export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
     <div className="w-full max-w-4xl mx-auto bg-slate-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
       <div className="p-6 border-b border-white/10 flex justify-between items-center bg-slate-950/50">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-500/20 rounded-lg text-cyan-400">
+          <div className="p-2 bg-cyan-500/20 rounded-[var(--radius-lg)] text-cyan-400">
             <Camera size={20} />
           </div>
           <div>
@@ -270,6 +270,7 @@ export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
 const MetricCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: React.ElementType; color: string }) => (
   <div className="bg-slate-950/30 border border-white/5 p-4 rounded-2xl">
     <div className="flex items-center gap-2 text-slate-500 mb-1">
+      {/* @ts-ignore */}
       <Icon size={12} />
       <span className="text-[9px] font-mono uppercase">{label}</span>
     </div>

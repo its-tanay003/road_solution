@@ -77,7 +77,7 @@ export const GlobalEmergencyPanel: React.FC = () => {
                   Locating...
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-safe">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[var(--color-safe)]">
                   <MapPin size={14} />
                   GPS ACTIVE: {currentNumbers.name}
                 </div>
@@ -144,7 +144,7 @@ export const GlobalEmergencyPanel: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
         <button
           onClick={() => callService(currentNumbers.emergency)}
-          className="w-full h-56 bg-emergency text-white rounded-[3rem] flex flex-col items-center justify-center gap-4 shadow-2xl active:scale-95 transition-transform relative overflow-hidden"
+          className="w-full h-56 bg-[var(--color-emergency)] text-white rounded-[3rem] flex flex-col items-center justify-center gap-4 shadow-2xl active:scale-95 transition-transform relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 p-8 opacity-10">
             <PhoneCall size={120} />
@@ -165,7 +165,7 @@ export const GlobalEmergencyPanel: React.FC = () => {
             label="AMBULANCE" 
             number={currentNumbers.ambulance} 
             icon={Ambulance} 
-            color="bg-safe" 
+            color="bg-[var(--color-safe)]" 
             onClick={() => callService(currentNumbers.ambulance)} 
           />
           <ServiceRow 
@@ -221,6 +221,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({ label, number, icon: Icon, colo
   >
     <div className="flex items-center gap-8">
       <div className={`w-20 h-20 ${color} rounded-3xl flex items-center justify-center text-white shadow-lg`}>
+        {/* @ts-expect-error - polymorphic icon prop mismatch */}
         <Icon size={40} strokeWidth={3} />
       </div>
       <div className="text-left">

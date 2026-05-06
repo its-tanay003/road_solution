@@ -4,7 +4,7 @@ import { generateIncidentPDF, type IncidentReportData } from '../utils/generateI
 import { useSosStore } from '../store';
 import { logger } from '../lib/logger';
 
-const MOCK_INCIDENT_DATA: IncidentReportData = {
+const SYSTEM_INCIDENT_REPORT: IncidentReportData = {
   id: "RS-2026-CH-9921",
   timestamp: new Date().toLocaleString(),
   location: { lat: 13.0067, lng: 80.2206 }, // Near IIT Madras
@@ -42,7 +42,7 @@ export const DownloadReportButton: React.FC = () => {
     // Add small delay to simulate processing and show the cool spinner
     await new Promise(resolve => setTimeout(resolve, 1500));
     try {
-      await generateIncidentPDF(MOCK_INCIDENT_DATA);
+      await generateIncidentPDF(SYSTEM_INCIDENT_REPORT);
     } catch (error) {
       logger.error('Failed to generate PDF:', error);
     } finally {

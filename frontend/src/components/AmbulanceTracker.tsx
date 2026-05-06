@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { useSocket } from '../hooks/useSocket';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -119,6 +120,7 @@ const MapController = ({ center, isFull }: { center: [number, number], isFull: b
 };
 
 export const AmbulanceTracker: React.FC = () => {
+  const { connected } = useSocket();
   const { ambulances, dispatchedUnitId, eta, distance, initializeFleet, dispatchAmbulance, tick } = useAmbulanceStore();
   const { location } = useSosStore();
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -181,6 +183,13 @@ export const AmbulanceTracker: React.FC = () => {
   return (
     <div className={`relative ${isFullScreen ? 'fixed inset-0 z-200 bg-slate-950' : 'w-full h-[400px] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl'}`}>
       
+      {!connected && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-1000 bg-amber-500/90 backdrop-blur-md text-black px-4 py-1.5 rounded-full flex items-center gap-2 border border-amber-600 shadow-xl pointer-events-none">
+          <AlertTriangle size={14} className="animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Real-time updates paused — showing last known data</span>
+        </div>
+      )}
+
       {/* Operational Telemetry Map */}
       <MapContainer 
         center={mapCenter} 
@@ -283,6 +292,7 @@ export const AmbulanceTracker: React.FC = () => {
       <div className="absolute top-4 right-4 z-1000 flex flex-col gap-2">
         <button 
           onClick={() => setIsFullScreen(!isFullScreen)}
+          title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           className="p-3 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all shadow-xl"
         >
           {isFullScreen ? <X size={20} /> : <Maximize2 size={20} />}
@@ -296,6 +306,7 @@ export const AmbulanceTracker: React.FC = () => {
             <button
               key={a.unitId}
               onClick={() => handleDispatch(a.unitId)}
+              title={`Dispatch ${a.unitId}`}
               className="shrink-0 bg-slate-900/95 backdrop-blur-xl border border-white/10 p-4 rounded-4xl w-[200px] hover:border-blue-500/50 transition-all group"
             >
               <div className="flex items-center justify-between mb-3">

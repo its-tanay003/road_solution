@@ -43,7 +43,11 @@ const BLACK_SPOTS = [
   { id: 'DELHI-1', name: 'Delhi - Mukarba Chowk', lat: 28.7373, lng: 77.1643, severity: 'CRITICAL' }
 ];
 
+import { AlertTriangle } from 'lucide-react';
+import { useSocket } from '../hooks/useSocket';
+
 export function LiveMap({ services, userLat, userLng, incidentLat, incidentLng, showRiskHeatmap, showBlackSpots, route, drones }: Props): React.ReactElement {
+  const { connected } = useSocket();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const layerGroup = useRef<L.LayerGroup | null>(null);
@@ -249,6 +253,12 @@ export function LiveMap({ services, userLat, userLng, incidentLat, incidentLng, 
 
   return (
     <div className="relative w-full h-full min-h-[400px]">
+      {!connected && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-amber-500/90 backdrop-blur-md text-black px-4 py-1.5 rounded-full flex items-center gap-2 border border-amber-600 shadow-xl pointer-events-none">
+          <AlertTriangle size={14} className="animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Real-time updates paused — showing last known data</span>
+        </div>
+      )}
       <div 
         ref={mapRef} 
         id="live-emergency-map"
@@ -258,12 +268,12 @@ export function LiveMap({ services, userLat, userLng, incidentLat, incidentLng, 
       />
       
       {/* HUD Overlays */}
-      <div className="absolute top-4 left-4 z-1000 flex flex-col gap-2">
-        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
+      <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
+        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-[var(--radius-lg)] flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#0A84FF] animate-pulse" />
           <span className="text-[10px] font-mono text-white/80 uppercase tracking-wider">GPS System: Active</span>
         </div>
-        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
+        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-[var(--radius-lg)] flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#32D74B]" />
           <span className="text-[10px] font-mono text-white/80 uppercase tracking-wider">Radar Scanning</span>
         </div>

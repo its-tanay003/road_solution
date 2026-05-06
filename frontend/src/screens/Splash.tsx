@@ -40,7 +40,7 @@ export const Splash: React.FC<SplashProps> = ({ onComplete }) => {
           opacity: [0, 1, 0],
           transition: { duration: 0.8, times: [0, 0.5, 1] }
         }}
-        className="w-4 h-4 bg-sos-red rounded-full absolute"
+        className="w-4 h-4 bg-[var(--color-emergency)] rounded-full absolute"
       />
 
       {/* 2. Expanding circle (shattering effect implied by next steps) */}
@@ -65,7 +65,7 @@ export const Splash: React.FC<SplashProps> = ({ onComplete }) => {
           {['R', 'O', 'A', 'D'].map((l, i) => (
             <motion.span key={i} variants={letterVariants} className="text-white">{l}</motion.span>
           ))}
-          <motion.span variants={letterVariants} className="text-sos-red">S</motion.span>
+          <motion.span variants={letterVariants} className="text-[var(--color-emergency)]">S</motion.span>
           {['o', 'S'].map((l, i) => (
             <motion.span key={i + 5} variants={letterVariants} className="text-white">{l}</motion.span>
           ))}

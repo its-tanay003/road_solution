@@ -59,11 +59,11 @@ export const SOSButton: React.FC<SOSButtonProps> = ({ onActivate }) => {
           opacity: [0.15, 0.05, 0.15]
         }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="absolute w-[280px] h-[280px] bg-sos-red rounded-full"
+        className="absolute w-[280px] h-[280px] bg-[var(--color-emergency)] rounded-full"
       />
 
       {/* Middle static ring */}
-      <div className="absolute w-[240px] h-[240px] border-2 border-sos-red/40 rounded-full" />
+      <div className="absolute w-[240px] h-[240px] border-2 border-[var(--color-emergency)]/40 rounded-full" />
 
       {/* Main Button */}
       <motion.button

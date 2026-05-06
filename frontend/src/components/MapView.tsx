@@ -133,7 +133,7 @@ export const MapView = ({ showRiskHeatmap = false, showBlackSpots = false }: { s
               <strong>{service.name}</strong><br/>
               {service.type.toUpperCase()}<br/>
               {service.phone_primary && (
-                <a href={`tel:${service.phone_primary}`} className="text-emergency font-bold">
+                <a href={`tel:${service.phone_primary}`} className="text-[var(--color-emergency)] font-bold">
                   {service.phone_primary}
                 </a>
               )}
@@ -148,7 +148,7 @@ export const MapView = ({ showRiskHeatmap = false, showBlackSpots = false }: { s
           onClick={() => setInternalShowRisk(!internalShowRisk)}
           className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-xl border ${
             internalShowRisk 
-              ? 'bg-emergency text-white border-white/20' 
+              ? 'bg-[var(--color-emergency)] text-white border-white/20' 
               : 'bg-slate-900/80 text-slate-400 border-white/10 hover:bg-slate-800'
           }`}
         >

@@ -10,8 +10,8 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) p-6 lg:p-10 font-ui relative overflow-hidden">
       {/* Background HUD elements */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-(--clr-blue) to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-(--clr-blue) to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-(--clr-blue) to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-(--clr-blue) to-transparent" />
         <div className="scanline-overlay" />
       </div>
 
@@ -100,6 +100,11 @@ export const Dashboard: React.FC = () => {
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-2"><MapIcon size={14} /> GPS_LOCK: STABLE</span>
           <span className="flex items-center gap-2"><Zap size={14} /> POWER: GRID_STABLE</span>
+          <div className="flex items-center gap-4 ml-6 pl-6 border-l border-white/10">
+            <a href="/roadmap" className="hover:text-white transition-colors">Roadmap</a>
+            <a href="/research" className="hover:text-white transition-colors">Research</a>
+            <a href="/technical" className="hover:text-white transition-colors">Technical</a>
+          </div>
         </div>
         <div className="flex items-center gap-2 text-(--clr-red) animate-pulse">
           <AlertCircle size={14} /> LIVE MONITORING ACTIVE

@@ -19,15 +19,15 @@ export const ResponderAlertOverlay = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-sm bg-navy border-2 border-emergency/50 rounded-2xl shadow-[0_0_50px_rgba(230,57,70,0.3)] overflow-hidden">
+      <div className="w-full max-w-sm bg-navy border-2 border-[var(--color-emergency)]/50 rounded-2xl shadow-[0_0_50px_rgba(230,57,70,0.3)] overflow-hidden">
         
         {/* Pulsing Header */}
-        <div className="bg-emergency/20 border-b border-emergency/30 p-4 flex items-center justify-center space-x-3">
-          <AlertTriangle className="text-emergency animate-pulse" size={24} />
+        <div className="bg-[rgba(255,59,59,0.20)] border-b border-[var(--color-emergency)]/30 p-4 flex items-center justify-center space-x-3">
+          <AlertTriangle className="text-[var(--color-emergency)] animate-pulse" size={24} />
           <h2 className="text-xl font-condensed font-bold text-white tracking-widest uppercase">
             Responder Alert
           </h2>
-          <AlertTriangle className="text-emergency animate-pulse" size={24} />
+          <AlertTriangle className="text-[var(--color-emergency)] animate-pulse" size={24} />
         </div>
 
         <div className="p-6 space-y-6">
@@ -54,7 +54,7 @@ export const ResponderAlertOverlay = () => {
             <button 
               onClick={handleAccept}
               title="Accept and Route"
-              className="py-3 px-4 rounded-xl font-bold flex items-center justify-center bg-emergency text-white hover:bg-emergency/80 transition-colors shadow-lg"
+              className="py-3 px-4 rounded-xl font-bold flex items-center justify-center bg-[var(--color-emergency)] text-white hover:bg-emergency/80 transition-colors shadow-lg"
             >
               <Navigation size={18} className="mr-2" /> Accept
             </button>

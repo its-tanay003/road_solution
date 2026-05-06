@@ -57,7 +57,7 @@ export const LiveCore: React.FC = () => {
         className={`relative z-10 w-48 h-48 rounded-sm flex flex-col items-center justify-center transition-all duration-500 overflow-hidden group ${
           isActive 
             ? 'bg-[var(--nx-red-dim)] border-2 border-[var(--nx-red-primary)] shadow-[0_0_50px_rgba(255,59,59,0.3)]' 
-            : 'bg-[var(--nx-bg-surface)] border-2 border-[var(--nx-border)] shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:border-[var(--nx-border-active)]'
+            : 'bg-[var(--nx-bg-[var(--color-surface)])] border-2 border-[var(--nx-border)] shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:border-[var(--nx-border-active)]'
         }`}
       >
         {/* Digital Corner Brackets */}

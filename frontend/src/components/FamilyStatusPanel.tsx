@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, CheckCircle2, Clock, Send, MessageSquare } from 'lucide-react';
 import { useMedicalProfileStore } from '../store/medicalProfileStore';
@@ -95,7 +95,8 @@ export const FamilyStatusPanel: React.FC<{ incidentId: string; location: { lat: 
                     <button
                       key="idle"
                       onClick={() => handleNotify(idx, contact.phone)}
-                      className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-[#2979FF] hover:border-[#2979FF]/50 transition-all"
+                      title={`Notify ${contact.name} via SMS`}
+                      className="p-2 rounded-[var(--radius-lg)] bg-white/5 border border-white/10 text-white/40 hover:text-[#2979FF] hover:border-[#2979FF]/50 transition-all"
                     >
                       <Send size={14} />
                     </button>

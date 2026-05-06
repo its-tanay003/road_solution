@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Check, Volume2, ShieldCheck } from 'lucide-react';
+import { GoodSamaritanCollapsible } from '../pages/GoodSamaritanGuide';
 
 const STEPS = [
   {
@@ -72,7 +74,9 @@ const STEPS = [
 ];
 
 export const BystanderMode: React.FC = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
+  const [showLegalGuide, setShowLegalGuide] = useState(true);
 
   const speak = () => {
     const text = `${STEPS[currentStep].title}. ${STEPS[currentStep].desc}`;
@@ -104,6 +108,11 @@ export const BystanderMode: React.FC = () => {
           exit={{ opacity: 0, x: -50 }}
           className="flex-1 flex flex-col px-8"
         >
+          {/* Legal Guide Integration */}
+          {currentStep === 0 && showLegalGuide && (
+            <GoodSamaritanCollapsible onDismiss={() => setShowLegalGuide(false)} />
+          )}
+
           {/* Illustration Zone */}
           <div className="flex-[0.45] flex items-center justify-center bg-night-2/30 rounded-[3rem] mb-8 border border-white/5">
             {STEPS[currentStep].illustration}
@@ -141,9 +150,15 @@ export const BystanderMode: React.FC = () => {
                 <ChevronLeft size={24} /> BACK
               </button>
               <button
-                onClick={() => currentStep < STEPS.length - 1 ? setCurrentStep(prev => prev + 1) : null}
-                className={`flex-[2] h-20 rounded-3xl flex items-center justify-center gap-2 text-xl font-black tracking-tighter active:scale-95 transition-transform ${
-                  currentStep === STEPS.length - 1 ? 'bg-safe-green text-night' : 'bg-cyan text-night'
+                onClick={() => {
+                  if (currentStep < STEPS.length - 1) {
+                    setCurrentStep(prev => prev + 1);
+                  } else {
+                    navigate('/incident-report');
+                  }
+                }}
+                className={`flex-2 h-20 rounded-3xl flex items-center justify-center gap-2 text-xl font-black tracking-tighter active:scale-95 transition-transform ${
+                  currentStep === STEPS.length - 1 ? 'bg-safe text-night' : 'bg-cyan text-night'
                 }`}
               >
                 {currentStep === STEPS.length - 1 ? (
@@ -154,7 +169,7 @@ export const BystanderMode: React.FC = () => {
               </button>
             </div>
             
-            <div className="flex items-center justify-center gap-2 text-amber-alert py-2">
+            <div className="flex items-center justify-center gap-2 text-warning py-2">
               <ShieldCheck size={16} />
               <span className="text-[10px] font-bold uppercase tracking-widest underline decoration-amber-alert/40 underline-offset-4">
                 Good Samaritan Law protects you

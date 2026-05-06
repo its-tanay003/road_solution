@@ -56,7 +56,7 @@ export const AppLoadingScreen: React.FC<Props> = ({ onComplete }) => {
       exit={{ opacity: 0, scale: 1.05 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       onClick={handleSkip}
-      className="fixed inset-0 z-[9999] bg-[#080C14] flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
+      className="fixed inset-0 z-9999 bg-[#080C14] flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
     >
 
       {/* Center Content */}
@@ -87,7 +87,7 @@ export const AppLoadingScreen: React.FC<Props> = ({ onComplete }) => {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-[var(--clr-text-2)] text-sm tracking-[0.3em] uppercase font-medium"
+                className="text-(--clr-text-2) text-sm tracking-[0.3em] uppercase font-medium"
               >
                 Emergency Intelligence Platform
               </motion.p>

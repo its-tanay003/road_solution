@@ -22,7 +22,7 @@ export const Home = () => {
       id: 'hospitals', 
       label: 'Find Hospitals', 
       icon: Hospital, 
-      color: 'bg-safe', 
+      color: 'bg-[var(--color-safe)]', 
       path: '/hospitals',
       desc: 'Nearest emergency care'
     },
@@ -58,7 +58,7 @@ export const Home = () => {
       <header className="flex flex-col gap-2 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-emergency rounded-2xl flex items-center justify-center shadow-lg shadow-emergency/20">
+            <div className="w-12 h-12 bg-[var(--color-emergency)] rounded-2xl flex items-center justify-center shadow-lg shadow-emergency/20">
               <ShieldAlert size={28} className="text-white" />
             </div>
             <div>
@@ -74,7 +74,7 @@ export const Home = () => {
                 onClick={() => i18n.changeLanguage(lang)}
                 className={`w-[50px] h-[40px] flex items-center justify-center text-sm font-black rounded-xl transition-all uppercase ${
                   i18n.language === lang 
-                  ? 'bg-emergency text-white shadow-md' 
+                  ? 'bg-[var(--color-emergency)] text-white shadow-md' 
                   : 'text-(--app-text) opacity-50 hover:opacity-100'
                 }`}
               >
@@ -91,7 +91,7 @@ export const Home = () => {
         <div className="relative z-10 flex flex-col items-center">
           <EmergencyButton />
           <div className="text-center mt-4">
-            <p className="text-xl font-black text-emergency uppercase animate-pulse">
+            <p className="text-xl font-black text-[var(--color-emergency)] uppercase animate-pulse">
               {isActive ? 'Emergency Mode Active' : t('sos.trigger')}
             </p>
             <p className="text-sm font-bold opacity-40 uppercase tracking-widest mt-1">
@@ -134,14 +134,19 @@ export const Home = () => {
         </div>
         <button 
           title="Call Primary Contact"
-          className="w-16 h-16 bg-safe rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all"
+          className="w-16 h-16 bg-[var(--color-safe)] rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all"
         >
           <Phone size={32} fill="white" />
         </button>
       </section>
 
       {/* Footer Meta */}
-      <footer className="text-center py-8">
+      <footer className="text-center py-8 space-y-4">
+        <div className="flex justify-center gap-6">
+          <button onClick={() => navigate('/roadmap')} className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Roadmap</button>
+          <button onClick={() => navigate('/research')} className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Research</button>
+          <button onClick={() => navigate('/technical')} className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Technical Specs</button>
+        </div>
         <p className="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em]">
           Nexus System v2.0 • Secured Data Hub • IITM 2026
         </p>

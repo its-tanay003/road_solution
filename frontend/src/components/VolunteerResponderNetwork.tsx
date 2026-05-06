@@ -43,7 +43,7 @@ export const VolunteerResponderNetwork: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md"
         >
-          <Panel className="p-8 border-(--nx-blue-primary)/30 bg-linear-to-b from-(--nx-bg-surface) to-(--nx-bg-elevated)">
+          <Panel className="p-8 border-(--nx-blue-primary)/30 bg-linear-to-b from-(--nx-bg-[var(--color-surface)]) to-(--nx-bg-elevated)">
             <div className="flex flex-col items-center text-center mb-8">
               <div className="w-16 h-16 bg-(--nx-blue-primary)/20 rounded-full flex items-center justify-center mb-4">
                 <Heart className="w-8 h-8 text-(--nx-blue-primary) animate-pulse" />
@@ -204,7 +204,7 @@ export const VolunteerResponderNetwork: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
               <UserPlus className="w-5 h-5 text-blue-400" />
             </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-(--nx-bg-surface)" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-(--nx-bg-[var(--color-surface)])" />
           </div>
           <div>
             <div className="text-xs font-bold text-white">Network Healthy</div>

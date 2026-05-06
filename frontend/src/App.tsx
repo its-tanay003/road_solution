@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Navigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Screens & Components
@@ -10,18 +10,21 @@ import { OnboardingFlow } from './components/OnboardingFlow';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { GovernancePortal } from './screens/GovernancePortal';
 import { ImpactCalculator } from './screens/ImpactCalculator';
-import DemoOrchestrator from './components/DemoOrchestrator';
+import { SystemOrchestrator } from './components/SystemOrchestrator';
 import CrashPatternAnalytics from './screens/CrashPatternAnalytics';
 import FamilyPortal from './screens/FamilyPortal';
 import ResponderView from './screens/ResponderView';
 import { ARNavigationView } from './components/ARNavigationView';
 import { PitchDeckMode } from './components/PitchDeckMode';
 import { KeyboardShortcutOverlay } from './components/KeyboardShortcutOverlay';
-import RoadmapPage from './screens/RoadmapPage';
-import ResearchPage from './screens/ResearchPage';
-import TechnicalPage from './screens/TechnicalPage';
+import { Roadmap } from './pages/Roadmap';
+import { Research } from './pages/Research';
+import { Technical } from './pages/Technical';
+import { GoodSamaritanGuide } from './pages/GoodSamaritanGuide';
 import { LiveMap } from './pages/LiveMap';
 import { HospitalFinder } from './screens/HospitalFinder';
+import { EvaluationLayout } from './components/EvaluationLayout';
+import { IncidentTimeline } from './components/IncidentTimeline';
 
 // Stores
 import { useMedicalProfileStore } from './store/medicalProfileStore';
@@ -44,32 +47,30 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
 
 const AppContent = () => {
   const location = useLocation();
-  const [searchParams] = useSearchParams();
   const { onboardingComplete } = useMedicalProfileStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for demo mode in URL
-  const isDemoMode = searchParams.get('demo') === 'true';
-  const [isDemoControlOpen, setDemoControlOpen] = useState(false);
   const { 
     isPresentationMode, 
     togglePresentationMode, 
     toggleShortcuts, 
     triggerScenario, 
     showShortcuts, 
-    isPaused 
+    isPaused,
+    isDemoControlOpen,
+    setDemoControlOpen
   } = useDemoStore();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // Ctrl+Shift+D to toggle demo controls
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        setDemoControlOpen(v => !v);
+        setDemoControlOpen(!isDemoControlOpen);
       }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, []);
+  }, [isDemoControlOpen, setDemoControlOpen]);
 
   useEffect(() => {
     const handleGlobalKeydown = (e: KeyboardEvent) => {
@@ -86,7 +87,7 @@ const AppContent = () => {
       }
 
       // Quick triggers for scenarios if in demo mode
-      if (isDemoMode && !isPresentationMode) {
+      if (isDemoControlOpen && !isPresentationMode) {
         if (e.key === '1') triggerScenario(1);
         if (e.key === '2') triggerScenario(2);
         if (e.key === '3') triggerScenario(3);
@@ -96,13 +97,13 @@ const AppContent = () => {
 
     window.addEventListener('keydown', handleGlobalKeydown);
     return () => window.removeEventListener('keydown', handleGlobalKeydown);
-  }, [isDemoMode, isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario]);
+  }, [isDemoControlOpen, isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario]);
 
   if (isLoading) {
     return <AppLoadingScreen onComplete={() => setIsLoading(false)} />;
   }
 
-  if (!onboardingComplete && !isDemoMode) {
+  if (!onboardingComplete && !isDemoControlOpen) {
     return <OnboardingFlow />;
   }
 
@@ -126,9 +127,11 @@ const AppContent = () => {
           <Route path="/responder/:incidentId/ar" element={<PageWrapper><ARNavigationView /></PageWrapper>} />
           <Route path="/map" element={<PageWrapper><LiveMap /></PageWrapper>} />
           <Route path="/hospitals" element={<PageWrapper><HospitalFinder /></PageWrapper>} />
-          <Route path="/roadmap" element={<PageWrapper><RoadmapPage /></PageWrapper>} />
-          <Route path="/research" element={<PageWrapper><ResearchPage /></PageWrapper>} />
-          <Route path="/technical" element={<PageWrapper><TechnicalPage /></PageWrapper>} />
+          <Route path="/roadmap" element={<PageWrapper><EvaluationLayout><Roadmap /></EvaluationLayout></PageWrapper>} />
+          <Route path="/research" element={<PageWrapper><EvaluationLayout><Research /></EvaluationLayout></PageWrapper>} />
+          <Route path="/technical" element={<PageWrapper><EvaluationLayout><Technical /></EvaluationLayout></PageWrapper>} />
+          <Route path="/good-samaritan" element={<PageWrapper><EvaluationLayout><GoodSamaritanGuide /></EvaluationLayout></PageWrapper>} />
+          <Route path="/incident-report" element={<PageWrapper><IncidentTimeline /></PageWrapper>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
@@ -137,7 +140,7 @@ const AppContent = () => {
       <NHAISmartHighwayPanel />
 
       {/* Global Demo Tools */}
-      {isDemoMode && isDemoControlOpen && <DemoOrchestrator />}
+      {isDemoControlOpen && <SystemOrchestrator />}
       
       {/* Presentation & Shortcut Layers */}
       <PitchDeckMode 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -66,11 +65,11 @@ export default function TechnicalPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <a href="https://github.com/its-tanay003/road_solution" target="_blank" rel="noreferrer"
-              className="px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors">
+              className="px-4 py-2 bg-white/10 rounded-[var(--radius-lg)] text-sm text-white hover:bg-white/20 transition-colors">
               ⭐ GitHub Repository
             </a>
-            <span className="px-4 py-2 bg-[#00E676]/10 rounded-lg text-sm text-[#00E676]">MIT License</span>
-            <span className="px-4 py-2 bg-white/5 rounded-lg text-sm text-gray-400">Stack: React 19 · Node.js · Socket.io · Zustand</span>
+            <span className="px-4 py-2 bg-[#00E676]/10 rounded-[var(--radius-lg)] text-sm text-[#00E676]">MIT License</span>
+            <span className="px-4 py-2 bg-white/5 rounded-[var(--radius-lg)] text-sm text-gray-400">Stack: React 19 · Node.js · Socket.io · Zustand</span>
           </div>
         </section>
 

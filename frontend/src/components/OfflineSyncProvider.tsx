@@ -87,7 +87,7 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-24 right-6 z-50 bg-(--nx-bg-surface) border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-4 min-w-[240px]"
+            className="fixed bottom-24 right-6 z-50 bg-(--nx-bg-[var(--color-surface)]) border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-4 min-w-[240px]"
           >
             <div className="relative">
               <Loader2 className="text-nx-blue-primary animate-spin" size={24} />

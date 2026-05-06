@@ -168,7 +168,7 @@ export const VehicleServicesPanel: React.FC = () => {
           <div>
             <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none">ROADSIDE HELP</h1>
             <div className="flex items-center gap-2 mt-2">
-              <div className={`w-3 h-3 rounded-full ${isOffline ? 'bg-amber' : 'bg-safe'}`} />
+              <div className={`w-3 h-3 rounded-full ${isOffline ? 'bg-amber' : 'bg-[var(--color-safe)]'}`} />
               <p className="text-xs font-black uppercase tracking-widest opacity-40">
                 {isOffline ? 'OFFLINE DATABASE' : 'SYSTEMS ONLINE'}
               </p>
@@ -205,7 +205,7 @@ export const VehicleServicesPanel: React.FC = () => {
         {/* SOS Towing */}
         <button 
           onClick={handleEmergencyTowing}
-          className="w-full h-24 bg-emergency text-white rounded-4xl flex items-center justify-between px-8 shadow-xl active:scale-[0.98] transition-transform"
+          className="w-full h-24 bg-[var(--color-emergency)] text-white rounded-4xl flex items-center justify-between px-8 shadow-xl active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-6">
             <Truck size={40} strokeWidth={3} />
@@ -238,7 +238,7 @@ export const VehicleServicesPanel: React.FC = () => {
         </div>
 
         {error && (
-          <div className="p-6 bg-emergency/10 border-4 border-emergency/20 rounded-3xl flex items-center gap-4 text-emergency">
+          <div className="p-6 bg-emergency/10 border-4 border-[var(--color-emergency)]/20 rounded-3xl flex items-center gap-4 text-[var(--color-emergency)]">
             <AlertTriangle size={32} />
             <p className="text-lg font-black uppercase tracking-tight">{error}</p>
           </div>
@@ -291,7 +291,7 @@ export const VehicleServicesPanel: React.FC = () => {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${service.lat},${service.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="h-20 bg-safe text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
+                      className="h-20 bg-[var(--color-safe)] text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
                     >
                       <Navigation size={28} /> GO
                     </a>

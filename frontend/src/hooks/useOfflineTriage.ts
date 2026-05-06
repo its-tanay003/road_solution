@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { triageIncident } from '../logic/offlineTriageEngine';
-import type { TriageInput, TriageOutput } from '../logic/offlineTriageEngine';
+import type { TriageInput } from '../logic/offlineTriageEngine';
 
 export const useOfflineTriage = (input: TriageInput | null) => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);

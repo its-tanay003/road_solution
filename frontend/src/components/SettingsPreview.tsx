@@ -10,15 +10,15 @@ export const SettingsPreview: React.FC = () => {
       {/* Mini HUD Bar */}
       <div className="h-8 glass flex items-center justify-between px-4 relative z-10">
         <div className="flex items-center gap-1">
-          <Shield size={12} className="text-sos-red" />
+          <Shield size={12} className="text-[var(--color-emergency)]" />
           <span className="text-[10px] font-bold text-white uppercase tracking-tighter">ROADSoS</span>
         </div>
-        <div className="w-2 h-2 bg-safe-green rounded-full" />
+        <div className="w-2 h-2 bg-[var(--color-safe)] rounded-full" />
       </div>
 
       {/* Mini SOS Button */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 relative z-10">
-        <div className="w-20 h-20 bg-sos-red rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,23,68,0.3)]">
+        <div className="w-20 h-20 bg-[var(--color-emergency)] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,23,68,0.3)]">
           <span className="text-white text-xl font-black font-rajdhani">SOS</span>
         </div>
         

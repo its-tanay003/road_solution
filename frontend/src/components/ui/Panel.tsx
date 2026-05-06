@@ -40,12 +40,15 @@ export const Panel: React.FC<PanelProps> = ({
   return (
     <div className={`nexus-card flex flex-col overflow-hidden ${getVariantStyles()} ${className}`}>
       {(title || Icon) && (
-        <div className="px-4 py-3 border-b border-inherit flex items-center justify-between bg-white/[0.02]">
+        <div className="px-4 py-3 border-b border-inherit flex items-center justify-between bg-white/2">
           <div className="flex items-center gap-3">
-            {Icon && <Icon size={16} className={getIconColor()} />}
+            {Icon && (
+              /* @ts-ignore */
+              <Icon className={getIconColor()} size={16} />
+            )}
             <div>
               {title && <h3 className="text-xs font-semibold uppercase tracking-wider text-white">{title}</h3>}
-              {subtitle && <p className="text-[10px] text-[var(--nx-text-tertiary)] uppercase">{subtitle}</p>}
+              {subtitle && <p className="text-[10px] text-(--nx-text-tertiary) uppercase">{subtitle}</p>}
             </div>
           </div>
           {action && <div>{action}</div>}
@@ -55,7 +58,7 @@ export const Panel: React.FC<PanelProps> = ({
         {children}
       </div>
       {/* Decorative Scanline */}
-      <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--nx-border-active)] to-transparent opacity-50" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-(--nx-border-active) to-transparent opacity-50" />
     </div>
   );
 };

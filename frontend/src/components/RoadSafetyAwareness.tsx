@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { BookOpen, Trophy, Share2, MessageCircle, CheckCircle2, XCircle, Info, ChevronRight, Zap } from 'lucide-react';
 import { useAwarenessStore } from '../store/awarenessStore';

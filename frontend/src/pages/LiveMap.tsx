@@ -58,7 +58,7 @@ export const LiveMap = () => {
       <div className="absolute top-6 left-6 right-6 z-400 flex flex-col gap-4 pointer-events-none">
         <div className="flex justify-between items-start w-full">
           <div className="flex flex-col gap-2 pointer-events-auto">
-             <div className="nexus-card bg-(--nx-bg-surface)/90 backdrop-blur-md border-(--nx-border) p-1.5 flex items-center shadow-2xl w-80">
+             <div className="nexus-card bg-(--nx-bg-[var(--color-surface)])/90 backdrop-blur-md border-(--nx-border) p-1.5 flex items-center shadow-2xl w-80">
                 <Search className="text-(--nx-text-tertiary) ml-3" size={16} />
                 <input 
                   type="text" 
@@ -70,8 +70,8 @@ export const LiveMap = () => {
                 </Button>
              </div>
              <div className="flex gap-2">
-                <Badge variant="mesh" className="bg-(--nx-bg-surface)/90 backdrop-blur-md">MAP-RELAY: 12ms</Badge>
-                <Badge variant="active" className="bg-(--nx-bg-surface)/90 backdrop-blur-md">GPS: FIXED</Badge>
+                <Badge variant="mesh" className="bg-(--nx-bg-[var(--color-surface)])/90 backdrop-blur-md">MAP-RELAY: 12ms</Badge>
+                <Badge variant="active" className="bg-(--nx-bg-[var(--color-surface)])/90 backdrop-blur-md">GPS: FIXED</Badge>
              </div>
           </div>
 
@@ -103,7 +103,7 @@ export const LiveMap = () => {
                <Hospital size={14} />
                HOSPITAL CAPACITY: {showHospitalPanel ? 'ENABLED' : 'DISABLED'}
              </Button>
-             <div className="nexus-card bg-(--nx-bg-surface)/90 backdrop-blur-md p-2 flex gap-1">
+             <div className="nexus-card bg-(--nx-bg-[var(--color-surface)])/90 backdrop-blur-md p-2 flex gap-1">
                 {[MapIcon, Activity, Shield].map((Icon, i) => (
                    <Button key={i} variant="ghost" size="sm" className="p-2 min-w-0 hover:bg-white/5">
                       <Icon size={16} />
@@ -123,7 +123,7 @@ export const LiveMap = () => {
             exit={{ x: 400, opacity: 0 }}
             className="absolute right-6 top-48 bottom-32 w-96 z-500 pointer-events-auto"
           >
-            <div className="nexus-card bg-(--nx-bg-surface)/95 backdrop-blur-xl h-full p-6 flex flex-col border-(--nx-border) shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)]">
+            <div className="nexus-card bg-(--nx-bg-[var(--color-surface)])/95 backdrop-blur-xl h-full p-6 flex flex-col border-(--nx-border) shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)]">
               <HospitalCapacityPanel />
             </div>
           </motion.div>
@@ -132,7 +132,7 @@ export const LiveMap = () => {
 
       {/* Swipeable Bottom Sheet */}
       <motion.div
-        className="absolute left-0 right-0 bg-(--nx-bg-surface)/95 backdrop-blur-3xl border-t border-(--nx-border) z-500 flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="absolute left-0 right-0 bg-(--nx-bg-[var(--color-surface)])/95 backdrop-blur-3xl border-t border-(--nx-border) z-500 flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
         initial={{ top: 'calc(100% - 100px)' }}
         animate={{ top: getSheetY() }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}

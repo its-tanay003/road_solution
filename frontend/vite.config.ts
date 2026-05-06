@@ -1,15 +1,15 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
-    react(),
+    react(), 
     tailwindcss(),
     VitePWA({
       strategies: 'injectManifest',
@@ -50,45 +50,33 @@ export default defineConfig({
       }
     })
   ],
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/socket.io': {
-        target: 'http://localhost:5000',
-        ws: true,
-      }
-    }
-  },
   resolve: {
     alias: [
       { find: /^leaflet$/, replacement: path.resolve(__dirname, 'src/lib/leaflet-esm.ts') },
     ],
   },
-  optimizeDeps: {
-    include: ['react-is', 'leaflet'],
-  },
+  optimizeDeps: { exclude: ['leaflet'] },
   build: {
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor-react';
-            }
-            if (id.includes('leaflet') || id.includes('react-leaflet')) {
-              return 'vendor-map';
-            }
-            if (id.includes('framer-motion') || id.includes('lucide-react') || id.includes('zustand')) {
-              return 'vendor-ui';
-            }
-            return 'vendor';
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            return 'react-vendor';
           }
-        }
-      }
-    }
-  }
-})
+          if (id.includes('leaflet') || id.includes('react-leaflet')) {
+            return 'map';
+          }
+          if (id.includes('framer-motion')) {
+            return 'animation';
+          }
+          if (id.includes('three')) {
+            return 'three';
+          }
+          if (id.includes('recharts')) {
+            return 'charts';
+          }
+        },
+      },
+    },
+  },
+});

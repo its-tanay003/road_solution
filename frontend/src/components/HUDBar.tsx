@@ -6,18 +6,14 @@ import { Settings, Shield } from 'lucide-react';
 
 function ConnectionDot() {
   const { connected, reconnectCount } = useSocket();
-  const color = connected ? '#32D74B' : reconnectCount > 0 ? '#FF9F0A' : '#FF3B3B';
   const title = connected ? 'Live' : reconnectCount > 0 ? `Reconnecting (${reconnectCount})` : 'Disconnected';
   return (
     <div
       title={title}
-      style={{
-        width: 7, height: 7, borderRadius: '50%', background: color,
-        boxShadow: connected ? `0 0 10px ${color}80` : 'none',
-        animation: connected ? 'none' : 'pulse 1s ease-in-out infinite',
-        flexShrink: 0,
-        transition: 'background 0.3s ease'
-      }}
+      className={`shrink-0 w-[7px] h-[7px] rounded-full transition-colors duration-300 ${
+        connected ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : 
+        reconnectCount > 0 ? 'bg-amber-400 animate-pulse' : 'bg-red-500 animate-pulse'
+      }`}
     />
   );
 }
@@ -42,18 +38,18 @@ export const HUDBar: React.FC<HUDBarProps> = ({ onSettingsClick }) => {
     <header className="h-[60px] glass fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6">
       {/* Left: Logo */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-sos-red rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,23,68,0.4)]">
+        <div className="w-8 h-8 bg-[var(--color-emergency)] rounded-[var(--radius-lg)] flex items-center justify-center shadow-[0_0_15px_rgba(255,23,68,0.4)]">
           <Shield size={20} className="text-white fill-current" />
         </div>
         <span className="text-xl font-rajdhani font-bold text-white tracking-tighter">
-          ROAD<span className="text-sos-red">S</span>oS
+          ROAD<span className="text-[var(--color-emergency)]">S</span>oS
         </span>
       </div>
 
       {/* Center: Live Status */}
       <div className="hidden md:flex items-center gap-3 bg-night-3/50 px-4 py-1.5 rounded-full border border-white/5">
         <ConnectionDot />
-        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${connected ? 'text-safe-green' : reconnectCount > 0 ? 'text-amber-500' : 'text-sos-red'}`}>
+        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${connected ? 'text-[var(--color-safe)]-green' : reconnectCount > 0 ? 'text-amber-500' : 'text-[var(--color-emergency)]'}`}>
           {connected ? 'System Active' : reconnectCount > 0 ? `Reconnecting (${reconnectCount})` : 'Offline Mode'}
         </span>
       </div>

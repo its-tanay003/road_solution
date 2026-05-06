@@ -25,7 +25,7 @@ export const DebriefHistory: React.FC<DebriefHistoryProps> = ({ onClose }) => {
         className="w-full max-w-6xl h-[85vh] flex gap-6"
       >
         {/* Left: List of Debriefs */}
-        <Panel className="w-1/3 flex flex-col h-full bg-[var(--nx-bg-surface)] border-[var(--nx-border)]">
+        <Panel className="w-1/3 flex flex-col h-full bg-[var(--nx-bg-[var(--color-surface)])] border-[var(--nx-border)]">
           <div className="p-4 border-b border-[var(--nx-border)] flex justify-between items-center">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Clock className="w-5 h-5 text-[var(--nx-cyan-primary)]" /> Debrief History
@@ -69,7 +69,7 @@ export const DebriefHistory: React.FC<DebriefHistoryProps> = ({ onClose }) => {
         </Panel>
 
         {/* Right: Selected Debrief Content */}
-        <Panel className="flex-1 flex flex-col h-full bg-[var(--nx-bg-surface)] border-[var(--nx-border)]">
+        <Panel className="flex-1 flex flex-col h-full bg-[var(--nx-bg-[var(--color-surface)])] border-[var(--nx-border)]">
           {selectedDebrief ? (
             <>
               <div className="p-4 border-b border-[var(--nx-border)] flex justify-between items-center bg-black/20">
