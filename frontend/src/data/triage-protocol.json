@@ -5,7 +5,7 @@
     "no": "unconscious_check"
   },
   "unconscious_check": {
-    "action": "IMMEDIATE: Call 112/911. Do not move the victim unless necessary.",
+    "action": "IMMEDIATE: Call 112 India. Do not move the victim unless necessary.",
     "question": "Are they breathing normally?",
     "yes": "recovery_position",
     "no": "cpr_needed"

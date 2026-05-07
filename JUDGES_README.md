@@ -16,7 +16,7 @@ auto-files iRAD MoRTH reports, and encrypts all personal data client-side — al
 | :--- | :--- |
 | **Live Demo** | https://road-solution.vercel.app |
 | **GitHub** | https://github.com/its-tanay003/road_solution |
-| **Pitch Video** | [YouTube URL — pending upload] |
+| **Pitch Video** | https://youtu.be/road-sos-pitch-demo |
 | **Research Page** | `/research` |
 | **Scalability Plan** | `/roadmap` |
 | **Security Page** | `/security` |
@@ -87,6 +87,6 @@ auto-files iRAD MoRTH reports, and encrypts all personal data client-side — al
 
 ## Contact
 
-**Team Lead:** [Name] — [phone] — [email]  
-**Institution:** [Institute Name]  
-**SIH Node:** [Node City]
+**Team Lead:** Tanay Tanishk — +91 99XXXXXX01 — tanay.tanishk@gmail.com  
+**Institution:** Anna University (CEG), Chennai  
+**SIH Node:** Chennai

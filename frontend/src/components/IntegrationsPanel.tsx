@@ -44,8 +44,8 @@ const INTEGRATIONS: Integration[] = [
   },
   {
     id: 'cad',
-    name: '911 CAD Dispatch',
-    description: 'Computer-Aided Dispatch orchestration for PSAP (Public Safety Answering Point) relay.',
+    name: '112 India CAD Integration',
+    description: 'Computer-Aided Dispatch orchestration for PSAP (Public Safety Answering Point) relay via Dial 112 India.',
     icon: <Activity className="w-6 h-6" />,
     status: 'CONNECTED',
     color: 'amber',

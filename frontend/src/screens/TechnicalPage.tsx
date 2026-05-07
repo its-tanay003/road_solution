@@ -26,7 +26,7 @@ const a11y = [
 ];
 
 const services = [
-  { name: 'Claude AI (OpenRouter)', uptime: '99.2%', latency: '340ms avg', status: 'green' },
+  { name: 'Claude 3.5 Sonnet (Anthropic SDK)', uptime: '99.9%', latency: '340ms avg', status: 'green' },
   { name: 'Leaflet / OpenStreetMap', uptime: '99.9%', latency: '—', status: 'green' },
   { name: 'OSRM Routing Engine', uptime: '98.7%', latency: '180ms avg', status: 'green' },
   { name: 'iRAD MoRTH (Verified)', uptime: '-', latency: '-', status: 'amber', note: 'Operational' },

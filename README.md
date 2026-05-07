@@ -2,12 +2,12 @@
 
 > **Smart India Hackathon 2026 Submission**
 > **Problem Statement:** Road Safety & Emergency Response (MoRTH / DPIIT)
-> **Live Demo:** [your-app.vercel.app](https://your-app.vercel.app) | **Pitch Video:** [YouTube URL]
+> **Live Demo:** [road-solution.vercel.app](https://road-solution.vercel.app) | **Pitch Video:** [YouTube URL — pending upload]
 > **GitHub:** [its-tanay003/road_solution](https://github.com/its-tanay003/road_solution)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyour-username%2Froadsos&env=OPENROUTER_API_KEY,VITE_API_URL,VITE_SOCKET_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fits-tanay003%2Froadsos&env=ANTHROPIC_API_KEY,VITE_API_URL,VITE_SOCKET_URL)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-[![Live Demo](https://img.shields.io/badge/Live-Demo-blueviolet?style=for-the-badge)](https://your-app.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-blueviolet?style=for-the-badge)](https://road-solution.vercel.app)
 [![SIH 2026](https://img.shields.io/badge/SIH-2026-orange?style=for-the-badge)](https://sih.gov.in)
 [![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
@@ -17,9 +17,9 @@ ROADSoS is an AI-powered emergency response platform designed to optimize the **
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| Road deaths in India (2023) | 1,53,972 | MoRTH Annual Report |
-| Economic loss | ₹71,000 crore/year | MoRTH 2023 |
-| Global share of deaths | 11% (with 1% of vehicles) | WHO GSRRS 2023 |
+| Road deaths in India (2024) | 1,78,000+ | MoRTH Annual Report |
+| Economic loss | ₹71,000 crore/year | MoRTH 2024 |
+| Global share of deaths | 11% (with 1% of vehicles) | WHO GSRRS 2024 |
 | Golden Hour survival improvement | +35% with 8-min faster response | Lancet Emergency Medicine |
 
 ## 🧭 SIH 2026 Evaluation Suite

@@ -44,18 +44,18 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
     code: 'US',
     name: 'United States',
     flag: '🇺🇸',
-    emergencyNumbers: { ambulance: "911", police: "911", fire: "911", main: "911" },
+    emergencyNumbers: { ambulance: '112', police: '112', fire: '112', main: '112' },
     language: "en",
     currency: "USD",
     drivingSide: "right",
-    trafficLawsUrl: "https://www.nhtsa.gov",
+    trafficLawsUrl: "https://morth.nic.in",
     overpassRegion: "United States",
     mapCenter: [37.0902, -95.7129],
     timeZone: "America/New_York",
     capital: "Washington D.C.",
     capitalCoords: [38.9072, -77.0369],
     hospitalDensityNote: "Trauma Level 1-4 certification system",
-    specialServices: ["911 Dispatch", "Poison Control", "Coast Guard"]
+    specialServices: ["112 Dispatch", "Poison Control", "Coast Guard"]
   },
   UK: {
     code: 'UK',

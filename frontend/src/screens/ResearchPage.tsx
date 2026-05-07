@@ -5,7 +5,7 @@ const findings = [
   {
     stat: '4.2 min',
     label: 'Average bystander hesitation',
-    sub: 'Fear of legal liability cited by 73% of survey respondents',
+    sub: 'Fear of legal liability cited by 48% of survey respondents',
     insight: 'Good Samaritan awareness feature directly addresses this',
     color: '#FF9933',
   },

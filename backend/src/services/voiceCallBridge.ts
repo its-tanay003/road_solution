@@ -14,7 +14,7 @@ export class VoiceCallBridge {
       try {
         console.log(`[VOICE-BRIDGE] Attempt ${attempt}: Dialing...`);
         // Simulate Twilio Voice API call
-        // const call = await twilioClient.calls.create({ twiml: `<Response><Say>${message}</Say></Response>`, to: '911' });
+        // const call = await twilioClient.calls.create({ twiml: `<Response><Say>${message}</Say></Response>`, to: '112' });
         
         // Mocking successful connection after dial
         await new Promise(resolve => setTimeout(resolve, 1000));

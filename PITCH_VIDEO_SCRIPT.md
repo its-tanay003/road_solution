@@ -6,7 +6,7 @@
 ## [0:00 – 0:15] HOOK
 
 **[VISUAL]** Black screen. Single white counter ticking up.
-**[TEXT ON SCREEN]** "153,972 Indians died on roads in 2023."
+**[TEXT ON SCREEN]** "1,78,000+ Indians died on roads in 2024."
 
 **[VO]:** "Every 3 minutes, an Indian dies on a road. Not from the crash — from the wait.
 The wait for someone to notice. The wait for someone to call. The wait for help to come.
@@ -18,7 +18,7 @@ This is ROADSoS."
 
 ## [0:15 – 0:45] THE PROBLEM
 
-**[VISUAL]** Split screen: India road accident stats from MoRTH 2023.
+**[VISUAL]** Split screen: India road accident stats from MoRTH 2024.
 
 **[VO]:** "India accounts for 11% of global road deaths with just 1% of global vehicles.
 MoRTH data shows the average bystander waits 4 minutes before acting —

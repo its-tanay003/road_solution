@@ -7,11 +7,9 @@ interface EmergencyProtocols {
 }
 
 const REGIONAL_PROTOCOLS: Record<string, EmergencyProtocols> = {
-  'US': { number: '911', ambulance: '911', police: '911', fire: '911', smsSupport: true },
-  'IN': { number: '112', ambulance: '102', police: '100', fire: '101', smsSupport: false },
-  'UK': { number: '999', ambulance: '999', police: '999', fire: '999', smsSupport: true },
+  'IN': { number: '112', ambulance: '112', police: '112', fire: '112', smsSupport: true },
   'EU': { number: '112', ambulance: '112', police: '112', fire: '112', smsSupport: true },
-  'DEFAULT': { number: '112', ambulance: '112', police: '112', fire: '112', smsSupport: false }
+  'DEFAULT': { number: '112', ambulance: '112', police: '112', fire: '112', smsSupport: true }
 };
 
 export const getEmergencyProtocol = (countryCode?: string): EmergencyProtocols => {

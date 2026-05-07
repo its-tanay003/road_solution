@@ -32,6 +32,8 @@ import { LiveMap } from './pages/LiveMap';
 import { HospitalFinder } from './screens/HospitalFinder';
 import { EvaluationLayout } from './components/EvaluationLayout';
 import { IncidentTimeline } from './components/IncidentTimeline';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { PrivacyConsentBanner } from './components/PrivacyConsentBanner';
 
 // Stores
 import { useMedicalProfileStore } from './store/medicalProfileStore';
