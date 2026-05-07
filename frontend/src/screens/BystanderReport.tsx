@@ -11,24 +11,25 @@ import {
   Navigation,
   Activity,
   Heart,
-  ChevronLeft
+  Shield
 } from 'lucide-react';
-import { io } from 'socket.io-client';
+import { sanitizeInput } from '../utils/inputSanitizer';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 type Step = 1 | 2 | 3;
+type LocationStatus = 'idle' | 'requesting' | 'granted' | 'denied';
 type VictimStatus = 'CONSCIOUS' | 'UNCONSCIOUS' | 'CRITICAL';
 
 export const BystanderReport: React.FC = () => {
-  const { incidentId } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
-  
+  const incidentId = params.incidentId || 'demo-001';
+
   const [step, setStep] = useState<Step>(1);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied'>('idle');
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>('idle');
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [victimStatus, setVictimStatus] = useState<VictimStatus | null>(null);
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,148 +40,169 @@ export const BystanderReport: React.FC = () => {
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationStatus('granted');
-        setTimeout(() => setStep(2), 800);
+        setTimeout(() => setStep(2), 1000);
       },
       (err) => {
         console.error('Location error:', err);
         setLocationStatus('denied');
-        setError('Location access denied. Please enable GPS to report.');
+        setError('Location access denied. Please enable GPS.');
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhoto(reader.result as string);
+        setPhotoBase64(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleSubmit = async () => {
-    if (!coords || !victimStatus) return;
-    
     setSubmitting(true);
-    setError(null);
+    const payload = { 
+      incidentId, 
+      coords, 
+      victimStatus, 
+      description: sanitizeInput(description),
+      image: photoBase64, 
+      timestamp: Date.now() 
+    };
 
     try {
-      const response = await fetch(`${SOCKET_URL}/api/bystander-report`, {
+      // 1. Try fetch first
+      await fetch(`${SOCKET_URL}/api/bystander-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          incidentId,
-          location: coords,
-          victimStatus,
-          photo: photo ? 'BASE64_ATTACHED' : null,
-          timestamp: new Date().toISOString()
-        })
+        body: JSON.stringify(payload)
       });
-
-      if (!response.ok) throw new Error('Failed to submit report');
-
-      setSubmitted(true);
-      
-      // Emit socket event for real-time dashboard update (though server also does this)
-      const socket = io(SOCKET_URL);
-      socket.emit('bystander:report', {
-        id: incidentId || `BYST-${Date.now()}`,
-        location: coords,
-        victimStatus,
-        timestamp: new Date().toISOString()
-      });
-
-      setTimeout(() => navigate('/'), 3000);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Submission failed';
-      setError(errorMessage);
+    } catch (err) {
+      console.warn('Fetch failed, falling back to socket only', err);
     } finally {
+      // 2. Emit socket regardless (never block user)
+      const socket = io(SOCKET_URL);
+      socket.emit('bystander:report', payload);
+      setSubmitted(true);
       setSubmitting(false);
     }
   };
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-(--clr-bg) flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-[#080C14] flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
         <motion.div 
-          initial={{ scale: 0.5, opacity: 0 }}
+          initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-24 h-24 bg-(--clr-green)/20 text-(--clr-green) rounded-full flex items-center justify-center mb-6"
+          transition={{ type: 'spring', damping: 12, stiffness: 100 }}
+          className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,197,94,0.4)]"
         >
-          <CheckCircle2 size={48} />
+          <CheckCircle2 size={56} className="text-white" />
         </motion.div>
-        <h1 className="text-3xl font-black hologram-text mb-4 uppercase">REPORT RECEIVED</h1>
-        <p className="text-(--clr-text-2) mb-8 max-w-xs">
-          Your information has been shared with emergency responders. Stay safe.
-        </p>
-        <div className="w-16 h-1 bg-(--clr-green)/30 rounded-full animate-pulse" />
+        
+        <h1 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">Report Sent</h1>
+        <p className="text-gray-400 mb-6">Your report has been sent to emergency responders</p>
+        
+        <div className="bg-white/5 border border-white/10 p-4 rounded-xl mb-8 w-full max-w-xs">
+          <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Reference ID</div>
+          <div className="font-mono text-white text-sm font-bold">{incidentId}</div>
+        </div>
+
+        <p className="text-sm font-bold text-white mb-4">Stay with the victim if it is safe to do so</p>
+
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl text-left w-full max-w-sm"
+        >
+          <div className="flex items-center gap-3 mb-3">
+             <Shield className="text-blue-400" size={20} />
+             <h3 className="font-bold text-blue-400 uppercase text-xs tracking-wider">Good Samaritan Law</h3>
+          </div>
+          <p className="text-[11px] text-blue-200/70 leading-relaxed">
+            You are protected from legal liability for providing reasonable assistance in good faith during an emergency.
+          </p>
+        </motion.div>
+
+        <button 
+          onClick={() => navigate('/')}
+          className="mt-8 text-gray-500 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors"
+        >
+          Return Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) font-ui flex flex-col p-6">
-      <header className="flex items-center justify-between mb-12">
-        <button onClick={() => step > 1 ? setStep((s) => (s - 1) as Step) : navigate(-1)} className="p-3 bg-white/5 rounded-2xl border border-(--clr-border)">
-          <ChevronLeft size={24} />
-        </button>
-        <div className="text-right">
-          <div className="text-[10px] font-mono text-(--clr-text-2) uppercase tracking-widest">Reporting Incident</div>
-          <div className="font-bold font-mono text-sm">#{incidentId || 'BYSTANDER'}</div>
-        </div>
-      </header>
-
-      <div className="flex-1 max-w-md mx-auto w-full">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= step ? 'bg-(--clr-blue)' : 'bg-white/10'}`} />
-            ))}
+    <div className="min-h-screen bg-[#080C14] text-white flex flex-col p-6 font-sans">
+      {/* Step Indicator */}
+      <div className="flex justify-center gap-4 mb-10 mt-4">
+        {[1, 2, 3].map((s) => (
+          <div 
+            key={s} 
+            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+              step >= s ? 'bg-[#FF9933] text-white shadow-[0_0_15px_rgba(255,153,51,0.4)]' : 'bg-white/5 text-gray-600 border border-white/10'
+            }`}
+          >
+            {step > s ? <CheckCircle2 size={16} /> : s}
           </div>
-          <div className="text-[10px] font-mono text-(--clr-text-2) uppercase tracking-[0.2em]">Step 0{step} of 03</div>
-        </div>
+        ))}
+      </div>
 
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div 
               key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex-1 flex flex-col justify-center gap-8"
             >
-              <div>
-                <h2 className="text-4xl font-black mb-4 uppercase leading-none">Share Your<br/><span className="text-(--clr-blue)">Location</span></h2>
-                <p className="text-(--clr-text-2) text-sm leading-relaxed">
-                  We need your precise GPS coordinates to route the nearest responder units to the scene.
-                </p>
+              <div className="text-center">
+                <h2 className="text-4xl font-black mb-3 uppercase leading-tight">Emergency<br/>Location</h2>
+                <p className="text-gray-400 text-sm">We need your coordinates to route rescue units.</p>
               </div>
 
-              <div className="aspect-square w-full bg-white/2 border-2 border-dashed border-(--clr-border) rounded-3xl flex flex-col items-center justify-center p-8 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-linear-to-b from-(--clr-blue)/5 to-transparent" />
-                <Navigation size={64} className={`text-(--clr-blue) mb-6 ${locationStatus === 'requesting' ? 'animate-pulse' : ''}`} />
-                
-                {locationStatus === 'granted' ? (
-                  <div className="text-center z-10">
-                    <p className="text-(--clr-green) font-bold flex items-center gap-2 justify-center">
-                      <CheckCircle2 size={16} /> GPS LOCKED
-                    </p>
-                    <p className="text-[10px] font-mono text-(--clr-text-2) mt-1 uppercase tracking-widest">
-                      {coords?.lat.toFixed(6)}, {coords?.lng.toFixed(6)}
-                    </p>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={requestLocation}
-                    disabled={locationStatus === 'requesting'}
-                    className="z-10 px-8 py-4 bg-(--clr-blue) text-white rounded-2xl font-black uppercase tracking-widest shadow-[0_15px_30px_rgba(41,121,255,0.3)] active:scale-95 transition-all flex items-center gap-3"
+              <div className="flex-1 flex flex-col justify-center items-center gap-6">
+                {locationStatus === 'requesting' ? (
+                  <motion.div 
+                    animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="flex flex-col items-center gap-4"
                   >
-                    {locationStatus === 'requesting' ? <Loader2 size={20} className="animate-spin" /> : <MapPin size={20} />}
-                    Allow Access
-                  </button>
+                    <div className="w-24 h-24 bg-[#FF9933]/20 rounded-full flex items-center justify-center">
+                       <Navigation size={48} className="text-[#FF9933]" />
+                    </div>
+                    <p className="text-xs font-mono tracking-widest text-[#FF9933]">Getting your location...</p>
+                  </motion.div>
+                ) : (
+                  <div className="w-full space-y-6">
+                    <button 
+                      onClick={requestLocation}
+                      className="w-full py-8 bg-blue-600 hover:bg-blue-500 rounded-3xl flex flex-col items-center gap-3 transition-all active:scale-95 shadow-[0_20px_40px_rgba(37,99,235,0.3)]"
+                    >
+                      <MapPin size={32} />
+                      <span className="font-black uppercase tracking-widest text-lg">Allow Location Access</span>
+                    </button>
+                    
+                    {error && (
+                      <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
+                        <p className="text-red-400 text-xs font-bold mb-3">{error}</p>
+                        <button 
+                          onClick={() => { setError(null); setLocationStatus('idle'); }}
+                          className="px-4 py-2 bg-red-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest"
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -192,37 +214,32 @@ export const BystanderReport: React.FC = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-8"
+              className="flex-1 flex flex-col gap-6"
             >
-              <div>
-                <h2 className="text-4xl font-black mb-4 uppercase leading-none">Victim<br/><span className="text-(--clr-red)">Status</span></h2>
-                <p className="text-(--clr-text-2) text-sm">
-                  Quickly assess the person's condition. This determines the level of medical resources dispatched.
-                </p>
+              <div className="mb-4">
+                <h2 className="text-3xl font-black uppercase mb-2">Assess Victim</h2>
+                <p className="text-gray-400 text-sm">Select the status of the primary victim.</p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
-                {[
-                  { id: 'CONSCIOUS', label: 'Conscious', sub: 'Responsive & breathing', icon: <Heart className="text-emerald-400" /> },
-                  { id: 'UNCONSCIOUS', label: 'Unconscious', sub: 'Non-responsive but breathing', icon: <Activity className="text-amber-400" /> },
-                  { id: 'CRITICAL', label: 'Critical', sub: 'Severe bleeding or not breathing', icon: <AlertCircle className="text-red-500" /> },
-                ].map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => {
-                      setVictimStatus(s.id as VictimStatus);
-                      setTimeout(() => setStep(3), 400);
-                    }}
-                    className={`p-6 rounded-3xl border-2 text-left transition-all ${victimStatus === s.id ? 'bg-(--clr-blue)/10 border-(--clr-blue)' : 'bg-white/2 border-(--clr-border) hover:bg-white/5'}`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="p-3 bg-white/5 rounded-xl">{s.icon}</div>
-                      {victimStatus === s.id && <CheckCircle2 className="text-(--clr-blue)" size={20} />}
-                    </div>
-                    <div className="font-black text-xl uppercase tracking-tight">{s.label}</div>
-                    <div className="text-xs text-(--clr-text-2) mt-1">{s.sub}</div>
-                  </button>
-                ))}
+              <div className="flex flex-col gap-4">
+                <StatusCard 
+                  color="#00C853"
+                  icon={<Heart size={32} />}
+                  label="CONSCIOUS"
+                  onClick={() => { setVictimStatus('CONSCIOUS'); setStep(3); }}
+                />
+                <StatusCard 
+                  color="#FFB300"
+                  icon={<Activity size={32} />}
+                  label="UNCONSCIOUS"
+                  onClick={() => { setVictimStatus('UNCONSCIOUS'); setStep(3); }}
+                />
+                <StatusCard 
+                  color="#FF1744"
+                  icon={<AlertCircle size={32} />}
+                  label="NOT BREATHING / CRITICAL"
+                  onClick={() => { setVictimStatus('CRITICAL'); setStep(3); }}
+                />
               </div>
             </motion.div>
           )}
@@ -233,54 +250,67 @@ export const BystanderReport: React.FC = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-8"
+              className="flex-1 flex flex-col gap-8"
             >
               <div>
-                <h2 className="text-4xl font-black mb-4 uppercase leading-none">Add<br/><span className="text-(--clr-blue)">Evidence</span></h2>
-                <p className="text-(--clr-text-2) text-sm">
-                  Optionally add a photo of the scene to help AI analyze impact severity.
-                </p>
+                <h2 className="text-3xl font-black uppercase mb-2">Evidence</h2>
+                <p className="text-gray-400 text-sm">Upload a photo to help responders prepare.</p>
               </div>
 
-              <div className="space-y-6">
-                <div className="relative aspect-video w-full bg-white/2 border-2 border-dashed border-(--clr-border) rounded-3xl overflow-hidden flex flex-col items-center justify-center group">
-                  {photo ? (
-                    <>
-                      <img src={photo} alt="Crash" className="w-full h-full object-cover" />
-                      <button onClick={() => setPhoto(null)} className="absolute top-4 right-4 p-2 bg-black/60 rounded-xl text-white backdrop-blur-md">
-                        Reset
-                      </button>
-                    </>
+              <div className="flex-1 flex flex-col gap-6">
+                <label className="flex-1 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white/5 transition-colors relative overflow-hidden group">
+                  {photoBase64 ? (
+                    <img src={photoBase64} alt="Incident Scene Preview" className="w-full h-full object-cover" />
                   ) : (
                     <>
-                      <Camera size={48} className="text-(--clr-text-2) mb-4 group-hover:text-(--clr-blue) transition-colors" />
-                      <p className="text-[10px] font-mono text-(--clr-text-2) uppercase tracking-widest">Tap to capture or upload</p>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        capture="environment"
-                        onChange={handlePhotoUpload}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
+                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-all">
+                        <Camera size={32} />
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Capture Scene (Optional)</span>
                     </>
                   )}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    capture="environment" 
+                    onChange={handlePhotoSelect}
+                    className="hidden" 
+                    id="incident-photo"
+                    aria-label="Upload incident photo"
+                  />
+                </label>
+
+                <div className="space-y-2">
+                  <label htmlFor="incident-desc" className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Additional Details</label>
+                  <textarea 
+                    id="incident-desc"
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Describe injuries or specific location details..."
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-[#FF9933] outline-none min-h-[100px] transition-all"
+                  />
                 </div>
 
-                {error && (
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-400 text-xs font-bold uppercase tracking-tight">
-                    <AlertCircle size={16} />
-                    {error}
+                {photoBase64 && (
+                  <div className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10">
+                       <img src={photoBase64} alt="Attached Evidence" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Image Attached</span>
+                    <button onClick={() => setPhotoBase64(null)} className="ml-auto text-gray-500 hover:text-white" aria-label="Remove photo">
+                      <AlertCircle size={14} />
+                    </button>
                   </div>
                 )}
 
                 <button 
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="w-full h-20 bg-(--clr-blue) text-white rounded-3xl font-black text-xl uppercase tracking-widest shadow-[0_20px_40px_rgba(41,121,255,0.4)] flex items-center justify-center gap-4 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-20 bg-[#FF9933] text-white rounded-3xl font-black text-xl uppercase tracking-widest shadow-[0_20px_40px_rgba(255,153,51,0.3)] flex items-center justify-center gap-4 active:scale-95 transition-all disabled:opacity-50"
                 >
-                  {submitting ? <Loader2 className="animate-spin" /> : (
+                  {submitting ? <Loader2 size={24} className="animate-spin" /> : (
                     <>
-                      Submit Report
+                      Send Emergency Report
                       <ArrowRight size={24} />
                     </>
                   )}
@@ -293,3 +323,30 @@ export const BystanderReport: React.FC = () => {
     </div>
   );
 };
+
+interface StatusCardProps {
+  color: string;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}
+
+const StatusCard = ({ color, icon, label, onClick }: StatusCardProps) => (
+  <button 
+    onClick={onClick}
+    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
+    role="button"
+    tabIndex={0}
+    aria-label={`Select victim status: ${label}`}
+    className="w-full h-[110px] rounded-3xl p-6 flex items-center gap-6 transition-all active:scale-[0.98] hover:brightness-110"
+    style={{ backgroundColor: color }}
+  >
+    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white">
+      {icon}
+    </div>
+    <span className="text-2xl font-black text-white text-left leading-tight uppercase tracking-tighter">
+      {label}
+    </span>
+    <ArrowRight size={24} className="ml-auto text-white/50" />
+  </button>
+);

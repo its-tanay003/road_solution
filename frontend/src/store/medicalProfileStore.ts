@@ -1,79 +1,51 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { encryptData } from '../utils/crypto';
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-export interface EmergencyContact {
-  name: string;
-  phone: string;
-  relationship: string;
+export type MedicalProfile = {
+  name: string
+  age: string
+  bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | ''
+  conditions: string[]
+  allergies: string
+  medications: string
+  emergencyContact1Name: string
+  emergencyContact1Phone: string
+  emergencyContact2Name: string
+  emergencyContact2Phone: string
+  language: 'en' | 'hi' | 'ta'
+  profileComplete: boolean
 }
 
-interface MedicalProfileState {
-  name: string;
-  age: string;
-  bloodType: string;
-  conditions: string[];
-  contacts: EmergencyContact[];
-  language: 'en' | 'hi' | 'ta';
-  onboardingComplete: boolean;
-  
-  setName: (name: string) => void;
-  setAge: (age: string) => void;
-  setBloodType: (type: string) => void;
-  setConditions: (conditions: string[]) => void;
-  setContacts: (contacts: EmergencyContact[]) => void;
-  setLanguage: (lang: 'en' | 'hi' | 'ta') => void;
-  setOnboardingComplete: (val: boolean) => void;
-  
-  // Encryption wrapper
-  getEncryptedPayload: () => Promise<{ cipherText: string, iv: string }>;
-  syncWithSupabase: () => Promise<void>;
+interface MedicalProfileState extends MedicalProfile {
+  setProfile: (profile: Partial<MedicalProfile>) => void
+  resetProfile: () => void
+}
+
+const initialState: MedicalProfile = {
+  name: '',
+  age: '',
+  bloodType: '',
+  conditions: [],
+  allergies: '',
+  medications: '',
+  emergencyContact1Name: '',
+  emergencyContact1Phone: '',
+  emergencyContact2Name: '',
+  emergencyContact2Phone: '',
+  language: 'en',
+  profileComplete: false
 }
 
 export const useMedicalProfileStore = create<MedicalProfileState>()(
   persist(
-    (set, get) => ({
-      name: '',
-      age: '',
-      bloodType: '',
-      conditions: [],
-      contacts: [],
-      language: 'en',
-      onboardingComplete: false,
-
-      setName: (name) => set({ name }),
-      setAge: (age) => set({ age }),
-      setBloodType: (bloodType) => set({ bloodType }),
-      setConditions: (conditions) => set({ conditions }),
-      setContacts: (contacts) => set({ contacts }),
-      setLanguage: (language) => set({ language }),
-      setOnboardingComplete: (onboardingComplete) => set({ onboardingComplete }),
-
-      getEncryptedPayload: async () => {
-        const { name, age, bloodType, conditions, contacts } = get();
-        const payload = { name, age, bloodType, conditions, contacts };
-        return await encryptData(payload);
-      },
-
-      syncWithSupabase: async () => {
-        const { getEncryptedPayload } = get();
-        const { supabase } = await import('../lib/supabaseClient');
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session?.user) return;
-
-        const encrypted = await getEncryptedPayload();
-        
-        const { error } = await supabase
-          .from('profiles')
-          .update({ medical_data: encrypted })
-          .eq('id', session.user.id);
-
-        if (error) throw error;
-      }
+    (set) => ({
+      ...initialState,
+      setProfile: (profile) => set((state) => ({ ...state, ...profile })),
+      resetProfile: () => set(initialState)
     }),
     {
       name: 'roadsos-medical-profile',
+      version: 1
     }
   )
-);
+)

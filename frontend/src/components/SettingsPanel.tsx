@@ -1,224 +1,257 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sun, Moon, Eye, Type, Activity, Bell, Phone, Check } from 'lucide-react';
-import { useAccessibilityStore, useUserStore } from '../store';
+import { X, Check, RotateCcw } from 'lucide-react';
+import { useAccessibilityStore } from '../store/accessibilityStore';
+import type { FontSize, FontWeight, LetterSpacing, Theme, Language } from '../store/accessibilityStore';
+import { useSettingsPanel } from '../hooks/useSettingsPanel';
 
-interface SettingsPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+export const SettingsPanel: React.FC = () => {
+  const { isOpen, close } = useSettingsPanel();
+  const store = useAccessibilityStore();
 
-export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
-  const { 
-    theme, setTheme, 
-    textSize, setTextSize, 
-    isReducedMotion, setReducedMotion,
-    sosTriggerMode, setSosTriggerMode 
-  } = useAccessibilityStore();
-
-  const { primaryEmergencyContact, setPrimaryEmergencyContact } = useUserStore();
-
-  const themes = [
-    { id: 'light', label: 'LIGHT', icon: Sun },
-    { id: 'dark', label: 'DARK', icon: Moon },
-    { id: 'high-contrast', label: 'CONTRAST', icon: Eye },
+  const themes: { id: Theme; label: string; color: string }[] = [
+    { id: 'dark', label: 'Default Dark', color: '#080C14' },
+    { id: 'light', label: 'Light Mode', color: '#FFFFFF' },
+    { id: 'high-contrast', label: 'High Contrast', color: '#000000' },
+    { id: 'saffron', label: 'India Saffron', color: '#FF9933' },
   ];
 
-  const sizes = [
-    { id: 'small', label: 'A', className: 'text-sm' },
-    { id: 'medium', label: 'A', className: 'text-base' },
-    { id: 'large', label: 'A', className: 'text-xl' },
-    { id: 'xl', label: 'A', className: 'text-3xl' },
+  const fontSizes: FontSize[] = ['sm', 'md', 'lg', 'xl', 'xxl'];
+  const languages: { id: Language; label: string }[] = [
+    { id: 'en', label: 'English' },
+    { id: 'hi', label: 'हिन्दी' },
+    { id: 'ta', label: 'தமிழ்' },
   ];
+
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-navy/80 backdrop-blur-md z-2000"
-          />
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-(--app-bg) z-2001 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
-          >
-            {/* Header */}
-            <div className="p-8 bg-(--app-surface) border-b-4 border-(--app-border) flex justify-between items-center">
-              <div>
-                <h2 className="text-4xl font-black text-(--app-text) tracking-tighter uppercase italic">Settings</h2>
-                <p className="text-xs font-black text-(--color-emergency) tracking-widest uppercase mt-1">Accessibility Controls</p>
+      <div className="fixed inset-0 z-2000 flex justify-end">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={close}
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        />
+
+        {/* Panel */}
+        <motion.div
+          initial={{ x: 380 }}
+          animate={{ x: 0 }}
+          exit={{ x: 380 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="relative w-[380px] h-full bg-surface border-l border-border shadow-2xl flex flex-col overflow-hidden"
+        >
+          {/* Header */}
+          <div className="p-6 border-b border-border flex justify-between items-center bg-surface-2">
+            <h2 className="text-xl font-bold tracking-tight text-text">PREFERENCES</h2>
+            <button 
+              onClick={close}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Close Settings"
+              aria-label="Close Settings"
+            >
+              <X size={24} className="text-text" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-10 pb-24">
+            
+            {/* Theme Section */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Theme</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {themes.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => store.setTheme(t.id)}
+                    className="group flex flex-col items-center gap-2"
+                  >
+                    <div 
+                      className={`w-full aspect-square rounded-2xl border-2 flex items-center justify-center relative transition-all ${
+                        store.theme === t.id 
+                        ? 'border-saffron shadow-[0_0_15px_rgba(255,153,51,0.3)]' 
+                        : 'border-border hover:border-text-2'
+                      }`}
+                      style={{ backgroundColor: t.color }}
+                    >
+                      {store.theme === t.id && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-saffron/10 rounded-2xl">
+                          <Check size={24} className={t.id === 'light' ? 'text-black' : 'text-saffron'} />
+                        </div>
+                      )}
+                    </div>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${store.theme === t.id ? 'text-saffron' : 'text-text-2'}`}>
+                      {t.label}
+                    </span>
+                  </button>
+                ))}
               </div>
-              <button 
-                onClick={onClose}
-                aria-label="Close Settings"
-                title="Close Settings"
-                className="w-16 h-16 flex items-center justify-center rounded-2xl bg-navy text-white shadow-lg active:scale-90 transition-transform"
-              >
-                <X size={32} strokeWidth={4} />
-              </button>
-            </div>
+            </section>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-8 space-y-12 pb-40">
+            {/* Font Size Section */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Font Size</h3>
+              <div className="flex bg-surface-2 p-1 rounded-xl border border-border">
+                {fontSizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => store.setFontSize(size)}
+                    className={`flex-1 h-10 rounded-lg text-xs font-bold transition-all ${
+                      store.fontSize === size 
+                      ? 'bg-saffron text-white shadow-lg' 
+                      : 'text-text-2 hover:text-text hover:bg-white/5'
+                    }`}
+                  >
+                    {size.toUpperCase()}
+                  </button>
+                ))}
+              </div>
               
-              {/* Theme Selection */}
-              <section className="space-y-6">
-                <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-amber/20 rounded-(--radius-lg) text-amber">
-                    <Sun size={24} strokeWidth={3} />
-                  </div>
-                  Visual Theme
-                </h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {themes.map((t) => (
+              {/* Preview Paragraph */}
+              <div className="p-4 rounded-xl bg-surface-2 border border-border">
+                <p className="text-text transition-all" style={{ fontSize: 'var(--app-font-size)' }}>
+                  Emergency alert sent. Ambulance ETA 6 minutes.
+                </p>
+              </div>
+            </section>
+
+            {/* Text Style Section */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Weight</h3>
+                <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
+                  {(['normal', 'bold'] as FontWeight[]).map((w) => (
                     <button
-                      key={t.id}
-                      onClick={() => setTheme(t.id as 'light' | 'dark' | 'high-contrast')}
-                      className={`h-24 flex items-center justify-between px-8 rounded-3xl border-4 transition-all active:scale-[0.98] ${
-                        theme === t.id 
-                        ? 'border-navy bg-navy text-white shadow-xl' 
-                        : 'border-(--app-border) bg-(--app-surface) text-(--app-text)'
+                      key={w}
+                      onClick={() => store.setFontWeight(w)}
+                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold transition-all ${
+                        store.fontWeight === w 
+                        ? 'bg-saffron text-white' 
+                        : 'text-text-2 hover:text-text'
                       }`}
                     >
-                      <div className="flex items-center gap-6">
-                        <t.icon size={32} strokeWidth={3} />
-                        <span className="text-2xl font-black tracking-tighter italic">{t.label}</span>
-                      </div>
-                      {theme === t.id && <Check size={32} strokeWidth={4} />}
+                      {w.toUpperCase()}
                     </button>
                   ))}
                 </div>
-              </section>
+              </div>
 
-              {/* Text Size */}
-              <section className="space-y-6">
-                <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-blue-500/20 rounded-(--radius-lg) text-blue-500">
-                    <Type size={24} strokeWidth={3} />
-                  </div>
-                  Text Size
-                </h3>
-                <div className="grid grid-cols-4 gap-3">
-                  {sizes.map((s) => (
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Spacing</h3>
+                <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
+                  {(['normal', 'spaced'] as LetterSpacing[]).map((s) => (
                     <button
-                      key={s.id}
-                      onClick={() => setTextSize(s.id as 'small' | 'medium' | 'large' | 'xl')}
-                      className={`h-20 flex items-center justify-center rounded-2xl border-4 transition-all active:scale-90 ${
-                        textSize === s.id 
-                        ? 'border-navy bg-navy text-white' 
-                        : 'border-(--app-border) bg-(--app-surface) text-(--app-text)'
+                      key={s}
+                      onClick={() => store.setLetterSpacing(s)}
+                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold transition-all ${
+                        store.letterSpacing === s 
+                        ? 'bg-saffron text-white' 
+                        : 'text-text-2 hover:text-text'
                       }`}
                     >
-                      <span className={`${s.className} font-black`}>{s.label}</span>
+                      {s.toUpperCase()}
                     </button>
                   ))}
                 </div>
-              </section>
+              </div>
+            </section>
 
-              {/* SOS Trigger */}
-              <section className="space-y-6">
-                <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-[rgba(255,59,59,0.20)] rounded-(--radius-lg) text-(--color-emergency)">
-                    <Bell size={24} strokeWidth={3} />
-                  </div>
-                  SOS Trigger Mode
-                </h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {['hold', 'tap'].map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setSosTriggerMode(mode as 'hold' | 'tap' | 'voice')}
-                      className={`h-24 flex items-center justify-between px-8 rounded-3xl border-4 transition-all active:scale-[0.98] ${
-                        sosTriggerMode === mode 
-                        ? 'border-(--color-emergency) bg-(--color-emergency) text-white shadow-xl' 
-                        : 'border-(--app-border) bg-(--app-surface) text-(--app-text)'
-                      }`}
-                    >
-                      <div className="text-left">
-                        <span className="text-2xl font-black tracking-tighter italic uppercase">{mode}</span>
-                        <p className="text-xs font-bold opacity-80">
-                          {mode === 'hold' ? '3s Long Press (Safe)' : 'Single Tap (Instant)'}
-                        </p>
-                      </div>
-                      {sosTriggerMode === mode && <Check size={32} strokeWidth={4} />}
-                    </button>
-                  ))}
-                </div>
-              </section>
+            {/* Language Section */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Language</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {languages.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => store.setLanguage(l.id)}
+                    className={`py-3 rounded-xl border font-bold text-xs transition-all ${
+                      store.language === l.id 
+                      ? 'bg-saffron border-saffron text-white shadow-lg' 
+                      : 'bg-surface-2 border-border text-text-2 hover:border-text-2'
+                    }`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </section>
 
-              {/* Reduced Motion */}
+            {/* Simplified Mode Section */}
+            <section className="space-y-4">
               <button
-                onClick={() => setReducedMotion(!isReducedMotion)}
-                className={`w-full p-6 rounded-3xl border-4 flex items-center justify-between transition-all active:scale-[0.98] ${
-                  isReducedMotion 
-                  ? 'border-(--color-safe) bg-(--color-safe) text-white' 
-                  : 'border-(--app-border) bg-(--app-surface) text-(--app-text)'
+                onClick={() => store.setSimplifiedMode(!store.simplifiedMode)}
+                className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
+                  store.simplifiedMode 
+                  ? 'bg-saffron/10 border-saffron' 
+                  : 'bg-surface-2 border-border hover:border-text-2'
                 }`}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-xl ${isReducedMotion ? 'bg-white/20' : 'bg-safe/20 text-(--color-safe)'}`}>
-                    <Activity size={24} strokeWidth={3} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xl font-black italic uppercase tracking-tighter">Reduced Motion</p>
-                    <p className="text-xs font-bold opacity-80">Minimal animations for safety</p>
-                  </div>
+                <div className="text-left">
+                  <p className={`text-sm font-bold ${store.simplifiedMode ? 'text-saffron' : 'text-text'}`}>Simple Mode</p>
+                  <p className="text-[10px] text-text-2">Shows only SOS, map, and hospitals</p>
                 </div>
-                <div className={`w-16 h-8 rounded-full relative transition-colors ${isReducedMotion ? 'bg-white/30' : 'bg-gray-300'}`}>
+                <div className={`w-12 h-6 rounded-full relative transition-colors ${store.simplifiedMode ? 'bg-saffron' : 'bg-border'}`}>
                   <motion.div
-                    animate={{ x: isReducedMotion ? 36 : 4 }}
-                    className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
+                    animate={{ x: store.simplifiedMode ? 26 : 2 }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                    className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
                   />
                 </div>
               </button>
+            </section>
 
-              {/* Emergency Contact */}
-              <section className="space-y-6">
-                <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-navy/20 rounded-(--radius-lg) text-navy">
-                    <Phone size={24} strokeWidth={3} />
-                  </div>
-                  Auto-Call Contact
-                </h3>
-                <div className="relative">
-                  <input
-                    type="tel"
-                    placeholder="ENTER PHONE NUMBER"
-                    aria-label="Emergency auto-call phone number"
-                    title="Emergency auto-call phone number"
-                    value={primaryEmergencyContact || ''}
-                    onChange={(e) => setPrimaryEmergencyContact(e.target.value)}
-                    className="w-full h-20 px-8 rounded-3xl border-4 border-(--app-border) bg-(--app-surface) text-2xl font-black text-navy focus:border-navy outline-none placeholder:text-navy/20 uppercase italic tracking-tighter"
-                  />
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 text-navy/40 pointer-events-none">
-                    <Phone size={24} strokeWidth={3} />
-                  </div>
-                </div>
-                <p className="text-xs font-black text-(--color-emergency) uppercase tracking-widest px-4">
-                  * This number is called automatically when SOS is triggered.
-                </p>
-              </section>
-            </div>
-            
-            {/* Footer */}
-            <div className="p-8 bg-(--app-surface) border-t-4 border-(--app-border) flex gap-4">
-              <button
-                onClick={onClose}
-                className="flex-1 h-20 bg-navy text-white rounded-2xl font-black text-2xl shadow-xl active:scale-95 transition-transform uppercase italic tracking-tighter"
-              >
-                SAVE & CLOSE
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
+            {/* Privacy & Safety Section */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Privacy & Safety</h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => { close(); window.location.href = '/privacy'; }}
+                  className="w-full p-4 rounded-xl bg-surface-2 border border-border text-left hover:bg-white/5 transition-all"
+                >
+                  <p className="text-sm font-bold text-text">Privacy Policy</p>
+                  <p className="text-[10px] text-text-2">DPDP Act 2023 Compliance</p>
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm('Are you sure? This will permanently erase your medical profile and emergency contacts from our servers.')) {
+                      try {
+                        const res = await fetch('/api/user/data', { method: 'DELETE' });
+                        if (res.ok) {
+                          alert('All personal data erased.');
+                          store.resetToDefaults();
+                          window.location.reload();
+                        } else {
+                          alert('Error erasing data. Please try again later.');
+                        }
+                      } catch (err) {
+                        alert('Network error.');
+                      }
+                    }
+                  }}
+                  className="w-full p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-left hover:bg-red-500/20 transition-all group"
+                >
+                  <p className="text-sm font-bold text-red-500">Delete My Data</p>
+                  <p className="text-[10px] text-red-400 opacity-60 group-hover:opacity-100">Permanent erasure of medical records</p>
+                </button>
+              </div>
+            </section>
+
+            {/* Reset Defaults */}
+            <button
+              onClick={() => store.resetToDefaults()}
+              className="w-full py-4 rounded-xl border border-border bg-white/5 text-text-2 text-xs font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-text transition-all mt-4"
+            >
+              <RotateCcw size={14} />
+              RESET ALL PREFERENCES
+            </button>
+          </div>
+        </motion.div>
+      </div>
     </AnimatePresence>
   );
 };

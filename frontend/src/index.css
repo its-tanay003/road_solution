@@ -19,6 +19,54 @@
   --clr-glow-blue: rgba(41,121,255,0.12);
   --font-ui: 'Space Grotesk', system-ui;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Accessibility Variables */
+  --app-font-size: 16px;
+  --app-font-weight: 400;
+  --app-letter-spacing: normal;
+  --app-line-height: 1.5;
+}
+
+.theme-light {
+  --clr-bg: #FFFFFF;
+  --clr-surface: #F8F9FA;
+  --clr-surface-2: #EDF2F7;
+  --clr-text: #0A0F1E;
+  --clr-text-2: #4A5568;
+  --clr-border: rgba(0,0,0,0.1);
+  --clr-border-active: rgba(0,0,0,0.2);
+}
+
+.theme-high-contrast {
+  --clr-bg: #000000;
+  --clr-surface: #0A0A0A;
+  --clr-surface-2: #1A1A1A;
+  --clr-text: #FFFFFF;
+  --clr-text-2: #CCCCCC;
+  --clr-border: rgba(255,255,255,0.4);
+  --clr-border-active: rgba(255,255,255,0.8);
+}
+
+.theme-saffron {
+  --clr-bg: #080C14;
+  --clr-surface: #0D1321;
+  --clr-surface-2: #111827;
+  --clr-text: #E8EDF5;
+  --clr-text-2: #8892A4;
+  --clr-red: #FF1744;
+  --clr-saffron: #FF9933;
+  --clr-border-active: rgba(255,153,51,0.3);
+}
+
+.theme-dark {
+  /* Default variables in :root */
+}
+
+html, body, #root {
+  font-size: var(--app-font-size);
+  font-weight: var(--app-font-weight);
+  letter-spacing: var(--app-letter-spacing);
+  line-height: var(--app-line-height);
 }
 
 @layer base {

@@ -3,10 +3,11 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useEmergencyStore } from '../store/emergencyStore';
 import { useMedicalProfileStore } from '../store/medicalProfileStore';
+import { AlertCircle } from 'lucide-react';
 
 export const SOSActiveScreen: React.FC = () => {
   const { crashDetectedAt, cancelSOS, sosActive, currentIncidentId } = useEmergencyStore();
-  const { name, bloodType } = useMedicalProfileStore();
+  const { profileComplete, name, bloodType } = useMedicalProfileStore();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(10);
 
@@ -93,6 +94,16 @@ export const SOSActiveScreen: React.FC = () => {
       </div>
 
       <div className="w-full max-w-sm space-y-6 relative z-10">
+        {!profileComplete && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
+            <AlertCircle size={18} className="text-amber-500" />
+            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest leading-relaxed">
+              Medical profile incomplete — <br/>
+              emergency responders will have limited data.
+            </p>
+          </div>
+        )}
+
         {/* Medical Card */}
         <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-3xl">
           <div className="flex items-center justify-between mb-6">

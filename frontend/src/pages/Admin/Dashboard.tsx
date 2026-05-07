@@ -18,6 +18,8 @@ interface Incident {
   severity: 'critical' | 'warning' | 'active';
   time: string;
   telemetry: { speed: string; gForce: string };
+  type: 'sos' | 'bystander';
+  victimStatus?: string;
 }
 
 interface Stats {
@@ -38,9 +40,9 @@ export const Dashboard = () => {
   });
 
   const [activeIncidents, setActiveIncidents] = useState<Incident[]>([
-    { id: 'SOS-912', location: 'New Delhi, Area 5', severity: 'critical', time: '2m ago', telemetry: { speed: '0km/h', gForce: '4.2g' } },
-    { id: 'SOS-884', location: 'Gurgaon, Sector 44', severity: 'warning', time: '12m ago', telemetry: { speed: '12km/h', gForce: '0.8g' } },
-    { id: 'SOS-771', location: 'Noida, Expressway', severity: 'active', time: '45m ago', telemetry: { speed: '0km/h', gForce: '2.1g' } },
+    { id: 'SOS-912', location: 'New Delhi, Area 5', severity: 'critical', time: '2m ago', telemetry: { speed: '0km/h', gForce: '4.2g' }, type: 'sos' },
+    { id: 'SOS-884', location: 'Gurgaon, Sector 44', severity: 'warning', time: '12m ago', telemetry: { speed: '12km/h', gForce: '0.8g' }, type: 'sos' },
+    { id: 'SOS-771', location: 'Noida, Expressway', severity: 'active', time: '45m ago', telemetry: { speed: '0km/h', gForce: '2.1g' }, type: 'sos' },
   ]);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -51,13 +53,21 @@ export const Dashboard = () => {
     // Socket.io integration for live updates
     const socket = io(SOCKET_URL);
     
-    socket.on('bystander:report', (report: { id: string; location: { lat: number; lng: number }; victimStatus: string }) => {
+    interface BystanderReportData {
+      id: string;
+      coords: { lat: number; lng: number };
+      victimStatus: string;
+    }
+
+    socket.on('bystander:report', (report: BystanderReportData) => {
       setActiveIncidents(prev => [{
         id: report.id,
-        location: `${report.location.lat.toFixed(4)}, ${report.location.lng.toFixed(4)}`,
-        severity: report.victimStatus.toLowerCase() === 'critical' ? 'critical' : 'active',
+        location: `${report.coords.lat.toFixed(4)}, ${report.coords.lng.toFixed(4)}`,
+        severity: report.victimStatus === 'CRITICAL' ? 'critical' : report.victimStatus === 'UNCONSCIOUS' ? 'warning' : 'active',
         time: 'Just now',
-        telemetry: { speed: 'N/A', gForce: 'Bystander' }
+        telemetry: { speed: 'N/A', gForce: 'Bystander' },
+        type: 'bystander',
+        victimStatus: report.victimStatus
       }, ...prev]);
     });
 
@@ -136,19 +146,32 @@ export const Dashboard = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="nexus-card p-4 hover:border-(--nx-border-active) transition-all cursor-pointer group"
+                    className={`nexus-card p-4 hover:border-(--nx-border-active) transition-all cursor-pointer group ${
+                      incident.type === 'bystander' ? 'border-l-2 border-l-(--nx-blue-primary)' : ''
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                        <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-sm flex items-center justify-center border ${
                             incident.severity === 'critical' ? 'bg-(--nx-red-dim) border-(--nx-red-primary)/30 text-(--nx-red-primary)' : 'bg-(--nx-amber-dim) border-(--nx-amber-primary)/30 text-(--nx-amber-primary)'
                           }`}>
-                             <AlertTriangle size={20} />
+                             {incident.type === 'bystander' ? <Users size={20} /> : <AlertTriangle size={20} />}
                           </div>
                           <div>
                             <div className="flex items-center gap-3">
-                              <span className="text-sm font-bold text-white font-mono">{incident.id}</span>
-                              <Badge variant={incident.severity}>{incident.severity.toUpperCase()}</Badge>
+                              {incident.type === 'bystander' ? (
+                                <span className="text-[10px] font-bold text-(--nx-blue-primary) uppercase tracking-wider flex items-center gap-1">
+                                  👤 Bystander Report
+                                </span>
+                              ) : (
+                                <span className="text-sm font-bold text-white font-mono">{incident.id}</span>
+                              )}
+                              <Badge variant={incident.severity}>
+                                {incident.victimStatus || incident.severity.toUpperCase()}
+                              </Badge>
+                              {incident.type === 'bystander' && (
+                                <span className="text-[10px] font-mono text-(--nx-text-tertiary)">{incident.id}</span>
+                              )}
                             </div>
                             <div className="flex items-center gap-3 mt-1.5 text-[10px] text-(--nx-text-tertiary) uppercase font-mono">
                                <span className="flex items-center gap-1"><MapPin size={10} /> {incident.location}</span>

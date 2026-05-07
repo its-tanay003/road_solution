@@ -32,9 +32,49 @@ import authRouter from './auth/authRouter';
 import { authRateLimiter, requireAuth, sosRateLimiter } from './middleware/auth';
 import { supabaseSsrMiddleware } from './middleware/supabaseSsr';
 
+import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
+import { validateSOS, validateBystanderReport, validateTriage } from './middleware/requestValidator';
+
 dotenv.config();
 
 const app = express();
+
+// --- Security Headers ---
+app.use(helmet({
+  contentSecurityPolicy: false, // Handled by Vercel/Frontend for better control
+  hsts: { maxAge: 31536000, includeSubDomains: true }
+}));
+
+// --- CORS ---
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    'https://road-solution.vercel.app',
+    'https://roadsos.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// --- Global Rate Limiter ---
+const globalLimiter = rateLimit({ 
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
+  message: { error: 'Too many requests' } 
+});
+app.use('/api/', globalLimiter);
+
+// --- Payload Security ---
+app.use(express.json({ limit: '500kb' })); // Prevent large payload attacks
+app.use(cookieParser());
+
+// --- Request ID ---
+app.use((req, res, next) => { 
+  res.setHeader('X-Request-ID', crypto.randomUUID()); 
+  next(); 
+});
 
 // --- Metrics Middleware ---
 app.use((req, res, next) => {
@@ -49,39 +89,41 @@ app.use((req, res, next) => {
 const server = http.createServer(app);
 
 // Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'accounts.google.com', 'apis.google.com'],
-      connectSrc: ["'self'", 'api.anthropic.com', '*.vercel.app', 'tile.openstreetmap.org'],
-      imgSrc: ["'self'", 'data:', '*.openstreetmap.org'],
-      styleSrc: ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
-      fontSrc: ["'self'", 'fonts.gstatic.com'],
-      frameSrc: ["'none'"],
-    },
-  },
-  hsts: { maxAge: 31536000, includeSubDomains: true },
-}));
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL ?? 'http://localhost:5173',
-    'http://localhost:5173',
-    'https://roadsos.vercel.app',
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-app.use(express.json());
-app.use(cookieParser());
 app.use(supabaseSsrMiddleware);
 app.use(observabilityMiddleware);
 
 // --- Auth Routes ---
 app.use('/auth', authRateLimiter, authRouter);
 
-// Prometheus Metrics Endpoint
+// SOS rate limiter — max 5 per minute per IP
+const productionSosLimiter = rateLimit({ windowMs: 60 * 1000, max: 5 });
+const bystanderReportLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
+
+// --- Data Erasure (DPDP Compliance) ---
+app.delete('/api/user/data', requireAuth, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    // Delete user profile and medical data
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+
+    const { error: medicalError } = await supabase
+      .from('medical_profiles')
+      .delete()
+      .eq('user_id', userId);
+
+    if (profileError || medicalError) throw profileError || medicalError;
+
+    res.json({ message: 'User data erased successfully' });
+  } catch (error) {
+    console.error('Data erasure error:', error);
+    res.status(500).json({ error: 'Failed to erase data' });
+  }
+});
 app.get('/metrics', async (req, res) => {
   try {
     res.set('Content-Type', register.contentType);
@@ -124,30 +166,30 @@ app.get('/api/risk/heatmap', requireAuth, (req, res) => {
 });
 
 // --- Bystander Report Endpoint ---
-app.post('/api/bystander-report', async (req, res) => {
-  const { location, victimStatus, photo, incidentId } = req.body;
+app.post('/api/bystander-report', bystanderReportLimiter, validateBystanderReport, async (req, res) => {
+  const { coords, victimStatus, description, image } = req.body;
   
-  if (!location || !victimStatus) {
-    return res.status(400).json({ error: 'Location and victim status are required' });
-  }
+  const { data, error } = await supabase
+    .from('bystander_reports')
+    .insert([
+      { 
+        location: `POINT(${coords.lng} ${coords.lat})`, 
+        victim_status: victimStatus,
+        description,
+        image_url: image
+      }
+    ])
+    .select();
 
-  const report = {
-    id: incidentId || `BYST-${Date.now()}`,
-    location,
-    victimStatus,
-    photo: !!photo, // Just flag if photo exists for now
-    timestamp: new Date().toISOString(),
-    type: 'BYSTANDER_REPORT'
-  };
+  if (error) return res.status(500).json({ error: error.message });
 
   // Broadcast to all clients (Dashboard, etc.)
-  const { io } = require('./services/socketService');
-  const socketIo = io();
+  const socketIo = req.app.get('io');
   if (socketIo) {
-    socketIo.emit('bystander:report', report);
+    socketIo.emit('bystander:report', data![0]);
   }
 
-  res.json({ success: true, reportId: report.id });
+  res.json({ success: true, reportId: data![0].id });
 });
 
 // Responder Routing Endpoint
@@ -194,6 +236,27 @@ app.post('/api/triage', requireAuth, async (req, res) => {
 });
 
 // AI Predictive Risk Forecast
+app.post('/api/sos', productionSosLimiter, validateSOS, async (req, res) => {
+  const { lat, lng, type, timestamp } = req.body;
+  
+  // Create SOS alert in Supabase
+  const { data, error } = await supabase
+    .from('sos_alerts')
+    .insert([
+      { 
+        location: `POINT(${lng} ${lat})`, 
+        type, 
+        status: 'ACTIVE',
+        created_at: new Date(timestamp).toISOString()
+      }
+    ])
+    .select();
+    
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, alert: data![0] });
+});
+
+// AI Predictive Risk Forecast (Legacy)
 app.post('/api/predict-risk', requireAuth, async (req, res) => {
   const { segment, weather } = req.body;
   if (!segment || !weather) {

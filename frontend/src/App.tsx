@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import { useSettingsStore, applySettingsToDOM } from './store/settingsStore';
+import { useAccessibilityStore } from './store/accessibilityStore';
 import { useAuthStore } from './store/authStore';
 
 // Screens & Components
 import HomeScreen from './screens/HomeScreen';
-import { Dashboard } from './screens/Dashboard';
+import { Dashboard } from './pages/Admin/Dashboard';
 import { Dispatched } from './screens/Dispatched';
 import { SOSActiveScreen } from './screens/SOSActiveScreen';
 import { BystanderReport } from './screens/BystanderReport';
@@ -15,6 +14,7 @@ import { useEmergencyStore } from './store/emergencyStore';
 import { socket } from './lib/socket';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
+import { MedicalProfilePage } from './pages/MedicalProfilePage';
 import { GovernancePortal } from './screens/GovernancePortal';
 import { ImpactCalculator } from './screens/ImpactCalculator';
 import { SystemOrchestrator } from './components/SystemOrchestrator';
@@ -41,24 +41,16 @@ import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';
 import { useDemoStore } from './store';
 import { LoginPage } from './pages/LoginPage';
 import { SecurityDashboard } from './pages/SecurityDashboard';
+import { SettingsButton } from './components/SettingsButton';
+import { SettingsPanel } from './components/SettingsPanel';
 
 // Re-apply persisted settings to DOM on every page load
 function AppInitializer() {
-  const settings = useSettingsStore();
-  const { i18n } = useTranslation();
+  const { fontSize, fontWeight, letterSpacing, theme, language, simplifiedMode, applySettings } = useAccessibilityStore();
 
   useEffect(() => {
-    applySettingsToDOM({
-      theme: settings.theme,
-      textSize: settings.textSize,
-      fontStyle: settings.fontStyle,
-      reducedMotion: settings.reducedMotion,
-      colorScheme: settings.colorScheme,
-    });
-    if (i18n.language !== settings.language) {
-      i18n.changeLanguage(settings.language);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    applySettings({ fontSize, fontWeight, letterSpacing, theme, language, simplifiedMode });
+  }, [fontSize, fontWeight, letterSpacing, theme, language, simplifiedMode, applySettings]);
 
   return null;
 }
@@ -83,7 +75,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
 
 const AppContent = () => {
   const location = useLocation();
-  const { onboardingComplete } = useMedicalProfileStore();
+  const { profileComplete } = useMedicalProfileStore();
   const [isLoading, setIsLoading] = useState(true);
   const { confirmDispatch } = useEmergencyStore();
 
@@ -155,8 +147,13 @@ const AppContent = () => {
     return <AppLoadingScreen onComplete={() => setIsLoading(false)} />;
   }
 
-  if (!onboardingComplete && !isDemoControlOpen) {
-    return <OnboardingFlow />;
+  if (!profileComplete && !isDemoControlOpen) {
+    return (
+      <>
+        <PrivacyConsentBanner />
+        <OnboardingFlow />
+      </>
+    );
   }
 
   return (
@@ -168,7 +165,9 @@ const AppContent = () => {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/" element={<ProtectedRoute><PageWrapper><HomeScreen /></PageWrapper></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><PageWrapper><MedicalProfilePage /></PageWrapper></ProtectedRoute>} />
           <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
           <Route path="/governance" element={<PageWrapper><GovernancePortal /></PageWrapper>} />
           <Route path="/impact" element={<PageWrapper><ImpactCalculator /></PageWrapper>} />
@@ -192,6 +191,7 @@ const AppContent = () => {
         </Routes>
       </AnimatePresence>
 
+      <PrivacyConsentBanner />
       <VolunteerAlertScreen />
       <NHAISmartHighwayPanel />
 
@@ -212,6 +212,9 @@ const AppContent = () => {
         onClose={() => toggleShortcuts(false)}
         isPaused={isPaused}
       />
+
+      <SettingsButton />
+      <SettingsPanel />
     </div>
   );
 };

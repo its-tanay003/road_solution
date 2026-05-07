@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Mic, Brain, Sparkles } from 'lucide-react';
+import { sanitizeInput } from '../utils/inputSanitizer';
 
 interface Message {
   id: string;
@@ -31,11 +32,12 @@ export const AIChat: React.FC = () => {
   }, [messages, isThinking]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    const sanitizedInputText = sanitizeInput(input, 1000);
+    if (!sanitizedInputText.trim()) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
-      text: input,
+      text: sanitizedInputText,
       sender: 'user',
       timestamp: Date.now()
     };

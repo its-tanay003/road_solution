@@ -19,6 +19,7 @@ export * from './notificationStore';
 export * from './trainingStore';
 export * from './wearableStore';
 export * from './ambulanceStore';
+export * from './emergencyStore';
   
 export interface SosIncident {
   id: string;
@@ -636,14 +637,15 @@ export const useDemoStore = create<DemoState>((set, get) => ({
     if (id === 1) {
       startScenario('CRASH');
       const sosStore = useSosStore.getState();
+      const emergencyStore = useEmergencyStore.getState();
       const uiStore = useUIStore.getState();
       const ambulanceStore = useAmbulanceStore.getState();
 
       // t=0
-      sosStore.setGForceData({ x: 12.4, y: 2.1, z: -3.2 });
+      emergencyStore.setGForceData({ x: 12.4, y: 2.1, z: -3.2 });
       useWearableStore.getState().updateHealthData({ spO2: 89 }); // Trigger rule-based fallback
-      sosStore.setCrashTriggered(true);
-      sosStore.setCrashDetectedAt(Date.now());
+      emergencyStore.setCrashTriggered(true);
+      emergencyStore.setCrashDetectedAt(Date.now());
       setScenarioStep(1);
 
       // t=1: SOS countdown
@@ -684,7 +686,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
       // t=12: Golden Hour
       setTimeout(() => {
         if (get().isPaused) return;
-        sosStore.setGoldenHourActive(true);
+        useEmergencyStore.getState().setGoldenHourActive(true);
         setScenarioStep(4);
       }, 12000 * speedFactor);
 
