@@ -82,7 +82,7 @@ export const DriverBehaviorScore: React.FC = () => {
           </h4>
           <div className="space-y-3">
             {insights.map((insight, i) => (
-              <div key={i} className="flex items-start gap-3 p-2 rounded-[var(--radius-lg)] bg-white/5 border border-white/5">
+              <div key={i} className="flex items-start gap-3 p-2 rounded-(--radius-lg) bg-white/5 border border-white/5">
                 <div className={`mt-0.5 ${insight.type === 'positive' ? 'text-(--clr-green)' : insight.type === 'negative' ? 'text-(--clr-red)' : 'text-(--clr-amber)'}`}>
                   {insight.icon}
                 </div>

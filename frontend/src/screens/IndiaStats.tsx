@@ -41,32 +41,32 @@ export const IndiaStats: React.FC = () => {
       {/* HERO STAT */}
       <div className="hud-card mb-8 relative z-10 overflow-hidden group">
         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-          <AlertTriangle size={80} className="text-[var(--color-warning)]" />
+          <AlertTriangle size={80} className="text-(--color-warning)" />
         </div>
-        <span className="text-[var(--color-warning)] font-black uppercase tracking-[0.2em] text-xs mb-2 block">Accidents in India This Year</span>
+        <span className="text-(--color-warning) font-black uppercase tracking-[0.2em] text-xs mb-2 block">Accidents in India This Year</span>
         <div className="flex items-baseline gap-2">
-          <h2 className="text-6xl font-black text-[var(--color-warning)] tabular-nums tracking-tighter">
+          <h2 className="text-6xl font-black text-(--color-warning) tabular-nums tracking-tighter">
             {liveAccidents.toLocaleString()}
           </h2>
           <motion.div 
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 1, repeat: Infinity }}
-            className="w-3 h-3 bg-[var(--color-emergency)] rounded-full mb-2"
+            className="w-3 h-3 bg-(--color-emergency) rounded-full mb-2"
           />
         </div>
         <p className="text-text-secondary mt-4 font-medium italic">
-          That's one accident every <span className="text-[var(--color-emergency)] font-bold">1.2 minutes</span>.
+          That's one accident every <span className="text-(--color-emergency) font-bold">1.2 minutes</span>.
         </p>
       </div>
 
       {/* STAT GRID */}
       <div className="grid grid-cols-2 gap-4 mb-8 relative z-10">
         <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-[var(--color-emergency)] text-[10px] font-black uppercase tracking-widest mb-1 block">Deaths</span>
+          <span className="text-(--color-emergency) text-[10px] font-black uppercase tracking-widest mb-1 block">Deaths</span>
           <span className="text-2xl font-bold text-white tabular-nums">168,491</span>
         </div>
         <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-[var(--color-warning)] text-[10px] font-black uppercase tracking-widest mb-1 block">Injured</span>
+          <span className="text-(--color-warning) text-[10px] font-black uppercase tracking-widest mb-1 block">Injured</span>
           <span className="text-2xl font-bold text-white tabular-nums">439,262</span>
         </div>
         <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
@@ -74,7 +74,7 @@ export const IndiaStats: React.FC = () => {
           <span className="text-2xl font-bold text-white tabular-nums">53%</span>
         </div>
         <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-[var(--color-safe)]-green text-[10px] font-black uppercase tracking-widest mb-1 block">Preventable</span>
+          <span className="text-(--color-safe)-green text-[10px] font-black uppercase tracking-widest mb-1 block">Preventable</span>
           <span className="text-2xl font-bold text-white tabular-nums">71%</span>
         </div>
       </div>
@@ -82,7 +82,7 @@ export const IndiaStats: React.FC = () => {
       {/* CHART SECTION */}
       <div className="hud-card mb-8 h-[400px] relative z-10">
         <h3 className="text-white font-bold mb-6 flex items-center gap-2">
-          <TrendingDown size={20} className="text-[var(--color-emergency)]" /> Deaths by State (Top 10)
+          <TrendingDown size={20} className="text-(--color-emergency)" /> Deaths by State (Top 10)
         </h3>
         <ResponsiveContainer width="100%" height="80%">
           <BarChart data={DATA} layout="vertical" margin={{ left: 0, right: 20 }}>
@@ -110,12 +110,12 @@ export const IndiaStats: React.FC = () => {
 
       {/* IMPACT SECTION */}
       <div className="grid grid-cols-2 gap-4 relative z-10 mb-8">
-        <div className="bg-sos-red/5 border border-[var(--color-emergency)]/20 p-6 rounded-4xl text-center">
-          <span className="text-[var(--color-emergency)] text-xs font-black uppercase tracking-widest mb-2 block">Standard response</span>
+        <div className="bg-sos-red/5 border border-(--color-emergency)/20 p-6 rounded-4xl text-center">
+          <span className="text-(--color-emergency) text-xs font-black uppercase tracking-widest mb-2 block">Standard response</span>
           <span className="text-3xl font-black text-white">18m</span>
         </div>
-        <div className="bg-[var(--color-safe)]/5 border border-[var(--color-safe)]-green/20 p-6 rounded-4xl text-center">
-          <span className="text-[var(--color-safe)]-green text-xs font-black uppercase tracking-widest mb-2 block">ROADSoS Aim</span>
+        <div className="bg-(--color-safe)/5 border border-(--color-safe)-green/20 p-6 rounded-4xl text-center">
+          <span className="text-(--color-safe)-green text-xs font-black uppercase tracking-widest mb-2 block">ROADSoS Aim</span>
           <span className="text-3xl font-black text-white">6m</span>
         </div>
       </div>

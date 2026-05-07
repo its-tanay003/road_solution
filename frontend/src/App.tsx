@@ -9,6 +9,10 @@ import { useAuthStore } from './store/authStore';
 import HomeScreen from './screens/HomeScreen';
 import { Dashboard } from './screens/Dashboard';
 import { Dispatched } from './screens/Dispatched';
+import { SOSActiveScreen } from './screens/SOSActiveScreen';
+import { BystanderReport } from './screens/BystanderReport';
+import { useEmergencyStore } from './store/emergencyStore';
+import { socket } from './lib/socket';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { GovernancePortal } from './screens/GovernancePortal';
@@ -81,6 +85,22 @@ const AppContent = () => {
   const location = useLocation();
   const { onboardingComplete } = useMedicalProfileStore();
   const [isLoading, setIsLoading] = useState(true);
+  const { confirmDispatch } = useEmergencyStore();
+
+  useEffect(() => {
+    socket.on('dispatch:confirmed', (data) => {
+      confirmDispatch(data);
+    });
+    
+    socket.on('sos:ack', () => {
+      console.log('SOS received by backend');
+    });
+
+    return () => {
+      socket.off('dispatch:confirmed');
+      socket.off('sos:ack');
+    };
+  }, [confirmDispatch]);
 
   const { 
     isPresentationMode, 
@@ -153,6 +173,8 @@ const AppContent = () => {
           <Route path="/governance" element={<PageWrapper><GovernancePortal /></PageWrapper>} />
           <Route path="/impact" element={<PageWrapper><ImpactCalculator /></PageWrapper>} />
           <Route path="/volunteer" element={<PageWrapper><VolunteerResponderNetwork /></PageWrapper>} />
+          <Route path="/sos-active" element={<PageWrapper><SOSActiveScreen /></PageWrapper>} />
+          <Route path="/report/:incidentId" element={<PageWrapper><BystanderReport /></PageWrapper>} />
           <Route path="/dispatched/:id" element={<PageWrapper><Dispatched /></PageWrapper>} />
           <Route path="/analytics" element={<PageWrapper><CrashPatternAnalytics /></PageWrapper>} />
           <Route path="/family/:incidentId" element={<PageWrapper><FamilyPortal /></PageWrapper>} />

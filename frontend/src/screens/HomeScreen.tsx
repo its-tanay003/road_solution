@@ -96,105 +96,7 @@ const ParticleCanvas = () => {
   return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-50" />;
 };
 
-// --- SOS Button with Hold Mechanic ---
-const SOSButton = ({ onTrigger }: { onTrigger: () => void }) => {
-  const [isHolding, setIsHolding] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const progressRef = useRef<number>(0);
-
-  const startHold = () => {
-    setIsHolding(true);
-    if (navigator.vibrate) navigator.vibrate([100]);
-    
-    const startTime = Date.now();
-    timerRef.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const newProgress = Math.min(elapsed / 3000, 1);
-      setProgress(newProgress);
-      progressRef.current = newProgress;
-
-      if (newProgress >= 1) {
-        clearInterval(timerRef.current!);
-        onTrigger();
-      }
-    }, 16);
-  };
-
-  const endHold = () => {
-    if (!isHolding) return;
-    setIsHolding(false);
-    clearInterval(timerRef.current!);
-    if (progressRef.current < 1 && progressRef.current > 0.05) {
-      // Trigger amber cancel toast logic here if needed
-    }
-    setProgress(0);
-    progressRef.current = 0;
-  };
-
-  return (
-    <div className="relative flex flex-col items-center">
-      <motion.div 
-        className="text-[10px] font-mono text-(--clr-text-2) mb-4 flex items-center gap-2"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--clr-red)] pulse-dot" />
-        CRITICAL MONITORING ACTIVE
-      </motion.div>
-
-      <div 
-        className="relative cursor-pointer select-none"
-        onMouseDown={startHold}
-        onMouseUp={endHold}
-        onMouseLeave={endHold}
-        onTouchStart={startHold}
-        onTouchEnd={endHold}
-      >
-        {/* Progress Ring */}
-        <svg className="absolute -inset-4 w-[212px] h-[212px] -rotate-90 pointer-events-none">
-          <circle
-            cx="106"
-            cy="106"
-            r="94"
-            fill="none"
-            stroke="var(--clr-border)"
-            strokeWidth="2"
-          />
-          <motion.circle
-            cx="106"
-            cy="106"
-            r="94"
-            fill="none"
-            stroke="var(--clr-red)"
-            strokeWidth="4"
-            strokeDasharray="590"
-            strokeDashoffset={590 - (590 * progress)}
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* The Button */}
-        <motion.button
-          className="w-[180px] h-[180px] rounded-full border-2 border-[var(--clr-red)] bg-[var(--clr-bg)] flex flex-col items-center justify-center relative overflow-hidden z-10"
-          style={{ boxShadow: isHolding ? '0 0 80px var(--clr-glow-red)' : '0 0 50px var(--clr-glow-red)' }}
-          animate={{ scale: isHolding ? 0.95 : 1 }}
-        >
-          <span className="text-[var(--clr-red)] text-3xl font-bold tracking-tighter mb-1">SOS</span>
-          <span className="text-[var(--clr-text-2)] text-[9px] font-mono tracking-widest">HOLD FOR 3S</span>
-          
-          {isHolding && (
-            <motion.div 
-              className="absolute inset-0 bg-[var(--clr-red)]/10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            />
-          )}
-        </motion.button>
-      </div>
-    </div>
-  );
-};
+import { SOSButton } from '../components/SOSButton';
 
 // --- Main HomeScreen Component ---
 const HomeScreen: React.FC = () => {
@@ -211,14 +113,14 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-screen flex flex-col bg-[var(--clr-bg)] text-[var(--clr-text)] overflow-hidden">
+    <div className="relative w-full h-screen flex flex-col bg-(--clr-bg) text-(--clr-text) overflow-hidden">
       <ParticleCanvas />
 
       {/* Top Bar */}
-      <header className="h-12 border-b border-[var(--clr-border)] flex items-center justify-between px-4 z-20 bg-[var(--clr-bg)]/80 backdrop-blur-md">
+      <header className="h-12 border-b border-(--clr-border) flex items-center justify-between px-4 z-20 bg-(--clr-bg)/80 backdrop-blur-md">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold hologram-text leading-none">ROADSoS</h1>
-          <span className="text-[10px] font-mono text-[var(--clr-saffron)] tracking-widest mt-0.5">
+          <span className="text-[10px] font-mono text-(--clr-saffron) tracking-widest mt-0.5">
             EMERGENCY INTELLIGENCE PLATFORM
           </span>
         </div>
@@ -230,20 +132,20 @@ const HomeScreen: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="flex gap-1">
             {['EN', 'हि', 'த'].map(lang => (
-              <button key={lang} className="w-8 h-6 flex items-center justify-center text-[10px] font-bold border border-[var(--clr-border)] hover:border-[var(--clr-blue)] transition-colors rounded">
+              <button key={lang} className="w-8 h-6 flex items-center justify-center text-[10px] font-bold border border-(--clr-border) hover:border-(--clr-blue) transition-colors rounded">
                 {lang}
               </button>
             ))}
           </div>
           <button 
             title="System Settings"
-            className="p-1.5 border border-[var(--clr-border)] rounded hover:bg-white/5 transition-colors"
+            className="p-1.5 border border-(--clr-border) rounded hover:bg-white/5 transition-colors"
           >
             <Settings size={16} className="text-(--clr-text-2)" />
           </button>
           <div className="flex gap-1.5 ml-2">
-            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-[var(--clr-green)]' : 'bg-amber-500'} pulse-dot`} />
-            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-[var(--clr-blue)]' : 'bg-white/10'}`} />
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-(--clr-green)' : 'bg-amber-500'} pulse-dot`} />
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-(--clr-blue)' : 'bg-white/10'}`} />
           </div>
         </div>
       </header>
@@ -258,11 +160,11 @@ const HomeScreen: React.FC = () => {
         >
           <span className="text-[10px] tracking-[0.3em] opacity-50 mb-1">IMPACT TELEMETRY</span>
           <span className="text-xl tracking-tighter">
-            G: <span className="text-[var(--clr-text)]">{gForce.toFixed(1)}G</span> ±0.1
+            G: <span className="text-(--clr-text)">{gForce.toFixed(1)}G</span> ±0.1
           </span>
         </motion.div>
 
-        <SOSButton onTrigger={() => navigate('/sos-active')} />
+        <SOSButton />
 
       {/* Action Cards */}
         <div className="mt-16 flex flex-wrap justify-center gap-4">
@@ -283,9 +185,9 @@ const HomeScreen: React.FC = () => {
                 if (card.id === 'awareness') setShowAwareness(true);
                 else navigate(card.path);
               }}
-              className="w-[140px] h-[88px] border border-[var(--clr-border)] rounded-lg flex flex-col items-center justify-center gap-2 group transition-all"
+              className="w-[140px] h-[88px] border border-(--clr-border) rounded-lg flex flex-col items-center justify-center gap-2 group transition-all"
             >
-              <card.icon size={20} className={`${card.color || 'text-(--clr-blue)'} group-hover:text-[var(--clr-text)] transition-colors`} />
+              <card.icon size={20} className={`${card.color || 'text-(--clr-blue)'} group-hover:text-(--clr-text) transition-colors`} />
               <span className="text-[9px] font-mono tracking-widest text-(--clr-text-2)">{card.label}</span>
             </motion.button>
           ))}
@@ -319,11 +221,11 @@ const HomeScreen: React.FC = () => {
       </main>
 
       {/* Bottom Status Bar */}
-      <footer className="h-9 border-t border-[var(--clr-border)] bg-[var(--clr-bg)]/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
+      <footer className="h-9 border-t border-(--clr-border) bg-(--clr-bg)/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-2 py-0.5 bg-[var(--clr-green)]/10 border border-[var(--clr-green)]/20 rounded">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--clr-green)]" />
-            <span className="text-[9px] font-mono font-bold text-[var(--clr-green)] tracking-wider">MESH READY / ONLINE</span>
+          <div className="flex items-center gap-2 px-2 py-0.5 bg-(--clr-green)/10 border border-(--clr-green)/20 rounded">
+            <span className="w-1.5 h-1.5 rounded-full bg-(--clr-green)" />
+            <span className="text-[9px] font-mono font-bold text-(--clr-green) tracking-wider">MESH READY / ONLINE</span>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-mono text-(--clr-text-2)">
             <Globe size={12} />
@@ -334,17 +236,17 @@ const HomeScreen: React.FC = () => {
         <div className="flex items-center gap-6 text-[10px] font-mono text-(--clr-text-2)">
           <div className="flex items-center gap-2">
             <Navigation2 size={12} className="rotate-45" />
-            <span>ACCURACY: <span className="text-[var(--clr-text)]">±2.4M</span></span>
+            <span>ACCURACY: <span className="text-(--clr-text)">±2.4M</span></span>
           </div>
-          <div className="flex items-center gap-2 border-l border-[var(--clr-border)] pl-6">
+          <div className="flex items-center gap-2 border-l border-(--clr-border) pl-6">
             <span className="opacity-50">LAST SYNC:</span>
-            <span className="text-[var(--clr-text)]">14:02:55.042</span>
+            <span className="text-(--clr-text)">14:02:55.042</span>
           </div>
         </div>
       </footer>
 
       {/* CRT Scanline Texture Layer */}
-      <div className="fixed inset-0 pointer-events-none z-[10001] opacity-[0.03] bg-[url('/noise.svg')] blend-multiply" />
+      <div className="fixed inset-0 pointer-events-none z-10001 opacity-[0.03] bg-[url('/noise.svg')] blend-multiply" />
     </div>
   );
 };

@@ -98,7 +98,7 @@ export const generateIncidentPDF = async (data: IncidentReportData) => {
     headStyles: { fillColor: [0, 51, 153] },
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 15;
+  currentY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
 
   // Section 4: Dispatched Resources
   doc.setFontSize(14);
@@ -114,7 +114,7 @@ export const generateIncidentPDF = async (data: IncidentReportData) => {
     headStyles: { fillColor: [0, 51, 153] },
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 15;
+  currentY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
 
   // Section 5: Victim Data
   doc.setFontSize(14);

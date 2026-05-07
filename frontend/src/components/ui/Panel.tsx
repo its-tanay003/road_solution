@@ -21,19 +21,19 @@ export const Panel: React.FC<PanelProps> = ({
 }) => {
   const getVariantStyles = () => {
     switch (variant) {
-      case 'active': return 'border-[var(--nx-blue-primary)] shadow-[0_0_15px_rgba(0,123,255,0.1)]';
-      case 'ai': return 'border-[var(--nx-green-primary)] shadow-[0_0_15px_rgba(0,255,123,0.1)]';
-      case 'danger': return 'border-[var(--nx-red-primary)] shadow-[0_0_15px_rgba(255,59,59,0.1)]';
-      default: return 'border-[var(--nx-border)]';
+      case 'active': return 'border-(--nx-blue-primary) shadow-[0_0_15px_rgba(0,123,255,0.1)]';
+      case 'ai': return 'border-(--nx-green-primary) shadow-[0_0_15px_rgba(0,255,123,0.1)]';
+      case 'danger': return 'border-(--nx-red-primary) shadow-[0_0_15px_rgba(255,59,59,0.1)]';
+      default: return 'border-(--nx-border)';
     }
   };
 
   const getIconColor = () => {
     switch (variant) {
-      case 'active': return 'text-[var(--nx-blue-primary)]';
-      case 'ai': return 'text-[var(--nx-green-primary)]';
-      case 'danger': return 'text-[var(--nx-red-primary)]';
-      default: return 'text-[var(--nx-text-tertiary)]';
+      case 'active': return 'text-(--nx-blue-primary)';
+      case 'ai': return 'text-(--nx-green-primary)';
+      case 'danger': return 'text-(--nx-red-primary)';
+      default: return 'text-(--nx-text-tertiary)';
     }
   };
 

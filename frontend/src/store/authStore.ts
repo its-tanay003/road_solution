@@ -17,6 +17,7 @@ interface AuthState {
   session: Session | null;
   isAuthenticated: boolean;
   setSession: (session: Session | null) => void;
+  login: (token: string, user: User) => void;
   logout: () => Promise<void>;
 }
 
@@ -43,6 +44,31 @@ export const useAuthStore = create<AuthState>()(
         };
 
         set({ user, session, isAuthenticated: true });
+      },
+
+      login: (token, user) => {
+        // This is primarily for the manual login flow/bypass
+        // We set the user and a mock session or just mark as authenticated
+        set({ 
+          user, 
+          isAuthenticated: true,
+          session: { 
+            access_token: token,
+            token_type: 'bearer',
+            expires_in: 3600,
+            refresh_token: '',
+            user: { 
+              id: user.id, 
+              aud: 'authenticated', 
+              role: 'authenticated', 
+              email: user.email,
+              phone: user.phone,
+              user_metadata: { full_name: user.name },
+              app_metadata: { provider: user.provider },
+              created_at: new Date().toISOString()
+            } as any
+          }
+        });
       },
 
       logout: async () => {

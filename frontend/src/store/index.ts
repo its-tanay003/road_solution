@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import axios from 'axios';
+import axios from '../lib/axios';
 import { encryptData } from '../utils/crypto';
 
 import { generateiRADReport, submitiRADReport, type iRADReport } from '../lib/iradReporter';
@@ -26,7 +26,7 @@ export interface SosIncident {
   location: { lat: number; lng: number } | null;
   severity: string;
   behaviorScore: number;
-  telemetry: Record<string, any>;
+  telemetry: Record<string, unknown>;
   weather?: string;
   triageScore?: number;
   timeline?: { time: string; event: string; responder?: string; status: string }[];
@@ -88,6 +88,20 @@ interface SosState {
   setDispatch108: (data: Dispatch108) => void;
   updateDispatchPosition: (lat: number, lng: number, etaSeconds: number, status: string) => void;
   syncOfflineQueue: () => Promise<void>;
+  
+  // Emergency / Golden Hour State (Merged)
+  goldenHourActive: boolean;
+  dispatchConfirmed: boolean;
+  crashDetectedAt: number | null;
+  goldenHourExpired: boolean;
+  crashTriggered: boolean;
+  gForceData: { x: number; y: number; z: number };
+  setGoldenHourActive: (active: boolean) => void;
+  setGoldenHourExpired: (expired: boolean) => void;
+  confirmDispatch: () => void;
+  setCrashDetectedAt: (time: number | null) => void;
+  setCrashTriggered: (triggered: boolean) => void;
+  setGForceData: (data: { x: number; y: number; z: number }) => void;
 }
 
 export const useSosStore = create<SosState>()(
@@ -110,6 +124,15 @@ export const useSosStore = create<SosState>()(
         mesh: 'PENDING'
       },
       dispatch108: null,
+      
+      // Emergency / Golden Hour Initial State
+      goldenHourActive: false,
+      dispatchConfirmed: false,
+      crashDetectedAt: null,
+      goldenHourExpired: false,
+      crashTriggered: false,
+      gForceData: { x: 0, y: 0, z: 0 },
+
       setDispatch108: (data) => set({ dispatch108: data }),
       updateDispatchPosition: (lat, lng, etaSeconds, status) => set((state) => ({
         dispatch108: state.dispatch108 ? {
@@ -178,7 +201,7 @@ export const useSosStore = create<SosState>()(
             return;
           }
 
-          const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/sos/trigger`, payload);
+          const response = await axios.post('/api/sos/trigger', payload);
           
           // NOTIFICATION DISPATCH ENGINE
 
@@ -194,7 +217,7 @@ export const useSosStore = create<SosState>()(
           
           if (useUserStore.getState().countryCode === 'IN') {
             try {
-              await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/sos/112`, {
+              await axios.post('/api/sos/112', {
                 lat: loc.lat,
                 lng: loc.lng,
                 severityLevel: 'HIGH',
@@ -212,12 +235,12 @@ export const useSosStore = create<SosState>()(
             isActive: true, 
             isTriggering: false,
             countdownActive: true,
-            countdownTime: 240
+            countdownTime: 10
           });
 
           // Trigger 108 GVK EMRI Dispatch Simulation
           try {
-            const dispatchRes = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/dispatch/108`, {
+            const dispatchRes = await axios.post('/api/dispatch/108', {
               incidentLat: loc.lat,
               incidentLng: loc.lng,
               severity: 'CRITICAL',
@@ -289,7 +312,20 @@ export const useSosStore = create<SosState>()(
           ...state.deliveryStatus,
           [channel]: status
         }
-      }))
+      })),
+
+      // Emergency Actions
+      setGoldenHourActive: (active) => set({ 
+        goldenHourActive: active, 
+        dispatchConfirmed: false,
+        goldenHourExpired: false,
+        crashTriggered: false
+      }),
+      setGoldenHourExpired: (expired) => set({ goldenHourExpired: expired }),
+      confirmDispatch: () => set({ dispatchConfirmed: true }),
+      setCrashDetectedAt: (time) => set({ crashDetectedAt: time }),
+      setCrashTriggered: (triggered) => set({ crashTriggered: triggered }),
+      setGForceData: (data) => set({ gForceData: data })
     }),
     {
       name: 'roadsos-sos-store',
@@ -579,10 +615,11 @@ export const useDemoStore = create<DemoState>((set, get) => ({
   toggleShortcuts: (val) => set((state) => ({ showShortcuts: val !== undefined ? val : !state.showShortcuts })),
   setVaahanStatus: (status) => set((state) => ({ vaahanData: { ...state.vaahanData, status } })),
   resetAll: () => {
-    useSosStore.getState().cancelSos();
-    useEmergencyStore.getState().setGoldenHourActive(false);
-    useEmergencyStore.getState().setCrashDetectedAt(null);
-    useEmergencyStore.getState().setCrashTriggered(false);
+    const sosStore = useSosStore.getState();
+    sosStore.cancelSos();
+    sosStore.setGoldenHourActive(false);
+    sosStore.setCrashDetectedAt(null);
+    sosStore.setCrashTriggered(false);
     useUIStore.getState().setStressed(false);
     useUIStore.getState().setUxMode('DEFAULT');
     useNetworkStore.getState().setMeshMode(false);
@@ -598,16 +635,15 @@ export const useDemoStore = create<DemoState>((set, get) => ({
 
     if (id === 1) {
       startScenario('CRASH');
-      const emergencyStore = useEmergencyStore.getState();
       const sosStore = useSosStore.getState();
       const uiStore = useUIStore.getState();
       const ambulanceStore = useAmbulanceStore.getState();
 
       // t=0
-      emergencyStore.setGForceData({ x: 12.4, y: 2.1, z: -3.2 });
+      sosStore.setGForceData({ x: 12.4, y: 2.1, z: -3.2 });
       useWearableStore.getState().updateHealthData({ spO2: 89 }); // Trigger rule-based fallback
-      emergencyStore.setCrashTriggered(true);
-      emergencyStore.setCrashDetectedAt(Date.now());
+      sosStore.setCrashTriggered(true);
+      sosStore.setCrashDetectedAt(Date.now());
       setScenarioStep(1);
 
       // t=1: SOS countdown
@@ -648,7 +684,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
       // t=12: Golden Hour
       setTimeout(() => {
         if (get().isPaused) return;
-        emergencyStore.setGoldenHourActive(true);
+        sosStore.setGoldenHourActive(true);
         setScenarioStep(4);
       }, 12000 * speedFactor);
 
@@ -707,40 +743,6 @@ export const useDemoStore = create<DemoState>((set, get) => ({
   }
 }));
 
-interface EmergencyState {
-  goldenHourActive: boolean;
-  dispatchConfirmed: boolean;
-  crashDetectedAt: number | null;
-  goldenHourExpired: boolean;
-  crashTriggered: boolean;
-  gForceData: { x: number; y: number; z: number };
-  setGoldenHourActive: (active: boolean) => void;
-  setGoldenHourExpired: (expired: boolean) => void;
-  confirmDispatch: () => void;
-  setCrashDetectedAt: (time: number | null) => void;
-  setCrashTriggered: (triggered: boolean) => void;
-  setGForceData: (data: { x: number; y: number; z: number }) => void;
-}
-
-export const useEmergencyStore = create<EmergencyState>((set) => ({
-  goldenHourActive: false,
-  dispatchConfirmed: false,
-  crashDetectedAt: null,
-  goldenHourExpired: false,
-  crashTriggered: false,
-  gForceData: { x: 0, y: 0, z: 0 },
-  setGoldenHourActive: (active) => set({ 
-    goldenHourActive: active, 
-    dispatchConfirmed: false,
-    goldenHourExpired: false,
-    crashTriggered: false
-  }),
-  setGoldenHourExpired: (expired) => set({ goldenHourExpired: expired }),
-  confirmDispatch: () => set({ dispatchConfirmed: true }),
-  setCrashDetectedAt: (time) => set({ crashDetectedAt: time }),
-  setCrashTriggered: (triggered) => set({ crashTriggered: triggered }),
-  setGForceData: (data) => set({ gForceData: data })
-}));
 
 interface JudgeIncident {
   id: string;

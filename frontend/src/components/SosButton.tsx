@@ -1,103 +1,80 @@
-import React, { useState, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { useSettingsStore } from '../store/settingsStore';
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useSOSButton } from '../hooks/useSOSButton';
 
-interface SOSButtonProps {
-  onActivate: () => void;
-}
+export const SOSButton: React.FC = () => {
+  const { holdProgress, isHolding, sosActive, holdStart, holdEnd, cancelSOS } = useSOSButton();
 
-export const SOSButton: React.FC<SOSButtonProps> = ({ onActivate }) => {
-  const [isHolding, setIsHolding] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const { hapticFeedback, sosMode } = useSettingsStore();
-  const timerRef = useRef<number | null>(null);
-  const controls = useAnimation();
-
-  const handleStart = () => {
-    if (sosMode !== 'hold3s') return;
-    setIsHolding(true);
-    setProgress(0);
-    
-    const startTime = Date.now();
-    const duration = 3000;
-
-    timerRef.current = window.setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const nextProgress = Math.min((elapsed / duration) * 100, 100);
-      setProgress(nextProgress);
-
-      if (hapticFeedback && window.navigator.vibrate) {
-        window.navigator.vibrate(50);
-      }
-
-      if (nextProgress === 100) {
-        window.clearInterval(timerRef.current!);
-        onActivate();
-        setIsHolding(false);
-        setProgress(0);
-      }
-    }, 50) as unknown as number;
-  };
-
-  const handleEnd = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setIsHolding(false);
-    setProgress(0);
-  };
-
-  // SVG Progress Ring calculations
-  const radius = 94;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (progress / 100) * circumference;
+  // SVG parameters for the progress ring
+  const radius = 85;
+  const circumference = 2 * Math.PI * radius; // ~534
+  const offset = circumference - (holdProgress / 100) * circumference;
 
   return (
-    <div className="relative flex items-center justify-center">
-      {/* Outer pulsing ring */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.15, 0.05, 0.15]
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="absolute w-[280px] h-[280px] bg-[var(--color-emergency)] rounded-full"
-      />
+    <div className="flex flex-col items-center justify-center gap-10">
+      <div className="relative flex items-center justify-center w-[180px] h-[180px]">
+        {/* Glow / Pulse Effect */}
+        <motion.div 
+          className="absolute inset-0 rounded-full bg-[#FF1744]/20 shadow-[0_0_40px_rgba(255,23,68,0.4)]"
+          animate={{ scale: isHolding ? [1, 1.15, 1] : 1 }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        />
 
-      {/* Middle static ring */}
-      <div className="absolute w-[240px] h-[240px] border-2 border-[var(--color-emergency)]/40 rounded-full" />
-
-      {/* Main Button */}
-      <motion.button
-        onPointerDown={handleStart}
-        onPointerUp={handleEnd}
-        onPointerLeave={handleEnd}
-        animate={controls}
-        whileTap={{ scale: 0.95 }}
-        className="sos-button-outer z-10"
-        aria-label="SOS Emergency Button. Press and hold for 3 seconds."
-      >
-        {/* Progress Arc */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90">
+        {/* SVG Progress Ring */}
+        <svg className="absolute inset-0 -rotate-90" width="180" height="180">
           <circle
-            cx="100"
-            cy="100"
+            cx="90"
+            cy="90"
             r={radius}
             fill="transparent"
-            stroke="white"
-            strokeWidth="8"
+            stroke="rgba(255,255,255,0.05)"
+            strokeWidth="10"
+          />
+          <motion.circle
+            cx="90"
+            cy="90"
+            r={radius}
+            fill="transparent"
+            stroke="#FF1744"
+            strokeWidth="10"
             strokeDasharray={circumference}
-            strokeDashoffset={offset}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ type: 'tween', ease: 'linear', duration: 0.1 }}
             strokeLinecap="round"
-            className={`transition-all duration-75 ${isHolding ? 'opacity-100' : 'opacity-0'}`}
           />
         </svg>
 
-        <div className="sos-button-inner">
-          <span className="text-5xl font-black font-rajdhani tracking-tighter mb-1">SOS</span>
-          <span className="text-xs font-bold uppercase tracking-widest opacity-80">
-            {isHolding ? 'RELEASE TO CANCEL' : 'PRESS & HOLD'}
+        {/* Main SOS Button */}
+        <motion.button
+          onPointerDown={holdStart}
+          onPointerUp={holdEnd}
+          onPointerLeave={holdEnd}
+          onTouchStart={holdStart}
+          onTouchEnd={holdEnd}
+          className="z-10 w-[145px] h-[145px] rounded-full bg-[#FF1744] flex flex-col items-center justify-center text-white shadow-2xl active:scale-95 transition-transform select-none cursor-pointer"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className="text-[10px] font-black uppercase tracking-widest opacity-80">
+            {holdProgress > 80 ? 'RELEASING...' : 'HOLD FOR'}
           </span>
-        </div>
-      </motion.button>
+          <span className="text-4xl font-black tracking-tighter">SOS</span>
+        </motion.button>
+      </div>
+
+      <AnimatePresence>
+        {sosActive && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            onClick={cancelSOS}
+            className="px-10 py-4 rounded-2xl bg-white/5 text-white font-bold border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors"
+          >
+            CANCEL EMERGENCY
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

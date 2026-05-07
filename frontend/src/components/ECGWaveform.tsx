@@ -38,7 +38,7 @@ export const ECGWaveform: React.FC<ECGWaveformProps> = ({ status, className }) =
   }, [status]);
 
   return (
-    <div className={`relative bg-nx-bg-[var(--color-surface)] border border-nx-border rounded-[var(--radius-lg)] overflow-hidden h-32 ${className}`}>
+    <div className={`relative bg-nx-bg-(--color-surface) border border-nx-border rounded-(--radius-lg) overflow-hidden h-32 ${className}`}>
       {/* Grid background */}
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff3b3b_1px,transparent_1px)] bg-size-[20px_20px]" />
       

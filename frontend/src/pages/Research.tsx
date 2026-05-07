@@ -10,6 +10,7 @@ import {
   Lightbulb,
   CheckCircle2
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell
@@ -159,9 +160,17 @@ export const Research = () => {
                   <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{gap.metric}</span>
                   <span className="text-xs font-mono font-bold text-white">{gap.current}% → {gap.target}%</span>
                 </div>
-                <div className="h-2 bg-white/5 rounded-full overflow-hidden flex relative">
-                  <div className="h-full bg-slate-700" style={{ width: `${gap.current}%` }} />
-                  <div className="h-full bg-cyan/40 animate-pulse" style={{ width: `${gap.target - gap.current}%` }} />
+                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden flex relative">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${gap.current}%` }}
+                    className="h-full bg-slate-700" 
+                  />
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${gap.target - gap.current}%` }}
+                    className="h-full bg-cyan/40 animate-pulse" 
+                  />
                 </div>
                 <p className="text-[9px] text-slate-500 leading-tight italic">
                   Potential for {gap.target - gap.current}% improvement through platform features.

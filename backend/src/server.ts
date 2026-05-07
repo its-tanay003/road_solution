@@ -82,40 +82,6 @@ app.use(observabilityMiddleware);
 app.use('/auth', authRateLimiter, authRouter);
 
 // Prometheus Metrics Endpoint
-app.get('/metrics', (req, res) => {
-  const avgLatency = metrics.aiTriageCount > 0 ? (metrics.totalAiLatency / metrics.aiTriageCount).toFixed(2) : 0;
-  
-  res.set('Content-Type', 'text/plain');
-  res.send(`
-# HELP roadsos_requests_total Total number of API requests.
-# TYPE roadsos_requests_total counter
-roadsos_requests_total ${metrics.requestCount}
-
-# HELP roadsos_errors_total Total number of error responses.
-# TYPE roadsos_errors_total counter
-roadsos_errors_total ${metrics.errorCount}
-
-# HELP roadsos_sos_triggers_total Total number of SOS triggers.
-# TYPE roadsos_sos_triggers_total counter
-roadsos_sos_triggers_total ${metrics.sosTriggers}
-
-# HELP roadsos_ai_triage_total Total number of AI triage evaluations.
-# TYPE roadsos_ai_triage_total counter
-roadsos_ai_triage_total ${metrics.aiTriageCount}
-
-# HELP roadsos_ai_triage_latency_avg Average latency of AI triage in ms.
-# TYPE roadsos_ai_triage_latency_avg gauge
-roadsos_ai_triage_latency_avg ${avgLatency}
-  `.trim());
-});
-
-// Init services
-connectRedis();
-const ioInstance = initSocket(server);
-app.set('io', ioInstance);
-attachDispatchIo(ioInstance as any);
-
-// --- Metrics Endpoint ---
 app.get('/metrics', async (req, res) => {
   try {
     res.set('Content-Type', register.contentType);
@@ -125,6 +91,12 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
+// --- Services Init ---
+connectRedis();
+const ioInstance = initSocket(server);
+app.set('io', ioInstance);
+attachDispatchIo(ioInstance as any);
+
 // Routes
 app.use('/api/sos', sosRateLimiter, sosRoutes);
 // Alias for Offline Sync Provider
@@ -133,15 +105,15 @@ app.get('/api/nearby-services', (req, res) => {
   res.redirect(307, `/api/services/nearby-osm?${query}`);
 });
 
-app.use('/api/services', servicesRoutes);
-app.use('/api/integrations', integrationsRoutes);
-app.use('/api/push', pushRoutes);
+app.use('/api/services', requireAuth, servicesRoutes);
+app.use('/api/integrations', requireAuth, integrationsRoutes);
+app.use('/api/push', requireAuth, pushRoutes);
 app.use('/api/dispatch', requireAuth, dispatchRoutes);
 app.use('/api/dispatch/108', requireAuth, dispatch108Routes);
-app.use('/api/vaahan', vaahanRoutes);
+app.use('/api/vaahan', requireAuth, vaahanRoutes);
 
 // Predictive Risk Engine Endpoint
-app.get('/api/risk/heatmap', (req, res) => {
+app.get('/api/risk/heatmap', requireAuth, (req, res) => {
   const minLat = parseFloat(req.query.minLat as string) || 28.5;
   const maxLat = parseFloat(req.query.maxLat as string) || 28.7;
   const minLng = parseFloat(req.query.minLng as string) || 77.1;
@@ -151,8 +123,35 @@ app.get('/api/risk/heatmap', (req, res) => {
   res.json({ points: heatmap });
 });
 
+// --- Bystander Report Endpoint ---
+app.post('/api/bystander-report', async (req, res) => {
+  const { location, victimStatus, photo, incidentId } = req.body;
+  
+  if (!location || !victimStatus) {
+    return res.status(400).json({ error: 'Location and victim status are required' });
+  }
+
+  const report = {
+    id: incidentId || `BYST-${Date.now()}`,
+    location,
+    victimStatus,
+    photo: !!photo, // Just flag if photo exists for now
+    timestamp: new Date().toISOString(),
+    type: 'BYSTANDER_REPORT'
+  };
+
+  // Broadcast to all clients (Dashboard, etc.)
+  const { io } = require('./services/socketService');
+  const socketIo = io();
+  if (socketIo) {
+    socketIo.emit('bystander:report', report);
+  }
+
+  res.json({ success: true, reportId: report.id });
+});
+
 // Responder Routing Endpoint
-app.get('/api/responders', async (req, res) => {
+app.get('/api/responders', requireAuth, async (req, res) => {
   const lat = parseFloat(req.query.lat as string) || 28.6139;
   const lng = parseFloat(req.query.lng as string) || 77.2090;
   const severity = (req.query.severity as 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW') || 'MODERATE';
@@ -167,7 +166,7 @@ app.get('/api/responders', async (req, res) => {
 });
 
 // Advanced Fusion Engine Triage
-app.post('/api/fusion-triage', async (req, res) => {
+app.post('/api/fusion-triage', requireAuth, async (req, res) => {
   try {
     const fusionResult = await processFusionTriage(req.body);
     res.json(fusionResult);
@@ -178,7 +177,7 @@ app.post('/api/fusion-triage', async (req, res) => {
 });
 
 // AI Triage Evaluation Endpoint
-app.post('/api/triage', async (req, res) => {
+app.post('/api/triage', requireAuth, async (req, res) => {
   const { description, medicalProfile, hasImage, biometricsContext } = req.body;
   
   if (!description) {
@@ -195,7 +194,7 @@ app.post('/api/triage', async (req, res) => {
 });
 
 // AI Predictive Risk Forecast
-app.post('/api/predict-risk', async (req, res) => {
+app.post('/api/predict-risk', requireAuth, async (req, res) => {
   const { segment, weather } = req.body;
   if (!segment || !weather) {
     return res.status(400).json({ error: 'Road segment and weather condition required' });
@@ -211,7 +210,7 @@ app.post('/api/predict-risk', async (req, res) => {
 });
 
 // Crash Photo Vision Analysis
-app.post('/api/triage/analyze-photo', async (req, res) => {
+app.post('/api/triage/analyze-photo', requireAuth, async (req, res) => {
   const { image, panicScore } = req.body;
   if (!image) return res.status(400).json({ error: 'Image data required' });
 
@@ -225,7 +224,7 @@ app.post('/api/triage/analyze-photo', async (req, res) => {
 });
 
 // Chatbot Triage Endpoint (Streaming)
-app.post('/api/triage/chat', async (req, res) => {
+app.post('/api/triage/chat', requireAuth, async (req, res) => {
   const { messages, language, panicScore, biometricContext } = req.body;
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Messages array is required' });
@@ -239,7 +238,7 @@ app.post('/api/triage/chat', async (req, res) => {
 });
 
 // Multi-Agent War Room Consensus Endpoint
-app.post('/api/triage/multi-agent', async (req, res) => {
+app.post('/api/triage/multi-agent', requireAuth, async (req, res) => {
   const { crashData, medData, resData } = req.body;
 
   const CRASH_SYSTEM = "You are a Crash Analyst. Analyze telemetry and determine impact severity. End with DECISION: [result].";
@@ -261,7 +260,7 @@ app.post('/api/triage/multi-agent', async (req, res) => {
 
 
 // Route Safety Prediction
-app.post('/api/route/safety', async (req, res) => {
+app.post('/api/route/safety', requireAuth, async (req, res) => {
   const { source, destination, weather } = req.body;
   if (!source || !destination) {
     return res.status(400).json({ error: 'Source and destination are required' });
@@ -276,7 +275,7 @@ app.post('/api/route/safety', async (req, res) => {
 });
 
 // Post-Incident Debrief Endpoint (Streaming)
-app.post('/api/debrief/stream', async (req, res) => {
+app.post('/api/debrief/stream', requireAuth, async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) {
     return res.status(400).json({ error: 'Prompt is required' });
@@ -290,7 +289,7 @@ app.post('/api/debrief/stream', async (req, res) => {
 });
 
 // Training Scenario Endpoint (Streaming)
-app.post('/api/training/stream', async (req, res) => {
+app.post('/api/training/stream', requireAuth, async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) {
     return res.status(400).json({ error: 'Prompt is required' });
@@ -304,7 +303,7 @@ app.post('/api/training/stream', async (req, res) => {
 });
 
 // Risk Forecast Summary Endpoint
-app.post('/api/risk/summary', async (req, res) => {
+app.post('/api/risk/summary', requireAuth, async (req, res) => {
   const { patterns } = req.body;
   try {
     const { generateRiskSummary } = require('./services/claudeService');
@@ -331,7 +330,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // --- Demo Reset ---
-app.post('/api/demo/reset', (req, res) => {
+app.post('/api/demo/reset', requireAuth, (req, res) => {
   // Reset in-memory metrics and logs
   metrics.requestCount = 0;
   metrics.errorCount = 0;

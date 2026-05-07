@@ -25,10 +25,10 @@ export const DebriefHistory: React.FC<DebriefHistoryProps> = ({ onClose }) => {
         className="w-full max-w-6xl h-[85vh] flex gap-6"
       >
         {/* Left: List of Debriefs */}
-        <Panel className="w-1/3 flex flex-col h-full bg-[var(--nx-bg-[var(--color-surface)])] border-[var(--nx-border)]">
-          <div className="p-4 border-b border-[var(--nx-border)] flex justify-between items-center">
+        <Panel className="w-1/3 flex flex-col h-full bg-(--nx-bg-[var(--color-surface))] border-(--nx-border)">
+          <div className="p-4 border-b border-(--nx-border) flex justify-between items-center">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[var(--nx-cyan-primary)]" /> Debrief History
+              <Clock className="w-5 h-5 text-(--nx-cyan-primary)" /> Debrief History
             </h2>
             <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
               <X className="w-5 h-5" />
@@ -49,7 +49,7 @@ export const DebriefHistory: React.FC<DebriefHistoryProps> = ({ onClose }) => {
                     onClick={() => setSelectedDebriefId(debrief.id)}
                     className={`w-full text-left p-4 rounded-xl border transition-all ${
                       selectedDebriefId === debrief.id
-                        ? 'bg-[var(--nx-cyan-primary)]/10 border-[var(--nx-cyan-primary)]/50'
+                        ? 'bg-(--nx-cyan-primary)/10 border-(--nx-cyan-primary)/50'
                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                     }`}
                   >
@@ -69,10 +69,10 @@ export const DebriefHistory: React.FC<DebriefHistoryProps> = ({ onClose }) => {
         </Panel>
 
         {/* Right: Selected Debrief Content */}
-        <Panel className="flex-1 flex flex-col h-full bg-[var(--nx-bg-[var(--color-surface)])] border-[var(--nx-border)]">
+        <Panel className="flex-1 flex flex-col h-full bg-(--nx-bg-[var(--color-surface))] border-(--nx-border)">
           {selectedDebrief ? (
             <>
-              <div className="p-4 border-b border-[var(--nx-border)] flex justify-between items-center bg-black/20">
+              <div className="p-4 border-b border-(--nx-border) flex justify-between items-center bg-black/20">
                 <div>
                   <h3 className="text-lg font-bold text-white">Debrief Report</h3>
                   <div className="text-sm text-slate-400 mt-1">

@@ -311,7 +311,7 @@ const Step3 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
         {(['en', 'hi', 'ta'] as const).map(l => (
           <button 
             key={l} onClick={() => { setLanguage(l); setSuccess(false); }}
-            className={`flex-1 py-2 text-[10px] font-bold border rounded-[var(--radius-lg)] transition-all ${
+            className={`flex-1 py-2 text-[10px] font-bold border rounded-(--radius-lg) transition-all ${
               language === l ? 'border-(--clr-blue) bg-(--clr-blue)/20' : 'border-(--clr-border) bg-white/5'
             }`}
           >

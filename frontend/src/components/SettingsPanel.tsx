@@ -53,7 +53,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
             <div className="p-8 bg-(--app-surface) border-b-4 border-(--app-border) flex justify-between items-center">
               <div>
                 <h2 className="text-4xl font-black text-(--app-text) tracking-tighter uppercase italic">Settings</h2>
-                <p className="text-xs font-black text-[var(--color-emergency)] tracking-widest uppercase mt-1">Accessibility Controls</p>
+                <p className="text-xs font-black text-(--color-emergency) tracking-widest uppercase mt-1">Accessibility Controls</p>
               </div>
               <button 
                 onClick={onClose}
@@ -71,7 +71,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
               {/* Theme Selection */}
               <section className="space-y-6">
                 <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-amber/20 rounded-[var(--radius-lg)] text-amber">
+                  <div className="p-2 bg-amber/20 rounded-(--radius-lg) text-amber">
                     <Sun size={24} strokeWidth={3} />
                   </div>
                   Visual Theme
@@ -100,7 +100,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
               {/* Text Size */}
               <section className="space-y-6">
                 <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-blue-500/20 rounded-[var(--radius-lg)] text-blue-500">
+                  <div className="p-2 bg-blue-500/20 rounded-(--radius-lg) text-blue-500">
                     <Type size={24} strokeWidth={3} />
                   </div>
                   Text Size
@@ -125,7 +125,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
               {/* SOS Trigger */}
               <section className="space-y-6">
                 <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-[rgba(255,59,59,0.20)] rounded-[var(--radius-lg)] text-[var(--color-emergency)]">
+                  <div className="p-2 bg-[rgba(255,59,59,0.20)] rounded-(--radius-lg) text-(--color-emergency)">
                     <Bell size={24} strokeWidth={3} />
                   </div>
                   SOS Trigger Mode
@@ -137,7 +137,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
                       onClick={() => setSosTriggerMode(mode as 'hold' | 'tap' | 'voice')}
                       className={`h-24 flex items-center justify-between px-8 rounded-3xl border-4 transition-all active:scale-[0.98] ${
                         sosTriggerMode === mode 
-                        ? 'border-[var(--color-emergency)] bg-[var(--color-emergency)] text-white shadow-xl' 
+                        ? 'border-(--color-emergency) bg-(--color-emergency) text-white shadow-xl' 
                         : 'border-(--app-border) bg-(--app-surface) text-(--app-text)'
                       }`}
                     >
@@ -158,12 +158,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
                 onClick={() => setReducedMotion(!isReducedMotion)}
                 className={`w-full p-6 rounded-3xl border-4 flex items-center justify-between transition-all active:scale-[0.98] ${
                   isReducedMotion 
-                  ? 'border-[var(--color-safe)] bg-[var(--color-safe)] text-white' 
+                  ? 'border-(--color-safe) bg-(--color-safe) text-white' 
                   : 'border-(--app-border) bg-(--app-surface) text-(--app-text)'
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-xl ${isReducedMotion ? 'bg-white/20' : 'bg-safe/20 text-[var(--color-safe)]'}`}>
+                  <div className={`p-2 rounded-xl ${isReducedMotion ? 'bg-white/20' : 'bg-safe/20 text-(--color-safe)'}`}>
                     <Activity size={24} strokeWidth={3} />
                   </div>
                   <div className="text-left">
@@ -182,7 +182,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
               {/* Emergency Contact */}
               <section className="space-y-6">
                 <h3 className="text-xl font-black flex items-center gap-3 text-(--app-text) uppercase tracking-tight">
-                  <div className="p-2 bg-navy/20 rounded-[var(--radius-lg)] text-navy">
+                  <div className="p-2 bg-navy/20 rounded-(--radius-lg) text-navy">
                     <Phone size={24} strokeWidth={3} />
                   </div>
                   Auto-Call Contact
@@ -201,7 +201,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
                     <Phone size={24} strokeWidth={3} />
                   </div>
                 </div>
-                <p className="text-xs font-black text-[var(--color-emergency)] uppercase tracking-widest px-4">
+                <p className="text-xs font-black text-(--color-emergency) uppercase tracking-widest px-4">
                   * This number is called automatically when SOS is triggered.
                 </p>
               </section>

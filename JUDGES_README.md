@@ -13,7 +13,7 @@ auto-files iRAD MoRTH reports, and encrypts all personal data client-side — al
 ## Quick Links
 
 | Resource | Link |
-|----------|------|
+| :--- | :--- |
 | **Live Demo** | https://road-solution.vercel.app |
 | **GitHub** | https://github.com/its-tanay003/road_solution |
 | **Pitch Video** | [YouTube URL — pending upload] |
@@ -39,7 +39,7 @@ auto-files iRAD MoRTH reports, and encrypts all personal data client-side — al
 ## Authentication System
 
 | Method | Status | Notes |
-|--------|--------|-------|
+| :--- | :--- | :--- |
 | Phone OTP | ✅ Live | OTP pre-filled in dev mode for easy testing |
 | Email / Password | ✅ Live | bcrypt hash, 30-day JWT |
 | Google OAuth | ✅ Wired | Requires `GOOGLE_CLIENT_ID` env var |
@@ -50,7 +50,7 @@ auto-files iRAD MoRTH reports, and encrypts all personal data client-side — al
 ## Security & Compliance
 
 | Control | Implementation | Status |
-|---------|---------------|--------|
+| :--- | :--- | :--- |
 | AES-GCM-256 | `crypto.subtle` — client-side, key never leaves device | ✅ Active |
 | HTTPS + HSTS | Vercel managed TLS, 1-year HSTS header | ✅ Active |
 | Helmet CSP | X-Frame-Options DENY, no inline scripts | ✅ Active |
@@ -63,7 +63,7 @@ auto-files iRAD MoRTH reports, and encrypts all personal data client-side — al
 ## Features Addressing SIH Problem Statement
 
 | SIH Criterion | ROADSoS Feature | Status |
-|---------------|-----------------|--------|
+| :--- | :--- | :--- |
 | Emergency detection | G-force SOS + voice trigger + hold-3s button | ✅ Live |
 | 112 India integration | Simulated 112 alert + iRAD auto-report | ✅ Simulated |
 | 108 ambulance coordination | GVK EMRI dispatch API simulation | ✅ Simulated |

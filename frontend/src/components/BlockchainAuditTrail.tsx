@@ -135,7 +135,7 @@ export const BlockchainAuditTrail = () => {
         </header>
 
         {/* Chain Visualization */}
-        <Panel className="p-0 border-nx-border/40 overflow-hidden bg-nx-bg-[var(--color-surface)]">
+        <Panel className="p-0 border-nx-border/40 overflow-hidden bg-nx-bg-(--color-surface)">
           <div className="p-4 border-b border-nx-border/30 flex items-center justify-between bg-white/2">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
@@ -175,7 +175,7 @@ export const BlockchainAuditTrail = () => {
                 />
               ))
             ) : (
-              <div className="w-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-nx-border/30 rounded-[var(--radius-lg)]">
+              <div className="w-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-nx-border/30 rounded-(--radius-lg)">
                 <FileText size={48} className="text-nx-text-tertiary/20 mb-4" />
                 <p className="text-nx-text-tertiary font-mono text-sm uppercase tracking-widest italic">No records in the current session ledger</p>
                 <Button variant="secondary" size="sm" className="mt-6" onClick={seedDemo}>Initialize Genesis Incident</Button>

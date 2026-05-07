@@ -122,7 +122,7 @@ export const DroneVideoFeed: React.FC = () => {
           <button
             onClick={handleBroadcast}
             title="Broadcast audio message to victim via drone speaker"
-            className="px-4 py-2 bg-(--clr-blue) hover:bg-(--clr-blue)/80 text-white rounded-[var(--radius-lg)] text-[10px] font-black uppercase tracking-widest transition-all"
+            className="px-4 py-2 bg-(--clr-blue) hover:bg-(--clr-blue)/80 text-white rounded-(--radius-lg) text-[10px] font-black uppercase tracking-widest transition-all"
           >
             Broadcast to Victim
           </button>

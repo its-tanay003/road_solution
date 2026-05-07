@@ -7,7 +7,7 @@ export const RoutePlanner = () => {
   return (
     <div className="min-h-screen bg-(--nx-bg-base) text-(--nx-text-primary) flex flex-col lg:flex-row">
       {/* Left: Tactical Route Inputs & Timeline */}
-      <div className="w-full lg:w-[400px] bg-(--nx-bg-[var(--color-surface)]) border-r border-(--nx-border) flex flex-col z-20">
+      <div className="w-full lg:w-[400px] bg-(--nx-bg-(--color-surface)) border-r border-(--nx-border) flex flex-col z-20">
         <div className="p-6 border-b border-(--nx-border) bg-(--nx-bg-elevated)/50 backdrop-blur-md">
            <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-8 bg-(--nx-blue-primary)/10 border border-(--nx-blue-primary)/30 rounded-sm flex items-center justify-center text-(--nx-blue-primary)">
@@ -94,7 +94,7 @@ export const RoutePlanner = () => {
 
         {/* Tactical Overlay Elements */}
         <div className="absolute top-8 left-8 z-30">
-           <div className="nexus-card bg-(--nx-bg-[var(--color-surface)])/80 backdrop-blur-md p-4 flex items-center gap-6">
+           <div className="nexus-card bg-(--nx-bg-(--color-surface))/80 backdrop-blur-md p-4 flex items-center gap-6">
               <div className="flex flex-col">
                  <span className="nexus-label">Transit Time</span>
                  <span className="text-xl font-black text-white font-mono uppercase">28 MINS</span>

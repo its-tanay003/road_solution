@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Wind, Eye, Droplets, Thermometer, ShieldCheck, Activity } from 'lucide-react';
 import { useWeatherStore } from '../store/weatherStore';
-import axios from 'axios';
+import axios from '../lib/axios';
 import { logger } from '../lib/logger';
 
 export const PredictiveRiskEngine: React.FC = () => {
@@ -152,7 +152,7 @@ export const PredictiveRiskEngine: React.FC = () => {
              <div className="p-5 rounded-3xl bg-white/5 border border-white/10">
                 <div className="flex items-center justify-between mb-2">
                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Global Risk Level</span>
-                   <span className={`text-xs font-black px-2 py-0.5 rounded-[var(--radius-lg)] bg-white/5 ${getRiskColor(riskScore)}`}>
+                   <span className={`text-xs font-black px-2 py-0.5 rounded-lg bg-white/5 ${getRiskColor(riskScore)}`}>
                       {getRiskLevel(riskScore)}
                    </span>
                 </div>

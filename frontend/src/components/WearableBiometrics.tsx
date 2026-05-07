@@ -107,7 +107,7 @@ export const WearableBiometrics: React.FC = () => {
     <div className="flex flex-col gap-6 p-6 bg-black/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-emerald-500/10 rounded-[var(--radius-lg)]">
+          <div className="p-2 bg-emerald-500/10 rounded-(--radius-lg)">
             <Activity className={`w-5 h-5 ${crashTriggered ? 'text-red-500' : 'text-emerald-500'} animate-pulse`} />
           </div>
           <div>

@@ -87,7 +87,7 @@ export const ChatBot = () => {
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <motion.div 
-            className="absolute inset-0 rounded-full border-2 border-[var(--color-safe)]/30 rotate-360 scale-100"
+            className="absolute inset-0 rounded-full border-2 border-(--color-safe)/30 rotate-360 scale-100"
             animate={{ rotate: 360, scale: isTyping ? [1, 1.2, 1] : 1 }}
             transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 1, repeat: Infinity } }}
           />
@@ -96,9 +96,9 @@ export const ChatBot = () => {
             animate={{ scale: isTyping ? [1, 1.5, 1] : [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          <div className="z-10 w-8 h-8 rounded-full bg-[var(--color-safe)] shadow-[0_0_15px_rgba(46,196,182,0.8)]"></div>
+          <div className="z-10 w-8 h-8 rounded-full bg-(--color-safe) shadow-[0_0_15px_rgba(46,196,182,0.8)]"></div>
         </motion.div>
-        <div className="mt-3 text-[var(--color-safe)] font-mono text-xs tracking-widest uppercase opacity-80">
+        <div className="mt-3 text-(--color-safe) font-mono text-xs tracking-widest uppercase opacity-80">
           {isTyping ? "Processing Telemetry..." : "System Idle"}
         </div>
       </div>
@@ -124,9 +124,9 @@ export const ChatBot = () => {
             className="flex justify-start"
           >
             <div className="bg-navy/80 p-4 rounded-2xl rounded-bl-none flex space-x-2 border border-white/10 backdrop-blur-md">
-              <div className="w-2 h-2 bg-[var(--color-safe)] rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-[var(--color-safe)] rounded-full animate-pulse delay-200"></div>
-              <div className="w-2 h-2 bg-[var(--color-safe)] rounded-full animate-pulse delay-400"></div>
+              <div className="w-2 h-2 bg-(--color-safe) rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-(--color-safe) rounded-full animate-pulse delay-200"></div>
+              <div className="w-2 h-2 bg-(--color-safe) rounded-full animate-pulse delay-400"></div>
             </div>
           </motion.div>
         )}
@@ -136,7 +136,7 @@ export const ChatBot = () => {
       <div className="p-4 bg-navy/90 backdrop-blur-xl border-t border-white/10 flex items-center space-x-3">
         <button 
           title="Voice Command"
-          className="p-3 bg-white/5 rounded-full text-[var(--color-safe)] hover:bg-safe/20 hover:text-[var(--color-safe)] transition-colors border border-[var(--color-safe)]/20"
+          className="p-3 bg-white/5 rounded-full text-(--color-safe) hover:bg-safe/20 hover:text-(--color-safe) transition-colors border border-(--color-safe)/20"
         >
           <Mic size={20} />
         </button>
@@ -151,7 +151,7 @@ export const ChatBot = () => {
         <button 
           onClick={handleSend}
           title="Send Message"
-          className="p-3 bg-[var(--color-emergency)] text-white rounded-xl hover:bg-red-600 transition-colors shadow-[0_0_15px_rgba(215,38,56,0.4)]"
+          className="p-3 bg-(--color-emergency) text-white rounded-xl hover:bg-red-600 transition-colors shadow-[0_0_15px_rgba(215,38,56,0.4)]"
         >
           <Send size={20} />
         </button>

@@ -221,7 +221,7 @@ export const DroneDispatchLayer = () => {
                       </div>
 
                       {/* Subject Box */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border border-white/40 rounded-[var(--radius-lg)]">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border border-white/40 rounded-(--radius-lg)">
                         <div className="absolute -top-6 left-0 px-2 py-0.5 bg-white/20 rounded text-[6px] backdrop-blur-sm">
                           TARGET: SUBJECT-1
                         </div>

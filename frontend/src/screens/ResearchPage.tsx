@@ -108,7 +108,7 @@ export default function ResearchPage() {
                 <div className="text-4xl font-black mb-2" style={{ color: f.color }}>{f.stat}</div>
                 <div className="font-bold text-white mb-1">{f.label}</div>
                 <div className="text-gray-400 text-sm mb-2">{f.sub}</div>
-                <div className="text-xs px-3 py-1.5 rounded-[var(--radius-lg)]" style={{ background: f.color + '15', color: f.color }}>
+                <div className="text-xs px-3 py-1.5 rounded-(--radius-lg)" style={{ background: f.color + '15', color: f.color }}>
                   💡 {f.insight}
                 </div>
               </motion.div>

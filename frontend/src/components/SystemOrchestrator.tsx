@@ -70,7 +70,7 @@ export const SystemOrchestrator = () => {
               <button
                 key={speed}
                 onClick={() => setSpeed(speed)}
-                className={`px-3 py-1 rounded-[var(--radius-lg)] text-xs font-bold transition-all ${
+                className={`px-3 py-1 rounded-(--radius-lg) text-xs font-bold transition-all ${
                   playbackSpeed === speed ? 'bg-[#FF9933] text-[#080C14]' : 'text-white/40 hover:text-white'
                 }`}
                 title={`Set speed to ${speed}x`}
@@ -142,7 +142,7 @@ export const SystemOrchestrator = () => {
                   { key: 'T', label: 'Terminal', icon: Terminal },
                 ].map((item) => (
                   <div key={item.key} className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <div className="w-8 h-8 rounded-[var(--radius-lg)] bg-white/5 flex items-center justify-center text-white/40">
+                    <div className="w-8 h-8 rounded-(--radius-lg) bg-white/5 flex items-center justify-center text-white/40">
                       <item.icon size={16} />
                     </div>
                     <div>

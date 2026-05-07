@@ -131,7 +131,7 @@ Be specific, professional, and data-driven. Format in clean sections.`;
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col print:max-h-none print:shadow-none print:w-full print:text-black"
       >
-        <Panel className="flex flex-col h-full bg-(--nx-bg-[var(--color-surface)]) border-(--nx-border) print:border-none print:bg-white">
+        <Panel className="flex flex-col h-full bg-(--nx-bg-(--color-surface)) border-(--nx-border) print:border-none print:bg-white">
           <div className="p-6 border-b border-(--nx-border) flex justify-between items-center print:border-b-2 print:border-gray-300">
             <div>
               <h2 className="text-2xl font-bold text-white tracking-tight print:text-black">Post-Incident Debrief</h2>

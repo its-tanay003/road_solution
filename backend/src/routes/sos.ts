@@ -7,12 +7,13 @@ import { enqueueSos } from '../services/queueService';
 import { SwarmIntelligenceEngine } from '../services/swarmIntelligence';
 import { VoiceCallBridge } from '../services/voiceCallBridge';
 import { adapterManager } from '../services/adapters/adapterManager';
+import { requireAuth } from '../middleware/auth';
 import crypto from 'crypto';
 
 const router = Router();
 
 // Trigger SOS
-router.post('/trigger', async (req, res) => {
+router.post('/trigger', requireAuth, async (req, res) => {
   const { deviceId, lat, lng, contactPhones, medicalProfile, blackboxData, emotionalState, networkCondition } = req.body;
   
   if (!deviceId || !lat || !lng) {
@@ -116,7 +117,7 @@ router.post('/trigger', async (req, res) => {
 });
 
 // Update Location
-router.post('/location-update', async (req, res) => {
+router.post('/location-update', requireAuth, async (req, res) => {
   const { token, lat, lng } = req.body;
   
   if (!token || !lat || !lng) {
@@ -178,7 +179,7 @@ router.get('/track/:token', async (req, res) => {
 });
 
 // India 112 Emergency Simulation
-router.post('/112', async (req, res) => {
+router.post('/112', requireAuth, async (req, res) => {
   const { lat, lng, severityLevel, vehicleType } = req.body;
   
   if (!lat || !lng) {

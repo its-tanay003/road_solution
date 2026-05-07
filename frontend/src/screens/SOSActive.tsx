@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, MapPin, ShieldAlert } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { FamilyStatusPanel } from '../components/FamilyStatusPanel';
 import { useSosStore } from '../store';
 import { useOfflineTriage } from '../hooks/useOfflineTriage';
@@ -10,8 +11,15 @@ import { DispatchCard } from '../components/DispatchCard';
 import type { TriageInput } from '../logic/offlineTriageEngine';
 
 export const SOSActive: React.FC = () => {
-  const { cancelSos, location, dispatch108 } = useSosStore();
-  const [seconds, setSeconds] = useState(0);
+  const navigate = useNavigate();
+  const { 
+    cancelSos, 
+    location, 
+    dispatch108, 
+    countdownTime, 
+    decrementCountdown, 
+    isActive 
+  } = useSosStore();
 
   // Simulated telemetry for triage
   const mockTelemetry: TriageInput = {
@@ -26,9 +34,19 @@ export const SOSActive: React.FC = () => {
   const { isOffline, triageResult } = useOfflineTriage(mockTelemetry);
 
   useEffect(() => {
-    const timer = setInterval(() => setSeconds(s => s + 1), 1000);
+    const timer = setInterval(() => {
+      decrementCountdown();
+    }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [decrementCountdown]);
+
+  // Auto-navigate when countdown hits 0 or dispatch is confirmed
+  useEffect(() => {
+    if (isActive && countdownTime <= 0) {
+      navigate('/dispatched');
+    }
+  }, [isActive, countdownTime, navigate]);
 
   return (
     <div className="fixed inset-0 z-50 bg-(--clr-bg) flex flex-col items-center justify-start p-6 overflow-y-auto custom-scrollbar">
@@ -121,7 +139,7 @@ export const SOSActive: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-(--clr-green) animate-ping" />
                 <span className="text-[10px] font-mono text-(--clr-green) tracking-widest uppercase">Dispatcher Connected</span>
               </div>
-              <span className="text-sm font-mono text-white">{Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}</span>
+              <span className="text-sm font-mono text-white">{Math.floor(countdownTime / 60)}:{(countdownTime % 60).toString().padStart(2, '0')}</span>
             </div>
             
             <div className="text-left space-y-4">
@@ -131,7 +149,7 @@ export const SOSActive: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs font-bold">112 EMERGENCY LINE</p>
-                  <p className="text-[10px] text-(--clr-text-2)">Automatic hand-off in 10s</p>
+                  <p className="text-[10px] text-(--clr-text-2)">Automatic hand-off in {countdownTime}s</p>
                 </div>
               </div>
             </div>
@@ -147,7 +165,10 @@ export const SOSActive: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={cancelSos}
+            onClick={() => {
+              cancelSos();
+              navigate('/');
+            }}
             className="w-full py-4 border border-white/10 rounded-xl font-mono text-[10px] tracking-widest text-white/40 hover:text-white hover:bg-white/5 transition-all"
           >
             CANCEL SOS SIGNAL

@@ -69,7 +69,7 @@ export const IncidentTimeline: React.FC = () => {
           
           <button 
             onClick={handleExport}
-            className="no-print flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-[var(--radius-lg)] font-bold text-sm transition-all"
+            className="no-print flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-(--radius-lg) font-bold text-sm transition-all"
           >
             <Download size={16} />
             EXPORT PDF

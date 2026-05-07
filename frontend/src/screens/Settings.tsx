@@ -155,7 +155,7 @@ export const Settings: React.FC = () => {
 
         {/* SECTION: EMERGENCY SETTINGS */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 text-[var(--color-emergency)] font-black uppercase tracking-[0.2em] text-xs">
+          <div className="flex items-center gap-3 text-emergency font-black uppercase tracking-[0.2em] text-xs">
             <Heart size={16} /> Emergency Control
           </div>
           
@@ -167,10 +167,10 @@ export const Settings: React.FC = () => {
                   key={mode.id}
                   onClick={() => setSosMode(mode.id)}
                   className={`w-full h-20 rounded-3xl px-6 flex items-center gap-4 border-2 transition-all ${
-                    sosMode === mode.id ? 'border-[var(--color-emergency)] bg-sos-red/5' : 'border-white/10 bg-night-2'
+                    sosMode === mode.id ? 'border-emergency bg-sos-red/5' : 'border-white/10 bg-night-2'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${sosMode === mode.id ? 'bg-[var(--color-emergency)]' : 'bg-white/10'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${sosMode === mode.id ? 'bg-emergency' : 'bg-white/10'}`}>
                     <Smartphone size={20} className={sosMode === mode.id ? 'text-white' : 'text-text-muted'} />
                   </div>
                   <div className="flex flex-col items-start">
@@ -178,7 +178,7 @@ export const Settings: React.FC = () => {
                     <span className="text-text-muted text-xs">{mode.desc}</span>
                   </div>
                   {mode.id === 'hold3s' && (
-                    <span className="ml-auto text-[10px] font-black bg-[var(--color-safe)] text-night px-2 py-0.5 rounded-full">BEST</span>
+                    <span className="ml-auto text-[10px] font-black bg-safe text-night px-2 py-0.5 rounded-full">BEST</span>
                   )}
                 </button>
               ))}
@@ -200,7 +200,7 @@ export const Settings: React.FC = () => {
 
         {/* SECTION: RESPONDER NETWORK */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 text-(--clr-blue) font-black uppercase tracking-[0.2em] text-xs">
+          <div className="flex items-center gap-3 text-blue-500 font-black uppercase tracking-[0.2em] text-xs">
             <Smartphone size={16} /> Responder Network
           </div>
           <PushNotificationSetup />
@@ -208,7 +208,7 @@ export const Settings: React.FC = () => {
 
         {/* SECTION: SAFETY ANALYTICS */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 text-(--clr-saffron) font-black uppercase tracking-[0.2em] text-xs">
+          <div className="flex items-center gap-3 text-amber font-black uppercase tracking-[0.2em] text-xs">
             <Shield size={16} /> Driver Safety Insights
           </div>
           <DriverBehaviorScore />
@@ -252,14 +252,14 @@ export const Settings: React.FC = () => {
         {/* SECTION: PWA INSTALLATION */}
         {installable && (
           <section className="space-y-6">
-            <div className="flex items-center gap-3 text-[var(--color-safe)] font-black uppercase tracking-[0.2em] text-xs">
+            <div className="flex items-center gap-3 text-safe font-black uppercase tracking-[0.2em] text-xs">
               <Smartphone size={16} /> App Experience
             </div>
             <button
               onClick={handleInstallClick}
-              className="w-full p-6 bg-night-2 border-2 border-[var(--color-safe)] rounded-4xl flex items-center gap-6 group hover:bg-[var(--color-safe)]/5 transition-all"
+              className="w-full p-6 bg-night-2 border-2 border-safe rounded-4xl flex items-center gap-6 group hover:bg-safe/5 transition-all"
             >
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-safe)] flex items-center justify-center shadow-lg shadow-safe/20">
+              <div className="w-14 h-14 rounded-2xl bg-safe flex items-center justify-center shadow-lg shadow-safe/20">
                 <Smartphone size={28} className="text-night" />
               </div>
               <div className="flex flex-col items-start">
@@ -273,7 +273,7 @@ export const Settings: React.FC = () => {
         {/* FOOTER */}
         <footer className="pt-8 space-y-4 text-center">
           <div className="flex justify-center items-center gap-3">
-            <span className="bg-[var(--color-warning)]/10 text-[var(--color-warning)] text-[10px] font-black px-3 py-1 rounded-full border border-[var(--color-warning)]/20">
+            <span className="bg-warning/10 text-warning text-[10px] font-black px-3 py-1 rounded-full border border-warning/20">
               NATIONAL ROAD SAFETY NETWORK
             </span>
           </div>

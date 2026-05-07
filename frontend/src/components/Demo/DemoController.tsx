@@ -191,7 +191,7 @@ export const DemoController = () => {
             exit={{ opacity: 0, y: 20 }}
             className="fixed inset-x-0 bottom-32 flex justify-center z-[50] pointer-events-none px-6"
           >
-            <div className="max-w-2xl w-full bg-(--nx-bg-[var(--color-surface)])/90 backdrop-blur-xl border border-(--nx-border-active) rounded-sm p-6 shadow-[0_20px_100px_rgba(0,0,0,0.8)]">
+            <div className="max-w-2xl w-full bg-(--nx-bg-(--color-surface))/90 backdrop-blur-xl border border-(--nx-border-active) rounded-sm p-6 shadow-[0_20px_100px_rgba(0,0,0,0.8)]">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                    <div className="relative">

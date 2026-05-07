@@ -46,7 +46,7 @@ export const DataAccuracyDashboard: React.FC = () => {
     <Panel className="bg-slate-900 border-slate-800 text-white p-6 overflow-hidden">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-emerald-500/20 rounded-[var(--radius-lg)]">
+          <div className="p-2 bg-emerald-500/20 rounded-(--radius-lg)">
             <ShieldCheck className="text-emerald-500" size={24} />
           </div>
           <div>

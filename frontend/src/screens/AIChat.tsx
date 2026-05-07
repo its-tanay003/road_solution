@@ -83,7 +83,7 @@ export const AIChat: React.FC = () => {
             <span className="text-[10px] text-cyan font-black uppercase tracking-tighter">Claude-Powered</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-[var(--color-safe)]-green text-xs font-bold uppercase tracking-widest">
+        <div className="flex items-center gap-2 text-(--color-safe)-green text-xs font-bold uppercase tracking-widest">
           <Sparkles size={14} /> Neural Link Active
         </div>
       </div>

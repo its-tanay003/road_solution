@@ -95,18 +95,18 @@ export const HospitalMapLayer: React.FC<HospitalMapLayerProps> = ({
             <Popup className="nexus-popup">
               <div className="p-2 min-w-[200px]">
                 <div className="text-xs font-bold uppercase tracking-widest text-white mb-1">
-                  {h.name} {isTop && <span className="text-[var(--nx-green-primary)]">(RECOMMENDED)</span>}
+                  {h.name} {isTop && <span className="text-(--nx-green-primary)">(RECOMMENDED)</span>}
                 </div>
-                <div className="text-[10px] text-[var(--nx-text-secondary)] mb-2">
+                <div className="text-[10px] text-(--nx-text-secondary) mb-2">
                   Trauma Level {h.traumaLevel}
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
                   <div className="bg-black/30 p-1.5 rounded-sm">
-                    <span className="text-[var(--nx-text-tertiary)] uppercase block">Beds</span>
+                    <span className="text-(--nx-text-tertiary) uppercase block">Beds</span>
                     <span className="text-white font-mono">{h.erAvailableBeds}/{h.erTotalBeds}</span>
                   </div>
                   <div className="bg-black/30 p-1.5 rounded-sm">
-                    <span className="text-[var(--nx-text-tertiary)] uppercase block">Wait</span>
+                    <span className="text-(--nx-text-tertiary) uppercase block">Wait</span>
                     <span className="text-white font-mono">{h.erWaitMinutes}m</span>
                   </div>
                 </div>

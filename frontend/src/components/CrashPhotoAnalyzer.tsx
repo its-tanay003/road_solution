@@ -79,7 +79,7 @@ export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
     <div className="w-full max-w-4xl mx-auto bg-slate-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
       <div className="p-6 border-b border-white/10 flex justify-between items-center bg-slate-950/50">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-500/20 rounded-[var(--radius-lg)] text-cyan-400">
+          <div className="p-2 bg-cyan-500/20 rounded-lg text-cyan-400">
             <Camera size={20} />
           </div>
           <div>
@@ -126,7 +126,7 @@ export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Image Viewport */}
             <div className="relative rounded-2xl overflow-hidden bg-black aspect-video border border-white/10 group">
-              <img src={image} alt="Crash scene" className="w-full h-full object-cover opacity-80" />
+              <img src={image} alt="Crash scene" className="w-full h-full object-cover rounded-lg" />
               
               {/* Scan Line Animation */}
               {isAnalyzing && (

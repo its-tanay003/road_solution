@@ -58,7 +58,7 @@ export const WhatsAppSOSButton: React.FC<WhatsAppSOSButtonProps> = ({ isMeshMode
       {!isSecondary && (
         <button 
           onClick={handleSendToAll}
-          className="text-[10px] font-mono text-[var(--clr-text-2)] uppercase tracking-widest hover:text-white transition-colors"
+          className="text-[10px] font-mono text-(--clr-text-2) uppercase tracking-widest hover:text-white transition-colors"
         >
           SEND TO ALL EMERGENCY CONTACTS
         </button>

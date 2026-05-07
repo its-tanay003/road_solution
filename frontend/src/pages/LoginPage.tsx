@@ -20,20 +20,6 @@ export function LoginPage() {
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%', height: 52, borderRadius: 12,
-    border: '1px solid rgba(255,255,255,0.15)',
-    background: 'rgba(255,255,255,0.05)',
-    color: '#fff', padding: '0 16px', fontSize: 15,
-    marginBottom: 12, boxSizing: 'border-box', outline: 'none',
-  };
-
-  const btnPrimary: React.CSSProperties = {
-    width: '100%', height: 52, borderRadius: 12,
-    background: '#FF1744', border: 'none',
-    color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer',
-  };
-
   const handleSendOTP = async () => {
     setLoading(true); setError('');
     try {
@@ -101,56 +87,39 @@ export function LoginPage() {
   ];
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: 'var(--bg-primary, #050A14)', padding: 20,
-    }}>
+    <div className="min-h-screen flex items-center justify-center bg-background p-5">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          width: '100%', maxWidth: 420,
-          background: 'var(--bg-secondary, #0A1628)',
-          borderRadius: 24, padding: '2rem',
-          border: '1px solid rgba(0,229,255,0.1)',
-        }}
+        className="w-full max-w-[420px] bg-secondary rounded-[24px] p-8 border border-white/5 shadow-2xl backdrop-blur-xl"
       >
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h1 style={{ fontSize: 36, fontWeight: 700, color: '#FF1744', letterSpacing: 2, margin: 0 }}>
+        <div className="text-center mb-8">
+          <h1 className="text-[36px] font-bold text-emergency tracking-widest m-0 leading-none">
             ROADSoS
           </h1>
-          <p style={{ fontSize: 13, opacity: 0.5, marginTop: 6 }}>India's Emergency Intelligence OS</p>
+          <p className="text-[13px] opacity-50 mt-2 font-mono uppercase tracking-tighter">India's Emergency Intelligence OS</p>
         </div>
 
         {/* Demo bypass button — visible to judges */}
         <button
           onClick={handleDemoLogin}
-          style={{
-            width: '100%', height: 48, borderRadius: 12, marginBottom: 20,
-            background: 'rgba(255,152,0,0.15)', border: '1px solid rgba(255,152,0,0.4)',
-            color: '#FFB300', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          }}
+          className="w-full h-12 rounded-xl mb-5 bg-warning/10 border border-warning/30 text-warning text-sm font-semibold cursor-pointer hover:bg-warning/20 transition-all"
         >
           ⚡ Continue as Demo User (Judge Mode)
         </button>
 
         {/* Tab selector */}
-        <div style={{
-          display: 'flex', background: 'rgba(255,255,255,0.05)',
-          borderRadius: 12, padding: 4, marginBottom: 24, gap: 4,
-        }}>
+        <div className="flex bg-white/5 rounded-xl p-1 mb-6 gap-1">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => { setTab(t.id); setError(''); }}
-              style={{
-                flex: 1, height: 40, borderRadius: 10, border: 'none',
-                background: tab === t.id ? 'rgba(255,255,255,0.12)' : 'transparent',
-                color: tab === t.id ? '#fff' : 'rgba(255,255,255,0.5)',
-                cursor: 'pointer', fontSize: 13, fontWeight: tab === t.id ? 600 : 400,
-                transition: 'all 0.2s',
-              }}
+              className={`flex-1 h-10 rounded-lg border-none text-[13px] transition-all cursor-pointer ${
+                tab === t.id 
+                  ? 'bg-white/10 text-white font-semibold' 
+                  : 'bg-transparent text-white/50 hover:text-white/80'
+              }`}
             >
               {t.label}
             </button>
@@ -166,53 +135,53 @@ export function LoginPage() {
                   <input
                     placeholder="Your name (optional)"
                     value={name} onChange={e => setName(e.target.value)}
-                    style={inputStyle}
+                    className="w-full h-[52px] rounded-xl border border-white/15 bg-white/5 text-white px-4 text-[15px] mb-3 outline-none focus:border-emergency/50 transition-all"
                   />
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                    <div style={{
-                      width: 60, height: 52, borderRadius: 12,
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      background: 'rgba(255,255,255,0.05)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#fff', fontSize: 14, fontWeight: 500, flexShrink: 0,
-                    }}>+91</div>
+                  <div className="flex gap-2 mb-4">
+                    <div className="w-[60px] h-[52px] rounded-xl border border-white/15 bg-white/5 flex items-center justify-center text-white text-sm font-medium shrink-0 font-mono">
+                      +91
+                    </div>
                     <input
                       type="tel"
                       placeholder="10-digit phone number"
                       value={phone}
                       onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      style={{ ...inputStyle, borderRadius: 12, marginBottom: 0 }}
+                      className="w-full h-[52px] rounded-xl border border-white/15 bg-white/5 text-white px-4 text-[15px] outline-none focus:border-emergency/50 transition-all font-mono"
                     />
                   </div>
-                  <button onClick={handleSendOTP} disabled={phone.length !== 10 || loading} style={{
-                    ...btnPrimary,
-                    opacity: phone.length !== 10 ? 0.5 : 1,
-                    cursor: phone.length !== 10 ? 'not-allowed' : 'pointer',
-                  }}>
+                  <button 
+                    onClick={handleSendOTP} 
+                    disabled={phone.length !== 10 || loading}
+                    className={`w-full h-[52px] rounded-xl bg-emergency text-white text-base font-semibold transition-all shadow-lg shadow-emergency/20 ${
+                      phone.length !== 10 || loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'
+                    }`}
+                  >
                     {loading ? 'Sending...' : 'Send OTP'}
                   </button>
                 </>
               ) : (
                 <>
-                  <p style={{ textAlign: 'center', fontSize: 13, opacity: 0.6, marginBottom: 16 }}>
+                  <p className="text-center text-[13px] opacity-60 mb-4">
                     OTP sent to +91 {phone}
                   </p>
                   <input
                     type="text" placeholder="6-digit OTP"
                     value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    style={{
-                      ...inputStyle,
-                      letterSpacing: 10, textAlign: 'center', fontSize: 22,
-                      border: '1px solid rgba(0,229,255,0.3)',
-                      background: 'rgba(0,229,255,0.05)',
-                    }}
+                    className="w-full h-[52px] rounded-xl text-white px-4 text-2xl mb-4 outline-none tracking-[0.5em] text-center font-bold border border-cyan/30 bg-cyan/5 focus:border-cyan/50 transition-all font-mono"
                   />
-                  <button onClick={handleVerifyOTP} disabled={otp.length !== 6 || loading}
-                    style={{ ...btnPrimary, background: '#1D9E75' }}>
+                  <button 
+                    onClick={handleVerifyOTP} 
+                    disabled={otp.length !== 6 || loading}
+                    className={`w-full h-[52px] rounded-xl bg-safe text-white text-base font-semibold transition-all shadow-lg shadow-safe/20 ${
+                      otp.length !== 6 || loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'
+                    }`}
+                  >
                     {loading ? 'Verifying...' : 'Verify & Login'}
                   </button>
-                  <button onClick={() => { setOtpSent(false); setOtp(''); }}
-                    style={{ width: '100%', height: 40, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', marginTop: 8 }}>
+                  <button 
+                    onClick={() => { setOtpSent(false); setOtp(''); }}
+                    className="w-full h-10 bg-transparent border-none text-white/50 text-sm cursor-pointer mt-2 hover:text-white transition-colors"
+                  >
                     ← Change number
                   </button>
                 </>
@@ -224,15 +193,40 @@ export function LoginPage() {
             <motion.div key="email"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               {isRegister && (
-                <input placeholder="Full name" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+                <input 
+                  placeholder="Full name" 
+                  value={name} 
+                  onChange={e => setName(e.target.value)} 
+                  className="w-full h-[52px] rounded-xl border border-white/15 bg-white/5 text-white px-4 text-[15px] mb-3 outline-none focus:border-emergency/50 transition-all"
+                />
               )}
-              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
-              <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={{ ...inputStyle, marginBottom: 16 }} />
-              <button onClick={handleEmailAuth} disabled={!email || !password || loading} style={btnPrimary}>
+              <input 
+                type="email" 
+                placeholder="Email address" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                className="w-full h-[52px] rounded-xl border border-white/15 bg-white/5 text-white px-4 text-[15px] mb-3 outline-none focus:border-emergency/50 transition-all"
+              />
+              <input 
+                type="password" 
+                placeholder="Password" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                className="w-full h-[52px] rounded-xl border border-white/15 bg-white/5 text-white px-4 text-[15px] mb-4 outline-none focus:border-emergency/50 transition-all"
+              />
+              <button 
+                onClick={handleEmailAuth} 
+                disabled={!email || !password || loading}
+                className={`w-full h-[52px] rounded-xl bg-emergency text-white text-base font-semibold transition-all shadow-lg shadow-emergency/20 ${
+                  !email || !password || loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'
+                }`}
+              >
                 {loading ? 'Please wait...' : isRegister ? 'Create account' : 'Login'}
               </button>
-              <button onClick={() => setIsRegister(!isRegister)}
-                style={{ width: '100%', height: 40, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', marginTop: 8, fontSize: 13 }}>
+              <button 
+                onClick={() => setIsRegister(!isRegister)}
+                className="w-full h-10 bg-transparent border-none text-white/50 text-[13px] cursor-pointer mt-2 hover:text-white transition-colors"
+              >
                 {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
               </button>
             </motion.div>
@@ -241,9 +235,9 @@ export function LoginPage() {
           {tab === 'social' && (
             <motion.div key="social"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-              <div style={{ textAlign: 'center', padding: '1rem', opacity: 0.6, fontSize: 13, lineHeight: 1.6 }}>
-                <p>Google and Facebook OAuth require API keys set in <code>.env</code>.</p>
-                <p style={{ marginTop: 8 }}>For the demo, use Phone OTP or Email above, or the Demo User button.</p>
+              <div className="text-center p-4 opacity-60 text-[13px] leading-relaxed font-mono">
+                <p>Google and Facebook OAuth require API keys set in <code className="bg-white/10 px-1 rounded">.env</code>.</p>
+                <p className="mt-2">For the demo, use Phone OTP or Email above, or the Demo User button.</p>
               </div>
             </motion.div>
           )}
@@ -253,18 +247,14 @@ export function LoginPage() {
         {error && (
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            style={{
-              marginTop: 12, padding: '10px 14px', borderRadius: 10,
-              background: 'rgba(255,23,68,0.12)', border: '1px solid rgba(255,23,68,0.3)',
-              color: '#FF6B7A', fontSize: 13, textAlign: 'center',
-            }}
+            className="mt-3 p-3 rounded-xl bg-emergency/10 border border-emergency/30 text-emergency text-[13px] text-center"
           >
             {error}
           </motion.div>
         )}
 
-        <p style={{ textAlign: 'center', fontSize: 11, opacity: 0.3, marginTop: 20, lineHeight: 1.6 }}>
-          By continuing, you agree to our Privacy Policy.
+        <p className="text-center text-[11px] opacity-30 mt-5 leading-relaxed font-mono">
+          By continuing, you agree to our Privacy Policy.<br />
           Your medical data stays encrypted on your device.
         </p>
       </motion.div>

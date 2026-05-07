@@ -44,39 +44,28 @@ export function MedicalProfile() {
     );
   };
 
-  const inputStyle: React.CSSProperties = {
-    flex: 1, height: 54, padding: '0 16px',
-    borderRadius: '0 12px 12px 0',
-    border: '1px solid rgba(255,255,255,0.15)',
-    background: 'rgba(255,255,255,0.05)',
-    color: 'inherit', fontSize: 16, boxSizing: 'border-box',
-  };
-
   return (
-    <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto' }}>
-      <h2 style={{ fontSize: 20, fontWeight: 500, marginBottom: 4 }}>Medical profile</h2>
-      <p style={{ fontSize: 13, opacity: 0.6, marginBottom: 24 }}>
+    <div className="p-4 max-w-[480px] mx-auto">
+      <h2 className="text-xl font-medium mb-1">Medical profile</h2>
+      <p className="text-[13px] opacity-60 mb-6">
         Sent automatically with your SOS. Encrypted on-device (AES-GCM-256).
       </p>
 
       {/* Blood group selector */}
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ fontSize: 13, opacity: 0.7, display: 'block', marginBottom: 10 }}>
+      <div className="mb-6">
+        <label className="text-[13px] opacity-70 block mb-2.5">
           Blood group
         </label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div className="flex flex-wrap gap-2">
           {BLOOD_GROUPS.map(bg => (
             <button
               key={bg}
               onClick={() => setBloodType(bg)}
-              style={{
-                padding: '10px 18px', borderRadius: 12, fontSize: 15, fontWeight: 500,
-                border: `2px solid ${bloodType === bg ? '#FF1744' : 'rgba(255,255,255,0.15)'}`,
-                background: bloodType === bg ? 'rgba(255,23,68,0.15)' : 'transparent',
-                color: bloodType === bg ? '#FF6B7A' : 'inherit',
-                cursor: 'pointer', minWidth: 64, minHeight: 48,
-                transition: 'all 0.15s ease',
-              }}
+              className={`px-[18px] py-[10px] rounded-xl text-[15px] font-medium border-2 transition-all min-w-[64px] min-h-[48px] ${
+                bloodType === bg 
+                  ? 'border-emergency bg-emergency/15 text-sos-red' 
+                  : 'border-white/15 bg-transparent hover:border-white/30'
+              }`}
             >
               {bg}
             </button>
@@ -85,22 +74,20 @@ export function MedicalProfile() {
       </div>
 
       {/* Allergy selector */}
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ fontSize: 13, opacity: 0.7, display: 'block', marginBottom: 10 }}>
+      <div className="mb-6">
+        <label className="text-[13px] opacity-70 block mb-2.5">
           Known allergies / Conditions
         </label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div className="flex flex-wrap gap-2">
           {COMMON_ALLERGIES.map(a => (
             <button
               key={a}
               onClick={() => toggleAllergy(a)}
-              style={{
-                padding: '10px 18px', borderRadius: 12, fontSize: 14,
-                border: `2px solid ${localAllergies.includes(a) ? '#FF9800' : 'rgba(255,255,255,0.15)'}`,
-                background: localAllergies.includes(a) ? 'rgba(255,152,0,0.15)' : 'transparent',
-                color: localAllergies.includes(a) ? '#FFB74D' : 'inherit',
-                cursor: 'pointer', minHeight: 48, transition: 'all 0.15s ease',
-              }}
+              className={`px-[18px] py-[10px] rounded-xl text-sm border-2 transition-all min-h-[48px] ${
+                localAllergies.includes(a)
+                  ? 'border-warning bg-warning/15 text-orange-400'
+                  : 'border-white/15 bg-transparent hover:border-white/30'
+              }`}
             >
               {a}
             </button>
@@ -109,18 +96,12 @@ export function MedicalProfile() {
       </div>
 
       {/* Emergency contact */}
-      <div style={{ marginBottom: 32 }}>
-        <label style={{ fontSize: 13, opacity: 0.7, display: 'block', marginBottom: 10 }}>
+      <div className="mb-8">
+        <label className="text-[13px] opacity-70 block mb-2.5">
           Emergency contact (gets WhatsApp alert on SOS)
         </label>
-        <div style={{ display: 'flex', gap: 0 }}>
-          <div style={{
-            padding: '0 12px', background: 'rgba(255,255,255,0.08)',
-            borderRadius: '12px 0 0 12px',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRight: 'none',
-            display: 'flex', alignItems: 'center', fontSize: 15, fontWeight: 500,
-          }}>
+        <div className="flex gap-0">
+          <div className="px-3 bg-white/10 rounded-l-xl border border-white/15 border-r-0 flex items-center text-[15px] font-medium">
             +91
           </div>
           <input
@@ -131,7 +112,7 @@ export function MedicalProfile() {
               setContacts([{ name: 'Emergency', phone, relationship: 'Contact' }]);
             }}
             placeholder="10-digit number"
-            style={inputStyle}
+            className="flex-1 h-[54px] px-4 rounded-r-xl border border-white/15 bg-white/5 text-inherit text-base box-border focus:outline-none focus:border-emergency/50 transition-colors"
           />
         </div>
       </div>
@@ -140,18 +121,17 @@ export function MedicalProfile() {
       <button
         onClick={handleSave}
         disabled={loading}
-        style={{
-          width: '100%', height: 58, borderRadius: 16, fontSize: 17, fontWeight: 600,
-          background: saved ? '#1D9E75' : '#FF1744', border: 'none',
-          color: '#fff', cursor: 'pointer', transition: 'background 0.3s',
-          opacity: loading ? 0.7 : 1,
-        }}
+        className={`w-full h-[58px] rounded-2xl text-[17px] font-semibold transition-all shadow-lg ${
+          loading ? 'opacity-70 cursor-not-allowed' : 'opacity-100'
+        } ${
+          saved ? 'bg-safe text-night' : 'bg-emergency text-white'
+        }`}
       >
         {loading ? 'Saving to cloud...' : saved ? '✓ Saved successfully' : 'Save medical profile'}
       </button>
 
-      <p style={{ fontSize: 12, opacity: 0.45, textAlign: 'center', marginTop: 16, lineHeight: 1.6 }}>
-        Your data is encrypted with AES-GCM-256 before storage.
+      <p className="text-[12px] opacity-45 text-center mt-4 leading-relaxed">
+        Your data is encrypted with AES-GCM-256 before storage.<br />
         Synced securely to your private cloud profile.
       </p>
     </div>

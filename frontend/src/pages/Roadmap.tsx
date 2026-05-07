@@ -104,8 +104,10 @@ export const Roadmap = () => {
               >
                 <div className="flex-1 w-full">
                   <div 
-                    className="glass-card p-8 relative overflow-hidden group hover:border-white/20 transition-all"
-                    style={{ borderTop: `4px solid ${phase.color}` }}
+                    className={`glass-card p-8 relative overflow-hidden group hover:border-white/20 transition-all border-t-4 ${
+                      phase.color === 'var(--color-emergency)' ? 'border-emergency' :
+                      phase.color === 'var(--color-amber)' ? 'border-warning' : 'border-safe'
+                    }`}
                   >
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                       <Milestone size={120} />
@@ -158,7 +160,7 @@ export const Roadmap = () => {
                             <span className="text-sm font-black text-safe">95%+</span>
                           </div>
                           <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-safe" style={{ width: '95%' }} />
+                            <div className="h-full bg-safe w-[95%]" />
                           </div>
                           
                           <div className="flex justify-between items-end">
@@ -166,7 +168,7 @@ export const Roadmap = () => {
                             <span className="text-sm font-black text-cyan">99.9%</span>
                           </div>
                           <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-cyan" style={{ width: '99%' }} />
+                            <div className="h-full bg-cyan w-[99%]" />
                           </div>
                         </div>
                       </div>
@@ -176,7 +178,10 @@ export const Roadmap = () => {
 
                 <div className="hidden md:flex flex-col items-center justify-center pt-10">
                   <div className="w-12 h-12 rounded-full border-4 border-night bg-slate-800 flex items-center justify-center z-10">
-                    <div className={`w-3 h-3 rounded-full animate-pulse`} style={{ backgroundColor: phase.color }} />
+                    <div className={`w-3 h-3 rounded-full animate-pulse ${
+                      phase.color === 'var(--color-emergency)' ? 'bg-emergency' :
+                      phase.color === 'var(--color-amber)' ? 'bg-warning' : 'bg-safe'
+                    }`} />
                   </div>
                 </div>
 

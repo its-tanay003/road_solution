@@ -5,7 +5,7 @@
 
 :root {
   --nx-bg-base: #0A0C0F;
-  --nx-bg-[var(--color-surface)]: #0F1218;
+  --nx-bg-(--color-surface): #0F1218;
   --nx-bg-elevated: #161B24;
   --nx-bg-overlay: #1C2333;
   --nx-border: rgba(255,255,255,0.07);
@@ -30,7 +30,7 @@
 
 @theme {
   --color-nx-bg-base: var(--nx-bg-base);
-  --color-nx-bg-[var(--color-surface)]: var(--nx-bg-[var(--color-surface)]);
+  --color-nx-bg-(--color-surface): var(--nx-bg-(--color-surface));
   --color-nx-bg-elevated: var(--nx-bg-elevated);
   --color-nx-bg-overlay: var(--nx-bg-overlay);
   --color-nx-red: var(--nx-red-primary);
@@ -94,7 +94,7 @@
 }
 
 .nexus-card {
-  background: var(--nx-bg-[var(--color-surface)]);
+  background: var(--nx-bg-(--color-surface));
   border: 1px solid var(--nx-border);
   border-radius: 10px;
   transition: all 150ms ease-out;

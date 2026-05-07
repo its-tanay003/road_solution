@@ -78,7 +78,7 @@ export const HospitalFinder: React.FC = () => {
               }`}
             >
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                s.type === 'Hospital' ? 'bg-sos-red/10 text-[var(--color-emergency)]' : 'bg-cyan/10 text-cyan'
+                s.type === 'Hospital' ? 'bg-sos-red/10 text-(--color-emergency)' : 'bg-cyan/10 text-cyan'
               }`}>
                 <HospitalIcon size={24} />
               </div>
@@ -97,12 +97,12 @@ export const HospitalFinder: React.FC = () => {
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.max(100 - (s.wait || 0) * 2, 5)}%` }}
-                        className={`h-full ${s.wait! < 15 ? 'bg-[var(--color-safe)]' : s.wait! < 30 ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-emergency)]'}`}
+                        className={`h-full ${s.wait! < 15 ? 'bg-(--color-safe)' : s.wait! < 30 ? 'bg-(--color-warning)' : 'bg-(--color-emergency)'}`}
                       />
                     </div>
                     <p className="text-[9px] font-bold text-text-muted mt-2 uppercase tracking-widest flex justify-between">
                       <span>Wait time: {s.wait} min</span>
-                      <span className={s.wait! < 15 ? 'text-[var(--color-safe)]-green' : s.wait! < 30 ? 'text-[var(--color-warning)]' : 'text-[var(--color-emergency)]'}>
+                      <span className={s.wait! < 15 ? 'text-(--color-safe)-green' : s.wait! < 30 ? 'text-(--color-warning)' : 'text-(--color-emergency)'}>
                         {s.wait! < 15 ? 'Optimal' : s.wait! < 30 ? 'Elevated' : 'Critical'}
                       </span>
                     </p>
@@ -115,7 +115,7 @@ export const HospitalFinder: React.FC = () => {
                   onClick={() => s.phone && (window.location.href = `tel:${s.phone}`)}
                   title={`Call ${s.name}`}
                   aria-label={`Call ${s.name}`}
-                  className="w-12 h-12 bg-[var(--color-safe)] text-night rounded-2xl flex items-center justify-center active:scale-90 transition-transform shadow-lg"
+                  className="w-12 h-12 bg-(--color-safe) text-night rounded-2xl flex items-center justify-center active:scale-90 transition-transform shadow-lg"
                 >
                   <Phone size={20} strokeWidth={3} />
                 </button>
@@ -139,11 +139,11 @@ export const HospitalFinder: React.FC = () => {
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="px-3 py-1 bg-cyan/10 text-cyan rounded-[var(--radius-lg)] text-[10px] font-black uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-cyan/10 text-cyan rounded-(--radius-lg) text-[10px] font-black uppercase tracking-widest">
                       {selectedService.type}
                     </span>
                     {selectedService.isNHAIAffiliated && (
-                      <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-[var(--radius-lg)] text-[10px] font-black uppercase tracking-widest">
+                      <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-(--radius-lg) text-[10px] font-black uppercase tracking-widest">
                         NHAI Affiliated
                       </span>
                     )}

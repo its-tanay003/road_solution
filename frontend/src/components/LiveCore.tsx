@@ -31,7 +31,7 @@ export const LiveCore: React.FC = () => {
               ease: "easeOut",
               delay: i * 1,
             }}
-            className={`absolute w-40 h-40 rounded-full border ${isActive ? 'border-[var(--nx-red-primary)]' : 'border-[var(--nx-border-active)]'}`}
+            className={`absolute w-40 h-40 rounded-full border ${isActive ? 'border-(--nx-red-primary)' : 'border-(--nx-border-active)'}`}
           />
         ))}
         
@@ -56,8 +56,8 @@ export const LiveCore: React.FC = () => {
         whileTap={{ scale: 0.95 }}
         className={`relative z-10 w-48 h-48 rounded-sm flex flex-col items-center justify-center transition-all duration-500 overflow-hidden group ${
           isActive 
-            ? 'bg-[var(--nx-red-dim)] border-2 border-[var(--nx-red-primary)] shadow-[0_0_50px_rgba(255,59,59,0.3)]' 
-            : 'bg-[var(--nx-bg-[var(--color-surface)])] border-2 border-[var(--nx-border)] shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:border-[var(--nx-border-active)]'
+            ? 'bg-(--nx-red-dim) border-2 border-(--nx-red-primary) shadow-[0_0_50px_rgba(255,59,59,0.3)]' 
+            : 'bg-(--nx-bg-[var(--color-surface))] border-2 border-(--nx-border) shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:border-(--nx-border-active)'
         }`}
       >
         {/* Digital Corner Brackets */}
@@ -75,7 +75,7 @@ export const LiveCore: React.FC = () => {
               exit={{ opacity: 0, y: -10 }}
               className="flex flex-col items-center z-10"
             >
-              <Radio className="text-[var(--nx-red-primary)] mb-3 animate-pulse" size={48} />
+              <Radio className="text-(--nx-red-primary) mb-3 animate-pulse" size={48} />
               <span className="text-white font-black tracking-[0.2em] uppercase text-xs">DISENGAGE</span>
             </motion.div>
           ) : (
@@ -87,18 +87,18 @@ export const LiveCore: React.FC = () => {
               className="flex flex-col items-center z-10"
             >
               <div className="relative mb-4">
-                <ShieldAlert className={`transition-all duration-300 ${isHovered ? 'text-[var(--nx-red-primary)] scale-110' : 'text-white/60'}`} size={56} />
+                <ShieldAlert className={`transition-all duration-300 ${isHovered ? 'text-(--nx-red-primary) scale-110' : 'text-white/60'}`} size={56} />
                 {isHovered && (
                   <motion.div 
                     layoutId="glow"
-                    className="absolute inset-0 bg-[var(--nx-red-primary)] blur-xl opacity-20"
+                    className="absolute inset-0 bg-(--nx-red-primary) blur-xl opacity-20"
                   />
                 )}
               </div>
               <span className="text-white font-black tracking-[0.3em] uppercase text-sm">TRIGGER SOS</span>
               <div className="mt-2 flex items-center gap-1.5">
-                 <Zap size={10} className="text-[var(--nx-amber-primary)]" />
-                 <span className="text-[9px] text-[var(--nx-text-tertiary)] uppercase font-bold">Neural Link Ready</span>
+                 <Zap size={10} className="text-(--nx-amber-primary)" />
+                 <span className="text-[9px] text-(--nx-text-tertiary) uppercase font-bold">Neural Link Ready</span>
               </div>
             </motion.div>
           )}

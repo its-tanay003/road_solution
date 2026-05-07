@@ -82,14 +82,14 @@ export const OfflineTriageOrchestrator: React.FC = () => {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setShowTriage(true)}
-                      className="flex-1 bg-white text-black h-10 rounded-[var(--radius-lg)] font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 bg-white text-black h-10 rounded-(--radius-lg) font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
                     >
                       <Activity size={14} />
                       Start Triage
                     </button>
                     <button 
                       onClick={() => setIsDismissed(true)}
-                      className="bg-slate-800 text-slate-300 w-10 h-10 rounded-[var(--radius-lg)] flex items-center justify-center hover:bg-slate-700 transition-colors"
+                      className="bg-slate-800 text-slate-300 w-10 h-10 rounded-(--radius-lg) flex items-center justify-center hover:bg-slate-700 transition-colors"
                       aria-label="Dismiss"
                     >
                       <X size={18} />

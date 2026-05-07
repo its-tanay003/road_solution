@@ -51,50 +51,38 @@ export function SecurityDashboard() {
   ];
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 800, margin: '0 auto' }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 6 }}>Security & Privacy</h1>
-        <p style={{ fontSize: 14, opacity: 0.6 }}>
+    <div className="p-6 max-w-[800px] mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold mb-2">Security & Privacy</h1>
+        <p className="text-sm opacity-60">
           Aligned with India's DPDP Act 2023 and CERT-In Information Security Guidelines.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-3 mb-6">
         {features.map(f => (
           <div
             key={f.title}
-            style={{
-              background: 'var(--bg-secondary, #0A1628)',
-              border: '0.5px solid rgba(0,229,255,0.12)',
-              borderRadius: 16, padding: '1rem 1.25rem',
-            }}
+            className="bg-secondary border border-white/10 rounded-2xl p-4 px-5"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <span style={{ fontSize: 22 }}>{f.icon}</span>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>{f.title}</span>
-              <span style={{
-                marginLeft: 'auto', fontSize: 11, padding: '2px 8px', borderRadius: 20,
-                background: 'rgba(29,158,117,0.15)', color: '#1D9E75', whiteSpace: 'nowrap',
-              }}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[22px]">{f.icon}</span>
+              <span className="text-sm font-semibold">{f.title}</span>
+              <span className="ml-auto text-[11px] py-0.5 px-2 rounded-full bg-safe/10 text-safe whitespace-nowrap">
                 ● Active
               </span>
             </div>
-            <p style={{ fontSize: 12, opacity: 0.62, lineHeight: 1.65 }}>{f.desc}</p>
+            <p className="text-[12px] opacity-60 leading-relaxed">{f.desc}</p>
           </div>
         ))}
       </div>
 
       {/* Privacy commitment (DPDP Act 2023) */}
-      <div style={{
-        padding: '1.25rem', borderRadius: 16,
-        border: '1px solid rgba(255,152,0,0.25)',
-        background: 'rgba(255,152,0,0.06)',
-        marginBottom: 20,
-      }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#FFB300' }}>
+      <div className="p-5 rounded-2xl border border-warning/25 bg-warning/5 mb-5">
+        <h3 className="text-[15px] font-semibold mb-3 text-warning">
           Privacy Commitment (DPDP Act 2023)
         </h3>
-        <ul style={{ fontSize: 13, opacity: 0.82, lineHeight: 2.1, paddingLeft: 20, margin: 0 }}>
+        <ul className="text-[13px] opacity-80 space-y-2 list-disc pl-5 m-0">
           <li>We collect only what is necessary to save your life in an emergency.</li>
           <li>You can delete your account and all associated data at any time from Settings → Account.</li>
           <li>Your medical profile data never leaves your device without your active SOS trigger.</li>
@@ -105,27 +93,29 @@ export function SecurityDashboard() {
       </div>
 
       {/* Consent categories */}
-      <div style={{ padding: '1.25rem', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Consent Record</h3>
-        {[
-          { label: 'GPS location', desc: 'Used only when SOS is triggered. Not stored between sessions.', required: true },
-          { label: 'Medical profile', desc: 'Blood group, allergies — encrypted on-device via AES-GCM-256.', required: true },
-          { label: 'Emergency contact', desc: 'Notified via WhatsApp only when SOS is triggered.', required: true },
-          { label: 'Anonymous crash analytics', desc: 'Helps improve response times for future users.', required: false },
-        ].map(c => (
-          <div key={c.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-            <span style={{ color: c.required ? '#FF1744' : '#00E676', fontSize: 18, lineHeight: '22px', flexShrink: 0 }}>
-              {c.required ? '🔴' : '🟢'}
-            </span>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500 }}>
-                {c.label}
-                {!c.required && <span style={{ fontSize: 11, opacity: 0.5, marginLeft: 8 }}>(optional)</span>}
+      <div className="p-5 rounded-2xl border border-white/10 bg-white/5">
+        <h3 className="text-[15px] font-semibold mb-4">Consent Record</h3>
+        <div className="space-y-4">
+          {[
+            { label: 'GPS location', desc: 'Used only when SOS is triggered. Not stored between sessions.', required: true },
+            { label: 'Medical profile', desc: 'Blood group, allergies — encrypted on-device via AES-GCM-256.', required: true },
+            { label: 'Emergency contact', desc: 'Notified via WhatsApp only when SOS is triggered.', required: true },
+            { label: 'Anonymous crash analytics', desc: 'Helps improve response times for future users.', required: false },
+          ].map(c => (
+            <div key={c.label} className="flex items-start gap-3">
+              <span className={`text-lg leading-6 shrink-0 ${c.required ? 'text-emergency' : 'text-safe'}`}>
+                {c.required ? '🔴' : '🟢'}
+              </span>
+              <div>
+                <div className="text-[13px] font-medium">
+                  {c.label}
+                  {!c.required && <span className="text-[11px] opacity-50 ml-2">(optional)</span>}
+                </div>
+                <div className="text-[12px] opacity-50 leading-snug">{c.desc}</div>
               </div>
-              <div style={{ fontSize: 12, opacity: 0.55, lineHeight: 1.5 }}>{c.desc}</div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

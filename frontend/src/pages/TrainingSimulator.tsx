@@ -152,7 +152,7 @@ export const TrainingSimulator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] font-sans relative flex flex-col">
+    <div className="min-h-screen bg-(--nx-bg-base) text-(--nx-text-primary) font-sans relative flex flex-col">
       {/* Global Training Banner */}
       <div className="w-full bg-amber-500/20 border-b border-amber-500/50 py-2 flex items-center justify-center gap-3">
         <AlertTriangle className="text-amber-500 animate-pulse" size={18} />
@@ -162,7 +162,7 @@ export const TrainingSimulator: React.FC = () => {
 
       <div className="flex-1 p-6 md:p-12 max-w-6xl mx-auto w-full flex flex-col h-full">
         <div className="flex items-center gap-3 mb-8">
-          <BrainCircuit className="text-[var(--nx-blue-primary)]" size={32} />
+          <BrainCircuit className="text-(--nx-blue-primary)" size={32} />
           <h1 className="text-4xl font-black italic tracking-tighter uppercase">Training Simulator</h1>
         </div>
 
@@ -176,23 +176,23 @@ export const TrainingSimulator: React.FC = () => {
               className="grid md:grid-cols-2 gap-8"
             >
               {/* Prebuilt */}
-              <div className="bg-[var(--nx-bg-[var(--color-surface)])] border border-[var(--nx-border)] rounded-2xl p-6">
-                <h2 className="text-xl font-bold mb-4 uppercase tracking-wider text-[var(--nx-text-secondary)]">Standard Scenarios</h2>
+              <div className="bg-(--nx-bg-[var(--color-surface))] border border-(--nx-border) rounded-2xl p-6">
+                <h2 className="text-xl font-bold mb-4 uppercase tracking-wider text-(--nx-text-secondary)">Standard Scenarios</h2>
                 <div className="space-y-4">
                   {PREBUILT_SCENARIOS.map(s => (
-                    <div key={s.id} onClick={() => startScenario(s.params)} className="p-4 border border-[var(--nx-border-light)] rounded-xl hover:border-[var(--nx-blue-primary)] cursor-pointer transition-colors bg-[var(--nx-bg-elevated)] group">
-                      <h3 className="font-bold text-[var(--nx-blue-primary)] uppercase tracking-wide group-hover:text-blue-400">{s.title}</h3>
-                      <p className="text-sm text-[var(--nx-text-tertiary)] mt-1">{s.desc}</p>
+                    <div key={s.id} onClick={() => startScenario(s.params)} className="p-4 border border-(--nx-border-light) rounded-xl hover:border-(--nx-blue-primary) cursor-pointer transition-colors bg-(--nx-bg-elevated) group">
+                      <h3 className="font-bold text-(--nx-blue-primary) uppercase tracking-wide group-hover:text-blue-400">{s.title}</h3>
+                      <p className="text-sm text-(--nx-text-tertiary) mt-1">{s.desc}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Custom */}
-              <div className="bg-[var(--nx-bg-[var(--color-surface)])] border border-[var(--nx-border)] rounded-2xl p-6 flex flex-col">
-                <h2 className="text-xl font-bold mb-4 uppercase tracking-wider text-[var(--nx-text-secondary)]">Custom Scenario</h2>
+              <div className="bg-(--nx-bg-[var(--color-surface))] border border-(--nx-border) rounded-2xl p-6 flex flex-col">
+                <h2 className="text-xl font-bold mb-4 uppercase tracking-wider text-(--nx-text-secondary)">Custom Scenario</h2>
                 <textarea 
-                  className="w-full flex-1 min-h-[150px] bg-[var(--nx-bg-base)] border border-[var(--nx-border)] rounded-xl p-4 text-[var(--nx-text-secondary)] focus:outline-none focus:border-[var(--nx-blue-primary)] resize-none"
+                  className="w-full flex-1 min-h-[150px] bg-(--nx-bg-base) border border-(--nx-border) rounded-xl p-4 text-(--nx-text-secondary) focus:outline-none focus:border-(--nx-blue-primary) resize-none"
                   placeholder="E.g., Multi-vehicle crash in snowstorm, 3 victims, nearest hospital 50 miles away..."
                   value={customParams}
                   onChange={(e) => setCustomParams(e.target.value)}
@@ -200,7 +200,7 @@ export const TrainingSimulator: React.FC = () => {
                 <button 
                   onClick={() => startScenario(customParams)}
                   disabled={!customParams.trim()}
-                  className="mt-4 w-full py-3 bg-[var(--nx-blue-primary)] hover:bg-blue-600 text-white rounded-xl font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-4 w-full py-3 bg-(--nx-blue-primary) hover:bg-blue-600 text-white rounded-xl font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Generate & Start
                 </button>
@@ -217,15 +217,15 @@ export const TrainingSimulator: React.FC = () => {
               className="flex-1 grid md:grid-cols-3 gap-6 overflow-hidden min-h-[600px]"
             >
               {/* Scenario Feed */}
-              <div className="md:col-span-2 flex flex-col bg-[var(--nx-bg-[var(--color-surface)])] border border-[var(--nx-border)] rounded-2xl overflow-hidden">
-                <div className="bg-[var(--nx-bg-elevated)] border-b border-[var(--nx-border)] p-4 flex justify-between items-center">
+              <div className="md:col-span-2 flex flex-col bg-(--nx-bg-[var(--color-surface))] border border-(--nx-border) rounded-2xl overflow-hidden">
+                <div className="bg-(--nx-bg-elevated) border-b border-(--nx-border) p-4 flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Activity className="text-amber-500 animate-pulse" size={20} />
                     <span className="font-bold tracking-widest uppercase text-sm">Live Dispatch Feed</span>
                   </div>
-                  {isStreaming && <span className="text-xs text-[var(--nx-text-tertiary)] uppercase tracking-widest animate-pulse">Receiving Data...</span>}
+                  {isStreaming && <span className="text-xs text-(--nx-text-tertiary) uppercase tracking-widest animate-pulse">Receiving Data...</span>}
                 </div>
-                <div className="flex-1 p-6 overflow-y-auto whitespace-pre-wrap font-mono text-sm leading-relaxed text-[var(--nx-text-secondary)] custom-scrollbar">
+                <div className="flex-1 p-6 overflow-y-auto whitespace-pre-wrap font-mono text-sm leading-relaxed text-(--nx-text-secondary) custom-scrollbar">
                   {scenarioText}
                   <div ref={contentEndRef} />
                 </div>
@@ -233,8 +233,8 @@ export const TrainingSimulator: React.FC = () => {
 
               {/* Decision Panel */}
               <div className="flex flex-col gap-6">
-                <div className="bg-[var(--nx-bg-[var(--color-surface)])] border border-[var(--nx-border)] rounded-2xl p-6">
-                  <h3 className="font-bold text-[var(--nx-text-secondary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                <div className="bg-(--nx-bg-[var(--color-surface))] border border-(--nx-border) rounded-2xl p-6">
+                  <h3 className="font-bold text-(--nx-text-secondary) uppercase tracking-wider mb-4 flex items-center gap-2">
                     <ShieldAlert size={18} /> Initial Triage
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
@@ -242,10 +242,10 @@ export const TrainingSimulator: React.FC = () => {
                       <button 
                         key={level}
                         onClick={() => handleTriage(level)}
-                        className={`p-2 border rounded-[var(--radius-lg)] text-xs font-bold uppercase tracking-widest transition-colors ${
+                        className={`p-2 border rounded-(--radius-lg) text-xs font-bold uppercase tracking-widest transition-colors ${
                           triageLevel === level 
-                            ? 'bg-[var(--nx-blue-primary)] border-[var(--nx-blue-primary)] text-white' 
-                            : 'border-[var(--nx-border)] text-[var(--nx-text-tertiary)] hover:border-white/20'
+                            ? 'bg-(--nx-blue-primary) border-(--nx-blue-primary) text-white' 
+                            : 'border-(--nx-border) text-(--nx-text-tertiary) hover:border-white/20'
                         }`}
                       >
                         {level}
@@ -254,8 +254,8 @@ export const TrainingSimulator: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-[var(--nx-bg-[var(--color-surface)])] border border-[var(--nx-border)] rounded-2xl p-6">
-                  <h3 className="font-bold text-[var(--nx-text-secondary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                <div className="bg-(--nx-bg-[var(--color-surface))] border border-(--nx-border) rounded-2xl p-6">
+                  <h3 className="font-bold text-(--nx-text-secondary) uppercase tracking-wider mb-4 flex items-center gap-2">
                     <Send size={18} /> Dispatch Unit
                   </h3>
                   <div className="grid grid-cols-1 gap-2">
@@ -265,10 +265,10 @@ export const TrainingSimulator: React.FC = () => {
                         <button 
                           key={uCode}
                           onClick={() => setUnitDispatched(uCode)}
-                          className={`p-3 border rounded-[var(--radius-lg)] text-sm font-bold uppercase tracking-wider transition-colors text-left ${
+                          className={`p-3 border rounded-(--radius-lg) text-sm font-bold uppercase tracking-wider transition-colors text-left ${
                             unitDispatched === uCode
-                              ? 'bg-[var(--nx-blue-primary)] border-[var(--nx-blue-primary)] text-white' 
-                              : 'border-[var(--nx-border)] text-[var(--nx-text-tertiary)] hover:border-white/20'
+                              ? 'bg-(--nx-blue-primary) border-(--nx-blue-primary) text-white' 
+                              : 'border-(--nx-border) text-(--nx-text-tertiary) hover:border-white/20'
                           }`}
                         >
                           {unit}
@@ -294,7 +294,7 @@ export const TrainingSimulator: React.FC = () => {
               key="debrief"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-3xl mx-auto w-full bg-[var(--nx-bg-[var(--color-surface)])] border border-[var(--nx-border)] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden"
+              className="max-w-3xl mx-auto w-full bg-(--nx-bg-[var(--color-surface))] border border-(--nx-border) rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
                 <Trophy size={200} />
@@ -304,28 +304,28 @@ export const TrainingSimulator: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-24 h-24 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
                   <Medal size={48} className="text-blue-500" />
                 </div>
-                <h2 className="text-2xl font-black uppercase tracking-widest text-[var(--nx-text-secondary)] mb-2">Simulation Complete</h2>
+                <h2 className="text-2xl font-black uppercase tracking-widest text-(--nx-text-secondary) mb-2">Simulation Complete</h2>
                 <div className="text-6xl font-black italic tracking-tighter text-white">
-                  {score} <span className="text-2xl text-[var(--nx-text-tertiary)]">/ 1000</span>
+                  {score} <span className="text-2xl text-(--nx-text-tertiary)">/ 1000</span>
                 </div>
               </div>
 
               <div className="space-y-6 relative z-10">
-                <h3 className="font-bold uppercase tracking-widest text-sm text-[var(--nx-text-secondary)] border-b border-[var(--nx-border)] pb-2">Debrief Notes</h3>
+                <h3 className="font-bold uppercase tracking-widest text-sm text-(--nx-text-secondary) border-b border-(--nx-border) pb-2">Debrief Notes</h3>
                 <ul className="space-y-4">
                   {debriefNotes.map((note, i) => (
-                    <li key={i} className="flex items-start gap-3 text-[var(--nx-text-secondary)]">
-                      <CheckCircle2 className="text-[var(--nx-green-primary)] shrink-0 mt-0.5" size={18} />
+                    <li key={i} className="flex items-start gap-3 text-(--nx-text-secondary)">
+                      <CheckCircle2 className="text-(--nx-green-primary) shrink-0 mt-0.5" size={18} />
                       <span className="leading-relaxed">{note}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-12 pt-8 border-t border-[var(--nx-border)] flex justify-center z-10 relative">
+              <div className="mt-12 pt-8 border-t border-(--nx-border) flex justify-center z-10 relative">
                 <button 
                   onClick={() => setPhase('SETUP')}
-                  className="px-8 py-3 bg-[var(--nx-bg-elevated)] hover:bg-[var(--nx-bg-base)] border border-[var(--nx-border)] text-white rounded-xl font-bold uppercase tracking-widest transition-colors"
+                  className="px-8 py-3 bg-(--nx-bg-elevated) hover:bg-(--nx-bg-base) border border-(--nx-border) text-white rounded-xl font-bold uppercase tracking-widest transition-colors"
                 >
                   Return to Scenarios
                 </button>

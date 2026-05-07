@@ -54,25 +54,25 @@ export const DistressAutoPrompt: React.FC = () => {
           <motion.div
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
-            className="w-full max-w-md bg-[var(--nx-bg-elevated)] border-2 border-[var(--nx-red-primary)] p-8 flex flex-col items-center text-center shadow-[0_0_50px_rgba(255,59,59,0.2)]"
+            className="w-full max-w-md bg-(--nx-bg-elevated) border-2 border-(--nx-red-primary) p-8 flex flex-col items-center text-center shadow-[0_0_50px_rgba(255,59,59,0.2)]"
           >
-            <div className="w-20 h-20 bg-[var(--nx-red-primary)]/20 rounded-full flex items-center justify-center mb-6 animate-pulse">
-              <AlertTriangle size={40} className="text-[var(--nx-red-primary)]" />
+            <div className="w-20 h-20 bg-(--nx-red-primary)/20 rounded-full flex items-center justify-center mb-6 animate-pulse">
+              <AlertTriangle size={40} className="text-(--nx-red-primary)" />
             </div>
 
             <h2 className="text-2xl font-black text-white mb-2">CRITICAL DISTRESS DETECTED</h2>
-            <p className="text-[var(--nx-text-secondary)] mb-8">
+            <p className="text-(--nx-text-secondary) mb-8">
               Your device interaction patterns indicate a potential emergency. Auto-SOS will trigger in {timeLeft} seconds.
             </p>
 
-            <div className="text-6xl font-black text-[var(--nx-red-primary)] mb-8 font-mono">
+            <div className="text-6xl font-black text-(--nx-red-primary) mb-8 font-mono">
               00:{timeLeft.toString().padStart(2, '0')}
             </div>
 
             <div className="w-full space-y-4">
               <button
                 onClick={handleTriggerNow}
-                className="w-full py-4 bg-[var(--nx-red-primary)] text-white font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-600 transition-colors"
+                className="w-full py-4 bg-(--nx-red-primary) text-white font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-600 transition-colors"
               >
                 <AlertTriangle size={20} />
                 TRIGGER SOS NOW
@@ -80,9 +80,9 @@ export const DistressAutoPrompt: React.FC = () => {
               
               <button
                 onClick={handleImOk}
-                className="w-full py-4 bg-transparent border border-[var(--nx-border-active)] text-white font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/5 transition-colors"
+                className="w-full py-4 bg-transparent border border-(--nx-border-active) text-white font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/5 transition-colors"
               >
-                <Check size={20} className="text-[var(--nx-green-primary)]" />
+                <Check size={20} className="text-(--nx-green-primary)" />
                 I'M OKAY (CANCEL)
               </button>
             </div>

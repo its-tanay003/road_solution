@@ -37,10 +37,10 @@ interface Service {
 }
 
 const SERVICE_TYPES = [
-  { id: 'Hospital', label: 'HOSPITALS', icon: Hospital, color: 'text-[var(--color-emergency)]', bg: 'bg-emergency/10' },
+  { id: 'Hospital', label: 'HOSPITALS', icon: Hospital, color: 'text-(--color-emergency)', bg: 'bg-emergency/10' },
   { id: 'Police Station', label: 'POLICE', icon: Shield, color: 'text-navy', bg: 'bg-navy/10' },
   { id: 'Fire Station', label: 'FIRE', icon: Flame, color: 'text-amber', bg: 'bg-amber/10' },
-  { id: 'Pharmacy', label: 'DRUGS', icon: Pill, color: 'text-[var(--color-safe)]', bg: 'bg-safe/10' }
+  { id: 'Pharmacy', label: 'DRUGS', icon: Pill, color: 'text-(--color-safe)', bg: 'bg-safe/10' }
 ];
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -147,7 +147,7 @@ export const NearbyServicesPanel: React.FC = () => {
       <header className="flex flex-col gap-2 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-[var(--color-safe)] rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 bg-(--color-safe) rounded-2xl flex items-center justify-center shadow-lg">
               <CheckCircle2 size={32} className="text-white" />
             </div>
             <div>
@@ -211,7 +211,7 @@ export const NearbyServicesPanel: React.FC = () => {
                         <ShieldCheck size={12} /> OSM VERIFIED
                       </div>
                       {service.isOpen && (
-                        <div className="px-3 py-1 bg-safe/10 text-[var(--color-safe)] text-xs font-black rounded-xl uppercase tracking-widest flex items-center gap-1">
+                        <div className="px-3 py-1 bg-safe/10 text-(--color-safe) text-xs font-black rounded-xl uppercase tracking-widest flex items-center gap-1">
                           <Clock size={12} /> OPEN
                         </div>
                       )}
@@ -225,7 +225,7 @@ export const NearbyServicesPanel: React.FC = () => {
                     </div>
                     {service.bedsAvailable !== undefined && (
                       <div className={`px-4 py-2 rounded-2xl text-lg font-black tracking-tighter shadow-sm border-2 ${
-                        service.bedsAvailable > 5 ? 'bg-safe/10 border-[var(--color-safe)]/20 text-[var(--color-safe)]' : 'bg-emergency/10 border-[var(--color-emergency)]/20 text-[var(--color-emergency)]'
+                        service.bedsAvailable > 5 ? 'bg-safe/10 border-(--color-safe)/20 text-(--color-safe)' : 'bg-emergency/10 border-(--color-emergency)/20 text-(--color-emergency)'
                       }`}>
                         {service.bedsAvailable} BEDS
                       </div>
@@ -246,7 +246,7 @@ export const NearbyServicesPanel: React.FC = () => {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${service.lat},${service.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="h-20 bg-[var(--color-safe)] text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
+                    className="h-20 bg-(--color-safe) text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
                   >
                     <Navigation size={28} /> GO
                   </a>

@@ -32,7 +32,7 @@ const getEncryptionKey = async (): Promise<CryptoKey> => {
   return key;
 };
 
-export const encryptData = async (data: any): Promise<{ cipherText: string, iv: string }> => {
+export const encryptData = async (data: unknown): Promise<{ cipherText: string, iv: string }> => {
   if (typeof window === 'undefined' || !window.crypto) {
     // Fallback for SSR or older browsers
     return { cipherText: btoa(JSON.stringify(data)), iv: 'fallback' };
@@ -54,7 +54,7 @@ export const encryptData = async (data: any): Promise<{ cipherText: string, iv: 
   };
 };
 
-export const decryptData = async (cipherText: string, ivStr: string): Promise<any> => {
+export const decryptData = async (cipherText: string, ivStr: string): Promise<unknown> => {
   if (ivStr === 'fallback') {
     return JSON.parse(atob(cipherText));
   }

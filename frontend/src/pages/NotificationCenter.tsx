@@ -91,7 +91,7 @@ export const NotificationCenter = () => {
   return (
     <div className="flex flex-col h-full bg-nx-bg-base text-nx-text-primary">
       {/* Header */}
-      <header className="border-b border-nx-border p-6 bg-nx-bg-[var(--color-surface)]/50 backdrop-blur-md sticky top-0 z-20">
+      <header className="border-b border-nx-border p-6 bg-nx-bg-(--color-surface)/50 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className={`p-1.5 rounded-full ${isSuppressed ? 'bg-nx-amber-primary/20 text-nx-amber-primary' : 'bg-nx-blue-primary/20 text-nx-blue-primary'}`}>
@@ -146,7 +146,7 @@ export const NotificationCenter = () => {
             <input 
               type="text" 
               placeholder="SEARCH ALERTS BY KEYWORD, UNIT OR INCIDENT ID..."
-              className="w-full bg-white/5 border border-nx-border rounded-[var(--radius-lg)] py-2 pl-10 pr-4 text-sm focus:border-nx-red-primary transition-all outline-none font-mono"
+              className="w-full bg-white/5 border border-nx-border rounded-(--radius-lg) py-2 pl-10 pr-4 text-sm focus:border-nx-red-primary transition-all outline-none font-mono"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

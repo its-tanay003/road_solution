@@ -28,18 +28,18 @@ export const IndiaStatsTicker: React.FC = () => {
   return (
     <div className="flex items-center justify-center gap-8 h-full">
       <div className="flex items-center gap-2">
-        <span className="text-[var(--clr-text-2)] text-[9px] font-mono tracking-widest uppercase">DEATHS TODAY</span>
-        <Odometer value={stats.deathsToday} color="text-[var(--clr-red)]" />
+        <span className="text-(--clr-text-2) text-[9px] font-mono tracking-widest uppercase">DEATHS TODAY</span>
+        <Odometer value={stats.deathsToday} color="text-(--clr-red)" />
       </div>
 
-      <div className="flex items-center gap-2 border-l border-[var(--clr-border)] pl-8">
-        <span className="text-[var(--clr-text-2)] text-[9px] font-mono tracking-widest uppercase">THIS YEAR</span>
-        <Odometer value={stats.deathsYear} color="text-[var(--clr-text)]" />
+      <div className="flex items-center gap-2 border-l border-(--clr-border) pl-8">
+        <span className="text-(--clr-text-2) text-[9px] font-mono tracking-widest uppercase">THIS YEAR</span>
+        <Odometer value={stats.deathsYear} color="text-(--clr-text)" />
       </div>
 
-      <div className="flex items-center gap-2 border-l border-[var(--clr-border)] pl-8">
-        <span className="text-[var(--clr-text-2)] text-[9px] font-mono tracking-widest uppercase">SAVED BY RSOS</span>
-        <span className="font-mono text-xs font-bold text-[var(--clr-green)]">1,402</span>
+      <div className="flex items-center gap-2 border-l border-(--clr-border) pl-8">
+        <span className="text-(--clr-text-2) text-[9px] font-mono tracking-widest uppercase">SAVED BY RSOS</span>
+        <span className="font-mono text-xs font-bold text-(--clr-green)">1,402</span>
       </div>
     </div>
   );

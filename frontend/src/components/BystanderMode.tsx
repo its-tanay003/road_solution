@@ -105,7 +105,7 @@ export const BystanderMode: React.FC = () => {
         <button 
           onClick={() => navigate('/')} 
           title="Exit Bystander Mode"
-          className="h-16 w-16 bg-emergency/10 text-[var(--color-emergency)] rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
+          className="h-16 w-16 bg-emergency/10 text-(--color-emergency) rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
         >
           <X size={32} strokeWidth={3} />
         </button>
@@ -130,14 +130,14 @@ export const BystanderMode: React.FC = () => {
                 <div className="grid gap-6 mt-auto">
                   <button 
                     onClick={handleNext}
-                    className="w-full h-28 bg-[var(--color-safe)] text-white rounded-4xl text-3xl font-black uppercase tracking-tighter shadow-2xl flex items-center justify-center gap-4 active:scale-95 transition-transform"
+                    className="w-full h-28 bg-(--color-safe) text-white rounded-4xl text-3xl font-black uppercase tracking-tighter shadow-2xl flex items-center justify-center gap-4 active:scale-95 transition-transform"
                   >
                     <CheckCircle2 size={40} />
                     YES, I AM SAFE
                   </button>
                   <button 
                     onClick={() => speak("Stay back. Call emergency services now.")}
-                    className="w-full h-24 bg-(--app-surface) border-4 border-[var(--color-emergency)] text-[var(--color-emergency)] rounded-4xl text-2xl font-black uppercase tracking-tighter active:scale-95 transition-transform"
+                    className="w-full h-24 bg-(--app-surface) border-4 border-(--color-emergency) text-(--color-emergency) rounded-4xl text-2xl font-black uppercase tracking-tighter active:scale-95 transition-transform"
                   >
                     NO, I AM AT RISK
                   </button>
@@ -159,13 +159,13 @@ export const BystanderMode: React.FC = () => {
 
             {step === 2 && (
               <div className="space-y-10 text-center flex-1 flex flex-col justify-center">
-                <div className="w-32 h-32 bg-emergency/10 rounded-[2.5rem] flex items-center justify-center mx-auto border-4 border-[var(--color-emergency)]/20">
-                  <Phone size={64} className="text-[var(--color-emergency)] animate-pulse" />
+                <div className="w-32 h-32 bg-emergency/10 rounded-[2.5rem] flex items-center justify-center mx-auto border-4 border-(--color-emergency)/20">
+                  <Phone size={64} className="text-(--color-emergency) animate-pulse" />
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter uppercase italic">Call for Help</h2>
                 <a 
                   href={`tel:${activeCountry.code === 'IN' ? '112' : activeCountry.emergencyNumbers.main}`}
-                  className="w-full py-12 bg-[var(--color-emergency)] text-white rounded-[3rem] text-5xl font-black uppercase tracking-tighter shadow-2xl flex flex-col items-center gap-2 active:scale-95 transition-transform"
+                  className="w-full py-12 bg-(--color-emergency) text-white rounded-[3rem] text-5xl font-black uppercase tracking-tighter shadow-2xl flex flex-col items-center gap-2 active:scale-95 transition-transform"
                 >
                   CALL {activeCountry.code === 'IN' ? '112' : activeCountry.emergencyNumbers.main}
                   <span className="text-lg opacity-80 tracking-widest font-black uppercase">Tap to Dial</span>
@@ -189,13 +189,13 @@ export const BystanderMode: React.FC = () => {
                 <div className="grid gap-6 mt-auto">
                   <button 
                     onClick={() => { setVictimStatus('conscious'); handleNext(); }}
-                    className="w-full h-28 bg-[var(--color-safe)] text-white rounded-4xl text-3xl font-black uppercase tracking-tighter active:scale-95 transition-transform"
+                    className="w-full h-28 bg-(--color-safe) text-white rounded-4xl text-3xl font-black uppercase tracking-tighter active:scale-95 transition-transform"
                   >
                     CONSCIOUS
                   </button>
                   <button 
                     onClick={() => { setVictimStatus('unconscious'); handleNext(); }}
-                    className="w-full h-28 bg-[var(--color-emergency)] text-white rounded-4xl text-3xl font-black uppercase tracking-tighter active:scale-95 transition-transform"
+                    className="w-full h-28 bg-(--color-emergency) text-white rounded-4xl text-3xl font-black uppercase tracking-tighter active:scale-95 transition-transform"
                   >
                     UNCONSCIOUS
                   </button>
@@ -206,8 +206,8 @@ export const BystanderMode: React.FC = () => {
             {step === 4 && (
               <div className="space-y-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-6 mb-4">
-                  <div className="w-16 h-16 bg-safe/10 rounded-3xl flex items-center justify-center border-4 border-[var(--color-safe)]/20">
-                    <Heart size={32} className="text-[var(--color-safe)]" />
+                  <div className="w-16 h-16 bg-safe/10 rounded-3xl flex items-center justify-center border-4 border-(--color-safe)/20">
+                    <Heart size={32} className="text-(--color-safe)" />
                   </div>
                   <h2 className="text-3xl font-black tracking-tighter uppercase italic">First Aid</h2>
                 </div>
@@ -215,8 +215,8 @@ export const BystanderMode: React.FC = () => {
                 <div className="flex-1 space-y-6 overflow-y-auto pr-2">
                   {victimStatus === 'unconscious' ? (
                     <>
-                      <div className="p-8 bg-emergency/10 border-4 border-[var(--color-emergency)]/20 rounded-[2.5rem]">
-                        <p className="text-3xl font-black text-[var(--color-emergency)] leading-none mb-3 uppercase italic">Don't Move Them</p>
+                      <div className="p-8 bg-emergency/10 border-4 border-(--color-emergency)/20 rounded-[2.5rem]">
+                        <p className="text-3xl font-black text-(--color-emergency) leading-none mb-3 uppercase italic">Don't Move Them</p>
                         <p className="text-xl font-bold opacity-70">Unless there is a fire or immediate danger.</p>
                       </div>
                       <div className="p-8 bg-navy/5 border-4 border-navy/10 rounded-[2.5rem]">
@@ -249,8 +249,8 @@ export const BystanderMode: React.FC = () => {
 
             {step === 5 && (
               <div className="space-y-10 text-center flex-1 flex flex-col justify-center">
-                <div className="w-32 h-32 bg-safe/10 rounded-[2.5rem] flex items-center justify-center mx-auto border-4 border-[var(--color-safe)]/20">
-                  <Share2 size={64} className="text-[var(--color-safe)]" />
+                <div className="w-32 h-32 bg-safe/10 rounded-[2.5rem] flex items-center justify-center mx-auto border-4 border-(--color-safe)/20">
+                  <Share2 size={64} className="text-(--color-safe)" />
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter uppercase italic">Share Location</h2>
                 <div className="p-8 bg-(--app-surface) rounded-[2.5rem] border-4 border-(--app-border) shadow-inner">
@@ -261,7 +261,7 @@ export const BystanderMode: React.FC = () => {
                 </div>
                 <button 
                   onClick={shareLocation}
-                  className="w-full h-28 bg-[var(--color-safe)] text-white rounded-4xl text-3xl font-black uppercase tracking-tighter shadow-2xl flex items-center justify-center gap-4 active:scale-95 transition-transform"
+                  className="w-full h-28 bg-(--color-safe) text-white rounded-4xl text-3xl font-black uppercase tracking-tighter shadow-2xl flex items-center justify-center gap-4 active:scale-95 transition-transform"
                 >
                   <MessageSquare size={40} />
                   WHATSAPP INFO
@@ -297,7 +297,7 @@ export const BystanderMode: React.FC = () => {
                     speak("Thank you for helping. You may have saved a life.");
                     navigate('/');
                   }}
-                  className="mt-auto w-full h-28 bg-[var(--color-emergency)] text-white rounded-4xl text-3xl font-black uppercase tracking-tighter shadow-2xl active:scale-95 transition-transform"
+                  className="mt-auto w-full h-28 bg-(--color-emergency) text-white rounded-4xl text-3xl font-black uppercase tracking-tighter shadow-2xl active:scale-95 transition-transform"
                 >
                   END SESSION
                 </button>
@@ -310,7 +310,7 @@ export const BystanderMode: React.FC = () => {
       {/* Footer Hint */}
       <footer className="px-8 py-8 bg-(--app-surface) border-t-4 border-(--app-border) text-center">
         <p className="text-xs font-black opacity-30 uppercase tracking-[0.3em] flex items-center justify-center gap-3">
-          <ShieldCheck size={20} className="text-[var(--color-safe)]" />
+          <ShieldCheck size={20} className="text-(--color-safe)" />
           BYSTANDER PROTOCOL v1.0 • ENFORCED
         </p>
       </footer>

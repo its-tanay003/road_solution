@@ -125,7 +125,7 @@ export const IntegrationsPanel: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-[var(--radius-lg)]">
+              <div className="p-2 bg-blue-500/20 rounded-(--radius-lg)">
                 <Cpu className="text-blue-400 w-6 h-6" />
               </div>
               <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">Agency Integrations</h1>

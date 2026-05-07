@@ -22,7 +22,7 @@ export interface Notification {
   incidentId?: string;
   actions?: NotificationAction[];
   priorityScore: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface NotificationState {

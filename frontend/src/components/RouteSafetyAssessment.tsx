@@ -101,10 +101,10 @@ export const RouteSafetyAssessment: React.FC = () => {
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'CRITICAL': return 'text-[var(--clr-red)]';
+      case 'CRITICAL': return 'text-(--clr-red)';
       case 'HIGH': return 'text-orange-500';
-      case 'MODERATE': return 'text-[var(--clr-saffron)]';
-      default: return 'text-[var(--clr-green)]';
+      case 'MODERATE': return 'text-(--clr-saffron)';
+      default: return 'text-(--clr-green)';
     }
   };
 
@@ -225,7 +225,7 @@ export const RouteSafetyAssessment: React.FC = () => {
                       whileHover={{ x: 4 }}
                       className="p-4 bg-(--clr-red)/5 border border-(--clr-red)/20 rounded-xl flex gap-3"
                     >
-                      <div className="w-8 h-8 rounded-[var(--radius-lg)] bg-(--clr-red)/20 flex items-center justify-center text-(--clr-red) shrink-0">
+                      <div className="w-8 h-8 rounded-(--radius-lg) bg-(--clr-red)/20 flex items-center justify-center text-(--clr-red) shrink-0">
                         {seg.accidents2023}
                       </div>
                       <div>

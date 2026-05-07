@@ -8,12 +8,12 @@ interface BadgeProps {
 
 export const Badge: React.FC<BadgeProps> = ({ variant = 'info', children, className = '' }) => {
   const styles = {
-    critical: 'bg-[var(--nx-red-dim)] text-[var(--nx-red-primary)] border-[var(--nx-red-primary)]/30',
-    warning: 'bg-[var(--nx-amber-dim)] text-[var(--nx-amber-primary)] border-[var(--nx-amber-primary)]/30',
-    active: 'bg-[var(--nx-green-dim)] text-[var(--nx-green-primary)] border-[var(--nx-green-primary)]/30',
-    ai: 'bg-[var(--nx-purple-dim)] text-[var(--nx-purple-primary)] border-[var(--nx-purple-primary)]/30',
-    mesh: 'bg-[var(--nx-teal-dim)] text-[var(--nx-teal-primary)] border-[var(--nx-teal-primary)]/30',
-    info: 'bg-[var(--nx-blue-dim)] text-[var(--nx-blue-primary)] border-[var(--nx-blue-primary)]/30'
+    critical: 'bg-(--nx-red-dim) text-(--nx-red-primary) border-(--nx-red-primary)/30',
+    warning: 'bg-(--nx-amber-dim) text-(--nx-amber-primary) border-(--nx-amber-primary)/30',
+    active: 'bg-(--nx-green-dim) text-(--nx-green-primary) border-(--nx-green-primary)/30',
+    ai: 'bg-(--nx-purple-dim) text-(--nx-purple-primary) border-(--nx-purple-primary)/30',
+    mesh: 'bg-(--nx-teal-dim) text-(--nx-teal-primary) border-(--nx-teal-primary)/30',
+    info: 'bg-(--nx-blue-dim) text-(--nx-blue-primary) border-(--nx-blue-primary)/30'
   };
 
   return (

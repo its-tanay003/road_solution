@@ -30,14 +30,14 @@ export const ImpactBanner: React.FC = () => {
 
             <div className="flex gap-4">
               <div className="w-12 h-12 rounded-xl bg-[rgba(255,59,59,0.20)] flex items-center justify-center shrink-0">
-                <AlertCircle className="text-[var(--color-emergency)]" size={24} />
+                <AlertCircle className="text-(--color-emergency)" size={24} />
               </div>
 
               <div className="flex-1 pr-4">
                 <h3 className="text-white font-bold text-sm mb-1">Critical Impact Alert</h3>
                 <p className="text-text-muted text-xs leading-relaxed mb-3">
-                  Every <span className="text-[var(--color-emergency)] font-bold underline decoration-sos-red/30">3.4 minutes</span>, an Indian dies on the road. 
-                  ROADSoS reduces coordination time from 9.2 minutes to <span className="text-[var(--color-safe)]-green font-bold">under 90 seconds</span>.
+                  Every <span className="text-(--color-emergency) font-bold underline decoration-sos-red/30">3.4 minutes</span>, an Indian dies on the road. 
+                  ROADSoS reduces coordination time from 9.2 minutes to <span className="text-(--color-safe)-green font-bold">under 90 seconds</span>.
                 </p>
 
                 <button 

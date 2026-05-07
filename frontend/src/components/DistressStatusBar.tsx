@@ -7,9 +7,9 @@ export const DistressStatusBar: React.FC = () => {
 
   const isVisible = isActive && score > 30;
 
-  let colorClass = 'bg-[var(--nx-green-primary)]';
-  if (score > 60) colorClass = 'bg-[var(--nx-red-primary)]';
-  else if (score > 30) colorClass = 'bg-[var(--nx-amber-primary)]';
+  let colorClass = 'bg-(--nx-green-primary)';
+  if (score > 60) colorClass = 'bg-(--nx-red-primary)';
+  else if (score > 30) colorClass = 'bg-(--nx-amber-primary)';
 
   return (
     <AnimatePresence>

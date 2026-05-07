@@ -108,7 +108,7 @@ export const MedicalVaultDemo: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-600/20 p-2 rounded-[var(--radius-lg)] border border-blue-500/30 text-blue-500">
+              <div className="bg-blue-600/20 p-2 rounded-(--radius-lg) border border-blue-500/30 text-blue-500">
                 <Fingerprint size={24} />
               </div>
               <h1 className="text-3xl font-black tracking-tighter uppercase italic">ZK Medical Vault</h1>

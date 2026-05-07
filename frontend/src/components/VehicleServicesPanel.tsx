@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Truck, 
   Wrench, 
@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   RefreshCw
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import axios from '../lib/axios';
 import { db } from '../lib/db';
 import { logger } from '../lib/logger';
 
@@ -161,14 +161,14 @@ export const VehicleServicesPanel: React.FC = () => {
   const filteredServices = services.filter(s => s.category === activeTab);
 
   return (
-    <div className="flex flex-col h-full bg-(--app-bg) text-(--app-text) font-sans overflow-hidden">
+    <div className="flex flex-col h-full bg-primary text-primary font-sans overflow-hidden">
       {/* Header */}
-      <div className="p-8 bg-(--app-surface) border-b-4 border-(--app-border) space-y-8">
+      <div className="p-8 bg-secondary border-b-4 border-border space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none">ROADSIDE HELP</h1>
             <div className="flex items-center gap-2 mt-2">
-              <div className={`w-3 h-3 rounded-full ${isOffline ? 'bg-amber' : 'bg-[var(--color-safe)]'}`} />
+              <div className={`w-3 h-3 rounded-full ${isOffline ? 'bg-amber-500' : 'bg-safe'}`} />
               <p className="text-xs font-black uppercase tracking-widest opacity-40">
                 {isOffline ? 'OFFLINE DATABASE' : 'SYSTEMS ONLINE'}
               </p>
@@ -178,7 +178,7 @@ export const VehicleServicesPanel: React.FC = () => {
             onClick={handleSaveArea}
             title="Save area for offline use"
             aria-label="Save area for offline use"
-            className="w-16 h-16 bg-(--app-bg) border-4 border-(--app-border) rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
+            className="w-16 h-16 bg-primary border-4 border-border rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
           >
             <Save size={28} />
           </button>
@@ -192,8 +192,8 @@ export const VehicleServicesPanel: React.FC = () => {
               onClick={() => setActiveTab(cat.id)}
               className={`flex flex-col items-center justify-center p-6 rounded-4xl border-4 transition-all active:scale-95 ${
                 activeTab === cat.id
-                ? 'bg-(--app-bg) border-navy text-navy shadow-lg'
-                : 'bg-(--app-bg) border-(--app-border) opacity-40'
+                ? 'bg-primary border-accent text-accent shadow-lg'
+                : 'bg-primary border-border opacity-40'
               }`}
             >
               <cat.icon size={32} strokeWidth={3} />
@@ -205,7 +205,7 @@ export const VehicleServicesPanel: React.FC = () => {
         {/* SOS Towing */}
         <button 
           onClick={handleEmergencyTowing}
-          className="w-full h-24 bg-[var(--color-emergency)] text-white rounded-4xl flex items-center justify-between px-8 shadow-xl active:scale-[0.98] transition-transform"
+          className="w-full h-24 bg-emergency text-white rounded-4xl flex items-center justify-between px-8 shadow-xl active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-6">
             <Truck size={40} strokeWidth={3} />
@@ -223,7 +223,7 @@ export const VehicleServicesPanel: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <span className="text-sm font-black opacity-40 uppercase tracking-widest">Search Radius</span>
-            <span className="text-2xl font-black text-navy">{radius}KM</span>
+            <span className="text-2xl font-black text-accent">{radius}KM</span>
           </div>
           <input 
             type="range"
@@ -233,12 +233,12 @@ export const VehicleServicesPanel: React.FC = () => {
             onChange={(e) => setRadius(parseInt(e.target.value))}
             title="Search Radius Slider"
             aria-label="Search Radius"
-            className="w-full h-12 accent-navy"
+            className="w-full h-full object-cover rounded-lg"
           />
         </div>
 
         {error && (
-          <div className="p-6 bg-emergency/10 border-4 border-[var(--color-emergency)]/20 rounded-3xl flex items-center gap-4 text-[var(--color-emergency)]">
+          <div className="p-6 bg-emergency/10 border-4 border-emergency/20 rounded-3xl flex items-center gap-4 text-emergency">
             <AlertTriangle size={32} />
             <p className="text-lg font-black uppercase tracking-tight">{error}</p>
           </div>
@@ -258,22 +258,22 @@ export const VehicleServicesPanel: React.FC = () => {
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-(--app-surface) border-4 border-(--app-border) rounded-4xl p-8 shadow-xl space-y-8"
+                  className="bg-elevated border border-white/5 rounded-lg p-6 shadow-glow-green/10"
                 >
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
-                        <div className="px-3 py-1 bg-navy/10 text-navy text-xs font-black rounded-xl uppercase tracking-widest">
+                        <div className="px-3 py-1 bg-accent/10 text-accent text-xs font-black rounded-xl uppercase tracking-widest">
                           {service.distance?.toFixed(1)}KM
                         </div>
                         {service.rating && (
-                          <div className="flex items-center gap-1 text-amber text-sm font-black">
+                          <div className="flex items-center gap-1 text-amber-500 text-sm font-black">
                             <Star size={14} fill="currentColor" />
                             {service.rating}
                           </div>
                         )}
                       </div>
-                      <h3 className="text-3xl font-black text-(--app-text) leading-none tracking-tight uppercase italic">
+                      <h3 className="text-3xl font-black text-primary leading-none tracking-tight uppercase italic">
                         {service.name}
                       </h3>
                       <p className="text-base font-bold opacity-50">{service.address}</p>
@@ -283,7 +283,7 @@ export const VehicleServicesPanel: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <a 
                       href={`tel:${service.phone || '+910000000000'}`}
-                      className="h-20 bg-navy text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
+                      className="h-20 bg-accent text-primary rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
                     >
                       <Phone size={28} /> CALL
                     </a>
@@ -291,7 +291,7 @@ export const VehicleServicesPanel: React.FC = () => {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${service.lat},${service.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="h-20 bg-[var(--color-safe)] text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
+                      className="h-20 bg-safe text-white rounded-3xl flex items-center justify-center gap-4 text-xl font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-transform"
                     >
                       <Navigation size={28} /> GO
                     </a>
@@ -300,7 +300,7 @@ export const VehicleServicesPanel: React.FC = () => {
               ))}
             </AnimatePresence>
           ) : (
-            <div className="py-20 text-center space-y-6 opacity-20 border-4 border-dashed border-(--app-border) rounded-[3rem]">
+            <div className="py-20 text-center space-y-6 opacity-20 border-4 border-dashed border-border rounded-[3rem]">
               <Search size={64} className="mx-auto" />
               <p className="text-xl font-black uppercase tracking-widest">No Help Found</p>
             </div>

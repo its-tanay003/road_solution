@@ -237,7 +237,7 @@ export const DemoCommandCenter = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2 bg-slate-900 border border-white/5 px-3 py-1 rounded-[var(--radius-lg)]">
+        <div className="flex items-center gap-2 bg-slate-900 border border-white/5 px-3 py-1 rounded-(--radius-lg)">
           <div className="flex items-center gap-1 mr-2">
             <button onClick={() => playScenario('CRASH')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Crash</button>
             <button onClick={() => playScenario('RURAL')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Rural</button>
@@ -440,7 +440,7 @@ export const DemoCommandCenter = () => {
               </div>
               <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
                 {unitStatus === 'IDLE' ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-700 space-y-2 border-2 border-dashed border-white/5 rounded-[var(--radius-lg)]">
+                  <div className="h-full flex flex-col items-center justify-center text-slate-700 space-y-2 border-2 border-dashed border-white/5 rounded-(--radius-lg)">
                     <Clock size={24} />
                     <span className="text-[10px] font-mono uppercase">Scanning...</span>
                   </div>
@@ -448,7 +448,7 @@ export const DemoCommandCenter = () => {
                   <motion.div 
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="p-3 bg-red-500/10 border border-red-500/30 rounded-[var(--radius-lg)]"
+                    className="p-3 bg-red-500/10 border border-red-500/30 rounded-(--radius-lg)"
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-black text-red-500">#ALPHA-9</span>
@@ -487,7 +487,7 @@ export const DemoCommandCenter = () => {
 
           {/* Map Section */}
           <div className="flex-1 min-h-[300px] bg-slate-900 rounded-xl overflow-hidden relative border border-white/5">
-            <div className="absolute top-4 left-4 z-1000 bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-[var(--radius-lg)] pointer-events-none">
+            <div className="absolute top-4 left-4 z-1000 bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-(--radius-lg) pointer-events-none">
               <div className="flex items-center gap-4">
                 <div className="text-center">
                   <div className="text-[9px] text-slate-500 uppercase font-black">AI Triage</div>
@@ -533,7 +533,7 @@ export const DemoCommandCenter = () => {
               {['DISPATCHED', 'EN ROUTE', 'ON SCENE'].map((status) => (
                 <div 
                   key={status}
-                  className={`flex-1 py-2 px-3 rounded-[var(--radius-lg)] flex items-center justify-center gap-2 transition-all border ${
+                  className={`flex-1 py-2 px-3 rounded-(--radius-lg) flex items-center justify-center gap-2 transition-all border ${
                     unitStatus === status 
                       ? 'bg-emerald-500 text-white font-black border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
                       : 'bg-slate-950/80 text-slate-600 font-bold border-white/5'

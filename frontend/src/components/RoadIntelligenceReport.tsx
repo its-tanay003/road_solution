@@ -107,7 +107,7 @@ export const RoadIntelligenceReport: React.FC = () => {
         <button 
           onClick={generateReport}
           disabled={loading}
-          className="p-2 rounded-[var(--radius-lg)] bg-white/5 hover:bg-white/10 text-(--clr-text-2) transition-all disabled:opacity-50"
+          className="p-2 rounded-(--radius-lg) bg-white/5 hover:bg-white/10 text-(--clr-text-2) transition-all disabled:opacity-50"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
         </button>

@@ -77,7 +77,7 @@ export const HospitalETAList: React.FC<Props> = ({ remainingMinutes }) => {
               `}
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-[var(--radius-lg)] ${isAvailable ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                <div className={`p-2 rounded-(--radius-lg) ${isAvailable ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                   <Hospital className="w-4 h-4" />
                 </div>
                 <div>

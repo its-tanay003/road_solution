@@ -47,8 +47,8 @@ export const IndiaStats = () => {
       {/* Hero Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Saved Lives', value: '3,842', trend: '+12%', icon: TrendingUp, color: 'text-[var(--color-safe)]', bg: 'bg-safe/10' },
-          { label: 'Active Alerts', value: '1,204', trend: 'Requires Action', icon: AlertTriangle, color: 'text-[var(--color-emergency)]', bg: 'bg-emergency/10' },
+          { label: 'Saved Lives', value: '3,842', trend: '+12%', icon: TrendingUp, color: 'text-(--color-safe)', bg: 'bg-safe/10' },
+          { label: 'Active Alerts', value: '1,204', trend: 'Requires Action', icon: AlertTriangle, color: 'text-(--color-emergency)', bg: 'bg-emergency/10' },
           { label: 'Safety Nodes', value: '842', trend: 'Network Active', icon: ShieldAlert, color: 'text-navy', bg: 'bg-navy/10' }
         ].map((stat, i) => (
           <div key={i} className="bg-(--app-surface) p-8 rounded-[2.5rem] border-4 border-(--app-border) shadow-xl relative overflow-hidden group">

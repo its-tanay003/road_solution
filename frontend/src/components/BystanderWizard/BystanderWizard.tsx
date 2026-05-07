@@ -69,23 +69,19 @@ export function BystanderWizard() {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        style={{ textAlign: 'center', padding: '3rem 1rem', maxWidth: 480, margin: '0 auto' }}
+        className="text-center py-12 px-4 max-w-md mx-auto"
       >
-        <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
-        <h2 style={{ color: '#00E676', marginBottom: 8, fontSize: 22 }}>
+        <div className="text-6xl mb-4">✅</div>
+        <h2 className="text-safe mb-2 text-2xl font-bold">
           Well done. You helped save a life.
         </h2>
-        <p style={{ opacity: 0.7, marginBottom: 24, lineHeight: 1.6 }}>
+        <p className="opacity-70 mb-6 leading-relaxed">
           India's Good Samaritan Guidelines 2015 protect you.
           You cannot be penalized for helping in good faith.
         </p>
         <button
           onClick={() => { setCurrentStep(0); setCompleted(false); }}
-          style={{
-            padding: '12px 32px', borderRadius: 12,
-            background: '#1D9E75', color: '#fff', border: 'none',
-            fontSize: 16, cursor: 'pointer', fontWeight: 600,
-          }}
+          className="px-8 py-3 rounded-xl bg-safe text-white font-semibold cursor-pointer"
         >
           Start over
         </button>
@@ -94,29 +90,26 @@ export function BystanderWizard() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', maxWidth: 480, margin: '0 auto' }}>
+    <div className="flex flex-col min-h-full max-w-md mx-auto">
       {/* Good Samaritan Banner */}
-      <div style={{
-        background: '#E65100', padding: '10px 16px', fontSize: 12, color: '#fff',
-        borderRadius: '0 0 12px 12px', textAlign: 'center', margin: '0 16px',
-      }}>
+      <div className="bg-orange-700 px-4 py-2 text-xs text-white rounded-b-xl text-center mx-4">
         India's Good Samaritan Law 2015 protects you — you are legally safe to help.
       </div>
 
       {/* Progress dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, padding: '16px 0' }}>
+      <div className="flex justify-center gap-2 py-4">
         {STEPS.map((s, i) => (
-          <div
+          <motion.div
             key={s.id}
-            style={{
-              width: i === currentStep ? 24 : 8, height: 8, borderRadius: 4,
-              background: i < currentStep ? '#00E676' : i === currentStep ? step.color : 'rgba(255,255,255,0.2)',
-              transition: 'all 0.3s ease',
-            }}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i < currentStep ? 'bg-safe w-2' : 
+              i === currentStep ? 'w-6' : 'bg-white/20 w-2'
+            }`}
+            animate={{ backgroundColor: i === currentStep ? s.color : undefined }}
           />
         ))}
       </div>
-      <div style={{ textAlign: 'center', fontSize: 12, opacity: 0.5, marginBottom: 8 }}>
+      <div className="text-center text-xs opacity-50 mb-2 uppercase tracking-tighter">
         Step {currentStep + 1} of {STEPS.length}
       </div>
 
@@ -134,26 +127,21 @@ export function BystanderWizard() {
           animate="center"
           exit="exit"
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: '24px 24px', textAlign: 'center',
-          }}
+          className="flex-1 flex flex-col items-center justify-center px-6 py-6 text-center"
         >
-          <div style={{ fontSize: 88, marginBottom: 20, lineHeight: 1 }}>{step.icon}</div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: step.color, marginBottom: 10, lineHeight: 1.2 }}>
+          <div className="text-8xl mb-5 leading-none">{step.icon}</div>
+          <motion.h1 
+            className="text-3xl font-bold mb-3 leading-tight" 
+            animate={{ color: step.color }}
+          >
             {t(step.titleKey)}
-          </h1>
-          <p style={{ fontSize: 16, opacity: 0.8, lineHeight: 1.7, maxWidth: 340 }}>
+          </motion.h1>
+          <p className="text-base opacity-80 leading-relaxed max-w-[340px]">
             {t(step.subKey)}
           </p>
           <button
             onClick={() => speak(`${t(step.titleKey)}. ${t(step.subKey)}`)}
-            style={{
-              marginTop: 20, padding: '8px 20px', borderRadius: 20,
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-              color: '#fff', cursor: 'pointer', fontSize: 13,
-            }}
+            className="mt-5 px-5 py-2 rounded-full bg-white/10 border border-white/20 text-white cursor-pointer text-sm"
           >
             🔊 Read aloud
           </button>
@@ -161,28 +149,21 @@ export function BystanderWizard() {
       </AnimatePresence>
 
       {/* Navigation buttons */}
-      <div style={{ display: 'flex', gap: 12, padding: '16px 24px 32px' }}>
+      <div className="flex gap-3 px-6 py-4 pb-8">
         <button
           onClick={goPrev}
           disabled={currentStep === 0}
-          style={{
-            flex: 1, height: 60, borderRadius: 16, fontSize: 16, fontWeight: 500,
-            background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
-            color: '#fff', cursor: currentStep === 0 ? 'not-allowed' : 'pointer',
-            opacity: currentStep === 0 ? 0.3 : 1, transition: 'opacity 0.2s',
-          }}
+          className={`flex-1 h-[60px] rounded-2xl text-base font-medium bg-transparent border border-white/20 text-white cursor-pointer transition-opacity ${currentStep === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-100'}`}
         >
           ← Back
         </button>
-        <button
+        <motion.button
           onClick={goNext}
-          style={{
-            flex: 2, height: 60, borderRadius: 16, fontSize: 16, fontWeight: 600,
-            background: step.color, border: 'none', color: '#fff', cursor: 'pointer',
-          }}
+          animate={{ backgroundColor: step.color }}
+          className="flex-2 h-[60px] rounded-2xl text-base font-semibold text-white cursor-pointer border-none shadow-lg"
         >
           {currentStep === STEPS.length - 1 ? '✓ Done' : 'Next step →'}
-        </button>
+        </motion.button>
       </div>
     </div>
   );

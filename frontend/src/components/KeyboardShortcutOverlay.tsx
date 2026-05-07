@@ -67,7 +67,7 @@ export const KeyboardShortcutOverlay: React.FC<KeyboardShortcutOverlayProps> = (
                   className="flex items-center justify-between p-4 border border-white/5 bg-white/2 rounded-2xl hover:bg-white/5 transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-[var(--radius-lg)] bg-black/40 group-hover:scale-110 transition-transform ${item.color}`}>
+                    <div className={`p-2 rounded-(--radius-lg) bg-black/40 group-hover:scale-110 transition-transform ${item.color}`}>
                       <item.icon size={18} />
                     </div>
                     <span className="text-sm font-medium text-white/70">{item.label}</span>

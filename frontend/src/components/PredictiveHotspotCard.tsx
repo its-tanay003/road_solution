@@ -129,10 +129,10 @@ export const PredictiveHotspotCard: React.FC = () => {
                     {hs.insight}
                   </p>
                   <div className="mt-3 flex gap-2">
-                     <button className="px-3 py-1 rounded-[var(--radius-lg)] bg-orange-500 text-black text-[10px] font-bold flex items-center gap-1">
+                     <button className="px-3 py-1 rounded-(--radius-lg) bg-orange-500 text-black text-[10px] font-bold flex items-center gap-1">
                         Deploy Patrol <ChevronRight size={12} />
                      </button>
-                     <button className="px-3 py-1 rounded-[var(--radius-lg)] bg-white/5 text-white/60 text-[10px] font-bold border border-white/10">
+                     <button className="px-3 py-1 rounded-(--radius-lg) bg-white/5 text-white/60 text-[10px] font-bold border border-white/10">
                         View Map
                      </button>
                   </div>

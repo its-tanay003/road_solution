@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../lib/axios';
 import { Hospital, Navigation, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getSocket } from '../lib/socket';
 import { logger } from '../lib/logger';
 

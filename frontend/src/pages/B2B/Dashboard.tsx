@@ -37,19 +37,19 @@ export const B2BDashboard = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-[var(--nx-bg-base)] text-[var(--nx-text-primary)] font-sans p-6 lg:p-10 pb-24 lg:pb-10 overflow-y-auto">
+    <div className="min-h-screen bg-(--nx-bg-base) text-(--nx-text-primary) font-sans p-6 lg:p-10 pb-24 lg:pb-10 overflow-y-auto">
       {/* Header Area */}
       <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
            <div className="flex items-center gap-4 mb-2">
-              <div className="w-10 h-10 bg-[var(--nx-blue-primary)] rounded-sm flex items-center justify-center shadow-[0_0_15px_rgba(0,184,212,0.3)]">
+              <div className="w-10 h-10 bg-(--nx-blue-primary) rounded-sm flex items-center justify-center shadow-[0_0_15px_rgba(0,184,212,0.3)]">
                  <Building2 className="text-white" size={24} />
               </div>
               <h1 className="text-2xl font-black tracking-tighter uppercase text-white">
-                INSTITUTIONAL <span className="text-[var(--nx-blue-primary)]">RELAY HUB</span>
+                INSTITUTIONAL <span className="text-(--nx-blue-primary)">RELAY HUB</span>
               </h1>
            </div>
-           <p className="text-[10px] text-[var(--nx-text-dim)] font-mono uppercase tracking-[0.3em]">Responder Network Control • Sector: HQ-01</p>
+           <p className="text-[10px] text-(--nx-text-dim) font-mono uppercase tracking-[0.3em]">Responder Network Control • Sector: HQ-01</p>
         </div>
         
         <div className="flex gap-4">
@@ -87,21 +87,21 @@ export const B2BDashboard = () => {
                     layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="nexus-card p-4 group hover:border-[var(--nx-border-active)] transition-all cursor-pointer bg-white/[0.01]"
+                    className="nexus-card p-4 group hover:border-(--nx-border-active) transition-all cursor-pointer bg-white/[0.01]"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <Badge variant={incident.severity}>{incident.severity}</Badge>
-                      <span className="text-[10px] font-mono text-[var(--nx-text-dim)]">{incident.timestamp}</span>
+                      <span className="text-[10px] font-mono text-(--nx-text-dim)">{incident.timestamp}</span>
                     </div>
-                    <h3 className="font-bold text-white text-md mb-2 group-hover:text-[var(--nx-blue-primary)] transition-colors">{incident.type}</h3>
-                    <div className="flex items-center gap-2 text-[10px] text-[var(--nx-text-dim)] uppercase mb-4">
+                    <h3 className="font-bold text-white text-md mb-2 group-hover:text-(--nx-blue-primary) transition-colors">{incident.type}</h3>
+                    <div className="flex items-center gap-2 text-[10px] text-(--nx-text-dim) uppercase mb-4">
                       <MapPin size={10} /> {incident.location}
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 py-3 border-t border-[var(--nx-border)]/50">
+                    <div className="grid grid-cols-2 gap-4 py-3 border-t border-(--nx-border)/50">
                        <div>
                           <div className="nexus-label mb-1">ETA</div>
-                          <div className="text-sm font-black text-[var(--nx-blue-primary)] font-mono">{incident.eta}</div>
+                          <div className="text-sm font-black text-(--nx-blue-primary) font-mono">{incident.eta}</div>
                        </div>
                        <div>
                           <div className="nexus-label mb-1">PATIENT STATUS</div>
@@ -110,7 +110,7 @@ export const B2BDashboard = () => {
                     </div>
                     
                     <div className="mt-2 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                       <ArrowRight size={16} className="text-[var(--nx-blue-primary)]" />
+                       <ArrowRight size={16} className="text-(--nx-blue-primary)" />
                     </div>
                   </motion.div>
                 ))}
@@ -121,7 +121,7 @@ export const B2BDashboard = () => {
         {/* Right: Live Command Map & Analytics */}
         <div className="col-span-12 lg:col-span-8 space-y-8">
            <Panel title="Regional Tactical Grid" icon={Globe} subtitle="Asset positioning & telemetry">
-              <div className="h-[480px] rounded-sm border border-[var(--nx-border)] overflow-hidden relative">
+              <div className="h-[480px] rounded-sm border border-(--nx-border) overflow-hidden relative">
                  <div className="absolute top-4 right-4 z-20">
                     <Badge variant="active" className="bg-black/60 backdrop-blur-md">MAP-RELAY: NOMINAL</Badge>
                  </div>
@@ -138,11 +138,11 @@ export const B2BDashboard = () => {
                       { label: 'RAPID RESPONDERS', used: 22, total: 30, color: 'var(--nx-amber-primary)' },
                     ].map((res, i) => (
                       <div key={i}>
-                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-[var(--nx-text-dim)] mb-2">
+                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-(--nx-text-dim) mb-2">
                           <span>{res.label}</span>
                           <span className="text-white">{res.used} / {res.total}</span>
                         </div>
-                        <div className="w-full h-1.5 bg-white/[0.03] border border-[var(--nx-border)] rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 bg-white/[0.03] border border-(--nx-border) rounded-full overflow-hidden">
                           <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: `${(res.used / res.total) * 100}%` }}
@@ -162,14 +162,14 @@ export const B2BDashboard = () => {
                        key={i}
                        initial={{ height: 0 }}
                        animate={{ height: `${v}%` }}
-                       className="flex-1 bg-[var(--nx-blue-primary)]/10 border-t border-[var(--nx-blue-primary)]/40 hover:bg-[var(--nx-blue-primary)]/40 transition-colors"
+                       className="flex-1 bg-(--nx-blue-primary)/10 border-t border-(--nx-blue-primary)/40 hover:bg-(--nx-blue-primary)/40 transition-colors"
                      />
                    ))}
                  </div>
-                 <div className="flex justify-between items-center text-[10px] font-mono text-[var(--nx-text-dim)] border-t border-[var(--nx-border)]/50 pt-4">
+                 <div className="flex justify-between items-center text-[10px] font-mono text-(--nx-text-dim) border-t border-(--nx-border)/50 pt-4">
                    <span className="uppercase">Historical 60M</span>
                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-[var(--nx-blue-primary)] rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-(--nx-blue-primary) rounded-full animate-pulse" />
                       <span className="text-white font-bold">AVG: 42ms</span>
                    </div>
                  </div>
@@ -190,10 +190,10 @@ interface MetricCardProps {
 
 const MetricCard = ({ label, value, icon, variant }: MetricCardProps) => {
   const styles = {
-    critical: 'border-[var(--nx-red-primary)]/20 bg-[var(--nx-red-dim)] text-[var(--nx-red-primary)]',
-    active: 'border-[var(--nx-green-primary)]/20 bg-[var(--nx-green-dim)] text-[var(--nx-green-primary)]',
-    mesh: 'border-[var(--nx-blue-primary)]/20 bg-[var(--nx-blue-dim)] text-[var(--nx-blue-primary)]',
-    info: 'border-[var(--nx-teal-primary)]/20 bg-[var(--nx-teal-dim)] text-[var(--nx-teal-primary)]'
+    critical: 'border-(--nx-red-primary)/20 bg-(--nx-red-dim) text-(--nx-red-primary)',
+    active: 'border-(--nx-green-primary)/20 bg-(--nx-green-dim) text-(--nx-green-primary)',
+    mesh: 'border-(--nx-blue-primary)/20 bg-(--nx-blue-dim) text-(--nx-blue-primary)',
+    info: 'border-(--nx-teal-primary)/20 bg-(--nx-teal-dim) text-(--nx-teal-primary)'
   };
 
   return (
