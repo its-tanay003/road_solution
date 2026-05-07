@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { Analytics } from '@vercel/analytics/react';
 import { useSettingsStore, applySettingsToDOM } from './store/settingsStore';
 import { useAuthStore } from './store/authStore';
 
@@ -199,6 +200,7 @@ const App = () => {
     <BrowserRouter>
       <AppInitializer />
       <AppContent />
+      <Analytics />
     </BrowserRouter>
   );
 };
