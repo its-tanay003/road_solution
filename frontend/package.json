@@ -16,6 +16,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "@types/leaflet.heat": "^0.2.5",
     "@types/three": "^0.184.0",
+    "@vercel/speed-insights": "^2.0.0",
     "autoprefixer": "^10.5.0",
     "axios": "^1.15.2",
     "chart.js": "^4.5.1",
