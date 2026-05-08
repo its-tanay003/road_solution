@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { IndiaStatsTicker } from '../components/IndiaStatsTicker';
-import { Shield, Activity, Monitor, Globe, Navigation2, BookOpen, X, Building2, ShieldCheck } from 'lucide-react';
+import { Shield, Activity, Globe, Navigation2, BookOpen, X, Building2, ShieldCheck } from 'lucide-react';
 import { RoadSafetyAwareness } from '../components/RoadSafetyAwareness';
 import { useSocket } from '../hooks/useSocket';
 import { ProfileCompleteBadge } from '../components/ProfileCompleteBadge';
 import { SOSButton } from '../components/SOSButton';
+import { MapMiniPreview } from '../components/map/MapMiniPreview';
 
 // --- Particle Canvas Background ---
 const ParticleCanvas = () => {
@@ -121,19 +122,13 @@ const HomeScreen: React.FC = () => {
   const allCards = [
     { id: 'report', label: 'BYSTANDER REPORT', icon: Shield, path: '/report/new' },
     { id: 'profile', label: 'MEDICAL PROFILE', icon: Activity, path: '/profile' },
-    { id: 'dashboard', label: 'COMMAND CENTER', icon: Monitor, path: '/dashboard' },
     { id: 'impact', label: 'IMPACT ANALYSIS', icon: Activity, path: '/impact', color: 'text-(--clr-blue)' },
     { id: 'governance', label: 'GOV INTELLIGENCE', icon: Building2, path: '/governance', color: 'text-(--clr-blue)' },
     { id: 'eval', label: 'SIH EVALUATION', icon: ShieldCheck, path: '/roadmap', color: 'text-(--clr-green)' },
-    { id: 'awareness', label: 'ROAD SAFETY IQ', icon: BookOpen, path: '#', color: 'text-(--clr-saffron)' },
-    { id: 'map', label: 'LIVE MAP', icon: Globe, path: '/map', color: 'text-(--clr-blue)', alwaysShow: true },
-    { id: 'hospitals', label: 'HOSPITALS', icon: Building2, path: '/hospitals', color: 'text-(--clr-green)', alwaysShow: true }
+    { id: 'awareness', label: 'ROAD SAFETY IQ', icon: BookOpen, path: '#', color: 'text-(--clr-saffron)' }
   ];
 
-  const visibleCards = simplifiedMode 
-    ? allCards.filter(c => c.alwaysShow)
-    : allCards.filter(c => c.id !== 'map' && c.id !== 'hospitals'); // Don't show map/hospitals in grid if in full mode? 
-    // Actually, let's just filter.
+  const visibleCards = allCards;
 
   return (
     <div className="relative w-full h-screen flex flex-col bg-(--clr-bg) text-(--clr-text) overflow-hidden">
@@ -184,8 +179,12 @@ const HomeScreen: React.FC = () => {
 
         <SOSButton />
 
+        <div className="mt-12 w-full flex justify-center px-4">
+          <MapMiniPreview />
+        </div>
+
       {/* Action Cards */}
-        <div className="mt-16 flex flex-wrap justify-center gap-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-4 max-w-3xl">
           {visibleCards.map((card) => (
             <motion.button
               key={card.id}

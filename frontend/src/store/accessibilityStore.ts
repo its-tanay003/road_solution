@@ -6,7 +6,7 @@ export type FontSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 export type FontWeight = 'normal' | 'bold';
 export type LetterSpacing = 'normal' | 'spaced';
 export type Theme = 'dark' | 'light' | 'high-contrast' | 'saffron';
-export type Language = 'en' | 'hi' | 'ta';
+export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn';
 
 interface AccessibilityState {
   fontSize: FontSize;

@@ -33,6 +33,10 @@ import { HospitalFinder } from './screens/HospitalFinder';
 import { EvaluationLayout } from './components/EvaluationLayout';
 import { IncidentTimeline } from './components/IncidentTimeline';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { TrustedContactsPage } from './pages/TrustedContactsPage';
+import { WhatsAppConnectPage } from './pages/WhatsAppConnectPage';
+import { ConsentManagementPage } from './pages/ConsentManagementPage';
 import { PrivacyConsentBanner } from './components/PrivacyConsentBanner';
 
 // Stores
@@ -168,6 +172,10 @@ const AppContent = () => {
         <Routes location={location} key={location.pathname}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/settings" element={<PageWrapper><SettingsPage /></PageWrapper>} />
+          <Route path="/settings/trusted-contacts" element={<PageWrapper><TrustedContactsPage /></PageWrapper>} />
+          <Route path="/settings/whatsapp" element={<PageWrapper><WhatsAppConnectPage /></PageWrapper>} />
+          <Route path="/settings/consent" element={<PageWrapper><ConsentManagementPage /></PageWrapper>} />
           <Route path="/" element={<ProtectedRoute><PageWrapper><HomeScreen /></PageWrapper></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><PageWrapper><MedicalProfilePage /></PageWrapper></ProtectedRoute>} />
           <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
@@ -184,9 +192,9 @@ const AppContent = () => {
           <Route path="/map" element={<PageWrapper><LiveMap /></PageWrapper>} />
           <Route path="/hospitals" element={<PageWrapper><HospitalFinder /></PageWrapper>} />
           <Route path="/roadmap" element={<PageWrapper><EvaluationLayout><Roadmap /></EvaluationLayout></PageWrapper>} />
+          <Route path="/good-samaritan" element={<PageWrapper><EvaluationLayout><GoodSamaritanGuide /></EvaluationLayout></PageWrapper>} />
           <Route path="/research" element={<PageWrapper><EvaluationLayout><Research /></EvaluationLayout></PageWrapper>} />
           <Route path="/technical" element={<PageWrapper><EvaluationLayout><Technical /></EvaluationLayout></PageWrapper>} />
-          <Route path="/good-samaritan" element={<PageWrapper><EvaluationLayout><GoodSamaritanGuide /></EvaluationLayout></PageWrapper>} />
           <Route path="/incident-report" element={<PageWrapper><IncidentTimeline /></PageWrapper>} />
           <Route path="/security" element={<PageWrapper><EvaluationLayout><SecurityDashboard /></EvaluationLayout></PageWrapper>} />
           <Route path="*" element={<Navigate to="/" replace />} />

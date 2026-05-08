@@ -14,6 +14,7 @@ import {
   Shield
 } from 'lucide-react';
 import { sanitizeInput } from '../utils/inputSanitizer';
+import { io } from 'socket.io-client';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -33,6 +34,8 @@ export const BystanderReport: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [victimStatus, setVictimStatus] = useState<VictimStatus>('CONSCIOUS');
+  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
 
   const requestLocation = () => {
     setLocationStatus('requesting');
@@ -223,19 +226,19 @@ export const BystanderReport: React.FC = () => {
 
               <div className="flex flex-col gap-4">
                 <StatusCard 
-                  color="#00C853"
+                  colorClass="bg-[#00C853]"
                   icon={<Heart size={32} />}
                   label="CONSCIOUS"
                   onClick={() => { setVictimStatus('CONSCIOUS'); setStep(3); }}
                 />
                 <StatusCard 
-                  color="#FFB300"
+                  colorClass="bg-[#FFB300]"
                   icon={<Activity size={32} />}
                   label="UNCONSCIOUS"
                   onClick={() => { setVictimStatus('UNCONSCIOUS'); setStep(3); }}
                 />
                 <StatusCard 
-                  color="#FF1744"
+                  colorClass="bg-[#FF1744]"
                   icon={<AlertCircle size={32} />}
                   label="NOT BREATHING / CRITICAL"
                   onClick={() => { setVictimStatus('CRITICAL'); setStep(3); }}
@@ -272,7 +275,6 @@ export const BystanderReport: React.FC = () => {
                   <input 
                     type="file" 
                     accept="image/*" 
-                    capture="environment" 
                     onChange={handlePhotoSelect}
                     className="hidden" 
                     id="incident-photo"
@@ -325,21 +327,20 @@ export const BystanderReport: React.FC = () => {
 };
 
 interface StatusCardProps {
-  color: string;
+  colorClass: string;
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
 }
 
-const StatusCard = ({ color, icon, label, onClick }: StatusCardProps) => (
+const StatusCard = ({ colorClass, icon, label, onClick }: StatusCardProps) => (
   <button 
     onClick={onClick}
     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
     role="button"
     tabIndex={0}
     aria-label={`Select victim status: ${label}`}
-    className="w-full h-[110px] rounded-3xl p-6 flex items-center gap-6 transition-all active:scale-[0.98] hover:brightness-110"
-    style={{ backgroundColor: color }}
+    className={`w-full h-[110px] rounded-3xl p-6 flex items-center gap-6 transition-all active:scale-[0.98] hover:brightness-110 ${colorClass}`}
   >
     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white">
       {icon}

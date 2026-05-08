@@ -10,10 +10,10 @@ export const SettingsPanel: React.FC = () => {
   const store = useAccessibilityStore();
 
   const themes: { id: Theme; label: string; color: string }[] = [
-    { id: 'dark', label: 'Default Dark', color: '#080C14' },
-    { id: 'light', label: 'Light Mode', color: '#FFFFFF' },
-    { id: 'high-contrast', label: 'High Contrast', color: '#000000' },
-    { id: 'saffron', label: 'India Saffron', color: '#FF9933' },
+    { id: 'dark', label: 'Default Dark', color: 'bg-[#080C14]' },
+    { id: 'light', label: 'Light Mode', color: 'bg-[#FFFFFF]' },
+    { id: 'high-contrast', label: 'High Contrast', color: 'bg-[#000000]' },
+    { id: 'saffron', label: 'India Saffron', color: 'bg-[#FF9933]' },
   ];
 
   const fontSizes: FontSize[] = ['sm', 'md', 'lg', 'xl', 'xxl'];
@@ -43,18 +43,18 @@ export const SettingsPanel: React.FC = () => {
           animate={{ x: 0 }}
           exit={{ x: 380 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="relative w-[380px] h-full bg-surface border-l border-border shadow-2xl flex flex-col overflow-hidden"
+          className="relative w-[380px] h-full bg-(--clr-bg) border-l border-white/10 shadow-2xl flex flex-col overflow-hidden"
         >
           {/* Header */}
-          <div className="p-6 border-b border-border flex justify-between items-center bg-surface-2">
-            <h2 className="text-xl font-bold tracking-tight text-text">PREFERENCES</h2>
+          <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+            <h2 className="text-xl font-bold tracking-tight text-(--clr-text)">PREFERENCES</h2>
             <button 
               onClick={close}
               className="p-2 hover:bg-white/10 rounded-full transition-colors"
               title="Close Settings"
               aria-label="Close Settings"
             >
-              <X size={24} className="text-text" />
+              <X size={24} className="text-(--clr-text)" />
             </button>
           </div>
 
@@ -63,7 +63,7 @@ export const SettingsPanel: React.FC = () => {
             
             {/* Theme Section */}
             <section className="space-y-4">
-              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Theme</h3>
+              <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Theme</h3>
               <div className="grid grid-cols-2 gap-4">
                 {themes.map((t) => (
                   <button
@@ -72,20 +72,19 @@ export const SettingsPanel: React.FC = () => {
                     className="group flex flex-col items-center gap-2"
                   >
                     <div 
-                      className={`w-full aspect-square rounded-2xl border-2 flex items-center justify-center relative transition-all ${
+                      className={`w-full aspect-square rounded-2xl border-2 flex items-center justify-center relative transition-all ${t.color} ${
                         store.theme === t.id 
-                        ? 'border-saffron shadow-[0_0_15px_rgba(255,153,51,0.3)]' 
-                        : 'border-border hover:border-text-2'
+                        ? 'border-(--clr-blue) shadow-[0_0_15px_rgba(var(--clr-blue-rgb),0.3)]' 
+                        : 'border-white/10 hover:border-white/30'
                       }`}
-                      style={{ backgroundColor: t.color }}
                     >
                       {store.theme === t.id && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-saffron/10 rounded-2xl">
-                          <Check size={24} className={t.id === 'light' ? 'text-black' : 'text-saffron'} />
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/10 rounded-2xl">
+                          <Check size={24} className={t.id === 'light' ? 'text-black' : 'text-(--clr-blue)'} />
                         </div>
                       )}
                     </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${store.theme === t.id ? 'text-saffron' : 'text-text-2'}`}>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${store.theme === t.id ? 'text-(--clr-blue)' : 'text-(--clr-text-2)'}`}>
                       {t.label}
                     </span>
                   </button>
@@ -95,16 +94,16 @@ export const SettingsPanel: React.FC = () => {
 
             {/* Font Size Section */}
             <section className="space-y-4">
-              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Font Size</h3>
-              <div className="flex bg-surface-2 p-1 rounded-xl border border-border">
+              <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Font Size</h3>
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
                 {fontSizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => store.setFontSize(size)}
                     className={`flex-1 h-10 rounded-lg text-xs font-bold transition-all ${
                       store.fontSize === size 
-                      ? 'bg-saffron text-white shadow-lg' 
-                      : 'text-text-2 hover:text-text hover:bg-white/5'
+                      ? 'bg-(--clr-blue) text-white shadow-lg' 
+                      : 'text-(--clr-text-2) hover:text-(--clr-text) hover:bg-white/5'
                     }`}
                   >
                     {size.toUpperCase()}
@@ -113,8 +112,8 @@ export const SettingsPanel: React.FC = () => {
               </div>
               
               {/* Preview Paragraph */}
-              <div className="p-4 rounded-xl bg-surface-2 border border-border">
-                <p className="text-text transition-all" style={{ fontSize: 'var(--app-font-size)' }}>
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <p className="text-(--clr-text) transition-all text-[length:var(--app-font-size)]">
                   Emergency alert sent. Ambulance ETA 6 minutes.
                 </p>
               </div>
@@ -123,16 +122,16 @@ export const SettingsPanel: React.FC = () => {
             {/* Text Style Section */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Weight</h3>
-                <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
+                <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Weight</h3>
+                <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
                   {(['normal', 'bold'] as FontWeight[]).map((w) => (
                     <button
                       key={w}
                       onClick={() => store.setFontWeight(w)}
                       className={`px-4 py-1.5 rounded-md text-[10px] font-bold transition-all ${
                         store.fontWeight === w 
-                        ? 'bg-saffron text-white' 
-                        : 'text-text-2 hover:text-text'
+                        ? 'bg-(--clr-blue) text-white' 
+                        : 'text-(--clr-text-2) hover:text-(--clr-text)'
                       }`}
                     >
                       {w.toUpperCase()}
@@ -142,16 +141,16 @@ export const SettingsPanel: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Spacing</h3>
-                <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
+                <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Spacing</h3>
+                <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
                   {(['normal', 'spaced'] as LetterSpacing[]).map((s) => (
                     <button
                       key={s}
                       onClick={() => store.setLetterSpacing(s)}
                       className={`px-4 py-1.5 rounded-md text-[10px] font-bold transition-all ${
                         store.letterSpacing === s 
-                        ? 'bg-saffron text-white' 
-                        : 'text-text-2 hover:text-text'
+                        ? 'bg-(--clr-blue) text-white' 
+                        : 'text-(--clr-text-2) hover:text-(--clr-text)'
                       }`}
                     >
                       {s.toUpperCase()}
@@ -163,7 +162,7 @@ export const SettingsPanel: React.FC = () => {
 
             {/* Language Section */}
             <section className="space-y-4">
-              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Language</h3>
+              <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Language</h3>
               <div className="grid grid-cols-3 gap-2">
                 {languages.map((l) => (
                   <button
@@ -171,8 +170,8 @@ export const SettingsPanel: React.FC = () => {
                     onClick={() => store.setLanguage(l.id)}
                     className={`py-3 rounded-xl border font-bold text-xs transition-all ${
                       store.language === l.id 
-                      ? 'bg-saffron border-saffron text-white shadow-lg' 
-                      : 'bg-surface-2 border-border text-text-2 hover:border-text-2'
+                      ? 'bg-(--clr-blue) border-(--clr-blue) text-white shadow-lg' 
+                      : 'bg-white/5 border-white/10 text-(--clr-text-2) hover:border-white/30'
                     }`}
                   >
                     {l.label}
@@ -185,17 +184,20 @@ export const SettingsPanel: React.FC = () => {
             <section className="space-y-4">
               <button
                 onClick={() => store.setSimplifiedMode(!store.simplifiedMode)}
+                role="switch"
+                aria-checked={store.simplifiedMode ? 'true' : 'false'}
+                aria-label="Simple Mode"
                 className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                   store.simplifiedMode 
-                  ? 'bg-saffron/10 border-saffron' 
-                  : 'bg-surface-2 border-border hover:border-text-2'
+                  ? 'bg-(--clr-blue)/10 border-(--clr-blue)' 
+                  : 'bg-white/5 border-white/10 hover:border-white/30'
                 }`}
               >
                 <div className="text-left">
-                  <p className={`text-sm font-bold ${store.simplifiedMode ? 'text-saffron' : 'text-text'}`}>Simple Mode</p>
-                  <p className="text-[10px] text-text-2">Shows only SOS, map, and hospitals</p>
+                  <p className={`text-sm font-bold ${store.simplifiedMode ? 'text-(--clr-blue)' : 'text-(--clr-text)'}`}>Simple Mode</p>
+                  <p className="text-[10px] text-(--clr-text-2)">Shows only SOS, map, and hospitals</p>
                 </div>
-                <div className={`w-12 h-6 rounded-full relative transition-colors ${store.simplifiedMode ? 'bg-saffron' : 'bg-border'}`}>
+                <div className={`w-12 h-6 rounded-full relative transition-colors ${store.simplifiedMode ? 'bg-(--clr-blue)' : 'bg-white/20'}`}>
                   <motion.div
                     animate={{ x: store.simplifiedMode ? 26 : 2 }}
                     transition={{ type: 'spring', damping: 20, stiffness: 300 }}
@@ -205,16 +207,44 @@ export const SettingsPanel: React.FC = () => {
               </button>
             </section>
 
-            {/* Privacy & Safety Section */}
+            {/* Connections Section */}
             <section className="space-y-4">
-              <h3 className="text-xs font-bold text-text-2 uppercase tracking-widest">Privacy & Safety</h3>
+              <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Connections</h3>
               <div className="space-y-2">
                 <button
-                  onClick={() => { close(); window.location.href = '/privacy'; }}
-                  className="w-full p-4 rounded-xl bg-surface-2 border border-border text-left hover:bg-white/5 transition-all"
+                  onClick={() => { close(); window.location.href = '/settings/trusted-contacts'; }}
+                  className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-all"
                 >
-                  <p className="text-sm font-bold text-text">Privacy Policy</p>
-                  <p className="text-[10px] text-text-2">DPDP Act 2023 Compliance</p>
+                  <p className="text-sm font-bold text-(--clr-text)">Trusted Contacts</p>
+                  <p className="text-[10px] text-(--clr-text-2)">Family and emergency responders</p>
+                </button>
+                <button
+                  onClick={() => { close(); window.location.href = '/settings/whatsapp'; }}
+                  className="w-full p-4 rounded-xl bg-green-500/5 border border-green-500/10 text-left hover:bg-green-500/10 transition-all"
+                >
+                  <p className="text-sm font-bold text-green-500">WhatsApp Alert</p>
+                  <p className="text-[10px] text-green-500/60">Automated incident notification</p>
+                </button>
+              </div>
+            </section>
+
+            {/* Privacy & Safety Section */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Privacy & Safety</h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => { close(); window.location.href = '/settings/consent'; }}
+                  className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-all"
+                >
+                  <p className="text-sm font-bold text-(--clr-text)">Data Consent</p>
+                  <p className="text-[10px] text-(--clr-text-2)">Manage granular permissions</p>
+                </button>
+                <button
+                  onClick={() => { close(); window.location.href = '/privacy'; }}
+                  className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-all"
+                >
+                  <p className="text-sm font-bold text-(--clr-text)">Privacy Policy</p>
+                  <p className="text-[10px] text-(--clr-text-2)">DPDP Act 2023 Compliance</p>
                 </button>
                 <button
                   onClick={async () => {
@@ -228,7 +258,7 @@ export const SettingsPanel: React.FC = () => {
                         } else {
                           alert('Error erasing data. Please try again later.');
                         }
-                      } catch (err) {
+                      } catch (_err) {
                         alert('Network error.');
                       }
                     }
@@ -244,7 +274,7 @@ export const SettingsPanel: React.FC = () => {
             {/* Reset Defaults */}
             <button
               onClick={() => store.resetToDefaults()}
-              className="w-full py-4 rounded-xl border border-border bg-white/5 text-text-2 text-xs font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-text transition-all mt-4"
+              className="w-full py-4 rounded-xl border border-white/10 bg-white/5 text-(--clr-text-2) text-xs font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-(--clr-text) transition-all mt-4"
             >
               <RotateCcw size={14} />
               RESET ALL PREFERENCES

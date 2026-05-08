@@ -12,13 +12,32 @@ interface User {
   provider: string;
 }
 
+interface Contact {
+  id: string;
+  name: string;
+  phone: string;
+  status: 'Accepted' | 'Pending';
+}
+
 interface AuthState {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
+  googleConnected: boolean;
+  instagramConnected: boolean;
+  instagramHandle?: string;
+  facebookConnected: boolean;
+  whatsappNumber?: string;
+  trustedContacts: Contact[];
+  
   setSession: (session: Session | null) => void;
   login: (token: string, user: User) => void;
   logout: () => Promise<void>;
+  updateUser: (data: Partial<User>) => void;
+  connectSocial: (provider: 'google' | 'instagram' | 'facebook', handle?: string) => void;
+  setWhatsapp: (phone: string) => void;
+  addContact: (contact: Omit<Contact, 'id' | 'status'>) => void;
+  removeContact: (id: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +46,10 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       session: null,
       isAuthenticated: false,
+      googleConnected: false,
+      instagramConnected: false,
+      facebookConnected: false,
+      trustedContacts: [],
 
       setSession: (session) => {
         if (!session) {
@@ -47,8 +70,6 @@ export const useAuthStore = create<AuthState>()(
       },
 
       login: (token, user) => {
-        // This is primarily for the manual login flow/bypass
-        // We set the user and a mock session or just mark as authenticated
         set({ 
           user, 
           isAuthenticated: true,
@@ -75,10 +96,42 @@ export const useAuthStore = create<AuthState>()(
         await supabase.auth.signOut();
         set({ user: null, session: null, isAuthenticated: false });
       },
+
+      updateUser: (data) => set((state) => ({
+        user: state.user ? { ...state.user, ...data } : null
+      })),
+
+      connectSocial: (provider, handle) => set((state) => ({
+        [`${provider}Connected`]: true,
+        ...(provider === 'instagram' ? { instagramHandle: handle } : {})
+      })),
+
+      setWhatsapp: (whatsappNumber) => set({ whatsappNumber }),
+
+      addContact: (contact) => set((state) => ({
+        trustedContacts: [
+          ...state.trustedContacts,
+          { ...contact, id: Math.random().toString(36).substr(2, 9), status: 'Pending' }
+        ]
+      })),
+
+      removeContact: (id) => set((state) => ({
+        trustedContacts: state.trustedContacts.filter(c => c.id !== id)
+      })),
     }),
     {
       name: 'roadsos-auth',
-      partialize: (s) => ({ user: s.user, session: s.session, isAuthenticated: s.isAuthenticated }),
+      partialize: (s) => ({ 
+        user: s.user, 
+        session: s.session, 
+        isAuthenticated: s.isAuthenticated,
+        googleConnected: s.googleConnected,
+        instagramConnected: s.instagramConnected,
+        instagramHandle: s.instagramHandle,
+        facebookConnected: s.facebookConnected,
+        whatsappNumber: s.whatsappNumber,
+        trustedContacts: s.trustedContacts
+      }),
     }
   )
 );

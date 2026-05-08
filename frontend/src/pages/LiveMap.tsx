@@ -1,209 +1,272 @@
-import { useState } from 'react';
-import { LiveMap as LiveMapComponent } from '../components/LiveMap';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Phone, Navigation, Activity, Shield, Map as MapIcon, Layers, Hospital } from 'lucide-react';
-import { useServicesStore, useSosStore } from '../store';
+import { useState, useCallback, useMemo } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { HospitalCapacityPanel } from '../components/HospitalCapacityPanel';
+import { useMapDataStore, MapPlace } from '../store/mapDataStore';
+import { useUserLocation } from '../hooks/useUserLocation';
+import { useNearbyPlaces } from '../hooks/useNearbyPlaces';
+
+import { SearchBar } from '../components/map/SearchBar';
+import { LayerTogglePanel } from '../components/map/LayerTogglePanel';
+import { RadiusControl } from '../components/map/RadiusControl';
+import { ServiceBottomSheet } from '../components/map/ServiceBottomSheet';
+import { ServiceDetailSheet } from '../components/map/ServiceDetailSheet';
+import { EmergencyMapMode } from '../components/map/EmergencyMapMode';
+
+const MAP_CONTAINER_STYLE = {
+  width: '100%',
+  height: '100vh',
+};
+
+// Tactical dark map style
+const MAP_OPTIONS: google.maps.MapOptions = {
+  disableDefaultUI: true,
+  zoomControl: false,
+  mapTypeControl: false,
+  scaleControl: false,
+  streetViewControl: false,
+  rotateControl: false,
+  fullscreenControl: false,
+  styles: [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#263c3f" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#6b9a76" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#38414e" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212a37" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry",
+      stylers: [{ color: "#746855" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#1f2835" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#f3d19c" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#2f3948" }],
+    },
+    {
+      featureType: "transit.station",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#17263c" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#515c6d" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#17263c" }],
+    },
+  ],
+};
+
+const MARKER_COLORS: Record<string, string> = {
+  hospitals: '#ef4444',
+  clinics: '#ec4899',
+  pharmacies: '#22c55e',
+  bloodBanks: '#dc2626',
+  ambulances: '#f97316',
+  police: '#3b82f6',
+  fire: '#ef4444',
+  fuel: '#eab308',
+  tolls: '#a855f7',
+  atms: '#9ca3af',
+  blackSpots: '#ef4444',
+  hazards: '#f97316'
+};
 
 export const LiveMap = () => {
-  const { services } = useServicesStore();
-  const { location } = useSosStore();
-  const [sheetState, setSheetState] = useState<'peek' | 'half' | 'full'>('peek');
-  const [showRiskHeatmap, setShowRiskHeatmap] = useState(false);
-  const [showBlackSpots, setShowBlackSpots] = useState(false);
-  const [showHospitalPanel, setShowHospitalPanel] = useState(false);
   const navigate = useNavigate();
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY || '',
+    libraries: ['places']
+  });
 
-  const userLat = location?.lat || 28.6139;
-  const userLng = location?.lng || 77.2090;
+  const { lat, lng, loading: locLoading } = useUserLocation();
+  const { searchRadius } = useMapDataStore();
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
 
-  // Map services to format expected by LiveMapComponent
-  const mapServices = services.map((s, idx) => ({
-    id: s.id || `svc-${idx}`,
-    name: s.name,
-    type: s.type,
-    lat: s.lat || userLat,
-    lng: s.lng || userLng,
-    phone: s.phone_primary
-  }));
+  // useNearbyPlaces relies on user location and the map instance (for the Places service)
+  const { places, isLoading: placesLoading } = useNearbyPlaces(lat, lng, map);
 
-  const getSheetY = () => {
-    switch (sheetState) {
-      case 'peek': return 'calc(100% - 100px)';
-      case 'half': return '50%';
-      case 'full': return '120px';
-      default: return 'calc(100% - 100px)';
+  const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
+    setMap(mapInstance);
+  }, []);
+
+  const onUnmount = useCallback(function callback() {
+    setMap(null);
+  }, []);
+
+  const center = useMemo(() => ({ lat: lat || 13.0827, lng: lng || 80.2707 }), [lat, lng]);
+
+  const handlePlaceSelected = (placeResult: google.maps.places.PlaceResult) => {
+    if (placeResult.geometry?.location && map) {
+      map.panTo(placeResult.geometry.location);
+      map.setZoom(15);
     }
   };
 
+  if (loadError) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-[#080C14] text-white p-6 text-center">
+        <h2 className="text-xl font-bold text-red-500 mb-2">Map Load Error</h2>
+        <p className="text-sm text-white/70">Please check your Google Maps API Key configuration.</p>
+        <button onClick={() => navigate('/')} className="mt-6 px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+          Return to Home
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden bg-(--nx-bg-base)">
-      {/* Full Bleed Map with Scanline Filter */}
-      <div className="absolute inset-0 z-0">
-        <LiveMapComponent 
-          services={mapServices}
-          userLat={userLat}
-          userLng={userLng}
-          showRiskHeatmap={showRiskHeatmap}
-          showBlackSpots={showBlackSpots}
-        />
-        {/* CRT/Scanline Overlay specifically for map to give it tactical feel */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-10" />
-      </div>
+    <div className="relative w-full h-screen overflow-hidden bg-[#080C14]">
+      {/* Tactical Scanline Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-[5]" />
 
-      {/* Floating Tactical Overlay Controls */}
-      <div className="absolute top-6 left-6 right-6 z-400 flex flex-col gap-4 pointer-events-none">
-        <div className="flex justify-between items-start w-full">
-          <div className="flex flex-col gap-2 pointer-events-auto">
-             <div className="nexus-card bg-(--nx-bg-(--color-surface))/90 backdrop-blur-md border-(--nx-border) p-1.5 flex items-center shadow-2xl w-80">
-                <Search className="text-(--nx-text-tertiary) ml-3" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="SEARCH COORDINATES / ASSETS..." 
-                  className="bg-transparent border-none outline-none text-white flex-1 ml-3 font-mono text-[11px] placeholder:text-(--nx-text-dim)"
-                />
-                <Button variant="secondary" size="sm" className="min-w-0 p-2">
-                  <Filter size={14} />
-                </Button>
-             </div>
-             <div className="flex gap-2">
-                <Badge variant="mesh" className="bg-(--nx-bg-(--color-surface))/90 backdrop-blur-md">MAP-RELAY: 12ms</Badge>
-                <Badge variant="active" className="bg-(--nx-bg-(--color-surface))/90 backdrop-blur-md">GPS: FIXED</Badge>
-             </div>
-          </div>
-
-          <div className="flex flex-col gap-2 items-end pointer-events-auto">
-             <Button 
-               variant={showBlackSpots ? 'primary' : 'secondary'} 
-               size="sm" 
-               className="gap-2 font-bold"
-               onClick={() => setShowBlackSpots(!showBlackSpots)}
-             >
-               <MapIcon size={14} />
-               BLACK SPOTS: {showBlackSpots ? 'ENABLED' : 'DISABLED'}
-             </Button>
-             <Button 
-               variant={showRiskHeatmap ? 'primary' : 'secondary'} 
-               size="sm" 
-               className="gap-2 font-bold"
-               onClick={() => setShowRiskHeatmap(!showRiskHeatmap)}
-             >
-               <Layers size={14} />
-               RISK OVERLAY: {showRiskHeatmap ? 'ENABLED' : 'DISABLED'}
-             </Button>
-             <Button 
-               variant={showHospitalPanel ? 'primary' : 'secondary'} 
-               size="sm" 
-               className="gap-2 font-bold"
-               onClick={() => setShowHospitalPanel(!showHospitalPanel)}
-             >
-               <Hospital size={14} />
-               HOSPITAL CAPACITY: {showHospitalPanel ? 'ENABLED' : 'DISABLED'}
-             </Button>
-             <div className="nexus-card bg-(--nx-bg-(--color-surface))/90 backdrop-blur-md p-2 flex gap-1">
-                {[MapIcon, Activity, Shield].map((Icon, i) => (
-                   <Button key={i} variant="ghost" size="sm" className="p-2 min-w-0 hover:bg-white/5">
-                      <Icon size={16} />
-                   </Button>
-                ))}
-             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Hospital Capacity Sidebar Panel */}
-      <AnimatePresence>
-        {showHospitalPanel && (
-          <motion.div
-            initial={{ x: 400, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 400, opacity: 0 }}
-            className="absolute right-6 top-48 bottom-32 w-96 z-500 pointer-events-auto"
-          >
-            <div className="nexus-card bg-(--nx-bg-(--color-surface))/95 backdrop-blur-xl h-full p-6 flex flex-col border-(--nx-border) shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)]">
-              <HospitalCapacityPanel />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Swipeable Bottom Sheet */}
-      <motion.div
-        className="absolute left-0 right-0 bg-(--nx-bg-(--color-surface))/95 backdrop-blur-3xl border-t border-(--nx-border) z-500 flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
-        initial={{ top: 'calc(100% - 100px)' }}
-        animate={{ top: getSheetY() }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.1}
-        onDragEnd={(_e, info) => {
-          if (info.offset.y < -50) {
-            setSheetState(prev => prev === 'peek' ? 'half' : 'full');
-          } else if (info.offset.y > 50) {
-            setSheetState(prev => prev === 'full' ? 'half' : 'peek');
-          }
-        }}
-      >
-        {/* Drag Handle & Info Strip */}
-        <div 
-          className="w-full flex flex-col items-center py-2 cursor-grab active:cursor-grabbing border-b border-(--nx-border)/50"
-          onClick={() => setSheetState(prev => prev === 'peek' ? 'half' : 'peek')}
+      {/* Top Header/Action Bar */}
+      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/80 to-transparent z-[40] pointer-events-none flex justify-between p-4 items-start">
+        <button 
+          onClick={() => navigate('/')}
+          className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors pointer-events-auto shadow-lg"
         >
-          <div className="w-12 h-[3px] bg-(--nx-border-active) rounded-full mb-2 opacity-50"></div>
-          <div className="flex items-center gap-4 px-6 w-full justify-between">
-            <span className="text-[10px] font-mono text-(--nx-text-tertiary) uppercase tracking-widest">Nearby Tactical Assets</span>
-            <span className="text-[10px] font-mono text-(--nx-blue-primary) uppercase">{services.length} UNITS DETECTED</span>
-          </div>
-        </div>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button className="h-10 px-6 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center text-white font-black tracking-widest pointer-events-auto shadow-lg shadow-red-600/30">
+          SOS
+        </button>
+      </div>
 
-        {/* Content Container */}
-        <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 content-start">
-          {services.map((service, idx) => (
-            <div key={idx} className="nexus-card p-4 group hover:border-(--nx-border-active) transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h4 className="text-sm font-bold text-white tracking-tight group-hover:text-(--nx-blue-primary) transition-colors">{service.name}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant={service.type === 'hospital' ? 'critical' : 'active'} className="text-[8px] py-0">
-                      {service.type}
-                    </Badge>
-                    <span className="text-[10px] font-mono text-(--nx-text-dim) uppercase">2.4 KM • 6 MIN</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  className="flex-1 text-[10px] gap-2"
-                  onClick={() => window.open(`tel:${service.phone_primary}`)}
-                >
-                  <Phone size={12} /> CALL
-                </Button>
-                <Button 
-                  variant="primary" 
-                  size="sm" 
-                  className="flex-1 text-[10px] gap-2"
-                  onClick={() => navigate(`/service/${idx}`)}
-                >
-                  <Navigation size={12} /> COMMAND
-                </Button>
-              </div>
-            </div>
-          ))}
-          
-          {services.length === 0 && (
-            <div className="col-span-full py-20 flex flex-col items-center justify-center opacity-30">
-               <MapIcon size={48} className="mb-4" />
-               <p className="text-xs font-mono uppercase tracking-[0.2em]">No assets in vicinity</p>
-            </div>
-          )}
+      <EmergencyMapMode />
+      <SearchBar onPlaceSelected={handlePlaceSelected} />
+      <LayerTogglePanel />
+      <RadiusControl />
+
+      {(!isLoaded || locLoading) ? (
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
+          <p className="text-white/50 text-sm font-mono tracking-widest uppercase">Initializing SAT-LINK...</p>
         </div>
-      </motion.div>
+      ) : (
+        <GoogleMap
+          mapContainerStyle={MAP_CONTAINER_STYLE}
+          center={center}
+          zoom={14}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={MAP_OPTIONS}
+        >
+          {/* User Location Marker */}
+          {lat && lng && (
+            <>
+              <Marker
+                position={{ lat, lng }}
+                icon={{
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 8,
+                  fillColor: '#3b82f6',
+                  fillOpacity: 1,
+                  strokeColor: '#ffffff',
+                  strokeWeight: 2,
+                }}
+                zIndex={100}
+              />
+              <Circle
+                center={{ lat, lng }}
+                radius={searchRadius}
+                options={{
+                  strokeColor: '#3b82f6',
+                  strokeOpacity: 0.2,
+                  strokeWeight: 1,
+                  fillColor: '#3b82f6',
+                  fillOpacity: 0.05,
+                  clickable: false
+                }}
+              />
+            </>
+          )}
+
+          {/* Place Markers */}
+          {places.map((place) => {
+            const color = MARKER_COLORS[place.type] || '#ffffff';
+            return (
+              <Marker
+                key={place.id}
+                position={{ lat: place.lat, lng: place.lng }}
+                onClick={() => setSelectedPlace(place)}
+                icon={{
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 6,
+                  fillColor: color,
+                  fillOpacity: 0.9,
+                  strokeColor: '#ffffff',
+                  strokeWeight: 1,
+                }}
+              />
+            );
+          })}
+        </GoogleMap>
+      )}
+
+      {/* Bottom Sheets */}
+      <ServiceBottomSheet 
+        places={places} 
+        onPlaceClick={(place) => setSelectedPlace(place)} 
+      />
+      <ServiceDetailSheet 
+        place={selectedPlace} 
+        onClose={() => setSelectedPlace(null)} 
+      />
+
     </div>
   );
 };
