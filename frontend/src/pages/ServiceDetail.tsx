@@ -31,7 +31,7 @@ export const ServiceDetail = () => {
         {/* Ambient Map Decoration */}
         <div className="absolute inset-0 opacity-20 grayscale contrast-125">
            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" alt="Tactical Background" className="w-full h-full object-cover" />
-           <div className="absolute inset-0 bg-gradient-to-t from-(--nx-bg-[var(--color-surface))] to-transparent" />
+           <div className="absolute inset-0 bg-linear-to-t from-(--nx-bg-[var(--color-surface))] to-transparent" />
         </div>
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

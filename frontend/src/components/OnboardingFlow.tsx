@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Camera, MapPin, Mic, CheckCircle2, ChevronRight, User, Heart, Phone } from 'lucide-react';
-import { useMedicalProfileStore } from '../store/medicalProfileStore';
+import { Bell, Camera, MapPin, Mic, CheckCircle2, ChevronRight, Heart, Phone } from 'lucide-react';
+import { useMedicalProfileStore, type MedicalContact } from '../store/medicalProfileStore';
 import { sanitizeInput } from '../utils/inputSanitizer';
 
 const DEATH_INTERVAL_SEC = 204;
@@ -152,8 +152,16 @@ const Step1 = ({ deathCount, onNext }: { deathCount: number, onNext: () => void 
 const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) => {
   const { 
     name, age, bloodType, setProfile, 
-    emergencyContact1Name, emergencyContact1Phone 
+    contacts, setContacts
   } = useMedicalProfileStore();
+
+  const firstContact: MedicalContact = contacts[0] ?? { name: '', phone: '', relationship: 'Emergency' };
+
+  const updateFirstContact = (updates: Partial<MedicalContact>) => {
+    const updated = contacts.length > 0 ? [...contacts] : [{ name: '', phone: '', relationship: 'Emergency' }];
+    updated[0] = { ...updated[0], ...updates };
+    setContacts(updated);
+  };
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
 
@@ -212,8 +220,8 @@ const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
             <div className="space-y-4">
               <input 
                 placeholder="Contact Name" 
-                value={emergencyContact1Name} 
-                onChange={e => setProfile({ emergencyContact1Name: sanitizeInput(e.target.value, 100) })}
+                value={firstContact.name} 
+                onChange={e => updateFirstContact({ name: sanitizeInput(e.target.value, 100) })}
                 className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:border-[#2979FF] outline-none transition-all text-sm"
               />
               <div className="relative">
@@ -221,8 +229,8 @@ const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
                 <input 
                   type="tel"
                   placeholder="Phone Number" 
-                  value={emergencyContact1Phone} 
-                  onChange={e => setProfile({ emergencyContact1Phone: e.target.value })}
+                  value={firstContact.phone} 
+                  onChange={e => updateFirstContact({ phone: e.target.value })}
                   className="w-full bg-white/5 border border-white/10 pl-14 pr-4 py-4 rounded-2xl focus:border-[#2979FF] outline-none transition-all text-sm"
                 />
               </div>

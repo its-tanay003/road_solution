@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useMedicalProfileStore } from '../store/medicalProfileStore';
+import { useAuthStore } from '../store/authStore';
 import { useSosStore } from '../store/index';
 
 interface WhatsAppSOSButtonProps {
@@ -9,7 +9,7 @@ interface WhatsAppSOSButtonProps {
 }
 
 export const WhatsAppSOSButton: React.FC<WhatsAppSOSButtonProps> = ({ isMeshMode, isSecondary }) => {
-  const { name, bloodType, contacts } = useMedicalProfileStore();
+  const { user, trustedContacts: contacts } = useAuthStore();
   const { location } = useSosStore();
 
   const generateWhatsAppUrl = (phoneNumber?: string) => {
@@ -17,7 +17,7 @@ export const WhatsAppSOSButton: React.FC<WhatsAppSOSButtonProps> = ({ isMeshMode
     const lng = location?.lng || 'LNG_UNKNOWN';
     const timestamp = new Date().toLocaleString();
     
-    const message = `🚨 EMERGENCY ALERT from ROADSoS\nVictim: ${name || 'Unknown'}\nBlood Type: ${bloodType || 'Unknown'}\nGPS: ${lat},${lng}\nTime: ${timestamp}\nAccident detected: G-Force 12.4G\nRespond or call 112 immediately`;
+    const message = `🚨 EMERGENCY ALERT from ROADSoS\nVictim: ${user?.name || 'Unknown'}\nGPS: ${lat},${lng}\nTime: ${timestamp}\nAccident detected: G-Force 12.4G\nRespond or call 112 immediately`;
     
     const baseUrl = "https://wa.me/";
     const target = phoneNumber ? phoneNumber.replace(/\D/g, '') : '';

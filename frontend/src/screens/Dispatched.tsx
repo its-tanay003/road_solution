@@ -47,8 +47,8 @@ export const Dispatched: React.FC = () => {
       
       {/* HUD Background elements */}
       <div className="fixed inset-0 pointer-events-none opacity-10">
-        <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-(--clr-green) to-transparent" />
-        <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-(--clr-green) to-transparent" />
+        <div className="absolute top-0 w-full h-px bg-linear-to-r from-transparent via-(--clr-green) to-transparent" />
+        <div className="absolute bottom-0 w-full h-px bg-linear-to-r from-transparent via-(--clr-green) to-transparent" />
       </div>
 
       <header className="w-full max-w-sm flex items-center justify-between mb-8 relative z-10">
@@ -126,7 +126,7 @@ export const Dispatched: React.FC = () => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-(--clr-bg) to-transparent z-20">
+      <footer className="fixed bottom-0 left-0 w-full p-6 bg-linear-to-t from-(--clr-bg) to-transparent z-20">
           <Link 
             to="/incident-report"
             className="w-full py-4 border border-white/10 rounded-xl font-mono text-[10px] tracking-widest text-(--clr-green) hover:bg-(--clr-green)/10 transition-all uppercase flex items-center justify-center gap-2 mb-4"

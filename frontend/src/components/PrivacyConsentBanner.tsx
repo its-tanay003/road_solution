@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, MapPin, BarChart3, History, Check, X, ExternalLink } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Shield, MapPin, BarChart3, History, Check, ExternalLink } from 'lucide-react';
 import { privacyConsent } from '../utils/privacyConsent';
 import { Link } from 'react-router-dom';
 

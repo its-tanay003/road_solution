@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
   Heart, 
   Phone, 
   ShieldCheck, 
-  AlertCircle, 
   Check, 
   Save,
-  Globe,
-  Plus
+  Globe
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMedicalProfileStore, type MedicalProfile } from '../store/medicalProfileStore';
@@ -37,10 +35,10 @@ export const MedicalProfilePage: React.FC = () => {
     conditions: store.conditions,
     allergies: store.allergies,
     medications: store.medications,
-    emergencyContact1Name: store.emergencyContact1Name,
-    emergencyContact1Phone: store.emergencyContact1Phone,
-    emergencyContact2Name: store.emergencyContact2Name,
-    emergencyContact2Phone: store.emergencyContact2Phone,
+    contacts: store.contacts.length > 0 ? store.contacts : [
+      { name: '', phone: '', relationship: 'Primary' },
+      { name: '', phone: '', relationship: 'Secondary' }
+    ],
     language: store.language,
     profileComplete: store.profileComplete
   });
@@ -228,8 +226,12 @@ export const MedicalProfilePage: React.FC = () => {
                 <input 
                   type="text"
                   placeholder="Name"
-                  value={formData.emergencyContact1Name}
-                  onChange={e => setFormData(prev => ({ ...prev, emergencyContact1Name: e.target.value }))}
+                  value={formData.contacts[0]?.name || ''}
+                  onChange={e => setFormData(prev => {
+                    const newContacts = [...prev.contacts];
+                    newContacts[0] = { ...newContacts[0], name: e.target.value, relationship: 'Primary' };
+                    return { ...prev, contacts: newContacts };
+                  })}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:border-[#FF9933]/50 outline-none"
                 />
                 <div className="relative">
@@ -237,8 +239,12 @@ export const MedicalProfilePage: React.FC = () => {
                   <input 
                     type="tel"
                     placeholder="Phone Number"
-                    value={formData.emergencyContact1Phone}
-                    onChange={e => setFormData(prev => ({ ...prev, emergencyContact1Phone: e.target.value }))}
+                    value={formData.contacts[0]?.phone || ''}
+                    onChange={e => setFormData(prev => {
+                      const newContacts = [...prev.contacts];
+                      newContacts[0] = { ...newContacts[0], phone: e.target.value.replace(/\D/g, '').slice(0, 10), relationship: 'Primary' };
+                      return { ...prev, contacts: newContacts };
+                    })}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-16 pr-5 py-4 focus:border-[#FF9933]/50 outline-none"
                   />
                 </div>
@@ -251,8 +257,12 @@ export const MedicalProfilePage: React.FC = () => {
                 <input 
                   type="text"
                   placeholder="Name"
-                  value={formData.emergencyContact2Name}
-                  onChange={e => setFormData(prev => ({ ...prev, emergencyContact2Name: e.target.value }))}
+                  value={formData.contacts[1]?.name || ''}
+                  onChange={e => setFormData(prev => {
+                    const newContacts = [...prev.contacts];
+                    newContacts[1] = { ...newContacts[1], name: e.target.value, relationship: 'Secondary' };
+                    return { ...prev, contacts: newContacts };
+                  })}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:border-[#FF9933]/50 outline-none"
                 />
                 <div className="relative">
@@ -260,8 +270,12 @@ export const MedicalProfilePage: React.FC = () => {
                   <input 
                     type="tel"
                     placeholder="Phone Number"
-                    value={formData.emergencyContact2Phone}
-                    onChange={e => setFormData(prev => ({ ...prev, emergencyContact2Phone: e.target.value }))}
+                    value={formData.contacts[1]?.phone || ''}
+                    onChange={e => setFormData(prev => {
+                      const newContacts = [...prev.contacts];
+                      newContacts[1] = { ...newContacts[1], phone: e.target.value.replace(/\D/g, '').slice(0, 10), relationship: 'Secondary' };
+                      return { ...prev, contacts: newContacts };
+                    })}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-16 pr-5 py-4 focus:border-[#FF9933]/50 outline-none"
                   />
                 </div>

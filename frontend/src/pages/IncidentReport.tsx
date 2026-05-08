@@ -293,6 +293,7 @@ export const IncidentReport = () => {
            </div>
            <button 
               onClick={handleSubmit}
+              disabled={isSubmitting}
               className="w-full h-16 bg-nx-red-primary text-white font-black text-lg uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:brightness-110 transition-all shadow-[0_0_30px_rgba(255,59,59,0.3)] group overflow-hidden relative"
            >
               <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12" />

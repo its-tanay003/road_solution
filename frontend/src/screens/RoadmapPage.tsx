@@ -345,7 +345,7 @@ export default function RoadmapPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-gradient-to-br from-[#0D1B2A] to-[#080C14] rounded-2xl p-8 border border-[#FF9933]/20 text-center space-y-4">
+        <section className="bg-linear-to-br from-[#0D1B2A] to-[#080C14] rounded-2xl p-8 border border-[#FF9933]/20 text-center space-y-4">
           <h2 className="text-2xl font-black text-white">Partner with ROADSoS</h2>
           <p className="text-gray-400">Join India's most deployable emergency response platform</p>
           <div className="flex flex-wrap justify-center gap-4 mt-4">

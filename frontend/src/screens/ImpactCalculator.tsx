@@ -48,7 +48,7 @@ export const ImpactCalculator: React.FC = () => {
 
         <main className="space-y-12">
           <section className="relative">
-            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-(--clr-blue) via-(--clr-blue)/20 to-transparent rounded-full" />
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-linear-to-b from-(--clr-blue) via-(--clr-blue)/20 to-transparent rounded-full" />
             <Calculator />
           </section>
 

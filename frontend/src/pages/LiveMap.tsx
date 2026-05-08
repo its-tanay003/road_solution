@@ -175,7 +175,7 @@ export const LiveMap = () => {
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-[5]" />
 
       {/* Top Header/Action Bar */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/80 to-transparent z-[40] pointer-events-none flex justify-between p-4 items-start">
+      <div className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-black/80 to-transparent z-[40] pointer-events-none flex justify-between p-4 items-start">
         <button 
           onClick={() => navigate('/')}
           className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors pointer-events-auto shadow-lg"

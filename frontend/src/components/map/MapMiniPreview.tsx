@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Map, Navigation2, Activity } from 'lucide-react';
+import { Map, Navigation2 } from 'lucide-react';
 
 export const MapMiniPreview = () => {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export const MapMiniPreview = () => {
       </div>
 
       {/* Glass Overlay Top */}
-      <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-center z-10 bg-gradient-to-b from-black/60 to-transparent">
+      <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-center z-10 bg-linear-to-b from-black/60 to-transparent">
         <div className="flex items-center gap-2">
           <Map size={14} className="text-blue-400" />
           <span className="text-[10px] font-bold text-white tracking-widest uppercase">Live Tactical Map</span>

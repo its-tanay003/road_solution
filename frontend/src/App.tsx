@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAccessibilityStore } from './store/accessibilityStore';
@@ -10,20 +10,13 @@ import { Dashboard } from './pages/Admin/Dashboard';
 import { Dispatched } from './screens/Dispatched';
 import { SOSActiveScreen } from './screens/SOSActiveScreen';
 import { BystanderReport } from './screens/BystanderReport';
-import { useEmergencyStore } from './store/emergencyStore';
-import { socket } from './lib/socket';
-import { OnboardingFlow } from './components/OnboardingFlow';
-import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { MedicalProfilePage } from './pages/MedicalProfilePage';
 import { GovernancePortal } from './screens/GovernancePortal';
 import { ImpactCalculator } from './screens/ImpactCalculator';
-import { SystemOrchestrator } from './components/SystemOrchestrator';
 import CrashPatternAnalytics from './screens/CrashPatternAnalytics';
 import FamilyPortal from './screens/FamilyPortal';
 import ResponderView from './screens/ResponderView';
 import { ARNavigationView } from './components/ARNavigationView';
-import { PitchDeckMode } from './components/PitchDeckMode';
-import { KeyboardShortcutOverlay } from './components/KeyboardShortcutOverlay';
 import { Roadmap } from './pages/Roadmap';
 import { Research } from './pages/Research';
 import { Technical } from './pages/Technical';
@@ -40,7 +33,6 @@ import { ConsentManagementPage } from './pages/ConsentManagementPage';
 import { PrivacyConsentBanner } from './components/PrivacyConsentBanner';
 
 // Stores
-import { useMedicalProfileStore } from './store/medicalProfileStore';
 import { VolunteerAlertScreen } from './components/VolunteerAlertScreen';
 import { VolunteerResponderNetwork } from './components/VolunteerResponderNetwork';
 import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';

@@ -25,6 +25,8 @@
   --shadow-glow-red: 0 0 16px rgba(255, 59, 59, 0.4);
   --shadow-glow-green: 0 0 16px rgba(50, 215, 75, 0.4);
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  --color-border: var(--border);
 }
 
 /* ============================================================

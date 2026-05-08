@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, User, Phone, Mail, Globe, 
-  MessageCircle, Users, Bell, MapPin, Shield, Palette, Settings, 
+  ArrowLeft, Phone, Mail, Globe, 
+  MessageCircle, Users, Bell, MapPin, Shield, Palette, 
   HelpCircle, Info, LogOut, ChevronRight, CheckCircle2, AlertTriangle,
-  Volume2, Vibrate as Vibration, Database, Download, Trash2, Camera, Mic, Activity
+  Volume2, Vibrate as Vibration, Download, Trash2, Camera, Mic, Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -15,10 +15,9 @@ import { EmailAuthModal } from '../components/EmailAuthModal';
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, googleConnected, instagramConnected, facebookConnected, whatsappNumber, trustedContacts, logout } = useAuthStore();
+  const { user, googleConnected, instagramConnected, whatsappNumber, trustedContacts, logout } = useAuthStore();
   const { 
-    fontSize, setFontSize, fontWeight, setFontWeight, 
-    letterSpacing, setLetterSpacing, theme, setTheme, 
+    fontSize, setFontSize, theme, setTheme, 
     language, setLanguage, simplifiedMode, setSimplifiedMode 
   } = useAccessibilityStore();
 

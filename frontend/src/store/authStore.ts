@@ -101,7 +101,7 @@ export const useAuthStore = create<AuthState>()(
         user: state.user ? { ...state.user, ...data } : null
       })),
 
-      connectSocial: (provider, handle) => set((state) => ({
+      connectSocial: (provider, handle) => set(() => ({
         [`${provider}Connected`]: true,
         ...(provider === 'instagram' ? { instagramHandle: handle } : {})
       })),

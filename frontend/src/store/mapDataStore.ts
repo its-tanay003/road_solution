@@ -63,7 +63,7 @@ export const useMapDataStore = create<MapDataState>((set, get) => ({
 
   setSearchRadius: (searchRadius) => set({ searchRadius }),
 
-  setSosActive: (sosActive) => set((state) => {
+  setSosActive: (sosActive) => set(() => {
     // If turning on SOS, force only critical layers
     if (sosActive) {
       return { 

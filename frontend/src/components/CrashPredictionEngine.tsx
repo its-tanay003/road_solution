@@ -242,7 +242,7 @@ export const CrashPredictionEngine: React.FC = () => {
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: '94.2%' }}
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                        className="h-full bg-linear-to-r from-blue-500 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
                       />
                     </div>
                   </div>

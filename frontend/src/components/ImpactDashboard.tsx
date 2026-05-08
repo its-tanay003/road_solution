@@ -45,9 +45,9 @@ export const ImpactDashboard: React.FC = () => {
         
         {/* HERO STAT — VISCERAL COUNTER */}
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-amber-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <div className="absolute -inset-1 bg-linear-to-r from-red-600 to-amber-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative bg-slate-900/80 border border-red-500/20 rounded-3xl p-8 md:p-12 flex flex-col items-center text-center overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-600 animate-shimmer"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-red-600 via-amber-500 to-red-600 animate-shimmer"></div>
             
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
@@ -63,7 +63,7 @@ export const ImpactDashboard: React.FC = () => {
             </h2>
 
             <div className="flex items-baseline gap-2">
-              <span className="text-7xl md:text-9xl font-black tracking-tighter tabular-nums text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500">
+              <span className="text-7xl md:text-9xl font-black tracking-tighter tabular-nums text-transparent bg-clip-text bg-linear-to-b from-white to-slate-500">
                 {sessionDeaths.toFixed(4)}
               </span>
               <span className="text-2xl md:text-4xl font-black text-red-600 animate-pulse">LIVES</span>
