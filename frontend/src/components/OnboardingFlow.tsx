@@ -1,4 +1,7 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Camera, MapPin, Mic, CheckCircle2, ChevronRight, User, Heart, Phone } from 'lucide-react';
+import { useMedicalProfileStore } from '../store/medicalProfileStore';
 import { sanitizeInput } from '../utils/inputSanitizer';
 
 const DEATH_INTERVAL_SEC = 204;

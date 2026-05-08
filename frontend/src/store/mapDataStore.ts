@@ -14,7 +14,7 @@ export type ServiceLayerType =
   | 'blackSpots' 
   | 'hazards';
 
-export interface MapPlace {
+export type MapPlace = {
   id: string;
   name: string;
   lat: number;

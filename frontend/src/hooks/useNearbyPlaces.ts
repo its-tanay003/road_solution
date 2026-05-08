@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useMapDataStore, MapPlace, ServiceLayerType } from '../store/mapDataStore';
+import { useMapDataStore } from '../store/mapDataStore';
+import type { MapPlace, ServiceLayerType } from '../store/mapDataStore';
 
 const LAYER_CONFIGS: Record<ServiceLayerType, { gmapTypes: string[], overpassQuery: string }> = {
   hospitals: { gmapTypes: ['hospital'], overpassQuery: 'node["amenity"="hospital"]' },

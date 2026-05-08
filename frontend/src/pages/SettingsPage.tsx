@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, User, Phone, Mail, Globe, Instagram, Facebook, 
+  ArrowLeft, User, Phone, Mail, Globe, 
   MessageCircle, Users, Bell, MapPin, Shield, Palette, Settings, 
   HelpCircle, Info, LogOut, ChevronRight, CheckCircle2, AlertTriangle,
-  Volume2, Vibration, Database, Download, Trash2, Camera, Mic, Activity
+  Volume2, Vibrate as Vibration, Database, Download, Trash2, Camera, Mic, Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { useAccessibilityStore, FontSize, Theme, Language } from '../store/accessibilityStore';
+import { useAccessibilityStore } from '../store/accessibilityStore';
+import type { FontSize, Theme, Language } from '../store/accessibilityStore';
 import { PhoneOTPModal } from '../components/PhoneOTPModal';
 import { EmailAuthModal } from '../components/EmailAuthModal';
 
@@ -135,7 +136,7 @@ export const SettingsPage: React.FC = () => {
             onClick={() => !googleConnected && window.alert('Google Auth integration coming soon in production.')}
           />
           <Row 
-            icon={Instagram} 
+            icon={Globe} 
             label="Instagram" 
             value={instagramConnected ? 'Connected' : 'For emergency photo sharing'}
             onClick={() => !instagramConnected && window.alert('Instagram integration coming soon.')}

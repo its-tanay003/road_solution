@@ -5,7 +5,8 @@ import {
   Flame, Fuel, ParkingCircle, CreditCard, AlertTriangle, AlertCircle,
   Layers, ChevronRight, ChevronLeft
 } from 'lucide-react';
-import { useMapDataStore, ServiceLayerType } from '../../store/mapDataStore';
+import { useMapDataStore } from '../../store/mapDataStore';
+import type { ServiceLayerType } from '../../store/mapDataStore';
 
 const LAYERS: { id: ServiceLayerType; label: string; icon: any; color: string }[] = [
   { id: 'hospitals', label: 'Hospitals', icon: Building2, color: 'text-red-500' },

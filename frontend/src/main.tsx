@@ -4,24 +4,35 @@ import App from './App.tsx'
 import './index.css'
 import './nexus.css'
 import './i18n/config'
-import { registerSW } from 'virtual:pwa-register'
 
-const updateSW = registerSW({
-  onNeedRefresh() {
-    if (confirm('New content available. Reload?')) {
-      updateSW(true)
-    }
-  },
-})
+// Progressive Web App Setup
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.log('SW registration failed: ', err);
+    });
+  });
+}
 
-// Custom PWA Install Prompt Logic
-window.addEventListener('beforeinstallprompt', (e: Event) => {
+// Global Error Handler for Tactical Stability
+window.addEventListener('error', (e) => {
+  console.error('[RUNTIME CRITICAL]', e.error);
+});
+
+// Capture install prompt for custom HUD button
+window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   (window as any).deferredPrompt = e;
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+console.log('Mounting App...');
+try {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  )
+  console.log('App mounted successfully.');
+} catch (err) {
+  console.error('Failed to mount App:', err);
+}

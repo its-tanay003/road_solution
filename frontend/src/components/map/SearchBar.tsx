@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Mic, Building2, Car, Shield, Activity, Fuel } from 'lucide-react';
-import { useMapDataStore, ServiceLayerType } from '../../store/mapDataStore';
+import { useMapDataStore } from '../../store/mapDataStore';
+import type { ServiceLayerType } from '../../store/mapDataStore';
 import { Autocomplete } from '@react-google-maps/api';
 
 const QUICK_FILTERS = [

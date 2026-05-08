@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPlace } from '../../store/mapDataStore';
-import { Phone, Navigation, Share2, X, Star, Clock, Copy, BedDouble, AlertCircle } from 'lucide-react';
+import type { MapPlace } from '../../store/mapDataStore';
+import { Phone, Navigation, Share2, X, Star, Activity, Copy } from 'lucide-react';
 
 interface ServiceDetailSheetProps {
   place: MapPlace | null;

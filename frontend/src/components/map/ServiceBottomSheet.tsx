@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPlace } from '../../store/mapDataStore';
-import { Phone, Navigation, Info, Clock, Star } from 'lucide-react';
+import type { MapPlace } from '../../store/mapDataStore';
+import { Phone, Navigation, Info, Star } from 'lucide-react';
 
 interface ServiceBottomSheetProps {
   places: MapPlace[];

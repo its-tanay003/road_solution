@@ -637,7 +637,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
     if (id === 1) {
       startScenario('CRASH');
       const sosStore = useSosStore.getState();
-      const emergencyStore = useEmergencyStore.getState();
+      const emergencyStore = useSosStore.getState();
       const uiStore = useUIStore.getState();
       const ambulanceStore = useAmbulanceStore.getState();
 
@@ -686,7 +686,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
       // t=12: Golden Hour
       setTimeout(() => {
         if (get().isPaused) return;
-        useEmergencyStore.getState().setGoldenHourActive(true);
+        useSosStore.getState().setGoldenHourActive(true);
         setScenarioStep(4);
       }, 12000 * speedFactor);
 

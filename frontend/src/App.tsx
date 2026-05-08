@@ -44,7 +44,6 @@ import { useMedicalProfileStore } from './store/medicalProfileStore';
 import { VolunteerAlertScreen } from './components/VolunteerAlertScreen';
 import { VolunteerResponderNetwork } from './components/VolunteerResponderNetwork';
 import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';
-import { useDemoStore } from './store';
 import { LoginPage } from './pages/LoginPage';
 import { SecurityDashboard } from './pages/SecurityDashboard';
 import { SettingsButton } from './components/SettingsButton';
@@ -81,93 +80,9 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
 
 const AppContent = () => {
   const location = useLocation();
-  const { profileComplete } = useMedicalProfileStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const { confirmDispatch } = useEmergencyStore();
-
-  useEffect(() => {
-    socket.on('dispatch:confirmed', (data) => {
-      confirmDispatch(data);
-    });
-    
-    socket.on('sos:ack', () => {
-      console.log('SOS received by backend');
-    });
-
-    return () => {
-      socket.off('dispatch:confirmed');
-      socket.off('sos:ack');
-    };
-  }, [confirmDispatch]);
-
-  const { 
-    isPresentationMode, 
-    togglePresentationMode, 
-    toggleShortcuts, 
-    triggerScenario, 
-    showShortcuts, 
-    isPaused,
-    isDemoControlOpen,
-    setDemoControlOpen
-  } = useDemoStore();
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      // Ctrl+Shift+D to toggle demo controls
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        setDemoControlOpen(!isDemoControlOpen);
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [isDemoControlOpen, setDemoControlOpen]);
-
-  useEffect(() => {
-    const handleGlobalKeydown = (e: KeyboardEvent) => {
-      // Toggle shortcuts with ?
-      if (e.key === '?') {
-        toggleShortcuts();
-        return;
-      }
-
-      // Shift+P for Presentation Mode
-      if (e.shiftKey && (e.key === 'P' || e.key === 'p')) {
-        togglePresentationMode();
-        return;
-      }
-
-      // Quick triggers for scenarios if in demo mode
-      if (isDemoControlOpen && !isPresentationMode) {
-        if (e.key === '1') triggerScenario(1);
-        if (e.key === '2') triggerScenario(2);
-        if (e.key === '3') triggerScenario(3);
-        if (e.key === '0') triggerScenario(4); // Reset
-      }
-    };
-
-    window.addEventListener('keydown', handleGlobalKeydown);
-    return () => window.removeEventListener('keydown', handleGlobalKeydown);
-  }, [isDemoControlOpen, isPresentationMode, togglePresentationMode, toggleShortcuts, triggerScenario]);
-
-  if (isLoading) {
-    return <AppLoadingScreen onComplete={() => setIsLoading(false)} />;
-  }
-
-  if (!profileComplete && !isDemoControlOpen) {
-    return (
-      <>
-        <PrivacyConsentBanner />
-        <OnboardingFlow />
-      </>
-    );
-  }
-
+  
   return (
     <div className="w-full min-h-screen bg-[#080C14] text-[#E8EDF5] selection:bg-[#2979FF]/30 overflow-hidden font-sans">
-      {/* HUD Overlays */}
-      <div className="scanline-overlay pointer-events-none opacity-20" />
-      <div className="scanline-sweep pointer-events-none" />
-      
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/login" element={<LoginPage />} />
@@ -204,25 +119,7 @@ const AppContent = () => {
       <PrivacyConsentBanner />
       <VolunteerAlertScreen />
       <NHAISmartHighwayPanel />
-
-      {/* Global Demo Tools */}
-      {isDemoControlOpen && <SystemOrchestrator />}
       
-      {/* Presentation & Shortcut Layers */}
-      <PitchDeckMode 
-        isOpen={isPresentationMode} 
-        onClose={togglePresentationMode} 
-        onStartDemo={() => {
-          togglePresentationMode();
-          triggerScenario(1);
-        }}
-      />
-      <KeyboardShortcutOverlay 
-        isOpen={showShortcuts} 
-        onClose={() => toggleShortcuts(false)}
-        isPaused={isPaused}
-      />
-
       <SettingsButton />
       <SettingsPanel />
     </div>
