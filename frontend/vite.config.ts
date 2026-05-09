@@ -2,12 +2,15 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: false,
+    hmr: true,
+
+  },
   plugins: [
     react(), 
     tailwindcss(),
@@ -51,11 +54,11 @@ export default defineConfig({
     })
   ],
   resolve: {
-    alias: [
-      { find: /^leaflet$/, replacement: path.resolve(__dirname, 'src/lib/leaflet-esm.ts') },
-    ],
+    dedupe: ['react', 'react-dom'],
   },
-  optimizeDeps: { exclude: ['leaflet'] },
+  optimizeDeps: { 
+    include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'framer-motion', 'leaflet'],
+  },
   build: {
     rollupOptions: {
       output: {

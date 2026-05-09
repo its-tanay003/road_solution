@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useAccessibilityStore } from './store/accessibilityStore';
+
 import { useAuthStore } from './store/authStore';
 
 // Screens & Components
@@ -41,16 +41,7 @@ import { SecurityDashboard } from './pages/SecurityDashboard';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsPanel } from './components/SettingsPanel';
 
-// Re-apply persisted settings to DOM on every page load
-function AppInitializer() {
-  const { fontSize, fontWeight, letterSpacing, theme, language, simplifiedMode, applySettings } = useAccessibilityStore();
 
-  useEffect(() => {
-    applySettings({ fontSize, fontWeight, letterSpacing, theme, language, simplifiedMode });
-  }, [fontSize, fontWeight, letterSpacing, theme, language, simplifiedMode, applySettings]);
-
-  return null;
-}
 
 // Protect routes behind auth
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -119,9 +110,9 @@ const AppContent = () => {
 };
 
 const App = () => {
+  console.log('[DEBUG] Rendering App, React Version:', React.version);
   return (
     <BrowserRouter>
-      <AppInitializer />
       <AppContent />
     </BrowserRouter>
   );

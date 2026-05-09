@@ -98,6 +98,9 @@ export const useAccessibilityStore = create<AccessibilityState>()(
     {
       name: 'roadsos-accessibility',
       version: 1,
+      migrate: (persistedState: unknown) => {
+        return persistedState as AccessibilityState;
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.applySettings(state);
@@ -106,3 +109,8 @@ export const useAccessibilityStore = create<AccessibilityState>()(
     }
   )
 );
+
+// Automatically apply settings whenever the store changes
+useAccessibilityStore.subscribe((state) => {
+  state.applySettings(state);
+});
