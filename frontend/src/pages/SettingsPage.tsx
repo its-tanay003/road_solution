@@ -13,6 +13,58 @@ import type { FontSize, Theme, Language } from '../store/accessibilityStore';
 import { PhoneOTPModal } from '../components/PhoneOTPModal';
 import { EmailAuthModal } from '../components/EmailAuthModal';
 
+const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
+  <div className="mb-8">
+    <h3 className="px-6 mb-2 text-[10px] font-bold tracking-[0.2em] text-(--clr-text-2) uppercase">
+      {title}
+    </h3>
+    <div className="bg-white/5 border-y border-white/10 overflow-hidden">
+      {children}
+    </div>
+  </div>
+);
+
+const Row = ({ 
+  icon: Icon, 
+  label, 
+  value, 
+  right, 
+  onClick, 
+  danger 
+}: { 
+  icon: any, 
+  label: string, 
+  value?: string, 
+  right?: React.ReactNode, 
+  onClick?: () => void,
+  danger?: boolean
+}) => (
+  <div
+    onClick={onClick}
+    role={onClick ? "button" : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    className={`w-full flex items-center gap-4 px-6 py-4 transition-colors border-b border-white/5 last:border-0 text-left ${onClick ? 'hover:bg-white/5 cursor-pointer' : ''}`}
+  >
+    <div className={`p-2 rounded-lg ${danger ? 'bg-red-500/10 text-red-500' : 'bg-white/5 text-(--clr-text-2)'}`}>
+      <Icon size={20} />
+    </div>
+    <div className="flex-1">
+      <p className={`text-sm font-medium ${danger ? 'text-red-500' : 'text-(--clr-text)'}`}>{label}</p>
+      {value && <p className="text-xs text-(--clr-text-2) mt-0.5">{value}</p>}
+    </div>
+    {right || <ChevronRight size={18} className="text-(--clr-text-2) opacity-50" />}
+  </div>
+);
+
+const Toggle = ({ active, onToggle }: { active: boolean, onToggle: () => void }) => (
+  <button
+    onClick={(e) => { e.stopPropagation(); onToggle(); }}
+    className={`w-12 h-6 rounded-full transition-all relative ${active ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
+  >
+    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'translate-x-6' : 'translate-x-0'}`} />
+  </button>
+);
+
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, googleConnected, instagramConnected, whatsappNumber, trustedContacts, logout } = useAuthStore();
@@ -27,55 +79,6 @@ export const SettingsPage: React.FC = () => {
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
-  const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div className="mb-8">
-      <h3 className="px-6 mb-2 text-[10px] font-bold tracking-[0.2em] text-(--clr-text-2) uppercase">
-        {title}
-      </h3>
-      <div className="bg-white/5 border-y border-white/10 overflow-hidden">
-        {children}
-      </div>
-    </div>
-  );
-
-  const Row = ({ 
-    icon: Icon, 
-    label, 
-    value, 
-    right, 
-    onClick, 
-    danger 
-  }: { 
-    icon: any, 
-    label: string, 
-    value?: string, 
-    right?: React.ReactNode, 
-    onClick?: () => void,
-    danger?: boolean
-  }) => (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 text-left"
-    >
-      <div className={`p-2 rounded-lg ${danger ? 'bg-red-500/10 text-red-500' : 'bg-white/5 text-(--clr-text-2)'}`}>
-        <Icon size={20} />
-      </div>
-      <div className="flex-1">
-        <p className={`text-sm font-medium ${danger ? 'text-red-500' : 'text-(--clr-text)'}`}>{label}</p>
-        {value && <p className="text-xs text-(--clr-text-2) mt-0.5">{value}</p>}
-      </div>
-      {right || <ChevronRight size={18} className="text-(--clr-text-2) opacity-50" />}
-    </button>
-  );
-
-  const Toggle = ({ active, onToggle }: { active: boolean, onToggle: () => void }) => (
-    <button
-      onClick={(e) => { e.stopPropagation(); onToggle(); }}
-      className={`w-12 h-6 rounded-full transition-all relative ${active ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
-    >
-      <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'translate-x-6' : 'translate-x-0'}`} />
-    </button>
-  );
 
   return (
     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">

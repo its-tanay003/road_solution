@@ -35,6 +35,7 @@ import { supabaseSsrMiddleware } from './middleware/supabaseSsr';
 import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { validateSOS, validateBystanderReport, validateTriage } from './middleware/requestValidator';
+import { supabaseAdmin as supabase } from './services/supabaseClient';
 
 dotenv.config();
 
