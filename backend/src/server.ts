@@ -24,6 +24,7 @@ import pushRoutes from './routes/push';
 import dispatchRoutes, { attachDispatchIo } from './routes/dispatch';
 import dispatch108Routes from './routes/dispatch108';
 import vaahanRoutes from './routes/vaahan';
+import aiRoutes from './routes/ai';
 import { observabilityMiddleware, metrics } from './middleware/observability';
 import { processFusionTriage } from './services/fusionEngine';
 import { getRiskHeatmap } from './services/riskEngine';
@@ -192,6 +193,8 @@ app.use('/api/push', requireAuth, pushRoutes);
 app.use('/api/dispatch', requireAuth, dispatchRoutes);
 app.use('/api/dispatch/108', requireAuth, dispatch108Routes);
 app.use('/api/vaahan', requireAuth, vaahanRoutes);
+app.use('/api/ai', requireAuth, aiRoutes);
+
 
 // Predictive Risk Engine Endpoint
 app.get('/api/risk/heatmap', requireAuth, (req, res) => {
