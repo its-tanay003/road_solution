@@ -78,7 +78,7 @@ export const VolunteerAlertScreen: React.FC = () => {
 
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-                <div className="w-10 h-10 rounded-(--radius-lg) bg-(--nx-bg-(--color-surface)) flex items-center justify-center">
+                <div className="w-10 h-10 rounded-(--radius-lg) bg-(--nx-bg-surface) flex items-center justify-center">
                   <MapPin className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
@@ -88,7 +88,7 @@ export const VolunteerAlertScreen: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-                <div className="w-10 h-10 rounded-(--radius-lg) bg-(--nx-bg-(--color-surface)) flex items-center justify-center">
+                <div className="w-10 h-10 rounded-(--radius-lg) bg-(--nx-bg-surface) flex items-center justify-center">
                   <AlertCircle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>

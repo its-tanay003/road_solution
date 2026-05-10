@@ -1,4 +1,6 @@
-@import "./styles/tokens.css";
+:root {
+  --invalid[variable]: red;
+}
 
 :root {
   --clr-bg: #080C14;

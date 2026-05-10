@@ -135,7 +135,7 @@ export const BlockchainAuditTrail = () => {
         </header>
 
         {/* Chain Visualization */}
-        <Panel className="p-0 border-nx-border/40 overflow-hidden bg-nx-bg-(--color-surface)">
+        <Panel className="p-0 border-nx-border/40 overflow-hidden bg-nx-bg-surface">
           <div className="p-4 border-b border-nx-border/30 flex items-center justify-between bg-white/2">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">

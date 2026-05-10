@@ -168,7 +168,7 @@ export const TriageChat = () => {
       <div className="absolute inset-0 pointer-events-none opacity-5 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.1)_2px,rgba(255,255,255,0.1)_3px)] z-50" />
 
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-nx-border bg-nx-bg-(--color-surface)/80 backdrop-blur-md z-20">
+      <div className="flex items-center justify-between p-4 border-b border-nx-border bg-nx-bg-surface/80 backdrop-blur-md z-20">
         <div className="flex items-center gap-4">
           <Button variant="secondary" size="sm" onClick={() => navigate(-1)} className="p-2 min-w-0">
             <ChevronLeft size={16} />
@@ -216,7 +216,7 @@ export const TriageChat = () => {
                 <div className={`p-4 rounded-sm border ${
                   msg.role === 'user' 
                     ? 'bg-nx-red-dim border-nx-red-primary/30 text-white' 
-                    : 'bg-nx-bg-(--color-surface) border-nx-border text-nx-text-secondary leading-relaxed text-sm'
+                    : 'bg-nx-bg-surface border-nx-border text-nx-text-secondary leading-relaxed text-sm'
                 }`}>
                   {msg.content}
                   {msg.role === 'assistant' && msg.content === '' && (
@@ -235,7 +235,7 @@ export const TriageChat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-nx-bg-(--color-surface) border-t border-nx-border space-y-4">
+      <div className="p-4 bg-nx-bg-surface border-t border-nx-border space-y-4">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
            {["Yes, injuries present", "Just property damage", "Multiple vehicles", "Smoke/Fire detected"].map((reply, i) => (
              <button 

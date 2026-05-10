@@ -42,7 +42,7 @@ export const HospitalCapacityDashboard: React.FC<HospitalCapacityDashboardProps>
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-(--nx-bg-(--color-surface)) overflow-hidden relative">
+    <div className="w-full h-full flex flex-col bg-(--nx-bg-surface) overflow-hidden relative">
       {!connected && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-1000 bg-amber-500/90 backdrop-blur-md text-black px-4 py-1.5 rounded-full flex items-center gap-2 border border-amber-600 shadow-xl pointer-events-none">
           <AlertTriangle size={14} className="animate-pulse" />

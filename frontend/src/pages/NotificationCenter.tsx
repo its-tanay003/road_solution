@@ -91,7 +91,7 @@ export const NotificationCenter = () => {
   return (
     <div className="flex flex-col h-full bg-nx-bg-base text-nx-text-primary">
       {/* Header */}
-      <header className="border-b border-nx-border p-6 bg-nx-bg-(--color-surface)/50 backdrop-blur-md sticky top-0 z-20">
+      <header className="border-b border-nx-border p-6 bg-nx-bg-surface/50 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className={`p-1.5 rounded-full ${isSuppressed ? 'bg-nx-amber-primary/20 text-nx-amber-primary' : 'bg-nx-blue-primary/20 text-nx-blue-primary'}`}>
