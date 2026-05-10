@@ -140,7 +140,7 @@ export const IncidentReport = () => {
                    initial={{ opacity: 0 }}
                    animate={{ opacity: 1 }}
                    exit={{ opacity: 0 }}
-                   className="absolute inset-0 bg-nx-bg-(--color-surface)/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-8 border border-nx-blue-primary/30 rounded-sm"
+                   className="absolute inset-0 bg-nx-bg-surface/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-8 border border-nx-blue-primary/30 rounded-sm"
                  >
                    <div className="relative mb-6">
                       <div className="w-16 h-16 border-2 border-nx-blue-primary/20 border-t-nx-blue-primary rounded-full animate-spin" />
@@ -198,7 +198,7 @@ export const IncidentReport = () => {
         </Panel>
 
         {/* Vaahan Vehicle Verification Tool */}
-        <div className="nexus-card p-6 mb-8 bg-nx-bg-(--color-surface)/95 border-nx-blue-primary/30">
+        <div className="nexus-card p-6 mb-8 bg-(--nx-bg-surface)/95 border-nx-blue-primary/30">
            <div className="flex items-center gap-3 mb-6">
               <Search size={18} className="text-nx-blue-primary" />
               <h3 className="text-xs font-bold text-white uppercase tracking-widest">VAAHAN VERIFICATION</h3>
@@ -206,7 +206,7 @@ export const IncidentReport = () => {
            <VaahanLookup />
         </div>
 
-        <div className="nexus-card p-6 mb-8 bg-nx-bg-(--color-surface)/95 border-nx-blue-primary/30">
+        <div className="nexus-card p-6 mb-8 bg-(--nx-bg-surface)/95 border-nx-blue-primary/30">
            <div className="flex items-center gap-3 mb-6">
               <div className="w-1 h-4 bg-nx-blue-primary" />
               <div className="flex-1 border-t border-nx-blue-primary/20" />

@@ -60,28 +60,40 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'framer-motion', 'leaflet'],
   },
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
-        codeSplitting: true,
         manualChunks(id) {
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-            return 'react-vendor';
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'animation';
+            }
+            if (id.includes('leaflet') || id.includes('react-leaflet')) {
+              return 'map';
+            }
+            if (id.includes('three') || id.includes('@react-three')) {
+              return 'three';
+            }
+            if (id.includes('chart.js') || id.includes('react-chartjs-2')) {
+              return 'charts';
+            }
+            if (id.includes('jspdf') || id.includes('html2canvas')) {
+              return 'pdf';
+            }
+            if (id.includes('i18next') || id.includes('react-i18next')) {
+              return 'i18n';
+            }
+            if (id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'ui-utils';
+            }
           }
-          if (id.includes('leaflet') || id.includes('react-leaflet')) {
-            return 'map';
-          }
-          if (id.includes('framer-motion')) {
-            return 'animation';
-          }
-          if (id.includes('three')) {
-            return 'three';
-          }
-          if (id.includes('recharts')) {
-            return 'charts';
-          }
-        },
-      },
-    },
+        }
+      }
+    }
   },
+
 });

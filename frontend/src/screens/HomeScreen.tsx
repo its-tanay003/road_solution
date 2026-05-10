@@ -1,13 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { IndiaStatsTicker } from '../components/IndiaStatsTicker';
 import { Shield, Activity, Globe, Navigation2, BookOpen, X, Building2, ShieldCheck } from 'lucide-react';
-import { RoadSafetyAwareness } from '../components/RoadSafetyAwareness';
 import { useSocket } from '../hooks/useSocket';
 import { ProfileCompleteBadge } from '../components/ProfileCompleteBadge';
 import { SOSButton } from '../components/SOSButton';
 import { MapMiniPreview } from '../components/map/MapMiniPreview';
+
+// Lazy load awareness component
+const RoadSafetyAwareness = React.lazy(() => import('../components/RoadSafetyAwareness').then(m => ({ default: m.RoadSafetyAwareness })));
+
+
 
 // --- Particle Canvas Background ---
 const ParticleCanvas = () => {
@@ -222,8 +226,11 @@ const HomeScreen: React.FC = () => {
                 >
                   <X size={20} />
                 </button>
-                <RoadSafetyAwareness />
+                <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[#2979FF]/20 border-t-[#2979FF] animate-spin" /></div>}>
+                  <RoadSafetyAwareness />
+                </Suspense>
               </motion.div>
+
             </motion.div>
           )}
         </AnimatePresence>

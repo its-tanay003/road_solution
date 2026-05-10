@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:css": "stylelint src/**/*.css",
+    "check:bundle": "node scripts/checkBundleSize.cjs",
+    "prepare": "husky install",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -63,6 +66,10 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
+    "stylelint": "^17.11.0",
+    "stylelint-config-standard": "^40.0.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10"
@@ -70,5 +77,13 @@
   "overrides": {
     "react": "$react",
     "react-dom": "$react-dom"
+  },
+  "lint-staged": {
+    "*.css": [
+      "stylelint --fix"
+    ],
+    "*.{ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }

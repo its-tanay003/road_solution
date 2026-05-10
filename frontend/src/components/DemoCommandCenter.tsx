@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldAlert, 
@@ -22,9 +22,12 @@ import { useJudgeStore, useChaosStore, useEmergencyStore } from '../store';
 import 'leaflet/dist/leaflet.css';
 import { GoldenHourTimer } from './GoldenHourTimer';
 import { DownloadReportButton } from './DownloadReportButton';
-import { CrashReconstruction3D } from './CrashReconstruction3D';
-import { WearableBiometrics } from './WearableBiometrics';
 import { VaahanLookup } from './VaahanLookup';
+
+// Heavy Components — Lazy Loaded
+const CrashReconstruction3D = lazy(() => import('./CrashReconstruction3D').then(m => ({ default: m.CrashReconstruction3D })));
+const WearableBiometrics = lazy(() => import('./WearableBiometrics').then(m => ({ default: m.WearableBiometrics })));
+
 
 // Fix leaflet icon issues
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -237,7 +240,7 @@ export const DemoCommandCenter = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2 bg-slate-900 border border-white/5 px-3 py-1 rounded-(--radius-lg)">
+        <div className="flex items-center gap-2 bg-slate-900 border border-white/5 px-3 py-1 rounded-lg">
           <div className="flex items-center gap-1 mr-2">
             <button onClick={() => playScenario('CRASH')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Crash</button>
             <button onClick={() => playScenario('RURAL')} className="text-[10px] font-mono text-slate-400 hover:text-white uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"><Play size={10}/> Rural</button>
@@ -440,7 +443,7 @@ export const DemoCommandCenter = () => {
               </div>
               <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
                 {unitStatus === 'IDLE' ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-700 space-y-2 border-2 border-dashed border-white/5 rounded-(--radius-lg)">
+                  <div className="h-full flex flex-col items-center justify-center text-slate-700 space-y-2 border-2 border-dashed border-white/5 rounded-lg">
                     <Clock size={24} />
                     <span className="text-[10px] font-mono uppercase">Scanning...</span>
                   </div>
@@ -448,7 +451,7 @@ export const DemoCommandCenter = () => {
                   <motion.div 
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="p-3 bg-red-500/10 border border-red-500/30 rounded-(--radius-lg)"
+                    className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-black text-red-500">#ALPHA-9</span>
@@ -487,7 +490,7 @@ export const DemoCommandCenter = () => {
 
           {/* Map Section */}
           <div className="flex-1 min-h-[300px] bg-slate-900 rounded-xl overflow-hidden relative border border-white/5">
-            <div className="absolute top-4 left-4 z-1000 bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-(--radius-lg) pointer-events-none">
+            <div className="absolute top-4 left-4 z-1000 bg-slate-950/80 backdrop-blur border border-white/10 p-2 rounded-lg pointer-events-none">
               <div className="flex items-center gap-4">
                 <div className="text-center">
                   <div className="text-[9px] text-slate-500 uppercase font-black">AI Triage</div>
@@ -533,7 +536,7 @@ export const DemoCommandCenter = () => {
               {['DISPATCHED', 'EN ROUTE', 'ON SCENE'].map((status) => (
                 <div 
                   key={status}
-                  className={`flex-1 py-2 px-3 rounded-(--radius-lg) flex items-center justify-center gap-2 transition-all border ${
+                  className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all border ${
                     unitStatus === status 
                       ? 'bg-emerald-500 text-white font-black border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
                       : 'bg-slate-950/80 text-slate-600 font-bold border-white/5'
@@ -558,14 +561,18 @@ export const DemoCommandCenter = () => {
                     <span className="text-[9px] text-emerald-500 font-mono">LIVE_FEED</span>
                   </div>
                 </div>
-                <CrashReconstruction3D />
+                <Suspense fallback={<div className="h-[280px] w-full bg-white/5 animate-pulse rounded-2xl flex items-center justify-center text-[10px] font-mono text-white/20">Loading 3D View...</div>}>
+                  <CrashReconstruction3D />
+                </Suspense>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between px-1">
                   <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Telemetry Dashboard</h3>
                   <div className="text-[9px] text-slate-400 font-mono">ENCRYPTED_SSL</div>
                 </div>
-                <WearableBiometrics />
+                <Suspense fallback={<div className="h-[280px] w-full bg-white/5 animate-pulse rounded-2xl flex items-center justify-center text-[10px] font-mono text-white/20">Loading Telemetry...</div>}>
+                  <WearableBiometrics />
+                </Suspense>
               </div>
             </div>
 

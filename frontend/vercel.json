@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run lint:css && npm run build && npm run check:bundle",
+  "framework": "vite",
   "rewrites": [
     {
       "source": "/(.*)",

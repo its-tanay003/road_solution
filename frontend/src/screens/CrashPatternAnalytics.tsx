@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, ShieldCheck, Download, Calendar, Share2 } from 'lucide-react';
-import { TimePatternHeatmap } from '../components/TimePatternHeatmap';
-import { RoadTypeBreakdown } from '../components/RoadTypeBreakdown';
-import { CausationWordCloud } from '../components/CausationWordCloud';
-import { PredictiveHotspotCard } from '../components/PredictiveHotspotCard';
 import { Button } from '../components/ui/Button';
+
+// Lazy loaded chart components
+const TimePatternHeatmap = lazy(() => import('../components/TimePatternHeatmap').then(m => ({ default: m.TimePatternHeatmap })));
+const RoadTypeBreakdown = lazy(() => import('../components/RoadTypeBreakdown').then(m => ({ default: m.RoadTypeBreakdown })));
+const CausationWordCloud = lazy(() => import('../components/CausationWordCloud').then(m => ({ default: m.CausationWordCloud })));
+const PredictiveHotspotCard = lazy(() => import('../components/PredictiveHotspotCard').then(m => ({ default: m.PredictiveHotspotCard })));
+
+
+const ChartSkeleton = ({ className }: { className?: string }) => (
+  <div className={`w-full h-full rounded-[2.5rem] bg-white/5 border border-white/10 animate-pulse flex items-center justify-center ${className}`}>
+    <div className="relative">
+      <div className="w-12 h-12 rounded-full border-2 border-[#2979FF]/20 border-t-[#2979FF] animate-spin" />
+      <div className="absolute inset-0 blur-xl bg-[#2979FF]/20 rounded-full" />
+    </div>
+  </div>
+);
 
 const CrashPatternAnalytics: React.FC = () => {
   return (
@@ -54,7 +66,9 @@ const CrashPatternAnalytics: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="h-[500px]"
           >
-            <TimePatternHeatmap />
+            <Suspense fallback={<ChartSkeleton />}>
+              <TimePatternHeatmap />
+            </Suspense>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -64,7 +78,9 @@ const CrashPatternAnalytics: React.FC = () => {
               transition={{ delay: 0.2 }}
               className="h-[450px]"
             >
-              <RoadTypeBreakdown />
+              <Suspense fallback={<ChartSkeleton />}>
+                <RoadTypeBreakdown />
+              </Suspense>
             </motion.div>
             
             <motion.div
@@ -73,7 +89,9 @@ const CrashPatternAnalytics: React.FC = () => {
               transition={{ delay: 0.3 }}
               className="h-[450px]"
             >
-              <CausationWordCloud />
+              <Suspense fallback={<ChartSkeleton />}>
+                <CausationWordCloud />
+              </Suspense>
             </motion.div>
           </div>
         </div>
@@ -85,8 +103,11 @@ const CrashPatternAnalytics: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <PredictiveHotspotCard />
+            <Suspense fallback={<ChartSkeleton className="h-[400px]" />}>
+              <PredictiveHotspotCard />
+            </Suspense>
           </motion.div>
+
 
           {/* AI Safety Score Card */}
           <motion.div

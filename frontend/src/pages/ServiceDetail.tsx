@@ -21,7 +21,7 @@ export const ServiceDetail = () => {
   return (
     <div className="flex flex-col min-h-screen bg-(--nx-bg-base) text-(--nx-text-primary)">
       {/* Tactical Hero Header */}
-      <div className="h-64 bg-(--nx-bg-[var(--color-surface))] relative border-b border-(--nx-border) overflow-hidden">
+      <div className="h-64 bg-(--nx-bg-surface) relative border-b border-(--nx-border) overflow-hidden">
         <div className="absolute top-6 left-6 z-30">
           <Button variant="secondary" size="sm" className="min-w-0 p-2 bg-black/40 backdrop-blur-md" onClick={() => navigate(-1)}>
             <ChevronLeft size={20} />
@@ -31,7 +31,7 @@ export const ServiceDetail = () => {
         {/* Ambient Map Decoration */}
         <div className="absolute inset-0 opacity-20 grayscale contrast-125">
            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" alt="Tactical Background" className="w-full h-full object-cover" />
-           <div className="absolute inset-0 bg-linear-to-t from-(--nx-bg-[var(--color-surface))] to-transparent" />
+           <div className="absolute inset-0 bg-linear-to-t from-(--nx-bg-surface) to-transparent" />
         </div>
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -62,7 +62,7 @@ export const ServiceDetail = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-6 bg-white/[0.02] border border-(--nx-border) p-4 rounded-sm">
+            <div className="flex-1 flex items-center bg-white/2 rounded-2xl border border-white/5 p-6 backdrop-blur-sm">
                <div className="flex flex-col items-center">
                   <div className="flex items-center gap-1 text-(--nx-amber-primary) mb-1">
                      <Star size={16} className="fill-current" />
@@ -70,7 +70,7 @@ export const ServiceDetail = () => {
                   </div>
                   <span className="text-[9px] font-bold text-(--nx-text-dim) uppercase">System Rating</span>
                </div>
-               <div className="w-[1px] h-10 bg-(--nx-border)" />
+               <div className="w-px h-12 bg-white/10 mx-6" />
                <div className="flex flex-col items-center">
                   <CheckCircle size={16} className="text-(--nx-green-primary) mb-1" />
                   <span className="text-[9px] font-bold text-(--nx-text-dim) uppercase tracking-tighter">Status: Active</span>
@@ -91,7 +91,7 @@ export const ServiceDetail = () => {
                 <Panel title="Operational Capabilities" icon={Shield} subtitle="Verified infrastructure & specialties">
                    <div className="grid grid-cols-2 gap-4">
                       {['Level 1 Trauma', '24/7 ICU', 'Blood Bank', 'Burn Unit', 'Neurology', 'Air-Evac Ready'].map((cap, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 bg-white/[0.01] border border-(--nx-border) rounded-sm group hover:border-(--nx-border-active) transition-all">
+                        <div key={i} className="flex items-center gap-3 p-3 bg-white/5 border border-(--nx-border) rounded-sm group hover:border-(--nx-border-active) transition-all">
                            <div className="w-1.5 h-1.5 bg-(--nx-blue-primary) rounded-full group-hover:scale-150 transition-transform shadow-[0_0_8px_var(--nx-blue-primary)]" />
                            <span className="text-xs font-bold text-white tracking-tight uppercase">{cap}</span>
                         </div>
@@ -137,8 +137,15 @@ export const ServiceDetail = () => {
   );
 };
 
-const MetricBox = ({ label, value, icon, accent }: any) => (
-  <div className={`p-6 nexus-card flex flex-col gap-4 ${accent ? 'border-(--nx-red-primary)/20 bg-(--nx-red-dim)/30' : 'bg-white/[0.02]'}`}>
+interface MetricBoxProps {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  accent?: boolean;
+}
+
+const MetricBox = ({ label, value, icon, accent }: MetricBoxProps) => (
+  <div className={`p-6 nexus-card flex flex-col gap-4 ${accent ? 'border-(--nx-red-primary)/20 bg-(--nx-red-dim)/30' : 'bg-white/2'}`}>
      <div className="flex items-center justify-between opacity-50">
         <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
         {icon}

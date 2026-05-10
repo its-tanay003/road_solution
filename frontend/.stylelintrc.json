@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "custom-property-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+    "no-invalid-position-at-import-rule": true,
+    "no-duplicate-at-import-rules": true
+  }
+}
