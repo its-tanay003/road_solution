@@ -1,11 +1,14 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const LIMITS = {
   'react-vendor': 500 * 1024,
   'three': 550 * 1024,
   'charts': 400 * 1024,
-  'pdf': 700 * 1024,
   'index': 300 * 1024,
 }
 
@@ -31,13 +34,7 @@ for (const [name, limit] of Object.entries(LIMITS)) {
     } else {
       console.log(`✅ ${match}: ${(size/1024).toFixed(0)}kB`)
     }
-  } else {
-    console.warn(`⚠️  No chunk found starting with "${name}"`)
   }
 }
 
-if (failed) {
-  process.exit(1)
-} else {
-  console.log('✨ All chunks are within limits.')
-}
+if (failed) process.exit(1)

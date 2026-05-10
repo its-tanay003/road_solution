@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:css": "stylelint src/**/*.css",
-    "check:bundle": "node scripts/checkBundleSize.cjs",
+    "check:bundle": "node scripts/checkBundleSize.js",
     "prepare": "husky install",
     "preview": "vite preview"
   },
@@ -79,11 +79,7 @@
     "react-dom": "$react-dom"
   },
   "lint-staged": {
-    "*.css": [
-      "stylelint --fix"
-    ],
-    "*.{ts,tsx}": [
-      "eslint --fix"
-    ]
+    "*.css": "stylelint",
+    "*.{ts,tsx}": "eslint"
   }
 }

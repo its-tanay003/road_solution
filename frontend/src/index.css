@@ -1,8 +1,4 @@
 :root {
-  --invalid[variable]: red;
-}
-
-:root {
   --clr-bg: #080C14;
   --clr-surface: #0D1321;
   --clr-surface-2: #111827;

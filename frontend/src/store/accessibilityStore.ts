@@ -22,6 +22,10 @@ interface AccessibilityState {
   setTheme: (theme: Theme) => void;
   setLanguage: (lang: Language) => void;
   setSimplifiedMode: (mode: boolean) => void;
+  voiceNavEnabled: boolean;
+  setVoiceNavEnabled: (enabled: boolean) => void;
+  ttsEnabled: boolean;
+  setTtsEnabled: (enabled: boolean) => void;
   resetToDefaults: () => void;
   applySettings: (state: Partial<AccessibilityState>) => void;
 }
@@ -41,6 +45,8 @@ const DEFAULT_STATE = {
   theme: 'dark' as Theme,
   language: 'en' as Language,
   simplifiedMode: false,
+  voiceNavEnabled: true,
+  ttsEnabled: true,
 };
 
 export const useAccessibilityStore = create<AccessibilityState>()(
@@ -57,6 +63,8 @@ export const useAccessibilityStore = create<AccessibilityState>()(
         i18n.changeLanguage(language);
       },
       setSimplifiedMode: (simplifiedMode) => set({ simplifiedMode }),
+      setVoiceNavEnabled: (voiceNavEnabled) => set({ voiceNavEnabled }),
+      setTtsEnabled: (ttsEnabled) => set({ ttsEnabled }),
       
       resetToDefaults: () => {
         set(DEFAULT_STATE);

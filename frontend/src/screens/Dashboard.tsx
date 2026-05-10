@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ImpactCalculator } from '../components/ImpactCalculator';
-import { RoadIntelligenceReport } from '../components/RoadIntelligenceReport';
+const RoadIntelligenceReport = React.lazy(() => import('../components/RoadIntelligenceReport').then(m => ({ default: m.RoadIntelligenceReport })));
+import PageLoadingFallback from '../components/PageLoadingFallback';
 import { PredictiveRiskEngine } from '../components/PredictiveRiskEngine';
 import { Activity, Shield, Map as MapIcon, Zap, AlertCircle } from 'lucide-react';
 
@@ -91,7 +92,9 @@ export const Dashboard: React.FC = () => {
               <div className="h-4 w-1 bg-(--clr-red) rounded-full" />
               <h2 className="text-sm font-mono tracking-widest uppercase text-(--clr-text-2)">AI Intelligence</h2>
             </div>
-            <RoadIntelligenceReport />
+            <React.Suspense fallback={<PageLoadingFallback />}>
+              <RoadIntelligenceReport />
+            </React.Suspense>
           </section>
         </div>
       </main>

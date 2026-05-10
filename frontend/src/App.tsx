@@ -39,7 +39,7 @@ const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard').then(m 
 import { EvaluationLayout } from './components/EvaluationLayout';
 import { PrivacyConsentBanner } from './components/PrivacyConsentBanner';
 import { VolunteerAlertScreen } from './components/VolunteerAlertScreen';
-import { VolunteerResponderNetwork } from './components/VolunteerResponderNetwork';
+const VolunteerResponderNetwork = lazy(() => import('./components/VolunteerResponderNetwork').then(m => ({ default: m.VolunteerResponderNetwork })));
 import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsPanel } from './components/SettingsPanel';

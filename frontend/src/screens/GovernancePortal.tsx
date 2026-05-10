@@ -10,7 +10,8 @@ import {
   Download,
   Lightbulb,
 } from 'lucide-react';
-import { RoadIntelligenceReport } from '../components/RoadIntelligenceReport';
+const RoadIntelligenceReport = React.lazy(() => import('../components/RoadIntelligenceReport').then(m => ({ default: m.RoadIntelligenceReport })));
+import PageLoadingFallback from '../components/PageLoadingFallback';
 
 const STATS = [
   { label: 'Lives Saved (Q2)', value: '1,242', trend: '+14%', color: 'text-green-400' },
@@ -174,7 +175,9 @@ export const GovernancePortal: React.FC = () => {
             <div className="h-4 w-1 bg-red-500 rounded-full" />
             <h2 className="text-xs font-black tracking-[0.2em] uppercase text-[#8892A4]">AI Weekly Intel</h2>
           </div>
-          <RoadIntelligenceReport />
+          <React.Suspense fallback={<PageLoadingFallback />}>
+            <RoadIntelligenceReport />
+          </React.Suspense>
         </div>
       </main>
 
