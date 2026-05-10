@@ -60,8 +60,10 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'framer-motion', 'leaflet'],
   },
   build: {
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        codeSplitting: true,
         manualChunks(id) {
           if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
             return 'react-vendor';
