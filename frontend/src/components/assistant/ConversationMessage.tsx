@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Volume2, 
@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   Search
 } from 'lucide-react';
-import type { Message } from '../../store/aiAssistantStore';
+import type { Message, MedicalData } from '../../store/aiAssistantStore';
 import { ttsQueue } from '../../utils/ttsQueue';
 import { useAccessibilityStore } from '../../store/accessibilityStore';
 
@@ -24,7 +24,7 @@ interface ConversationMessageProps {
   isLatest: boolean;
 }
 
-const MedicalReport: React.FC<{ data: any, agent: string }> = ({ data, agent }) => {
+const MedicalReport: React.FC<{ data: MedicalData, agent: string }> = ({ data, agent }) => {
   const isVision = agent === 'vision';
   const isTriage = agent === 'triage';
 
@@ -41,7 +41,7 @@ const MedicalReport: React.FC<{ data: any, agent: string }> = ({ data, agent }) 
             data.estimatedSeverity === 'SERIOUS' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 
             'bg-green-500/20 text-green-400 border border-green-500/30'
           }`}>
-            SEVERITY: {data.estimatedSeverity}
+            SEVERITY: {data.estimatedSeverity || 'UNKNOWN'}
           </div>
         </div>
 
@@ -93,7 +93,7 @@ const MedicalReport: React.FC<{ data: any, agent: string }> = ({ data, agent }) 
           <Activity size={16} className="text-amber-400" />
           <span className="text-xs font-black uppercase tracking-wider text-amber-400">Triage Assessment</span>
         </div>
-        <div className={`p-4 rounded-2xl border-2 ${severityColors[data.severity] || severityColors.MINIMAL}`}>
+        <div className={`p-4 rounded-2xl border-2 ${severityColors[data.severity || 'MINIMAL'] || severityColors.MINIMAL}`}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-lg font-black tracking-tighter">LEVEL: {data.severity}</span>
             <Zap size={20} className={data.severity === 'IMMEDIATE' ? 'animate-pulse' : ''} />
@@ -145,11 +145,11 @@ const MedicalReport: React.FC<{ data: any, agent: string }> = ({ data, agent }) 
           </div>
           
           <div className="space-y-3">
-            {data.abnormalVitals?.length > 0 && (
+            {(data.abnormalVitals?.length ?? 0) > 0 && (
               <div className="bg-black/20 p-2 rounded-lg border border-white/5">
                 <span className="text-[10px] font-black uppercase text-gray-400">Abnormal Readings:</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
-                  {data.abnormalVitals.map((v: string, i: number) => (
+                  {data.abnormalVitals?.map((v: string, i: number) => (
                     <span key={i} className="px-2 py-0.5 bg-red-500/20 rounded text-[10px] font-bold text-red-300 border border-red-500/30">
                       {v}
                     </span>
@@ -214,25 +214,29 @@ const MedicalReport: React.FC<{ data: any, agent: string }> = ({ data, agent }) 
 };
 
 export const ConversationMessage: React.FC<ConversationMessageProps> = ({ message, isLatest }) => {
-  const [displayedText, setDisplayedText] = useState(message.role === 'user' ? message.content : '');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const { language, ttsEnabled } = useAccessibilityStore();
-
   const isUser = message.role === 'user';
-
+  
   const structuredData = useMemo(() => {
     if (isUser) return null;
     try {
-      if (message.content.trim().startsWith('{') || message.content.trim().startsWith('[')) {
-        return JSON.parse(message.content);
+      const trimmed = message.content.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        return JSON.parse(trimmed);
       }
       return null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }, [message.content, isUser]);
 
-  const handleSpeak = () => {
+  const [displayedText, setDisplayedText] = useState(() => {
+    if (isUser || !isLatest || structuredData) return message.content;
+    return '';
+  });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const { language, ttsEnabled } = useAccessibilityStore();
+
+  const handleSpeak = useCallback(() => {
     if (isPlaying) {
       ttsQueue.stop();
       setIsPlaying(false);
@@ -248,27 +252,26 @@ export const ConversationMessage: React.FC<ConversationMessageProps> = ({ messag
       setIsPlaying(true);
       setTimeout(() => setIsPlaying(false), textToSpeak.length * 80); 
     }
-  };
+  }, [isPlaying, message.content, structuredData, language]);
 
   useEffect(() => {
-    if (!isUser && message.content && isLatest && !structuredData) {
+    if (!isUser && message.content && isLatest && !structuredData && displayedText.length < message.content.length) {
       let index = displayedText.length;
-      if (index >= message.content.length) return;
-
       const interval = setInterval(() => {
-        if (index < message.content.length) {
-          setDisplayedText((prev) => prev + message.content[index]);
-          index++;
-        } else {
+        setDisplayedText((prev) => {
+          if (index < message.content.length) {
+            const nextChar = message.content[index];
+            index++;
+            return prev + nextChar;
+          }
           clearInterval(interval);
           if (ttsEnabled) handleSpeak();
-        }
+          return prev;
+        });
       }, 20);
       return () => clearInterval(interval);
-    } else if (!isUser) {
-      setDisplayedText(message.content);
     }
-  }, [message.content, isUser, isLatest, ttsEnabled, structuredData]);
+  }, [message.content, isUser, isLatest, ttsEnabled, structuredData, handleSpeak, displayedText.length]);
 
   return (
     <motion.div

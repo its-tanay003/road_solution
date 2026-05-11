@@ -10,6 +10,26 @@ export interface Message {
   processingTime?: number;
 }
 
+export interface MedicalData {
+  estimatedSeverity?: string;
+  observedConditions?: string[];
+  urgencyIndicators?: string[];
+  consciousnessLevel?: string;
+  additionalObservations?: string;
+  severity?: string;
+  primaryConcerns?: string[];
+  recommendedUnitType?: string;
+  estimatedTimeToDeterioration?: string;
+  immediateActions?: string[];
+  vitalStatus?: string;
+  abnormalVitals?: string[];
+  possibleConditions?: string[];
+  recommendations?: string[];
+  status?: string;
+  identityDetails?: string;
+  confidence?: number;
+}
+
 export interface AgentOutputs {
   triage: Record<string, unknown> | null;
   vision: Record<string, unknown> | null;

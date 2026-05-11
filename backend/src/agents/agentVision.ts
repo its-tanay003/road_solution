@@ -4,56 +4,70 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are a medical AI trained on clinical visual diagnosis. Analyze images and video frames of injured persons and identify: visible injuries (lacerations, fractures, burns, bruising), level of consciousness (responsive/unresponsive/confused), skin color (pallor, cyanosis, flushing), breathing pattern (normal/labored/absent), pupil response if visible, approximate age range, body position, and any environmental hazards. Output JSON: { "observedConditions": string[], "consciousnessLevel": string, "urgencyIndicators": string[], "estimatedSeverity": "CRITICAL"|"SERIOUS"|"MODERATE"|"MINOR", "visualConfidence": number, "additionalObservations": string }. Be specific. Do not speculate beyond what is visible.`;
+export async function runVisionAgent(imageBase64: string, context?: string, patientProfile?: any) {
+  if (!imageBase64) return null;
 
-export async function runVisionAgent(imageBase64: string | undefined, videoFrames: string[] = [], onStream?: (text: string) => void) {
-  if (!imageBase64 && videoFrames.length === 0) return null;
+  const [mediaType, base64Data] = imageBase64.split(',');
+  const mediaTypeValue = mediaType.split(':')[1].split(';')[0];
 
-  const content: any[] = [];
-  
-  if (imageBase64) {
-    const [mediaType, base64Data] = imageBase64.split(',');
-    const mediaTypeValue = mediaType.split(':')[1].split(';')[0];
-    content.push({
-      type: 'image',
-      source: { type: 'base64', media_type: mediaTypeValue as any, data: base64Data }
-    });
-  }
+  const prompt = `You are an emergency medical vision AI. Analyze this image of a potentially injured person.
+        
+Identify and report:
+1. VISIBLE INJURIES: Location, type (laceration/fracture/burn/bruising/swelling), estimated severity
+2. CONSCIOUSNESS: Awake and alert / Confused / Unconscious / Unknown
+3. BREATHING: Visible chest movement, labored breathing signs
+4. SKIN: Pallor (pale), cyanosis (blue lips/fingertips), flushing, diaphoresis (sweating)
+5. BODY POSITION: How they are lying, any unnatural limb positions
+6. BLEEDING: Visible blood, estimated amount (minor/moderate/severe)
+7. ENVIRONMENT: Any visible hazards (fire, water, traffic, electrical)
+8. AGE ESTIMATE: Approximate age range
 
-  for (const frame of videoFrames) {
-    if (frame) {
-      const [mediaType, base64Data] = frame.split(',');
-      const mediaTypeValue = mediaType.split(':')[1].split(';')[0];
-      content.push({
-        type: 'image',
-        source: { type: 'base64', media_type: mediaTypeValue as any, data: base64Data }
-      });
-    }
-  }
+Output as JSON only, no markdown:
+{
+  "consciousnessLevel": "ALERT|CONFUSED|UNCONSCIOUS|UNKNOWN",
+  "visibleInjuries": [{"location": "", "type": "", "severity": "MINOR|MODERATE|SEVERE"}],
+  "breathing": "NORMAL|LABORED|ABSENT|UNKNOWN",
+  "skinCondition": [],
+  "bleeding": "NONE|MINOR|MODERATE|SEVERE",
+  "bodyPosition": "",
+  "estimatedAge": "",
+  "environmentalHazards": [],
+  "overallSeverity": "CRITICAL|SERIOUS|MODERATE|MINOR",
+  "confidenceScore": 0-100,
+  "immediateVisionConcerns": [],
+  "limitationsNote": ""
+}
 
-  content.push({ type: 'text', text: 'Analyze the provided visual data according to your instructions.' });
+Context from caller: ${context || 'Road traffic accident reported'}
+${patientProfile ? 'Known patient conditions: ' + JSON.stringify(patientProfile.conditions || patientProfile) : ''}`;
 
-  const stream = await anthropic.messages.create({
+  const response = await anthropic.messages.create({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
     messages: [
-      { role: 'user', content }
-    ],
-    stream: true,
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image',
+            source: { type: 'base64', media_type: mediaTypeValue as any, data: base64Data }
+          },
+          {
+            type: 'text',
+            text: prompt
+          }
+        ]
+      }
+    ]
   });
 
-  let fullResponse = '';
-  for await (const chunk of stream) {
-    if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-      const text = chunk.delta.text;
-      fullResponse += text;
-      if (onStream) onStream(text);
-    }
-  }
+  const fullResponse = (response.content[0] as any).text;
 
   try {
-    return JSON.parse(fullResponse);
+    // Attempt to extract JSON if it's wrapped in markers or not
+    const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
+    const jsonStr = jsonMatch ? jsonMatch[0] : fullResponse;
+    return JSON.parse(jsonStr);
   } catch (e) {
     console.error('Failed to parse VisionAgent output:', fullResponse);
     return { error: 'Failed to parse JSON', raw: fullResponse };

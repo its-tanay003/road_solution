@@ -37,13 +37,7 @@ router.post('/vision-analyze', async (req, res) => {
   try {
     const { runVisionAgent } = await import('../agents/agentVision');
     
-    // Enrich context if patientProfile exists
-    let enrichedContext = context || 'Analyze the provided visual data.';
-    if (patientProfile) {
-      enrichedContext += `\nPatient context: ${JSON.stringify(patientProfile)}`;
-    }
-
-    const result = await runVisionAgent(imageBase64);
+    const result = await runVisionAgent(imageBase64, context, patientProfile);
     res.json(result);
   } catch (error: any) {
     console.error('Vision Analysis Route Error:', error);

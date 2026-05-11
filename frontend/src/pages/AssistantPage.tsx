@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAIAssistantStore, AgentOutputs } from '../store/aiAssistantStore';
+import { useAIAssistantStore } from '../store/aiAssistantStore';
+import type { AgentOutputs } from '../store/aiAssistantStore';
 import { useAccessibilityStore } from '../store/accessibilityStore';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 import { useAssistantOrchestrator } from '../hooks/useAssistantOrchestrator';

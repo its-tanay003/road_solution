@@ -1,166 +1,158 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { AgentOutputs, Message } from '../store/aiAssistantStore';
+import { AgentOutputs, MedicalData } from '../store/aiAssistantStore';
+
+// Extend jsPDF type to include internal properties if needed
+interface jsPDFWithInternal extends jsPDF {
+  internal: {
+    getNumberOfPages: () => number;
+    pageSize: {
+      height: number;
+      width: number;
+    };
+  };
+}
 
 export const generateMedicalReport = (
-  incidentId: string | null,
+  referenceId: string,
   agentOutputs: AgentOutputs,
-  conversationHistory: Message[]
+  conversationHistory: { role: string; content: string; timestamp: number }[]
 ) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF() as jsPDFWithInternal;
   const timestamp = new Date().toLocaleString();
 
   // Header
-  doc.setFillColor(15, 23, 42); // slate-900
-  doc.rect(0, 0, 210, 40, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.text('ROADSoS MEDICAL REPORT', 20, 25);
+  doc.setFontSize(22);
+  doc.setTextColor(220, 38, 38); // red-600
+  doc.text('YIRC EMERGENCY MEDICAL REPORT', 14, 22);
   
   doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Incident ID: ${incidentId || 'N/A'}`, 140, 20);
-  doc.text(`Generated: ${timestamp}`, 140, 28);
+  doc.setTextColor(100, 116, 139); // slate-500
+  doc.text(`Generated on: ${timestamp}`, 14, 30);
+  doc.text(`Reference: ${referenceId}`, 14, 35);
+  
+  doc.setDrawColor(226, 232, 240);
+  doc.line(14, 40, 196, 40);
 
-  let yPos = 50;
+  let currentY = 50;
 
-  // 1. Triage Section
+  // 1. Triage Summary
   if (agentOutputs.triage) {
-    const data = agentOutputs.triage as Record<string, any>;
-    doc.setTextColor(15, 23, 42);
+    const data = agentOutputs.triage as MedicalData;
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('1. EMERGENCY TRIAGE ASSESSMENT', 20, yPos);
-    yPos += 10;
+    doc.setTextColor(30, 41, 59);
+    doc.text('Triage Assessment', 14, currentY);
+    
+    const triageRows = [
+      ['Estimated Severity', data.estimatedSeverity || 'Unknown'],
+      ['Consciousness Level', data.consciousnessLevel || 'Not Assessed'],
+      ['Observed Conditions', (data.observedConditions || []).join(', ') || 'None'],
+      ['Urgency Indicators', (data.urgencyIndicators || []).join(', ') || 'None'],
+    ];
 
     autoTable(doc, {
-      startY: yPos,
-      head: [['Metric', 'Value']],
-      body: [
-        ['Severity Level', String(data.severity || 'UNKNOWN')],
-        ['Primary Concerns', Array.isArray(data.primaryConcerns) ? data.primaryConcerns.join(', ') : 'N/A'],
-        ['Recommended Transport', String(data.recommendedUnitType || 'N/A')],
-        ['Est. Deterioration Time', String(data.estimatedTimeToDeterioration || 'N/A')],
-        ['Immediate Actions', Array.isArray(data.immediateActions) ? data.immediateActions.join(', ') : 'N/A'],
-      ],
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] }, // blue-500
+      startY: currentY + 5,
+      head: [['Field', 'Clinical Finding']],
+      body: triageRows,
+      theme: 'grid',
+      headStyles: { fillColor: [220, 38, 38] },
     });
-    yPos = (doc as any).lastAutoTable.finalY + 15;
+
+    currentY = (doc as any).lastAutoTable.finalY + 15;
   }
 
-  // 2. Visual Diagnosis Section
+  // 2. Vision Analysis
   if (agentOutputs.vision) {
-    const data = agentOutputs.vision as Record<string, any>;
+    const data = agentOutputs.vision as MedicalData;
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('2. VISUAL DIAGNOSIS', 20, yPos);
-    yPos += 10;
+    doc.setTextColor(30, 41, 59);
+    doc.text('Visual Trauma Analysis', 14, currentY);
+    
+    const visionRows = [
+      ['Trauma Severity', data.severity || 'Unknown'],
+      ['Primary Concerns', (data.primaryConcerns || []).join(', ') || 'None'],
+      ['Recommended Unit', data.recommendedUnitType || 'General'],
+      ['Immediate Actions', (data.immediateActions || []).join(', ') || 'None'],
+    ];
 
     autoTable(doc, {
-      startY: yPos,
-      head: [['Observation', 'Details']],
-      body: [
-        ['Estimated Severity', String(data.estimatedSeverity || 'N/A')],
-        ['Observed Conditions', Array.isArray(data.observedConditions) ? data.observedConditions.join(', ') : 'N/A'],
-        ['Urgency Indicators', Array.isArray(data.urgencyIndicators) ? data.urgencyIndicators.join(', ') : 'N/A'],
-        ['Consciousness Level', String(data.consciousnessLevel || 'N/A')],
-        ['Additional Notes', String(data.additionalObservations || 'N/A')],
-      ],
-      theme: 'striped',
+      startY: currentY + 5,
+      head: [['Field', 'Visual Assessment']],
+      body: visionRows,
+      theme: 'grid',
       headStyles: { fillColor: [37, 99, 235] }, // blue-600
     });
-    yPos = (doc as any).lastAutoTable.finalY + 15;
+
+    currentY = (doc as any).lastAutoTable.finalY + 15;
   }
 
-  // 3. Vital Signs Section
+  // 3. Vitals Report
   if (agentOutputs.vitals) {
-    const data = agentOutputs.vitals as Record<string, any>;
+    const data = agentOutputs.vitals as MedicalData;
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('3. VITAL SIGN ANALYSIS', 20, yPos);
-    yPos += 10;
+    doc.setTextColor(30, 41, 59);
+    doc.text('Vital Signs Assessment', 14, currentY);
+    
+    const vitalsRows = [
+      ['Vital Status', data.vitalStatus || 'Unknown'],
+      ['Abnormal Vitals', (data.abnormalVitals || []).join(', ') || 'None detected'],
+      ['Possible Conditions', (data.possibleConditions || []).join(', ') || 'None identified'],
+    ];
 
     autoTable(doc, {
-      startY: yPos,
-      head: [['Category', 'Assessment']],
-      body: [
-        ['Overall Status', String(data.vitalStatus || 'N/A')],
-        ['Abnormal Vitals', Array.isArray(data.abnormalVitals) ? data.abnormalVitals.join(', ') : 'NONE DETECTED'],
-        ['Possible Conditions', Array.isArray(data.possibleConditions) ? data.possibleConditions.join(', ') : 'N/A'],
-        ['Recommendations', Array.isArray(data.recommendations) ? data.recommendations.join(', ') : 'N/A'],
-      ],
-      theme: 'striped',
-      headStyles: { fillColor: [239, 68, 68] }, // red-500
-    });
-    yPos = (doc as any).lastAutoTable.finalY + 15;
-  }
-
-  // 4. Identity Section
-  if (agentOutputs.identity) {
-    const data = agentOutputs.identity as Record<string, any>;
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('4. IDENTITY VERIFICATION', 20, yPos);
-    yPos += 10;
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Status', 'Identity Details', 'Confidence']],
-      body: [
-        [String(data.status || 'UNKNOWN'), String(data.identityDetails || 'N/A'), `${Math.round((Number(data.confidence) || 0) * 100)}%`],
-      ],
-      theme: 'striped',
-      headStyles: { fillColor: [14, 165, 233] }, // sky-500
-    });
-    yPos = (doc as any).lastAutoTable.finalY + 15;
-  }
-
-  // 5. Conversation Summary
-  if (yPos > 240) {
-    doc.addPage();
-    yPos = 30;
-  }
-  
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('5. INCIDENT LOG SUMMARY', 20, yPos);
-  yPos += 10;
-
-  const logs = conversationHistory
-    .filter(m => !m.content.startsWith('{') && !m.content.startsWith('['))
-    .slice(-10) // Last 10 relevant messages
-    .map(m => [
-      new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      m.role === 'user' ? 'USER' : (m.agent?.toUpperCase() || 'AI'),
-      m.content.length > 100 ? m.content.substring(0, 100) + '...' : m.content
-    ]);
-
-  if (logs.length > 0) {
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Time', 'Source', 'Message Content']],
-      body: logs,
+      startY: currentY + 5,
+      head: [['Field', 'Vital Signs']],
+      body: vitalsRows,
       theme: 'grid',
-      headStyles: { fillColor: [71, 85, 105] }, // slate-600
+      headStyles: { fillColor: [5, 150, 105] }, // emerald-600
     });
-  } else {
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'italic');
-    doc.text('No relevant chat logs recorded.', 25, yPos + 5);
+
+    currentY = (doc as any).lastAutoTable.finalY + 15;
   }
 
-  // Footer
-  const pageCount = (doc as any).internal.getNumberOfPages();
+  // 4. Conversation History (Condensed)
+  doc.addPage();
+  doc.setFontSize(16);
+  doc.setTextColor(30, 41, 59);
+  doc.text('Incident Conversation Log', 14, 22);
+
+  const historyRows = conversationHistory.map(msg => [
+    new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    msg.role.toUpperCase(),
+    msg.content.length > 100 ? msg.content.substring(0, 97) + '...' : msg.content
+  ]);
+
+  autoTable(doc, {
+    startY: 30,
+    head: [['Time', 'Role', 'Content']],
+    body: historyRows,
+    theme: 'striped',
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 'auto' }
+    }
+  });
+
+  // Footer on all pages
+  const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
-    doc.text('CONFIDENTIAL MEDICAL RECORD - ROADSoS AI ASSISTANT', 105, 285, { align: 'center' });
+    doc.text(
+      'CONFIDENTIAL MEDICAL RECORD - YIRC AI ASSISTANT PROTOCOL',
+      105,
+      doc.internal.pageSize.height - 10,
+      { align: 'center' }
+    );
+    doc.text(
+      `Page ${i} of ${pageCount}`,
+      doc.internal.pageSize.width - 20,
+      doc.internal.pageSize.height - 10
+    );
   }
 
-  doc.save(`ROADSoS_Report_${incidentId || 'Unknown'}_${Date.now()}.pdf`);
+  doc.save(`YIRC_Medical_Report_${referenceId.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
 };
+
