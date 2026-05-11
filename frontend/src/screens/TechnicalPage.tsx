@@ -65,11 +65,11 @@ export default function TechnicalPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <a href="https://github.com/its-tanay003/road_solution" target="_blank" rel="noreferrer"
-              className="px-4 py-2 bg-white/10 rounded-(--radius-lg) text-sm text-white hover:bg-white/20 transition-colors">
+              className="px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors">
               ⭐ GitHub Repository
             </a>
-            <span className="px-4 py-2 bg-[#00E676]/10 rounded-(--radius-lg) text-sm text-[#00E676]">MIT License</span>
-            <span className="px-4 py-2 bg-white/5 rounded-(--radius-lg) text-sm text-gray-400">Stack: React 19 · Node.js · Socket.io · Zustand</span>
+            <span className="px-4 py-2 bg-[#00E676]/10 rounded-lg text-sm text-[#00E676]">MIT License</span>
+            <span className="px-4 py-2 bg-white/5 rounded-lg text-sm text-gray-400">Stack: React 19 · Node.js · Socket.io · Zustand</span>
           </div>
         </section>
 
@@ -82,7 +82,7 @@ export default function TechnicalPage() {
               <div className="space-y-3">
                 {certItems.map(item => (
                   <div key={item.label} className="flex items-center gap-3 text-sm">
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot(item.status)}`} />
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${dot(item.status)}`} />
                     <span className="text-gray-300">{item.label}</span>
                   </div>
                 ))}
@@ -147,7 +147,7 @@ export default function TechnicalPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-[#0D1B2A] rounded-xl p-4 border border-white/10 flex items-center gap-4"
               >
-                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dot(s.status)}`} />
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dot(s.status)}`} />
                 <div className="flex-1">
                   <div className="text-white text-sm font-medium">{s.name}</div>
                   {s.note && <div className="text-gray-500 text-xs">{s.note}</div>}
@@ -172,7 +172,7 @@ export default function TechnicalPage() {
               { label: 'Accessibility (axe-core)', value: 'Automated + NVDA manual', status: 'amber' },
             ].map(item => (
               <div key={item.label} className="flex items-start gap-2">
-                <span className="text-yellow-400 text-xs mt-0.5 flex-shrink-0">⚡ In Progress</span>
+                <span className="text-yellow-400 text-xs mt-0.5 shrink-0">⚡ In Progress</span>
                 <div>
                   <div className="text-gray-300 font-medium">{item.label}</div>
                   <div className="text-gray-500 text-xs">{item.value}</div>

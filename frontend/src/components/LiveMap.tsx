@@ -269,11 +269,11 @@ export function LiveMap({ services, userLat, userLng, incidentLat, incidentLng, 
       
       {/* HUD Overlays */}
       <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
-        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-(--radius-lg) flex items-center gap-2">
+        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#0A84FF] animate-pulse" />
           <span className="text-[10px] font-mono text-white/80 uppercase tracking-wider">GPS System: Active</span>
         </div>
-        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-(--radius-lg) flex items-center gap-2">
+        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#32D74B]" />
           <span className="text-[10px] font-mono text-white/80 uppercase tracking-wider">Radar Scanning</span>
         </div>

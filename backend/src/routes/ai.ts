@@ -27,4 +27,28 @@ router.post('/analyze', async (req, res) => {
   }
 });
 
+router.post('/vision-analyze', async (req, res) => {
+  const { imageBase64, context, patientProfile } = req.body;
+
+  if (!imageBase64) {
+    return res.status(400).json({ error: 'Image data is required' });
+  }
+
+  try {
+    const { runVisionAgent } = await import('../agents/agentVision');
+    
+    // Enrich context if patientProfile exists
+    let enrichedContext = context || 'Analyze the provided visual data.';
+    if (patientProfile) {
+      enrichedContext += `\nPatient context: ${JSON.stringify(patientProfile)}`;
+    }
+
+    const result = await runVisionAgent(imageBase64);
+    res.json(result);
+  } catch (error: any) {
+    console.error('Vision Analysis Route Error:', error);
+    res.status(500).json({ error: error.message || 'Vision analysis failed' });
+  }
+});
+
 export default router;

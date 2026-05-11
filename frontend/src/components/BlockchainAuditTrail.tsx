@@ -39,14 +39,14 @@ export const BlockchainAuditTrail = () => {
     if (highlightId && chain.length > 0) {
       const block = chain.find(b => b.hash.startsWith(highlightId) || b.index.toString() === highlightId);
       if (block) {
-        setSelectedBlock(block);
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
+        const timer = setTimeout(() => {
+          setSelectedBlock(block);
           const element = document.getElementById(`block-${block.index}`);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
           }
         }, 100);
+        return () => clearTimeout(timer);
       }
     }
   }, [highlightId, chain]);
@@ -175,7 +175,7 @@ export const BlockchainAuditTrail = () => {
                 />
               ))
             ) : (
-              <div className="w-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-nx-border/30 rounded-(--radius-lg)">
+              <div className="w-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-nx-border/30 rounded-lg">
                 <FileText size={48} className="text-nx-text-tertiary/20 mb-4" />
                 <p className="text-nx-text-tertiary font-mono text-sm uppercase tracking-widest italic">No records in the current session ledger</p>
                 <Button variant="secondary" size="sm" className="mt-6" onClick={seedDemo}>Initialize Genesis Incident</Button>

@@ -1,0 +1,895 @@
+﻿
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\New Volume (D)\mandi\frontend\e2e\tests\crash-detection.spec.ts
+  34:68  error  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\components\AgentWarRoom.tsx
+  162:21  warning  Unused eslint-disable directive (no problems were reported)
+
+C:\New Volume (D)\mandi\frontend\src\components\AlertStatus.tsx
+  20:32  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\components\AlertStatus.tsx:20:32
+  18 | export const AlertStatus: React.FC<AlertStatusProps> = ({ contacts, onComplete }) => {
+  19 |   const [statuses, setStatuses] = useState<ContactStatus[]>([]);
+> 20 |   const [startTime] = useState(Date.now());
+     |                                ^^^^^^^^^^ Cannot call impure function
+  21 |   const [elapsed, setElapsed] = useState(0);
+  22 |
+  23 |   useEffect(() => {  react-hooks/purity
+
+C:\New Volume (D)\mandi\frontend\src\components\AmbientUIProvider.tsx
+  13:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  74:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\AmbulanceTracker.tsx
+  22:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\BlockchainAuditTrail.tsx
+  42:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\BlockchainAuditTrail.tsx:42:9
+  40 |       const block = chain.find(b => b.hash.startsWith(highlightId) || b.index.toString() === highlightId);
+  41 |       if (block) {
+> 42 |         setSelectedBlock(block);
+     |         ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  43 |         // Small delay to ensure DOM is ready
+  44 |         setTimeout(() => {
+  45 |           const element = document.getElementById(`block-${block.index}`);  react-hooks/set-state-in-effect
+
+C:\New Volume (D)\mandi\frontend\src\components\CausationWordCloud.tsx
+   6:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\CrashPhotoAnalyzer.tsx
+  273:8  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\New Volume (D)\mandi\frontend\src\components\CrashPredictionEngine.tsx
+  121:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\CrashPredictionEngine.tsx:121:7
+  119 |     let mounted = true;
+  120 |     if (mounted) {
+> 121 |       trainModel();
+      |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  122 |     }
+  123 |     return () => { mounted = false; };
+  124 |   }, [trainModel]);  react-hooks/set-state-in-effect
+
+C:\New Volume (D)\mandi\frontend\src\components\DriverBehaviorScore.tsx
+  12:16  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\components\DriverBehaviorScore.tsx:12:16
+  10 |   const latestIncident = closedIncidents[0] || {
+  11 |     id: 'DEMO-823',
+> 12 |     timestamp: Date.now() - 3600000,
+     |                ^^^^^^^^^^ Cannot call impure function
+  13 |     behaviorScore: 78,
+  14 |     telemetry: []
+  15 |   };  react-hooks/purity
+
+C:\New Volume (D)\mandi\frontend\src\components\DroneMapMarker.tsx
+  63:6  warning  React Hook useEffect has a missing dependency: 'startPos'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\New Volume (D)\mandi\frontend\src\components\EmailAuthModal.tsx
+  40:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\ImpactCalculator.tsx
+   85:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\IndiaBlackSpots.tsx
+  56:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\IndiaBlackSpots.tsx:56:7
+  54 |         }
+  55 |       }
+> 56 |       setWarningSpot(foundWarning);
+     |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  57 |     }
+  58 |   }, [location]);
+  59 |  react-hooks/set-state-in-effect
+
+C:\New Volume (D)\mandi\frontend\src\components\InsuranceClaimButton.tsx
+  69:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\MapView.tsx
+  14:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\MedicalVaultDemo.tsx
+  79:18  error  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  85:14  error  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\components\NearbyServicesPanel.tsx
+   81:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  134:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\OfflineReadinessScore.tsx
+  116:10  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\New Volume (D)\mandi\frontend\src\components\OfflineSyncProvider.tsx
+   33:65  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   78:6   warning  React Hook useEffect has a missing dependency: 'cacheServices'. Either include it or remove the dependency array                react-hooks/exhaustive-deps
+  132:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\New Volume (D)\mandi\frontend\src\components\OfflineTriageOrchestrator.tsx
+  42:18  error  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\components\OneTabEmergencyCall.tsx
+  74:10  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\New Volume (D)\mandi\frontend\src\components\PageLoadingFallback.tsx
+  14:14  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\components\PageLoadingFallback.tsx:14:14
+  12 |         key={i}
+  13 |         initial={{ 
+> 14 |           x: Math.random() * 100 + "%", 
+     |              ^^^^^^^^^^^^^ Cannot call impure function
+  15 |           y: "110%",
+  16 |           opacity: 0 
+  17 |         }}                                                                                                                                    react-hooks/purity
+  23:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\components\PageLoadingFallback.tsx:23:25
+  21 |         }}
+  22 |         transition={{ 
+> 23 |           duration: 2 + Math.random() * 3, 
+     |                         ^^^^^^^^^^^^^ Cannot call impure function
+  24 |           repeat: Infinity, 
+  25 |           delay: Math.random() * 5,
+  26 |           ease: "linear"                                                                                    react-hooks/purity
+  25:18  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\components\PageLoadingFallback.tsx:25:18
+  23 |           duration: 2 + Math.random() * 3, 
+  24 |           repeat: Infinity, 
+> 25 |           delay: Math.random() * 5,
+     |                  ^^^^^^^^^^^^^ Cannot call impure function
+  26 |           ease: "linear"
+  27 |         }}
+  28 |         className="absolute w-[1px] h-12 bg-gradient-to-b from-transparent via-[#2979FF]/40 to-transparent z-0"  react-hooks/purity
+  29:27  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\components\PageLoadingFallback.tsx:29:27
+  27 |         }}
+  28 |         className="absolute w-[1px] h-12 bg-gradient-to-b from-transparent via-[#2979FF]/40 to-transparent z-0"
+> 29 |         style={{ left: `${Math.random() * 100}%` }}
+     |                           ^^^^^^^^^^^^^ Cannot call impure function
+  30 |       />
+  31 |     ))}
+  32 |                                                          react-hooks/purity
+
+C:\New Volume (D)\mandi\frontend\src\components\PanicModeOverlay.tsx
+   27:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   31:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\PhoneOTPModal.tsx
+  22:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\PhoneOTPModal.tsx:22:7
+  20 |   useEffect(() => {
+  21 |     if (!isOpen) {
+> 22 |       setStep('phone');
+     |       ^^^^^^^ Avoid calling setState() directly within an effect
+  23 |       setPhone('');
+  24 |       setOtp(['', '', '', '', '', '']);
+  25 |       setError(null);  react-hooks/set-state-in-effect
+  44:19  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+  71:19  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\PredictiveHotspotCard.tsx
+  19:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\PresentationOpeningScreen.tsx
+  15:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx
+   17:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:17:7
+  15 |   useEffect(() => {
+  16 |     if (!privacyConsent.hasConsent()) {
+> 17 |       setIsVisible(true);
+     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |     }
+  19 |   }, []);
+  20 |                                                                                                                                                                       react-hooks/set-state-in-effect
+   39:11  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   91:14  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:91:14
+  89 |
+  90 |           <div className="grid gap-3 mb-6">
+> 91 |             <ConsentChip 
+     |              ^^^^^^^^^^^ This component is created during render
+  92 |               icon={MapPin} 
+  93 |               label="Emergency Location Sharing" 
+  94 |               active={consents.emergencyLocation} 
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:32:23
+  30 |   if (!isVisible) return null;
+  31 |
+> 32 |   const ConsentChip = ({ 
+     |                       ^^^
+> 33 |     icon: Icon, 
+     | ^^^^^^^^^^^^^^^^
+> 34 |     label, 
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^
+> 63 |     </button>
+     | ^^^^^^^^^^^^^^^^
+> 64 |   );
+     | ^^^^ The component is created during render here
+  65 |
+  66 |   return (
+  67 |     <div className="fixed inset-0 z-1000 flex items-end justify-center p-4 bg-black/80 backdrop-blur-sm">                                                      react-hooks/static-components
+   97:14  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:97:14
+   95 |               required
+   96 |             />
+>  97 |             <ConsentChip 
+      |              ^^^^^^^^^^^ This component is created during render
+   98 |               icon={BarChart3} 
+   99 |               label="Anonymous Analytics" 
+  100 |               active={consents.analytics} 
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:32:23
+  30 |   if (!isVisible) return null;
+  31 |
+> 32 |   const ConsentChip = ({ 
+     |                       ^^^
+> 33 |     icon: Icon, 
+     | ^^^^^^^^^^^^^^^^
+> 34 |     label, 
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^
+> 63 |     </button>
+     | ^^^^^^^^^^^^^^^^
+> 64 |   );
+     | ^^^^ The component is created during render here
+  65 |
+  66 |   return (
+  67 |     <div className="fixed inset-0 z-1000 flex items-end justify-center p-4 bg-black/80 backdrop-blur-sm">                                                                 react-hooks/static-components
+  103:14  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:103:14
+  101 |               onClick={() => setConsents(c => ({ ...c, analytics: !c.analytics }))}
+  102 |             />
+> 103 |             <ConsentChip 
+      |              ^^^^^^^^^^^ This component is created during render
+  104 |               icon={History} 
+  105 |               label="Incident History" 
+  106 |               active={consents.incidentHistory} 
+
+C:\New Volume (D)\mandi\frontend\src\components\PrivacyConsentBanner.tsx:32:23
+  30 |   if (!isVisible) return null;
+  31 |
+> 32 |   const ConsentChip = ({ 
+     |                       ^^^
+> 33 |     icon: Icon, 
+     | ^^^^^^^^^^^^^^^^
+> 34 |     label, 
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^
+> 63 |     </button>
+     | ^^^^^^^^^^^^^^^^
+> 64 |   );
+     | ^^^^ The component is created during render here
+  65 |
+  66 |   return (
+  67 |     <div className="fixed inset-0 z-1000 flex items-end justify-center p-4 bg-black/80 backdrop-blur-sm">  react-hooks/static-components
+
+C:\New Volume (D)\mandi\frontend\src\components\PushNotificationSetup.tsx
+  45:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\RiskForecastLayer.tsx
+  133:88  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  141:6   warning  React Hook useCallback has missing dependencies: 'weatherData?.riskMultiplier', 'weatherData?.temperature', 'weatherData.visibility', and 'weatherData.weatherCode'. Either include them or remove the dependency array                                                                            react-hooks/exhaustive-deps
+  173:6   warning  React Hook useEffect has missing dependencies: 'weatherData.condition' and 'weatherData?.riskMultiplier'. Either include them or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setSummary' needs the current value of 'weatherData.condition'  react-hooks/exhaustive-deps
+
+C:\New Volume (D)\mandi\frontend\src\components\RoadIntelligenceReport.tsx
+  55:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\RoadIntelligenceReport.tsx:55:5
+  53 |
+  54 |   useEffect(() => {
+> 55 |     generateReport();
+     |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  56 |   }, []);
+  57 |
+  58 |   const downloadPDF = () => {  react-hooks/set-state-in-effect
+
+C:\New Volume (D)\mandi\frontend\src\components\RoadTypeBreakdown.tsx
+  56:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\SettingsPanel.tsx
+  261:32  error  '_err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\components\VaahanLookup.tsx
+  38:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:79  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\VolunteerAlertScreen.tsx
+  16:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\AgentStatusRow.tsx
+  4:31  error  'AgentStatus' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\CameraAnalysisPanel.tsx
+  82:7  error  Parsing error: JSX element 'motion.div' has no corresponding closing tag
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\ConversationMessage.tsx
+   3:28  error    'User' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  31:13  error    Error: Cannot access variable before it is declared
+
+`handleSpeak` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\ConversationMessage.tsx:31:13
+  29 |           // Auto-play TTS if enabled
+  30 |           if (ttsEnabled) {
+> 31 |             handleSpeak();
+     |             ^^^^^^^^^^^ `handleSpeak` accessed before it is declared
+  32 |           }
+  33 |         }
+  34 |       }, 30);
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\ConversationMessage.tsx:41:3
+  39 |   }, [message.content, isUser, isLatest, ttsEnabled]);
+  40 |
+> 41 |   const handleSpeak = () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |     if (isPlaying) {
+     | ^^^^^^^^^^^^^^^^^^^^
+> 43 |       ttsQueue.stop();
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^
+> 50 |     }
+     | ^^^^^^^^^^^^^^^^^^^^
+> 51 |   };
+     | ^^^^^ `handleSpeak` is declared here
+  52 |
+  53 |   return (
+  54 |     <motion.div                                                         react-hooks/immutability
+  37:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\ConversationMessage.tsx:37:7
+  35 |       return () => clearInterval(interval);
+  36 |     } else if (!isUser) {
+> 37 |       setDisplayedText(message.content);
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  38 |     }
+  39 |   }, [message.content, isUser, isLatest, ttsEnabled]);
+  40 |  react-hooks/set-state-in-effect
+  39:6   warning  React Hook useEffect has a missing dependency: 'handleSpeak'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\FileUploadArea.tsx
+   8:38  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  17:5   error  Error: Cannot access variable before it is declared
+
+`handleFiles` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\FileUploadArea.tsx:17:5
+  15 |     e.preventDefault();
+  16 |     setIsDragging(false);
+> 17 |     handleFiles(Array.from(e.dataTransfer.files));
+     |     ^^^^^^^^^^^ `handleFiles` accessed before it is declared
+  18 |   }, []);
+  19 |
+  20 |   const handleFiles = async (newFiles: File[]) => {
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\FileUploadArea.tsx:20:3
+  18 |   }, []);
+  19 |
+> 20 |   const handleFiles = async (newFiles: File[]) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |     const processed = newFiles.map(file => ({
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 22 |       file,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 23 |       id: Math.random().toString(36).substr(2, 9),
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |       preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |       type: file.type
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |     }));
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 27 |     setFiles(prev => [...prev, ...processed]);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 28 |   };
+     | ^^^^^ `handleFiles` is declared here
+  29 |
+  30 |   const removeFile = (id: string) => {
+  31 |     setFiles(prev => {  react-hooks/immutability
+
+C:\New Volume (D)\mandi\frontend\src\components\assistant\InputModeSelector.tsx
+  2:10  error  'motion' is defined but never used        @typescript-eslint/no-unused-vars
+  6:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\iRADReportCard.tsx
+  129:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\map\LayerTogglePanel.tsx
+  11:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\components\ui\Panel.tsx
+  46:15  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useAssistantOrchestrator.ts
+  1:23  error  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useCrashDetection.ts
+  119:77  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useCrashDetection.ts:119:77
+  117 |   }, [isSimulating, isActive, countdownActive, startCountdown, setLowBandwidth, location]);
+  118 |
+> 119 |   return { impactDetected, lastAcceleration, behavioralAlert, blackboxData: blackboxRef.current };
+      |                                                                             ^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  120 | };
+  121 |  react-hooks/refs
+  119:77  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useCrashDetection.ts:119:77
+  117 |   }, [isSimulating, isActive, countdownActive, startCountdown, setLowBandwidth, location]);
+  118 |
+> 119 |   return { impactDetected, lastAcceleration, behavioralAlert, blackboxData: blackboxRef.current };
+      |                                                                             ^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  120 | };
+  121 |  react-hooks/refs
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useNearbyPlaces.ts
+   99:53  error    Unexpected any. Specify a different type                                                                                                @typescript-eslint/no-explicit-any
+  146:6   warning  React Hook useEffect has missing dependencies: 'cachePlaces' and 'getCachedPlaces'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useNetworkMode.ts
+  15:38   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:71   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:107  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\hooks\usePWAInstall.ts
+   5:56  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+   8:43  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+  15:18  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+  21:20  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+  22:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\hooks\usePWAInstall.ts:22:7
+  20 |     // Check if already installable (if event fired before component mount)
+  21 |     if ((window as any).deferredPrompt) {
+> 22 |       setDeferredPrompt((window as any).deferredPrompt);
+     |       ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |       setInstallable(true);
+  24 |     }
+  25 |  react-hooks/set-state-in-effect
+  22:36  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+  44:18  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useUserLocation.ts
+  28:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useUserLocation.ts:28:7
+  26 |   useEffect(() => {
+  27 |     if (!navigator.geolocation) {
+> 28 |       setLocation({
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |         ...CHENNAI_DEFAULT,
+  30 |         error: 'Geolocation is not supported by your browser',
+  31 |         loading: false,  react-hooks/set-state-in-effect
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useWakeWord.ts
+   7:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   8:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  54:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:17  error  'e' is defined but never used             @typescript-eslint/no-unused-vars
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useWebRTC.ts
+   18:53  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   19:18  error    Error: Cannot access variable before it is declared
+
+`createPeerConnection` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useWebRTC.ts:19:18
+  17 |     // Listen for WebRTC signaling from the signaling server (socket.io)
+  18 |     const handleOffer = async ({ senderId, offer }: any) => {
+> 19 |       const pc = createPeerConnection(senderId);
+     |                  ^^^^^^^^^^^^^^^^^^^^ `createPeerConnection` accessed before it is declared
+  20 |       await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  21 |       const answer = await pc.createAnswer();
+  22 |       await pc.setLocalDescription(answer);
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useWebRTC.ts:66:3
+  64 |   }, [isActive]);
+  65 |
+> 66 |   const createPeerConnection = (peerId: string) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 67 |     const pc = new RTCPeerConnection({
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 68 |       iceServers: [
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 85 |     return pc;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 86 |   };
+     | ^^^^^ `createPeerConnection` is declared here
+  87 |
+  88 |   const setupDataChannel = (channel: RTCDataChannel, peerId: string) => {
+  89 |     channel.onopen = () => {  react-hooks/immutability
+   26:55  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   33:64  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   45:11  error    Error: Cannot access variable before it is declared
+
+`initiateConnection` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useWebRTC.ts:45:11
+  43 |       nearbyPeerIds.forEach(peerId => {
+  44 |         if (!peerConnections.current.has(peerId)) {
+> 45 |           initiateConnection(peerId);
+     |           ^^^^^^^^^^^^^^^^^^ `initiateConnection` accessed before it is declared
+  46 |         }
+  47 |       });
+  48 |     };
+
+C:\New Volume (D)\mandi\frontend\src\hooks\useWebRTC.ts:110:3
+  108 |   };
+  109 |
+> 110 |   const initiateConnection = async (peerId: string) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |     const pc = createPeerConnection(peerId);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |     
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     socket.emit('webrtc-offer', { targetId: peerId, offer });
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 121 |   };
+      | ^^^^^ `initiateConnection` is declared here
+  122 |
+  123 |   const broadcastMeshSos = (encryptedPayload: any) => {
+  124 |     if (dataChannels.current.size === 0) {                                                                                                                                             react-hooks/immutability
+   64:6   warning  React Hook useEffect has missing dependencies: 'createPeerConnection' and 'initiateConnection'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  123:47  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\lib\iradReporter.ts
+  49:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:90  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\lib\leaflet-esm.ts
+  1:1  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  3:1  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\New Volume (D)\mandi\frontend\src\lib\logger.ts
+  4:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  6:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\lib\offlineDB.ts
+   28:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   38:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\lib\pushService.ts
+  51:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\main.tsx
+  25:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\pages\FirstAid.tsx
+  128:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx
+    9:61  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+   54:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:54:12
+  52 |           </div>
+  53 |
+> 54 |           <Section icon={Building2} title="Data Controller">
+     |            ^^^^^^^ This component is created during render
+  55 |             <p>
+  56 |               The data controller for ROADSoS is <strong>[Team Name / Institute Name]</strong>, participating in the Smart India Hackathon 2026. 
+  57 |               We act as a Fiduciary for your emergency data.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:9:19
+   7 |   const navigate = useNavigate();
+   8 |
+>  9 |   const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     <div className="mb-10">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |       <div className="flex items-center gap-3 mb-4">
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |   );
+     | ^^^^ The component is created during render here
+  22 |
+  23 |   return (
+  24 |     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">                                                                 react-hooks/static-components
+   61:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:61:12
+  59 |           </Section>
+  60 |
+> 61 |           <Section icon={Eye} title="Data We Collect">
+     |            ^^^^^^^ This component is created during render
+  62 |             <ul className="list-disc pl-5 space-y-2">
+  63 |               <li><strong>Emergency Location:</strong> Real-time GPS coordinates during SOS triggers.</li>
+  64 |               <li><strong>Medical Profile:</strong> Blood group, allergies, and chronic conditions (encrypted).</li>
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:9:19
+   7 |   const navigate = useNavigate();
+   8 |
+>  9 |   const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     <div className="mb-10">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |       <div className="flex items-center gap-3 mb-4">
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |   );
+     | ^^^^ The component is created during render here
+  22 |
+  23 |   return (
+  24 |     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">            react-hooks/static-components
+   70:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:70:12
+  68 |           </Section>
+  69 |
+> 70 |           <Section icon={Lock} title="Purpose of Processing">
+     |            ^^^^^^^ This component is created during render
+  71 |             <p>
+  72 |               In accordance with Section 4 of the DPDP Act, we process data only for <strong>specified, lawful purposes</strong>:
+  73 |             </p>
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:9:19
+   7 |   const navigate = useNavigate();
+   8 |
+>  9 |   const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     <div className="mb-10">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |       <div className="flex items-center gap-3 mb-4">
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |   );
+     | ^^^^ The component is created during render here
+  22 |
+  23 |   return (
+  24 |     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">                                                                                                                        react-hooks/static-components
+   81:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:81:12
+  79 |           </Section>
+  80 |
+> 81 |           <Section icon={Shield} title="Data Security">
+     |            ^^^^^^^ This component is created during render
+  82 |             <p>
+  83 |               We implement production-standard technical and organizational measures to prevent data breaches:
+  84 |             </p>
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:9:19
+   7 |   const navigate = useNavigate();
+   8 |
+>  9 |   const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     <div className="mb-10">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |       <div className="flex items-center gap-3 mb-4">
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |   );
+     | ^^^^ The component is created during render here
+  22 |
+  23 |   return (
+  24 |     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">                                                                                                                                                 react-hooks/static-components
+   92:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:92:12
+  90 |           </Section>
+  91 |
+> 92 |           <Section icon={Trash2} title="Retention & Erasure">
+     |            ^^^^^^^ This component is created during render
+  93 |             <p>
+  94 |               <strong>Retention:</strong> Incident logs are retained for 90 days for emergency audit purposes, after which they are permanently deleted.
+  95 |             </p>
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:9:19
+   7 |   const navigate = useNavigate();
+   8 |
+>  9 |   const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     <div className="mb-10">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |       <div className="flex items-center gap-3 mb-4">
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |   );
+     | ^^^^ The component is created during render here
+  22 |
+  23 |   return (
+  24 |     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">                                                                                                 react-hooks/static-components
+  101:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:101:12
+   99 |           </Section>
+  100 |
+> 101 |           <Section icon={UserCheck} title="Your Rights (DPDP Act 2023)">
+      |            ^^^^^^^ This component is created during render
+  102 |             <ul className="list-disc pl-5 space-y-2">
+  103 |               <li><strong>Section 12:</strong> Right to access information about your personal data.</li>
+  104 |               <li><strong>Section 13:</strong> Right to correction and erasure of personal data.</li>
+
+C:\New Volume (D)\mandi\frontend\src\pages\PrivacyPage.tsx:9:19
+   7 |   const navigate = useNavigate();
+   8 |
+>  9 |   const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     <div className="mb-10">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |       <div className="flex items-center gap-3 mb-4">
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |   );
+     | ^^^^ The component is created during render here
+  22 |
+  23 |   return (
+  24 |     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">  react-hooks/static-components
+
+C:\New Volume (D)\mandi\frontend\src\pages\SettingsPage.tsx
+  35:9  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\pages\TrainingSimulator.tsx
+  49:18  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\pages\TrainingSimulator.tsx:49:18
+  47 |     setPhase('ACTIVE');
+  48 |     setScenarioText('');
+> 49 |     setStartTime(Date.now());
+     |                  ^^^^^^^^^^ Cannot call impure function
+  50 |     setIsStreaming(true);
+  51 |     setTriageLevel(null);
+  52 |     setUnitDispatched(null);                         react-hooks/purity
+  98:36  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\New Volume (D)\mandi\frontend\src\pages\TrainingSimulator.tsx:98:36
+   96 |   const handleTriage = (level: string) => {
+   97 |     setTriageLevel(level);
+>  98 |     if (!triageTime) setTriageTime(Date.now());
+      |                                    ^^^^^^^^^^ Cannot call impure function
+   99 |   };
+  100 |
+  101 |   const submitDecisions = () => {  react-hooks/purity
+
+C:\New Volume (D)\mandi\frontend\src\pages\TriageChat.tsx
+  23:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:81  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  43:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\New Volume (D)\mandi\frontend\src\store\authStore.ts
+  90:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 134 problems (126 errors, 8 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

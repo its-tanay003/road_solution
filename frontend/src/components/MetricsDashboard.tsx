@@ -110,7 +110,7 @@ export const MetricsDashboard: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-emerald-600/20 p-2 rounded-(--radius-lg) border border-emerald-500/30">
+              <div className="bg-emerald-600/20 p-2 rounded-lg border border-emerald-500/30">
                 <BarChart3 size={24} className="text-emerald-500" />
               </div>
               <h1 className="text-3xl font-black tracking-tighter uppercase italic">System Telemetry</h1>

@@ -42,7 +42,7 @@ export const MeshStatus: React.FC = () => {
     <div className="p-6 bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl space-y-6 max-w-xl mx-auto shadow-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-(--radius-lg) transition-colors ${internetKilled ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
+          <div className={`p-2 rounded-lg transition-colors ${internetKilled ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
             {internetKilled ? <WifiOff size={20} /> : <Wifi size={20} />}
           </div>
           <div>
@@ -57,7 +57,7 @@ export const MeshStatus: React.FC = () => {
         {!internetKilled && (
           <button 
             onClick={simulateInternetKill}
-            className="px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/30 rounded-(--radius-lg) text-xs font-black tracking-tighter transition-all"
+            className="px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/30 rounded-lg text-xs font-black tracking-tighter transition-all"
           >
             KILL INTERNET
           </button>
@@ -101,7 +101,7 @@ export const MeshStatus: React.FC = () => {
           </div>
           <button 
             onClick={handleTestBroadcast}
-            className="px-3 py-1.5 bg-amber-500 text-slate-900 text-[10px] font-black rounded-(--radius-lg) uppercase tracking-widest"
+            className="px-3 py-1.5 bg-amber-500 text-slate-900 text-[10px] font-black rounded-lg uppercase tracking-widest"
           >
             Test Relay
           </button>
@@ -127,7 +127,7 @@ export const MeshStatus: React.FC = () => {
                     key={i}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="p-3 border-b border-white/5 last:border-0 bg-white/5 rounded-(--radius-lg) mb-2"
+                    className="p-3 border-b border-white/5 last:border-0 bg-white/5 rounded-lg mb-2"
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">MESH RELAY RECEIVED</span>

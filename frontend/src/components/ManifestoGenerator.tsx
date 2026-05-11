@@ -63,7 +63,7 @@ export const ManifestoGenerator: React.FC = () => {
         <div className="bg-slate-900/50 border border-white/10 rounded-3xl p-8 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-(--radius-lg)">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
                 <FileText className="text-blue-400 w-6 h-6" />
               </div>
               <h1 className="text-3xl font-black tracking-tight uppercase italic">Manifesto Engine</h1>

@@ -35,6 +35,8 @@ const WhatsAppConnectPage = lazy(() => import('./pages/WhatsAppConnectPage').the
 const ConsentManagementPage = lazy(() => import('./pages/ConsentManagementPage').then(m => ({ default: m.ConsentManagementPage })));
 const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard').then(m => ({ default: m.SecurityDashboard })));
 
+const AssistantPage = lazy(() => import('./pages/AssistantPage').then(m => ({ default: m.AssistantPage })));
+
 // Layouts & UI Components (Keep Eager if small or used globally)
 import { EvaluationLayout } from './components/EvaluationLayout';
 import { PrivacyConsentBanner } from './components/PrivacyConsentBanner';
@@ -86,6 +88,7 @@ const AppContent = () => {
             <Route path="/impact" element={<PageWrapper><ImpactCalculator /></PageWrapper>} />
             <Route path="/volunteer" element={<PageWrapper><VolunteerResponderNetwork /></PageWrapper>} />
             <Route path="/sos-active" element={<PageWrapper><SOSActiveScreen /></PageWrapper>} />
+            <Route path="/assistant" element={<ProtectedRoute><PageWrapper><AssistantPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/report/:incidentId" element={<PageWrapper><BystanderReport /></PageWrapper>} />
             <Route path="/dispatched/:id" element={<PageWrapper><Dispatched /></PageWrapper>} />
             <Route path="/analytics" element={<PageWrapper><CrashPatternAnalytics /></PageWrapper>} />

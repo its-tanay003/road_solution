@@ -107,7 +107,7 @@ export const RoadIntelligenceReport: React.FC = () => {
         <button 
           onClick={generateReport}
           disabled={loading}
-          className="p-2 rounded-(--radius-lg) bg-white/5 hover:bg-white/10 text-(--clr-text-2) transition-all disabled:opacity-50"
+          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-(--clr-text-2) transition-all disabled:opacity-50"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
         </button>
@@ -187,7 +187,7 @@ export const RoadIntelligenceReport: React.FC = () => {
                 <div className="space-y-3">
                   {report.insights.map((insight, i) => (
                     <div key={i} className="flex gap-3 text-sm leading-relaxed text-(--clr-text-2)">
-                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-(--clr-amber) flex-shrink-0" />
+                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-(--clr-amber) shrink-0" />
                       <p>{insight}</p>
                     </div>
                   ))}

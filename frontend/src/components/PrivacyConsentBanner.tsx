@@ -4,6 +4,40 @@ import { Shield, MapPin, BarChart3, History, Check, ExternalLink } from 'lucide-
 import { privacyConsent } from '../utils/privacyConsent';
 import { Link } from 'react-router-dom';
 
+const ConsentChip = ({ 
+  icon: Icon, 
+  label, 
+  active, 
+  required, 
+  onClick 
+}: { 
+  icon: React.ElementType; 
+  label: string; 
+  active: boolean; 
+  required?: boolean;
+  onClick?: () => void;
+}) => (
+  <button
+    onClick={required ? undefined : onClick}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
+      active 
+        ? 'bg-(--clr-blue)/10 border-(--clr-blue) text-(--clr-text)' 
+        : 'bg-white/5 border-white/10 text-(--clr-text-2) hover:border-white/20'
+    } ${required ? 'cursor-default' : 'cursor-pointer'}`}
+  >
+    <div className={`p-2 rounded-lg ${active ? 'bg-(--clr-blue) text-white' : 'bg-white/10'}`}>
+      <Icon size={18} />
+    </div>
+    <div className="flex-1 text-left">
+      <p className="text-sm font-medium">{label}</p>
+      <p className="text-[10px] opacity-60">
+        {required ? 'Required for emergency features' : 'Optional'}
+      </p>
+    </div>
+    {active ? <Check size={16} className="text-(--clr-blue)" /> : <div className="w-4" />}
+  </button>
+);
+
 export const PrivacyConsentBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [consents, setConsents] = useState({
@@ -28,40 +62,6 @@ export const PrivacyConsentBanner: React.FC = () => {
   };
 
   if (!isVisible) return null;
-
-  const ConsentChip = ({ 
-    icon: Icon, 
-    label, 
-    active, 
-    required, 
-    onClick 
-  }: { 
-    icon: any; 
-    label: string; 
-    active: boolean; 
-    required?: boolean;
-    onClick?: () => void;
-  }) => (
-    <button
-      onClick={required ? undefined : onClick}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
-        active 
-          ? 'bg-(--clr-blue)/10 border-(--clr-blue) text-(--clr-text)' 
-          : 'bg-white/5 border-white/10 text-(--clr-text-2) hover:border-white/20'
-      } ${required ? 'cursor-default' : 'cursor-pointer'}`}
-    >
-      <div className={`p-2 rounded-lg ${active ? 'bg-(--clr-blue) text-white' : 'bg-white/10'}`}>
-        <Icon size={18} />
-      </div>
-      <div className="flex-1 text-left">
-        <p className="text-sm font-medium">{label}</p>
-        <p className="text-[10px] opacity-60">
-          {required ? 'Required for emergency features' : 'Optional'}
-        </p>
-      </div>
-      {active ? <Check size={16} className="text-(--clr-blue)" /> : <div className="w-4" />}
-    </button>
-  );
 
   return (
     <div className="fixed inset-0 z-1000 flex items-end justify-center p-4 bg-black/80 backdrop-blur-sm">

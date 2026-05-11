@@ -139,11 +139,11 @@ export const HospitalFinder: React.FC = () => {
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="px-3 py-1 bg-cyan/10 text-cyan rounded-(--radius-lg) text-[10px] font-black uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-cyan/10 text-cyan rounded-lg text-[10px] font-black uppercase tracking-widest">
                       {selectedService.type}
                     </span>
                     {selectedService.isNHAIAffiliated && (
-                      <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-(--radius-lg) text-[10px] font-black uppercase tracking-widest">
+                      <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-black uppercase tracking-widest">
                         NHAI Affiliated
                       </span>
                     )}

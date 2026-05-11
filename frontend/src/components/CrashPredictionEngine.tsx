@@ -109,18 +109,16 @@ export const CrashPredictionEngine: React.FC = () => {
 
     setModel(newModel);
     setIsTraining(false);
-    predict(newModel, features);
     
     x.dispose();
     y.dispose();
-  }, [features, predict]);
+  }, []);
 
   useEffect(() => {
-    let mounted = true;
-    if (mounted) {
+    const timer = setTimeout(() => {
       trainModel();
-    }
-    return () => { mounted = false; };
+    }, 100);
+    return () => clearTimeout(timer);
   }, [trainModel]);
 
   useEffect(() => {

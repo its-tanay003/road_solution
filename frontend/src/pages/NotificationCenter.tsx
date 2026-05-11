@@ -146,7 +146,7 @@ export const NotificationCenter = () => {
             <input 
               type="text" 
               placeholder="SEARCH ALERTS BY KEYWORD, UNIT OR INCIDENT ID..."
-              className="w-full bg-white/5 border border-nx-border rounded-(--radius-lg) py-2 pl-10 pr-4 text-sm focus:border-nx-red-primary transition-all outline-none font-mono"
+              className="w-full bg-white/5 border border-nx-border rounded-lg py-2 pl-10 pr-4 text-sm focus:border-nx-red-primary transition-all outline-none font-mono"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

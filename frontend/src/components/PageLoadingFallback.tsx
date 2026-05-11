@@ -1,5 +1,12 @@
 import { motion } from 'framer-motion';
 
+const RANDOM_DATA_BITS = [...Array(15)].map(() => ({
+  x: Math.random() * 100,
+  duration: 2 + Math.random() * 3,
+  delay: Math.random() * 5,
+  left: Math.random() * 100
+}));
+
 const PageLoadingFallback = () => (
   <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center relative overflow-hidden font-sans">
     {/* Dynamic Background Elements */}
@@ -7,11 +14,11 @@ const PageLoadingFallback = () => (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#2979FF]/5 blur-[100px] rounded-full" />
 
     {/* Floating Data Bits */}
-    {[...Array(15)].map((_, i) => (
+    {RANDOM_DATA_BITS.map((bit, i) => (
       <motion.div
         key={i}
         initial={{ 
-          x: Math.random() * 100 + "%", 
+          x: bit.x + "%", 
           y: "110%",
           opacity: 0 
         }}
@@ -20,13 +27,13 @@ const PageLoadingFallback = () => (
           opacity: [0, 1, 0]
         }}
         transition={{ 
-          duration: 2 + Math.random() * 3, 
+          duration: bit.duration, 
           repeat: Infinity, 
-          delay: Math.random() * 5,
+          delay: bit.delay,
           ease: "linear"
         }}
         className="absolute w-[1px] h-12 bg-gradient-to-b from-transparent via-[#2979FF]/40 to-transparent z-0"
-        style={{ left: `${Math.random() * 100}%` }}
+        style={{ left: `${bit.left}%` }}
       />
     ))}
 

@@ -3,16 +3,18 @@ import { motion } from 'framer-motion';
 import { Shield, Zap, TrendingDown, CheckCircle2, AlertTriangle, FileText, Download } from 'lucide-react';
 import { useSosStore } from '../store';
 
+const MOCK_LATEST_INCIDENT = {
+  id: 'DEMO-823',
+  timestamp: Date.now() - 3600000,
+  behaviorScore: 78,
+  telemetry: []
+};
+
 export const DriverBehaviorScore: React.FC = () => {
   const { closedIncidents } = useSosStore();
   
   // Use the latest incident or mock one if empty
-  const latestIncident = closedIncidents[0] || {
-    id: 'DEMO-823',
-    timestamp: Date.now() - 3600000,
-    behaviorScore: 78,
-    telemetry: []
-  };
+  const latestIncident = closedIncidents[0] || MOCK_LATEST_INCIDENT;
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'var(--clr-green)';
@@ -82,7 +84,7 @@ export const DriverBehaviorScore: React.FC = () => {
           </h4>
           <div className="space-y-3">
             {insights.map((insight, i) => (
-              <div key={i} className="flex items-start gap-3 p-2 rounded-(--radius-lg) bg-white/5 border border-white/5">
+              <div key={i} className="flex items-start gap-3 p-2 rounded-lg bg-white/5 border border-white/5">
                 <div className={`mt-0.5 ${insight.type === 'positive' ? 'text-(--clr-green)' : insight.type === 'negative' ? 'text-(--clr-red)' : 'text-(--clr-amber)'}`}>
                   {insight.icon}
                 </div>

@@ -17,7 +17,7 @@ interface AlertStatusProps {
 
 export const AlertStatus: React.FC<AlertStatusProps> = ({ contacts, onComplete }) => {
   const [statuses, setStatuses] = useState<ContactStatus[]>([]);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(() => Date.now());
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {

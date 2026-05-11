@@ -148,7 +148,7 @@ export const useHospitalStore = create<HospitalState>((set, get) => {
       set({ isSimulating: false });
     },
 
-    preAlertHospital: async (id: string, _incidentDetails?: Record<string, unknown>) => {
+    preAlertHospital: async (id: string) => {
       // Simulate API call
       return new Promise((resolve) => {
         setTimeout(() => {

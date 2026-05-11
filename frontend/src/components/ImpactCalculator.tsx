@@ -176,7 +176,7 @@ export const ImpactCalculator: React.FC = () => {
             <input 
               type="range" min="10" max={data.ambulances} step="50"
               value={equipped} onChange={(e) => setEquipped(parseInt(e.target.value))}
-              className="w-full h-1.5 bg-white/10 rounded-(--radius-lg) appearance-none cursor-pointer accent-(--clr-blue)"
+              className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-(--clr-blue)"
               aria-label="Adjust ambulances equipped"
             />
             <p className="text-[10px] font-mono text-(--clr-text-2)">
@@ -190,7 +190,7 @@ export const ImpactCalculator: React.FC = () => {
               <input 
                 type="range" min="0" max="70" step="1"
                 value={reduction} onChange={(e) => setReduction(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-white/10 rounded-(--radius-lg) appearance-none cursor-pointer accent-(--clr-amber)"
+                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-(--clr-amber)"
                 aria-label="Adjust response time improvement percentage"
               />
               <span className="text-(--clr-amber) font-mono font-bold block text-center">{reduction}%</span>
@@ -200,7 +200,7 @@ export const ImpactCalculator: React.FC = () => {
               <input 
                 type="range" min="0" max="30" step="1"
                 value={adoption} onChange={(e) => setAdoption(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-white/10 rounded-(--radius-lg) appearance-none cursor-pointer accent-(--clr-green)"
+                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-(--clr-green)"
                 aria-label="Adjust bystander rate percentage"
               />
               <span className="text-(--clr-green) font-mono font-bold block text-center">{adoption}%</span>

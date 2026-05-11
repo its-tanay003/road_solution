@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Mic, Brain, Sparkles } from 'lucide-react';
+import { Send, Mic, Brain, Sparkles, Camera, X } from 'lucide-react';
 import { sanitizeInput } from '../utils/inputSanitizer';
+import { MedicalVisionPanel } from '../components/MedicalVisionPanel';
 
 interface Message {
   id: string;
@@ -17,10 +18,11 @@ export const AIChat: React.FC = () => {
       id: '1',
       text: "I am the ROADSoS AI. I can help with triage or guidance. What is the emergency?",
       sender: 'ai',
-      timestamp: Date.now()
+      timestamp: 1714820400000 // Fixed timestamp for initial message
     }
   ]);
   const [isThinking, setIsThinking] = useState(false);
+  const [showVisionPanel, setShowVisionPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -134,12 +136,41 @@ export const AIChat: React.FC = () => {
             <button
               key={chip}
               onClick={() => setInput(chip)}
-              className="flex-shrink-0 h-10 px-6 bg-night-3 border border-white/10 rounded-full text-white text-sm font-bold whitespace-nowrap active:scale-95 transition-transform"
+              className="shrink-0 h-10 px-6 bg-night-3 border border-white/10 rounded-full text-white text-sm font-bold whitespace-nowrap active:scale-95 transition-transform"
             >
               {chip}
             </button>
           ))}
+          <button
+            onClick={() => setShowVisionPanel(!showVisionPanel)}
+            className={`shrink-0 h-10 px-6 rounded-full text-sm font-bold whitespace-nowrap active:scale-95 transition-all flex items-center gap-2 ${
+              showVisionPanel ? 'bg-red-500 text-white border-red-400' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+            }`}
+          >
+            {showVisionPanel ? <X size={16} /> : <Camera size={16} />}
+            {showVisionPanel ? 'Close Camera' : 'Open Vision Triage'}
+          </button>
         </div>
+
+        {showVisionPanel && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mb-6"
+          >
+            <MedicalVisionPanel onAnalysisComplete={(result) => {
+              // Add a message about the analysis
+              const aiMsg: Message = {
+                id: Date.now().toString(),
+                text: `Vision Analysis Complete: ${result.observedConditions?.join(', ') || 'No injuries detected'}. Severity: ${result.estimatedSeverity}.`,
+                sender: 'ai',
+                timestamp: Date.now()
+              };
+              setMessages(prev => [...prev, aiMsg]);
+            }} />
+          </motion.div>
+        )}
 
         <div className="flex gap-3 items-center">
           <div className="flex-1 relative">

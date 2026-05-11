@@ -7,7 +7,7 @@ export interface Block {
   incidentId: string;
   action: string;
   actorId: string;
-  data: any;
+  data: unknown;
   previousHash: string;
   hash: string;
 }
@@ -17,9 +17,9 @@ interface BlockchainState {
   isChainValid: boolean;
   
   // Actions
-  addBlock: (incidentId: string, action: string, actorId: string, data: any) => Promise<void>;
+  addBlock: (incidentId: string, action: string, actorId: string, data: unknown) => Promise<void>;
   validateChain: () => Promise<boolean>;
-  tamperBlock: (index: number, newData: any) => void;
+  tamperBlock: (index: number, newData: unknown) => void;
   resetChain: () => void;
 }
 

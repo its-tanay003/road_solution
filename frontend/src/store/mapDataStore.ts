@@ -27,7 +27,7 @@ export type MapPlace = {
   distance?: number;
   eta?: string;
   facilities?: string[];
-  mockData?: any;
+  mockData?: Record<string, unknown>;
 }
 
 interface MapDataState {

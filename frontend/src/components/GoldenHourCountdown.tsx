@@ -178,7 +178,7 @@ export const GoldenHourCountdown = () => {
                 className="mt-12 flex flex-col items-center gap-4"
               >
                 <div className="bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 rounded-2xl flex items-center gap-3">
-                  <div className="p-1.5 bg-emerald-500 rounded-(--radius-lg)">
+                  <div className="p-1.5 bg-emerald-500 rounded-lg">
                     <ShieldCheck size={20} className="text-white" />
                   </div>
                   <div className="text-left">

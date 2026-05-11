@@ -3,22 +3,22 @@ import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, Trash2, ArrowLeft, Building2, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const Section = ({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
+  <div className="mb-10">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="p-2 bg-(--clr-blue)/10 text-(--clr-blue) rounded-lg">
+        <Icon size={20} />
+      </div>
+      <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+    </div>
+    <div className="pl-11 text-(--clr-text-2) leading-relaxed space-y-4 text-sm md:text-base">
+      {children}
+    </div>
+  </div>
+);
+
 export const PrivacyPage: React.FC = () => {
   const navigate = useNavigate();
-
-  const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
-    <div className="mb-10">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-(--clr-blue)/10 text-(--clr-blue) rounded-lg">
-          <Icon size={20} />
-        </div>
-        <h2 className="text-xl font-bold tracking-tight">{title}</h2>
-      </div>
-      <div className="pl-11 text-(--clr-text-2) leading-relaxed space-y-4 text-sm md:text-base">
-        {children}
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) pb-20">

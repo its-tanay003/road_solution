@@ -181,7 +181,7 @@ export const RiskForecastLayer = () => {
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-[rgba(255,59,59,0.20)] rounded-(--radius-lg)">
+            <div className="p-1.5 bg-[rgba(255,59,59,0.20)] rounded-lg">
               <AlertTriangle className="text-(--color-emergency)" size={16} />
             </div>
             <h3 className="text-xs font-black uppercase tracking-widest text-white">Risk Forecast <span className="text-muted text-[10px]">Next 2h</span></h3>

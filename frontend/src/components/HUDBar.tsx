@@ -38,7 +38,7 @@ export const HUDBar: React.FC<HUDBarProps> = ({ onSettingsClick }) => {
     <header className="h-[60px] glass fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6">
       {/* Left: Logo */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-(--color-emergency) rounded-(--radius-lg) flex items-center justify-center shadow-[0_0_15px_rgba(255,23,68,0.4)]">
+        <div className="w-8 h-8 bg-(--color-emergency) rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,23,68,0.4)]">
           <Shield size={20} className="text-white fill-current" />
         </div>
         <span className="text-xl font-rajdhani font-bold text-white tracking-tighter">

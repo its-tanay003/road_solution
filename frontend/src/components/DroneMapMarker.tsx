@@ -30,13 +30,13 @@ const droneIcon = L.divIcon({
   iconAnchor: [20, 20],
 });
 
+const START_POS: [number, number] = [13.0125, 80.2214];
+
 export const DroneMapMarker: React.FC<{ target: [number, number] }> = ({ target }) => {
   const { status, isDispatched } = useDroneStore();
-  const [pos, setPos] = useState<[number, number]>([13.0125, 80.2214]);
+  const [pos, setPos] = useState<[number, number]>(START_POS);
   const requestRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
-
-  const startPos: [number, number] = [13.0125, 80.2214];
 
   useEffect(() => {
     if (!isDispatched || status === 'IDLE' || status === 'TAKEOFF') return;
@@ -47,8 +47,8 @@ export const DroneMapMarker: React.FC<{ target: [number, number] }> = ({ target 
 
       if (progress < 1) {
         // Simple linear interpolation for simulation
-        const lat = startPos[0] + (target[0] - startPos[0]) * progress;
-        const lng = startPos[1] + (target[1] - startPos[1]) * progress;
+        const lat = START_POS[0] + (target[0] - START_POS[0]) * progress;
+        const lng = START_POS[1] + (target[1] - START_POS[1]) * progress;
         setPos([lat, lng]);
         requestRef.current = requestAnimationFrame(animate);
       } else {

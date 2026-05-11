@@ -96,7 +96,7 @@ export const FamilyStatusPanel: React.FC<{ incidentId: string; location: { lat: 
                       key="idle"
                       onClick={() => handleNotify(idx, contact.phone)}
                       title={`Notify ${contact.name} via SMS`}
-                      className="p-2 rounded-(--radius-lg) bg-white/5 border border-white/10 text-white/40 hover:text-[#2979FF] hover:border-[#2979FF]/50 transition-all"
+                      className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-[#2979FF] hover:border-[#2979FF]/50 transition-all"
                     >
                       <Send size={14} />
                     </button>

@@ -108,7 +108,7 @@ export default function ResearchPage() {
                 <div className="text-4xl font-black mb-2" style={{ color: f.color }}>{f.stat}</div>
                 <div className="font-bold text-white mb-1">{f.label}</div>
                 <div className="text-gray-400 text-sm mb-2">{f.sub}</div>
-                <div className="text-xs px-3 py-1.5 rounded-(--radius-lg)" style={{ background: f.color + '15', color: f.color }}>
+                <div className="text-xs px-3 py-1.5 rounded-lg" style={{ background: f.color + '15', color: f.color }}>
                   💡 {f.insight}
                 </div>
               </motion.div>
@@ -151,7 +151,7 @@ export default function ResearchPage() {
 
         {/* QR Validation */}
         <section className="bg-[#0D1B2A] rounded-2xl p-8 border border-[#2979FF]/20 flex flex-col md:flex-row items-center gap-8">
-          <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center flex-shrink-0">
+          <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center shrink-0">
             <div className="grid grid-cols-7 gap-0.5 p-2">
               {Array.from({ length: 49 }).map((_, i) => (
                 <div key={i} className={`w-2.5 h-2.5 ${(i + Math.floor(i/7)) % 2 === 0 ? 'bg-black' : 'bg-white'}`} />

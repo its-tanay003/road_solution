@@ -5,30 +5,39 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  agent?: string;
+  confidence?: number;
+  processingTime?: number;
 }
 
 export interface AgentOutputs {
-  triage: any | null;
-  vision: any | null;
-  vitals: any | null;
-  firstAid: any | null;
-  identity: any | null;
-  orchestrator: any | null;
+  triage: Record<string, unknown> | null;
+  vision: Record<string, unknown> | null;
+  vitals: Record<string, unknown> | null;
+  firstAid: Record<string, unknown> | null;
+  identity: Record<string, unknown> | null;
+  orchestrator: Record<string, unknown> | null;
 }
 
-export type InputMode = 'text' | 'voice' | 'camera' | 'file' | 'wearable';
+export type InputMode = 'text' | 'voice' | 'camera' | 'file' | 'photo' | 'video' | 'wearable';
+export type AgentStatus = 'idle' | 'running' | 'done' | 'error';
 
 interface AIAssistantState {
   agentOutputs: AgentOutputs;
   activeAgents: string[];
+  agentStatuses: Record<string, AgentStatus>;
   streamingText: Record<string, string>;
   conversationHistory: Message[];
   inputMode: InputMode;
   isListening: boolean;
   isSpeaking: boolean;
   cameraActive: boolean;
+  interimTranscript: string;
+  incidentId: string | null;
+  language: string;
 
-  setAgentOutput: (agent: keyof AgentOutputs, data: any) => void;
+  setAgentOutput: (agent: keyof AgentOutputs, data: Record<string, unknown>) => void;
+  setAgentStatus: (agent: string, status: AgentStatus) => void;
   addActiveAgent: (agent: string) => void;
   removeActiveAgent: (agent: string) => void;
   updateStreamingText: (agent: string, chunk: string, isFullUpdate?: boolean) => void;
@@ -38,6 +47,9 @@ interface AIAssistantState {
   setIsListening: (isListening: boolean) => void;
   setIsSpeaking: (isSpeaking: boolean) => void;
   setCameraActive: (cameraActive: boolean) => void;
+  setInterimTranscript: (text: string) => void;
+  setIncidentId: (id: string | null) => void;
+  setLanguage: (language: string) => void;
   resetIncident: () => void;
 }
 
@@ -51,17 +63,34 @@ export const useAIAssistantStore = create<AIAssistantState>((set) => ({
     orchestrator: null,
   },
   activeAgents: [],
+  agentStatuses: {
+    triage: 'idle',
+    vision: 'idle',
+    vitals: 'idle',
+    firstAid: 'idle',
+    identity: 'idle',
+    orchestrator: 'idle',
+  },
   streamingText: {},
   conversationHistory: [],
-  inputMode: 'text',
+  inputMode: 'voice',
   isListening: false,
   isSpeaking: false,
   cameraActive: false,
+  interimTranscript: '',
+  incidentId: null,
+  language: 'en-US',
 
   setAgentOutput: (agent, data) =>
     set((state) => ({
       agentOutputs: { ...state.agentOutputs, [agent]: data },
       activeAgents: state.activeAgents.filter((a) => a !== agent),
+      agentStatuses: { ...state.agentStatuses, [agent]: 'done' },
+    })),
+
+  setAgentStatus: (agent, status) =>
+    set((state) => ({
+      agentStatuses: { ...state.agentStatuses, [agent]: status },
     })),
     
   addActiveAgent: (agent) =>
@@ -69,6 +98,7 @@ export const useAIAssistantStore = create<AIAssistantState>((set) => ({
       activeAgents: state.activeAgents.includes(agent)
         ? state.activeAgents
         : [...state.activeAgents, agent],
+      agentStatuses: { ...state.agentStatuses, [agent]: 'running' },
     })),
 
   removeActiveAgent: (agent) =>
@@ -100,6 +130,9 @@ export const useAIAssistantStore = create<AIAssistantState>((set) => ({
   setIsListening: (isListening) => set({ isListening }),
   setIsSpeaking: (isSpeaking) => set({ isSpeaking }),
   setCameraActive: (cameraActive) => set({ cameraActive }),
+  setInterimTranscript: (text) => set({ interimTranscript: text }),
+  setIncidentId: (id) => set({ incidentId: id }),
+  setLanguage: (language: string) => set({ language }),
 
   resetIncident: () =>
     set({
@@ -112,10 +145,21 @@ export const useAIAssistantStore = create<AIAssistantState>((set) => ({
         orchestrator: null,
       },
       activeAgents: [],
+      agentStatuses: {
+        triage: 'idle',
+        vision: 'idle',
+        vitals: 'idle',
+        firstAid: 'idle',
+        identity: 'idle',
+        orchestrator: 'idle',
+      },
       streamingText: {},
       conversationHistory: [],
       isListening: false,
       isSpeaking: false,
       cameraActive: false,
+      interimTranscript: '',
+      incidentId: null,
+      language: 'en-US',
     }),
 }));
