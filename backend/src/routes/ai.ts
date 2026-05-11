@@ -37,7 +37,7 @@ router.post('/vision-analyze', async (req, res) => {
   try {
     const { runVisionAgent } = await import('../agents/agentVision');
     
-    const result = await runVisionAgent(imageBase64, context, patientProfile);
+    const result = await runVisionAgent(imageBase64, context, undefined, patientProfile);
     res.json(result);
   } catch (error: any) {
     console.error('Vision Analysis Route Error:', error);

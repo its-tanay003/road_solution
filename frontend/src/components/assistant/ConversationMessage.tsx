@@ -18,6 +18,7 @@ import {
 import type { Message, MedicalData } from '../../store/aiAssistantStore';
 import { ttsQueue } from '../../utils/ttsQueue';
 import { useAccessibilityStore } from '../../store/accessibilityStore';
+import { IdentityResultCard } from './IdentityResultCard';
 
 interface ConversationMessageProps {
   message: Message;
@@ -183,30 +184,19 @@ const MedicalReport: React.FC<{ data: MedicalData, agent: string }> = ({ data, a
 
   if (agent === 'identity') {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Fingerprint size={16} className="text-blue-400" />
-          <span className="text-xs font-black uppercase tracking-wider text-blue-400">Identity Verification</span>
-        </div>
-        <div className={`p-4 rounded-2xl border-2 ${
-          data.status === 'CONFIRMED' ? 'bg-blue-500/10 border-blue-500/50 text-blue-200' : 'bg-slate-800/40 border-slate-700 text-slate-300'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-black tracking-widest uppercase">{data.status}</span>
-            {data.status === 'CONFIRMED' ? <ShieldCheck size={20} /> : <Search size={20} />}
-          </div>
-          <p className="text-sm font-medium">{data.identityDetails}</p>
-          {data.confidence && (
-            <div className="mt-2 h-1 w-full bg-black/20 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${data.confidence * 100}%` }}
-                className="h-full bg-blue-500"
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      <IdentityResultCard 
+        data={{
+          status: data.status as any || 'UNCONFIRMED',
+          name: data.name,
+          age: data.age,
+          bloodGroup: data.bloodGroup,
+          medicalHistory: data.medicalHistory,
+          source: data.source || 'Govt DB Lookup (VAAHAN/UIDAI)',
+          confidence: data.confidence,
+          identityDetails: data.identityDetails
+        }}
+        onLinkReport={() => console.log('Link to report')}
+      />
     );
   }
 

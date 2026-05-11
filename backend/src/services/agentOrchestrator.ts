@@ -49,7 +49,7 @@ export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
   // 2. Run MedicalVisionAgent
   if (imageBase64 || (videoFrames && videoFrames.length > 0)) {
     promises.push(
-      runVisionAgent(imageBase64, videoFrames, (text) => emitStream('vision', text))
+      runVisionAgent(imageBase64!, textMessage || videoFrames, (text) => emitStream('vision', text), userProfile)
         .then(res => {
           results.vision = res;
           if (io) io.emit('agent:update', { incidentId, agentName: 'vision', data: res });

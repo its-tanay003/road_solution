@@ -6,12 +6,28 @@ import {
   Save, 
   Loader2, 
   AlertCircle, 
-  Maximize2, 
   ShieldCheck
 } from 'lucide-react';
 import { useAssistantOrchestrator } from '../../hooks/useAssistantOrchestrator';
 import { usePoseDetection } from '../../hooks/usePoseDetection';
 import { useIdentityRecognition } from '../../hooks/useIdentityRecognition';
+import { useAIAssistantStore } from '../../store/aiAssistantStore';
+
+interface VisibleInjury {
+  location: string;
+  type: string;
+  severity: 'SEVERE' | 'MODERATE' | 'MINOR';
+}
+
+interface VisionOutput {
+  visibleInjuries: VisibleInjury[];
+  consciousnessLevel: string;
+  breathing: string;
+  immediateVisionConcerns: string[];
+  overallSeverity: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR';
+  bleeding?: string;
+  skinCondition?: string[];
+}
 
 interface Detection {
   label: string;
@@ -44,8 +60,12 @@ export const CameraAnalysisPanel: React.FC = () => {
   const [detections, setDetections] = useState<Detection[]>([]);
   
   const { sendToAI } = useAssistantOrchestrator();
+  const { agentOutputs, streamingText } = useAIAssistantStore();
   const { pose, isReady: isPoseReady } = usePoseDetection(videoRef);
   const { identity, qrData, isModelsLoaded: isFaceReady } = useIdentityRecognition(videoRef);
+
+  const visionData = agentOutputs.vision as unknown as VisionOutput;
+  const isVisionRunning = streamingText.vision !== undefined && streamingText.vision.length > 0;
 
   // Draw Pose and Face landmarks
   useEffect(() => {
@@ -94,13 +114,11 @@ export const CameraAnalysisPanel: React.FC = () => {
     try {
       await sendToAI("Visual Triage Request", frame);
       
-      // Update detections based on pose/identity if available
-      if (pose) {
-        setDetections([{
-          label: 'SKELETAL ANALYSIS ACTIVE',
-          x: 10, y: 10, w: 20, h: 5, severity: 'green'
-        }]);
-      }
+      // Temporary detection box while processing
+      setDetections([{
+        label: 'ANALYZING SCENE...',
+        x: 25, y: 25, w: 50, h: 50, severity: 'amber'
+      }]);
     } catch (err) {
       console.error('Camera analysis failed:', err);
     } finally {
@@ -189,6 +207,25 @@ export const CameraAnalysisPanel: React.FC = () => {
               </div>
             </motion.div>
           ))}
+          
+          {visionData?.visibleInjuries?.map((injury, idx) => (
+            <motion.div
+              key={`injury-${idx}`}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute pointer-events-none"
+              style={{ 
+                left: `${30 + idx * 10}%`, // Simulated positioning since Claude doesn't give coordinates
+                top: `${40 + idx * 5}%` 
+              }}
+            >
+              <div className={`p-1 rounded-full ${injury.severity === 'SEVERE' ? 'bg-red-500' : 'bg-amber-500'} animate-ping absolute inset-0`} />
+              <div className={`relative w-4 h-4 rounded-full border-2 border-white ${injury.severity === 'SEVERE' ? 'bg-red-600' : 'bg-amber-600'}`} />
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[8px] px-1 py-0.5 rounded whitespace-nowrap">
+                {injury.location}: {injury.type}
+              </div>
+            </motion.div>
+          ))}
         </AnimatePresence>
 
         {/* Status Indicators */}
@@ -238,35 +275,86 @@ export const CameraAnalysisPanel: React.FC = () => {
 
       {/* Analysis Insights */}
       <div className="flex-1 p-6 overflow-y-auto no-scrollbar">
-        <div className="flex items-center gap-2 mb-4">
-          <ShieldCheck className="text-green-400" size={18} />
-          <h3 className="text-white font-bold text-sm tracking-tight uppercase">AI Vision Insights</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-green-400" size={18} />
+            <h3 className="text-white font-bold text-sm tracking-tight uppercase">AI Vision Insights</h3>
+          </div>
+          {visionData && (
+            <div className={`px-2 py-0.5 rounded text-[10px] font-black ${
+              visionData.overallSeverity === 'CRITICAL' ? 'bg-red-500 text-white' :
+              visionData.overallSeverity === 'SERIOUS' ? 'bg-orange-500 text-white' :
+              'bg-blue-500 text-white'
+            }`}>
+              {visionData.overallSeverity}
+            </div>
+          )}
         </div>
         
         <div className="grid grid-cols-1 gap-3">
-          <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-amber-500/20 text-amber-500 rounded-lg shrink-0">
-                <AlertCircle size={18} />
-              </div>
-              <div>
-                <p className="text-white text-sm font-medium">Head Trauma Detected</p>
-                <p className="text-gray-500 text-xs mt-1">Minor laceration visible on forehead. No active bleeding observed.</p>
-              </div>
+          {isVisionRunning && !visionData && (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <Loader2 className="animate-spin text-orange-500" size={32} />
+              <p className="text-gray-500 text-xs font-medium animate-pulse">CLAUDE 3.5 VISION IS ANALYZING THE SCENE...</p>
             </div>
-          </div>
-          
-          <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-blue-500/20 text-blue-500 rounded-lg shrink-0">
-                <Maximize2 size={18} />
-              </div>
-              <div>
-                <p className="text-white text-sm font-medium">Environment Check</p>
-                <p className="text-gray-500 text-xs mt-1">Scene is secure. Proper lighting detected. No smoke or fire visible.</p>
-              </div>
+          )}
+
+          {!visionData && !isVisionRunning && (
+            <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-2xl">
+              <p className="text-gray-600 text-xs">Tap "ANALYSE NOW" for deep medical vision triage.</p>
             </div>
-          </div>
+          )}
+
+          {visionData && (
+            <>
+              {/* Consciousness & Breathing */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-900/50 p-3 rounded-2xl border border-slate-800">
+                  <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">Consciousness</p>
+                  <p className="text-white text-sm font-black mt-1">{visionData.consciousnessLevel}</p>
+                </div>
+                <div className="bg-slate-900/50 p-3 rounded-2xl border border-slate-800">
+                  <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">Breathing</p>
+                  <p className="text-white text-sm font-black mt-1">{visionData.breathing}</p>
+                </div>
+              </div>
+
+              {/* Injuries */}
+              {visionData.visibleInjuries?.map((injury, idx) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  key={idx} 
+                  className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg shrink-0 ${
+                      injury.severity === 'SEVERE' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'
+                    }`}>
+                      <AlertCircle size={18} />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{injury.location}: {injury.type}</p>
+                      <p className="text-gray-500 text-xs mt-1">Severity: {injury.severity}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Concerns */}
+              {visionData.immediateVisionConcerns?.length > 0 && (
+                <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20 mt-2">
+                  <p className="text-red-400 text-[10px] uppercase font-black mb-2">Immediate Concerns</p>
+                  <ul className="list-disc list-inside text-xs text-red-200/80 space-y-1">
+                    {visionData.immediateVisionConcerns.map((concern: string, idx: number) => (
+                      <li key={idx}>{concern}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

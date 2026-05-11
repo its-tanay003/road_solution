@@ -7,8 +7,15 @@ declare global {
   }
 }
 
+export interface Identity {
+  name: string;
+  id: string;
+  confidence: number;
+  isSimulated: boolean;
+}
+
 export const useIdentityRecognition = (videoRef: React.RefObject<HTMLVideoElement>) => {
-  const [identity, setIdentity] = useState<any>(null);
+  const [identity, setIdentity] = useState<Identity | null>(null);
   const [qrData, setQrData] = useState<string | null>(null);
   const [isModelsLoaded, setIsModelsLoaded] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);

@@ -4,9 +4,28 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are an identity assistance AI. Given facial features description or image analysis results, help identify a person by cross-referencing provided information with available context (vehicle registration, ROADSoS profile data, emergency contacts). Never fabricate identity. If identity cannot be confirmed, state "Identity unconfirmed — treating as Unknown Patient [timestamp]". Privacy rule: all identity data is used only for emergency medical care and is discarded after incident closure. Output plain text or JSON as appropriate, but preferably JSON: { "status": "CONFIRMED"|"UNCONFIRMED", "identityDetails": string, "confidence": number }`;
+const SYSTEM_PROMPT = `You are an identity assistance AI. Given facial features description or image analysis results, help identify a person by cross-referencing provided information with available context (vehicle registration, ROADSoS profile data, emergency contacts). 
 
-export async function runIdentityAgent(identityData: any, context?: any, onStream?: (text: string) => void) {
+Output as JSON only:
+{
+  "status": "CONFIRMED" | "UNCONFIRMED" | "SIMULATED",
+  "name": "Full Name",
+  "age": "e.g. 28",
+  "bloodGroup": "e.g. A+",
+  "identityDetails": "Detailed background",
+  "medicalHistory": ["list", "of", "conditions"],
+  "confidence": 0-1,
+  "source": "VAAHAN/UIDAI/ROADSoS"
+}
+
+Never fabricate identity. If identity cannot be confirmed, set status to UNCONFIRMED.
+Privacy rule: all identity data is used only for emergency medical care.`;
+
+export async function runIdentityAgent(
+  identityData: { imageBase64?: string; description?: string } | null, 
+  context?: any, 
+  onStream?: (text: string) => void
+) {
   if (!identityData) return null;
 
   const stream = await anthropic.messages.create({

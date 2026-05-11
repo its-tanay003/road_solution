@@ -27,6 +27,11 @@ export interface MedicalData {
   recommendations?: string[];
   status?: string;
   identityDetails?: string;
+  name?: string;
+  age?: string;
+  bloodGroup?: string;
+  medicalHistory?: string[];
+  source?: string;
   confidence?: number;
 }
 

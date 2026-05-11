@@ -4,8 +4,18 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-export async function runVisionAgent(imageBase64: string, context?: string, patientProfile?: any) {
+export async function runVisionAgent(
+  imageBase64: string, 
+  context?: string | string[], 
+  onStream?: (text: string) => void,
+  patientProfile?: { conditions?: string[]; [key: string]: any }
+) {
   if (!imageBase64) return null;
+
+  // Handle case where context might be videoFrames (array of strings) from older orchestrator logic
+  const contextStr = Array.isArray(context) 
+    ? `Multiple frames provided. Context: ${context.join(', ')}` 
+    : (context || 'Road traffic accident reported');
 
   const [mediaType, base64Data] = imageBase64.split(',');
   const mediaTypeValue = mediaType.split(':')[1].split(';')[0];
@@ -38,10 +48,10 @@ Output as JSON only, no markdown:
   "limitationsNote": ""
 }
 
-Context from caller: ${context || 'Road traffic accident reported'}
+Context from caller: ${contextStr}
 ${patientProfile ? 'Known patient conditions: ' + JSON.stringify(patientProfile.conditions || patientProfile) : ''}`;
 
-  const response = await anthropic.messages.create({
+  const stream = await anthropic.messages.create({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 1024,
     messages: [
@@ -50,7 +60,11 @@ ${patientProfile ? 'Known patient conditions: ' + JSON.stringify(patientProfile.
         content: [
           {
             type: 'image',
-            source: { type: 'base64', media_type: mediaTypeValue as any, data: base64Data }
+            source: { 
+              type: 'base64', 
+              media_type: mediaTypeValue as "image/jpeg" | "image/png" | "image/gif" | "image/webp", 
+              data: base64Data 
+            }
           },
           {
             type: 'text',
@@ -58,13 +72,20 @@ ${patientProfile ? 'Known patient conditions: ' + JSON.stringify(patientProfile.
           }
         ]
       }
-    ]
+    ],
+    stream: true,
   });
 
-  const fullResponse = (response.content[0] as any).text;
+  let fullResponse = '';
+  for await (const chunk of stream) {
+    if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+      const text = chunk.delta.text;
+      fullResponse += text;
+      if (onStream) onStream(text);
+    }
+  }
 
   try {
-    // Attempt to extract JSON if it's wrapped in markers or not
     const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
     const jsonStr = jsonMatch ? jsonMatch[0] : fullResponse;
     return JSON.parse(jsonStr);
