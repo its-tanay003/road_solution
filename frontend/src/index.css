@@ -1,3 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --color-border: var(--clr-border);
+}
+
 :root {
   --clr-bg: #080C14;
   --clr-surface: #0D1321;

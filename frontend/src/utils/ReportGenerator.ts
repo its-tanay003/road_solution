@@ -18,7 +18,7 @@ export const generateMedicalReport = (
   agentOutputs: AgentOutputs,
   conversationHistory: { role: string; content: string; timestamp: number }[]
 ) => {
-  const doc = new jsPDF() as jsPDFWithInternal;
+  const doc = (new jsPDF() as unknown) as jsPDFWithInternal;
   const timestamp = new Date().toLocaleString();
 
   // Header

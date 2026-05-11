@@ -1,7 +1,6 @@
 export class TTSQueue {
   private queue: string[] = [];
   private isSpeaking = false;
-  private currentUtterance: SpeechSynthesisUtterance | null = null;
 
   speak(text: string, lang: string = 'en-US') {
     this.queue.push(text);
@@ -48,7 +47,6 @@ export class TTSQueue {
       this.processQueue(lang);
     };
 
-    this.currentUtterance = utterance;
     window.speechSynthesis.speak(utterance);
   }
 
@@ -56,7 +54,6 @@ export class TTSQueue {
     window.speechSynthesis.cancel();
     this.queue = [];
     this.isSpeaking = false;
-    this.currentUtterance = null;
   }
 
   pause() {
