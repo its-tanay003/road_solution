@@ -7,12 +7,26 @@ export interface EmergencyContact {
 export const buildSOSMessage = (
   profileName: string, 
   gps: { lat: number; lng: number }, 
-  hospital: { name: string; eta: number }
+  hospital: { name: string; eta: number },
+  vitals?: { hr: number; spO2: number; battery: number }
 ) => {
   const timestamp = new Date().toLocaleTimeString();
   const mapLink = `https://www.google.com/maps/?q=${gps.lat},${gps.lng}`;
   
-  const text = `🚨 ROADSOS EMERGENCY ALERT\n${profileName} triggered SOS.\nLocation: ${mapLink}\nTime: ${timestamp}\nNearest Hospital: ${hospital.name} (ETA: ${hospital.eta} min)\nAutomated message from ROADSoS.`;
+  let text = `🚨 *ROADSOS EMERGENCY ALERT* 🚨\n\n`;
+  text += `*${profileName}* triggered SOS.\n`;
+  text += `Time: ${timestamp}\n`;
+  text += `📍 Location: ${mapLink}\n\n`;
+
+  if (vitals) {
+    text += `*VITALS (Live):*\n`;
+    text += `❤️ HR: ${vitals.hr} bpm\n`;
+    text += `🫁 SpO2: ${vitals.spO2}%\n`;
+    text += `🔋 Device: ${vitals.battery}%\n\n`;
+  }
+
+  text += `Nearest: ${hospital.name} (ETA: ${hospital.eta} min)\n\n`;
+  text += `— Automated message via ROADSoS AI`;
   
   return encodeURIComponent(text);
 };

@@ -62,11 +62,11 @@ export const Roadmap = () => {
         <header className="mb-12">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-emergency/20 rounded-2xl flex items-center justify-center text-emergency border border-emergency/30">
-              <TrendingUp size={28} />
+              <Globe size={28} />
             </div>
             <div>
-              <h1 className="text-4xl font-black tracking-tighter uppercase italic italic-shadow">Deployment Roadmap</h1>
-              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.3em]">SIH 2026 National Strategic Vision</p>
+              <h1 className="text-4xl font-black tracking-tighter uppercase italic italic-shadow">Our Vision</h1>
+              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.3em]">National Strategic Rollout Plan</p>
             </div>
           </div>
           
@@ -238,7 +238,7 @@ export const Roadmap = () => {
 
         {/* Footer Info */}
         <div className="text-center p-10 border border-white/5 rounded-[3rem] bg-white/2">
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mb-4">Evaluation Verification</p>
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mb-4">Strategic Readiness</p>
           <div className="flex flex-wrap justify-center gap-8">
             <div className="flex items-center gap-2">
               <ShieldCheck className="text-safe" size={16} />

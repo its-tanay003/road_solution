@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Eye, Heart, LifeBuoy, Fingerprint, Cpu } from 'lucide-react';
-import { useAIAssistantStore, AgentStatus } from '../../store/aiAssistantStore';
+import { useAIAssistantStore } from '../../store/aiAssistantStore';
 
 const AGENTS = [
   { id: 'triage', name: 'Triage', icon: Activity },

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { IndiaStatsTicker } from '../components/IndiaStatsTicker';
-import { Shield, Activity, Globe, Navigation2, BookOpen, X, Building2, ShieldCheck } from 'lucide-react';
+import { Shield, Activity, Globe, Navigation2, BookOpen, X, Building2 } from 'lucide-react';
 import { useSocket } from '../hooks/useSocket';
 import { ProfileCompleteBadge } from '../components/ProfileCompleteBadge';
 import { SOSButton } from '../components/SOSButton';
@@ -128,7 +128,7 @@ const HomeScreen: React.FC = () => {
     { id: 'profile', label: 'MEDICAL PROFILE', icon: Activity, path: '/profile' },
     { id: 'impact', label: 'IMPACT ANALYSIS', icon: Activity, path: '/impact', color: 'text-(--clr-blue)' },
     { id: 'governance', label: 'GOV INTELLIGENCE', icon: Building2, path: '/governance', color: 'text-(--clr-blue)' },
-    { id: 'eval', label: 'SIH EVALUATION', icon: ShieldCheck, path: '/roadmap', color: 'text-(--clr-green)' },
+    { id: 'vision', label: 'OUR VISION', icon: Globe, path: '/vision', color: 'text-(--clr-green)' },
     { id: 'awareness', label: 'ROAD SAFETY IQ', icon: BookOpen, path: '#', color: 'text-(--clr-saffron)' }
   ];
 

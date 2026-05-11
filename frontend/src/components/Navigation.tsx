@@ -1,4 +1,4 @@
-import { Home, Map, MessageSquare, BarChart2, ShieldCheck } from 'lucide-react';
+import { Home, Map, MessageSquare, BarChart2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface NavigationProps {
@@ -11,8 +11,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'map', icon: Map, label: 'Map' },
     { id: 'ai', icon: MessageSquare, label: 'AI Chat' },
-    { id: 'stats', icon: BarChart2, label: 'Stats' },
-    { id: 'eval', icon: ShieldCheck, label: 'Eval' },
+    { id: 'stats', icon: BarChart2, label: 'Impact' },
   ];
 
   return (

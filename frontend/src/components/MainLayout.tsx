@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IndiaStatsTicker } from './IndiaStatsTicker';
 import { ImpactBanner } from './ImpactBanner';
 
-import { EvaluationSidebar } from './EvaluationSidebar';
-
 import { useNavigate } from 'react-router-dom';
 
 interface MainLayoutProps {
@@ -25,14 +23,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   const navigate = useNavigate();
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'eval') {
-      navigate('/roadmap');
-    } else if (tabId === 'stats') {
-      navigate('/india-stats');
+    if (tabId === 'stats') {
+      navigate('/impact-data');
     } else if (tabId === 'home') {
       navigate('/');
     } else if (tabId === 'map') {
       navigate('/map');
+    } else if (tabId === 'ai') {
+      navigate('/assistant');
     } else {
       onTabChange(tabId);
     }
@@ -40,12 +38,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-night">
-      <EvaluationSidebar />
       <IndiaStatsTicker />
       <HUDBar onSettingsClick={onSettingsClick} />
       <ImpactBanner />
       
-      <main className="flex-1 flex flex-col mt-[100px] pb-[72px] lg:pl-64">
+      <main className="flex-1 flex flex-col mt-[100px] pb-[72px] relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

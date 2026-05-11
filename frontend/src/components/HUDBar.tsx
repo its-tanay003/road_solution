@@ -1,6 +1,18 @@
 import { useSocket } from '../hooks/useSocket';
 import { useSettingsStore } from '../store/settingsStore';
-import { Settings, Shield } from 'lucide-react';
+import { useAccessibilityStore } from '../store/accessibilityStore';
+import { Settings, Shield, Mic } from 'lucide-react';
+
+function SoundMonitorDot() {
+  const { soundMonitorActive } = useAccessibilityStore();
+  if (!soundMonitorActive) return null;
+  return (
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 animate-pulse">
+      <Mic size={10} className="text-cyan-400" />
+      <span className="text-[8px] font-bold text-cyan-400 uppercase tracking-tighter">Mic Active</span>
+    </div>
+  );
+}
 
 
 
@@ -58,6 +70,7 @@ export const HUDBar: React.FC<HUDBarProps> = ({ onSettingsClick }) => {
       {/* Right: Actions */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 bg-night-2 px-3 py-1.5 rounded-xl border border-white/10">
+          <SoundMonitorDot />
           <span className="text-lg">{langMap[language]?.flag || '🌐'}</span>
           <span className="text-xs font-bold text-white">{langMap[language]?.label || 'EN'}</span>
         </div>

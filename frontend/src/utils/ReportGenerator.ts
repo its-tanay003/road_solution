@@ -1,15 +1,11 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { AgentOutputs, MedicalData } from '../store/aiAssistantStore';
+import type { AgentOutputs, MedicalData } from '../store/aiAssistantStore';
 
-// Extend jsPDF type to include internal properties if needed
-interface jsPDFWithInternal extends jsPDF {
-  internal: {
-    getNumberOfPages: () => number;
-    pageSize: {
-      height: number;
-      width: number;
-    };
+// Extend jsPDF type to include autoTable properties
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
   };
 }
 
@@ -18,7 +14,7 @@ export const generateMedicalReport = (
   agentOutputs: AgentOutputs,
   conversationHistory: { role: string; content: string; timestamp: number }[]
 ) => {
-  const doc = (new jsPDF() as unknown) as jsPDFWithInternal;
+  const doc = (new jsPDF() as unknown) as jsPDFWithAutoTable;
   const timestamp = new Date().toLocaleString();
 
   // Header
@@ -58,7 +54,7 @@ export const generateMedicalReport = (
       headStyles: { fillColor: [220, 38, 38] },
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 15;
+    currentY = doc.lastAutoTable.finalY + 15;
   }
 
   // 2. Vision Analysis
@@ -83,7 +79,7 @@ export const generateMedicalReport = (
       headStyles: { fillColor: [37, 99, 235] }, // blue-600
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 15;
+    currentY = doc.lastAutoTable.finalY + 15;
   }
 
   // 3. Vitals Report
@@ -107,7 +103,7 @@ export const generateMedicalReport = (
       headStyles: { fillColor: [5, 150, 105] }, // emerald-600
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 15;
+    // currentY = doc.lastAutoTable.finalY + 15; // Unused but kept logic if needed
   }
 
   // 4. Conversation History (Condensed)
@@ -135,7 +131,9 @@ export const generateMedicalReport = (
   });
 
   // Footer on all pages
-  const pageCount = doc.internal.getNumberOfPages();
+  // @ts-ignore - internal is not fully typed in jspdf
+  const internal = doc.internal as any;
+  const pageCount = internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
@@ -143,13 +141,13 @@ export const generateMedicalReport = (
     doc.text(
       'CONFIDENTIAL MEDICAL RECORD - YIRC AI ASSISTANT PROTOCOL',
       105,
-      doc.internal.pageSize.height - 10,
+      internal.pageSize.height - 10,
       { align: 'center' }
     );
     doc.text(
       `Page ${i} of ${pageCount}`,
-      doc.internal.pageSize.width - 20,
-      doc.internal.pageSize.height - 10
+      internal.pageSize.width - 20,
+      internal.pageSize.height - 10
     );
   }
 

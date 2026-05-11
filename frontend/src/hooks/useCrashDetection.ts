@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSosStore, useNetworkStore } from '../store';
+import { useAccessibilityStore } from '../store/accessibilityStore';
 import { logger } from '../lib/logger';
 
 export interface TelemetryPoint {
@@ -11,6 +12,7 @@ export interface TelemetryPoint {
 export const useCrashDetection = (isSimulating: boolean = false) => {
   const { triggerSos, isActive, startCountdown, countdownActive, countdownTime, decrementCountdown, location } = useSosStore();
   const { setLowBandwidth } = useNetworkStore();
+  const { setHighStressMode, setTheme, setFontSize, highStressAutoActivate } = useAccessibilityStore();
   const [lastAcceleration, setLastAcceleration] = useState({ x: 0, y: 0, z: 0 });
   const [impactDetected, setImpactDetected] = useState(false);
   const [behavioralAlert, setBehavioralAlert] = useState<string | null>(null);
@@ -63,6 +65,12 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
         setImpactDetected(true);
         setLowBandwidth(true); // Disable animations to save processing
         startCountdown();
+
+        if (highStressAutoActivate) {
+          setHighStressMode(true);
+          setTheme('high-contrast');
+          setFontSize('xxl');
+        }
         
         // Push blackbox data to backend or persist locally
         if (typeof window !== 'undefined') {
@@ -95,6 +103,12 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
           setImpactDetected(true);
           setLowBandwidth(true);
           startCountdown();
+          
+          if (highStressAutoActivate) {
+            setHighStressMode(true);
+            setTheme('high-contrast');
+            setFontSize('xxl');
+          }
         }
       }, 5000);
       return () => clearTimeout(timer);
@@ -106,6 +120,12 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
         setImpactDetected(true);
         setLowBandwidth(true);
         startCountdown();
+
+        if (highStressAutoActivate) {
+          setHighStressMode(true);
+          setTheme('high-contrast');
+          setFontSize('xxl');
+        }
       };
       window.addEventListener('dev:simulate-crash', handleSimulateCrash);
 
@@ -114,7 +134,13 @@ export const useCrashDetection = (isSimulating: boolean = false) => {
         window.removeEventListener('dev:simulate-crash', handleSimulateCrash);
       };
     }
-  }, [isSimulating, isActive, countdownActive, startCountdown, setLowBandwidth, location]);
+  }, [isSimulating, isActive, countdownActive, startCountdown, setLowBandwidth, location, highStressAutoActivate, setFontSize, setHighStressMode, setTheme]);
 
-  return { impactDetected, lastAcceleration, behavioralAlert, blackboxData: blackboxRef.current };
+
+  return { 
+    impactDetected, 
+    lastAcceleration, 
+    behavioralAlert, 
+    getBlackboxData: () => blackboxRef.current 
+  };
 };

@@ -52,7 +52,7 @@ export const BlockchainAuditTrail = () => {
   }, [highlightId, chain]);
 
   const handleTamper = (index: number) => {
-    tamperBlock(index, { ...chain[index].data, tampered: true, maliciousPayload: "REDACTED_INCIDENT_DATA" });
+    tamperBlock(index, { ...(chain[index].data as any), tampered: true, maliciousPayload: "REDACTED_INCIDENT_DATA" });
   };
 
   const handleExport = () => {

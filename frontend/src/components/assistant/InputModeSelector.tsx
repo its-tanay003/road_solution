@@ -1,7 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+
 import { Mic, Camera, FileUp, Image, Video, Watch, Type } from 'lucide-react';
-import { useAIAssistantStore, InputMode } from '../../store/aiAssistantStore';
+import { useAIAssistantStore, type InputMode } from '../../store/aiAssistantStore';
 
 const MODES: { id: InputMode; label: string; icon: any }[] = [
   { id: 'voice', label: 'Voice', icon: Mic },

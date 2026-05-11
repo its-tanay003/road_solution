@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-export const usePoseDetection = (videoRef: React.RefObject<HTMLVideoElement>) => {
+export const usePoseDetection = (videoRef: React.RefObject<HTMLVideoElement | null>) => {
   const [pose, setPose] = useState<any>(null);
   const [isReady, setIsReady] = useState(false);
   const poseRef = useRef<any>(null);

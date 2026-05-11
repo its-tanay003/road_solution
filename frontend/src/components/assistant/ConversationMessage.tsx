@@ -10,10 +10,7 @@ import {
   Zap,
   Info,
   ShieldAlert,
-  Heart,
-  Fingerprint,
-  ShieldCheck,
-  Search
+  Heart
 } from 'lucide-react';
 import type { Message, MedicalData } from '../../store/aiAssistantStore';
 import { ttsQueue } from '../../utils/ttsQueue';
@@ -192,8 +189,7 @@ const MedicalReport: React.FC<{ data: MedicalData, agent: string }> = ({ data, a
           bloodGroup: data.bloodGroup,
           medicalHistory: data.medicalHistory,
           source: data.source || 'Govt DB Lookup (VAAHAN/UIDAI)',
-          confidence: data.confidence,
-          identityDetails: data.identityDetails
+          confidence: data.confidence
         }}
         onLinkReport={() => console.log('Link to report')}
       />

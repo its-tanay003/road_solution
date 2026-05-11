@@ -11,9 +11,9 @@ interface SpeechRecognition extends EventTarget {
   start: () => void;
   stop: () => void;
   abort: () => void;
-  onresult: (event: { resultIndex: number; results: { length: number; [key: number]: { isFinal: boolean; [key: number]: { transcript: string } } } }) => void;
+  onresult: (event: any) => void;
   onend: () => void;
-  onerror: (event: { error: string }) => void;
+  onerror: (event: any) => void;
 }
 
 interface SpeechRecognitionConstructor {
@@ -78,7 +78,7 @@ export const useVoiceAssistant = () => {
     recognition.interimResults = true;
     recognition.lang = langMap[language] || 'en-IN';
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => {
       let interimTranscript = '';
       let finalTranscript = '';
 

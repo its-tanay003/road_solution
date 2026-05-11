@@ -7,10 +7,13 @@ import { useOfflineTriage } from '../hooks/useOfflineTriage';
 import { OfflineTriageBadge } from '../components/OfflineTriageBadge';
 import { DroneDispatchPanel } from '../components/DroneDispatchPanel';
 import { useDroneStore } from '../store/droneStore';
+import { NotificationStatusPanel } from '../components/NotificationStatusPanel';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export const Dispatched: React.FC = () => {
   const [eta, setEta] = useState(6);
   const [distance, setDistance] = useState(2.4);
+  const [showDispatchTracker, setShowDispatchTracker] = useState(false);
   const { dispatchDrone } = useDroneStore();
 
   const mockTelemetry = {
@@ -82,6 +85,26 @@ export const Dispatched: React.FC = () => {
             <span className="flex items-center gap-1.5"><Navigation size={12} /> {distance.toFixed(1)} KM</span>
             <span className="flex items-center gap-1.5"><Clock size={12} /> 12:44 PM</span>
           </div>
+        </div>
+
+        {/* Dispatch & Notification Tracker */}
+        <div className="mb-6 space-y-4">
+          <button 
+            onClick={() => setShowDispatchTracker(!showDispatchTracker)}
+            className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-sm font-medium text-white/70">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              Response Orchestration Tracker
+            </div>
+            {showDispatchTracker ? <ChevronUp size={16} className="text-white/40" /> : <ChevronDown size={16} className="text-white/40" />}
+          </button>
+          
+          {showDispatchTracker && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <NotificationStatusPanel />
+            </div>
+          )}
         </div>
 
         {/* Triage & Vehicle Section */}

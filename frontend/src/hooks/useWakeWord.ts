@@ -1,14 +1,6 @@
 import { useState, useCallback } from 'react';
 import { logger } from '../lib/logger';
 
-// Extend the Window interface to include webkitSpeechRecognition
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
-
 export const useWakeWord = (
   wakeWords: string[], 
   onWakeWordDetected: (word: string) => void
@@ -17,7 +9,8 @@ export const useWakeWord = (
   const [error, setError] = useState<string | null>(null);
 
   const startListening = useCallback(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // @ts-ignore - SpeechRecognition is vendor-prefixed in many browsers
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
       setError("Speech Recognition API is not supported in this browser.");
@@ -27,7 +20,6 @@ export const useWakeWord = (
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = false;
-    // Set to English, but could be dynamic based on user store
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
@@ -36,17 +28,15 @@ export const useWakeWord = (
     };
 
     recognition.onresult = (event: any) => {
-      // Get the latest result
       const current = event.resultIndex;
       const transcript = event.results[current][0].transcript.toLowerCase().trim();
       
       logger.log("Heard:", transcript);
 
-      // Check if any wake word is in the transcript
       for (const word of wakeWords) {
         if (transcript.includes(word.toLowerCase())) {
           onWakeWordDetected(word);
-          break; // Stop checking if we found one
+          break;
         }
       }
     };
@@ -60,13 +50,10 @@ export const useWakeWord = (
     };
 
     recognition.onend = () => {
-      // Automatically restart if it ends (e.g. network hiccup or silence timeout)
-      // but only if we haven't unmounted or intentionally stopped.
-      // For a robust system, we restart it.
       if (isListening) {
         try {
           recognition.start();
-        } catch(e) {
+        } catch {
           setIsListening(false);
         }
       } else {

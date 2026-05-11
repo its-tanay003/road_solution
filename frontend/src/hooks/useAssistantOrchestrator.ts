@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import axios from 'axios';
 import { useAIAssistantStore } from '../store/aiAssistantStore';
 

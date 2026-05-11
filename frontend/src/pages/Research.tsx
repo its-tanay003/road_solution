@@ -61,8 +61,8 @@ export const Research = () => {
               <Search size={28} />
             </div>
             <div>
-              <h1 className="text-4xl font-black tracking-tighter uppercase italic italic-shadow">Field Research Findings</h1>
-              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.3em]">Evidence-Based Design Strategy • SIH 2026</p>
+              <h1 className="text-4xl font-black tracking-tighter uppercase italic italic-shadow">Impact Analysis</h1>
+              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.3em]">Evidence-Based Design Strategy • Public Safety Analytics</p>
             </div>
           </div>
           
@@ -80,7 +80,7 @@ export const Research = () => {
             <div className="glass-card p-6">
               <p className="text-[10px] font-bold opacity-50 uppercase mb-1 text-emergency">Critical Gaps</p>
               <h3 className="text-3xl font-black">06</h3>
-              <p className="text-[10px] opacity-40 uppercase mt-1">IDENTIFIED FOR SIH</p>
+              <p className="text-[10px] opacity-40 uppercase mt-1">INFRASTRUCTURE CHALLENGES</p>
             </div>
             <div className="glass-card p-6">
               <p className="text-[10px] font-bold opacity-50 uppercase mb-1 text-safe">Solution Fit</p>
@@ -228,14 +228,14 @@ export const Research = () => {
         <footer className="mt-20 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-              <FileText size={14} /> Dataset: SIH_2026_RESEARCH_ALPHA
+              <FileText size={14} /> Dataset: RS_PUBLIC_ANALYTICS_ALPHA
             </div>
             <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
               <Users size={14} /> Author: ROADSoS Analytics
             </div>
           </div>
           <div className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-            IIT MADRAS • NATIONAL ROAD SAFETY CHALLENGE • 2026
+            ROADSoS PROJECT • NATIONAL ROAD SAFETY CHALLENGE • 2026
           </div>
         </footer>
       </div>

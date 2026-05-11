@@ -11,6 +11,16 @@ import {
   RoomNote
 } from './incidentRoomStore';
 import { volunteerService } from './volunteerService';
+import { redisClient } from './cacheService';
+
+interface UserLocation {
+  userId: string;
+  lat: number;
+  lng: number;
+  lastUpdate: number;
+}
+
+const userLocations = new Map<string, UserLocation>();
 
 let io: SocketIOServer;
 
@@ -190,6 +200,48 @@ export const initSocket = (server: HttpServer) => {
       volunteerService.updateLocation(socket.id, location);
     });
 
+    // --- All User Location Tracking (for P2P Geofencing) ---
+    socket.on('user:location_update', async (location: { lat: number, lng: number }) => {
+      const data: UserLocation = {
+        userId: socket.id,
+        lat: location.lat,
+        lng: location.lng,
+        lastUpdate: Date.now()
+      };
+      
+      userLocations.set(socket.id, data);
+
+      // Also try to push to Redis for cross-server geofencing
+      if (redisClient.isOpen) {
+        try {
+          await redisClient.geoAdd('user_locations', {
+            longitude: location.lng,
+            latitude: location.lat,
+            member: socket.id
+          });
+          // Set expiry for 1 hour to keep it fresh
+          await redisClient.expire('user_locations', 3600);
+        } catch (e) {
+          // Fallback to in-memory handled above
+        }
+      }
+    });
+
+    // SOS Trigger from Client
+    socket.on('sos:triggered', async (data: { lat: number, lng: number, type: string }) => {
+      console.log(`SOS Triggered by ${socket.id} at ${data.lat}, ${data.lng}`);
+      
+      // 1. Broadcast to all (Demo purpose)
+      socket.broadcast.emit('sos:triggered', {
+        ...data,
+        timestamp: new Date(),
+        socketId: socket.id
+      });
+
+      // 2. Broadcast to nearby users (500m radius)
+      await broadcastEmergencyToNearby(data.lat, data.lng, socket.id);
+    });
+
     socket.on('disconnect', async () => {
       console.log(`Socket disconnected: ${socket.id}`);
       websocketConnections.dec();
@@ -202,6 +254,14 @@ export const initSocket = (server: HttpServer) => {
       
       // Remove from volunteers
       volunteerService.removeVolunteer(socket.id);
+
+      // Remove from location tracking
+      userLocations.delete(socket.id);
+      if (redisClient.isOpen) {
+        try {
+          await redisClient.zRem('user_locations', socket.id);
+        } catch (e) {}
+      }
     });
   });
 
@@ -235,3 +295,62 @@ export const broadcastToResponders = (event: string, payload: any): boolean => {
   }
   return false;
 };
+
+/**
+ * Broadcasts emergency alert to all users within a specific radius (default 500m)
+ */
+export const broadcastEmergencyToNearby = async (lat: number, lng: number, senderId: string, radiusMeters: number = 500) => {
+  if (!io) return;
+
+  const nearbyIds: string[] = [];
+
+  // Try Redis first
+  if (redisClient.isOpen) {
+    try {
+      const results = await redisClient.geoSearch('user_locations', 
+        { latitude: lat, longitude: lng },
+        { radius: radiusMeters, unit: 'm' }
+      );
+      nearbyIds.push(...results.filter(id => id !== senderId));
+    } catch (e) {
+      console.error('Redis GeoSearch failed, falling back to in-memory', e);
+    }
+  }
+
+  // Fallback to in-memory if Redis failed or returned nothing (or just as a safety)
+  if (nearbyIds.length === 0) {
+    userLocations.forEach((loc, id) => {
+      if (id === senderId) return;
+      const dist = calculateDistance(lat, lng, loc.lat, loc.lng);
+      if (dist <= radiusMeters / 1000) { // dist is in km
+        nearbyIds.push(id);
+      }
+    });
+  }
+
+  const payload = {
+    type: 'NEARBY_EMERGENCY',
+    location: { lat, lng },
+    timestamp: Date.now(),
+    severity: 'CRITICAL',
+    message: '🚨 EMERGENCY NEARBY: A user needs immediate help within 500m of your location.'
+  };
+
+  nearbyIds.forEach(id => {
+    io.to(id).emit('nearby:emergency', payload);
+  });
+
+  console.log(`Broadcasted emergency to ${nearbyIds.length} nearby users.`);
+};
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}

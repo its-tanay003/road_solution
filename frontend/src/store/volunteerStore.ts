@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { io, Socket } from 'socket.io-client';
+import { socket } from '../lib/socket';
 
 interface ActiveIncident {
   incidentId: string;
@@ -19,14 +19,13 @@ interface VolunteerState {
     distanceTravelled: number;
     points: number;
   };
+  init: () => void;
   register: (name: string, skills: string[]) => void;
   toggleStatus: () => void;
   addNearbyIncident: (incident: ActiveIncident) => void;
   removeIncident: (id: string) => void;
   updateStats: (updates: Partial<VolunteerState['stats']>) => void;
 }
-
-let socket: Socket | null = null;
 
 export const useVolunteerStore = create<VolunteerState>()(
   persist(
@@ -39,23 +38,30 @@ export const useVolunteerStore = create<VolunteerState>()(
         distanceTravelled: 0,
         points: 0
       },
+      init: () => {
+        if (!socket.connected) {
+          socket.connect();
+        }
+
+        socket.on('volunteer:nearby_incident', (incident: ActiveIncident) => {
+          get().addNearbyIncident(incident);
+        });
+
+        // Listen for SOS cancel
+        socket.on('sos:cancelled_globally', (incidentId: string) => {
+          get().removeIncident(incidentId);
+        });
+      },
       register: (name, skills) => {
         set({ isRegistered: true, isActive: true });
         
-        // Connect to socket for volunteer events
-        if (!socket) {
-          socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000');
-          
-          socket.emit('volunteer:register', {
-            name,
-            skills,
-            location: { lat: 28.6139, lng: 77.2090 } // Initial mock
-          });
+        get().init();
 
-          socket.on('volunteer:nearby_incident', (incident: ActiveIncident) => {
-            get().addNearbyIncident(incident);
-          });
-        }
+        socket.emit('volunteer:register', {
+          name,
+          skills,
+          location: { lat: 28.6139, lng: 77.2090 } // Initial mock
+        });
       },
       toggleStatus: () => {
         const nextActive = !get().isActive;

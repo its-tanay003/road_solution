@@ -93,7 +93,7 @@ export function SecurityDashboard() {
       </div>
 
       {/* Consent categories */}
-      <div className="p-5 rounded-2xl border border-white/10 bg-white/5">
+      <div className="p-5 rounded-2xl border border-white/10 bg-white/5 mb-6">
         <h3 className="text-[15px] font-semibold mb-4">Consent Record</h3>
         <div className="space-y-4">
           {[
@@ -115,6 +115,48 @@ export function SecurityDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Security Mitigation Matrix */}
+      <div className="p-5 rounded-2xl border border-white/10 bg-white/5">
+        <h3 className="text-[15px] font-semibold mb-4 italic uppercase">Security Mitigation Matrix</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-left">
+                <th className="pb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Vulnerability</th>
+                <th className="pb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Threat</th>
+                <th className="pb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Mitigation Strategy</th>
+                <th className="pb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Status</th>
+              </tr>
+            </thead>
+            <tbody className="text-[11px] font-mono">
+              {[
+                { vulnerability: 'MITM Attacks', threat: 'High', mitigation: 'mTLS & End-to-End Encryption', status: 'Implemented' },
+                { vulnerability: 'Identity Leak', threat: 'Critical', mitigation: 'ZKP Anonymization Layer', status: 'Implemented' },
+                { vulnerability: 'DDoS / Traffic Spike', threat: 'High', mitigation: 'Edge Computing & Auto-Scaling', status: 'Hardened' },
+                { vulnerability: 'Database Compromise', threat: 'High', mitigation: 'Field-level AES-256 Encryption', status: 'Audit Ready' },
+              ].map((row, i) => (
+                <tr key={i} className="border-b border-white/5 hover:bg-white/2 transition-colors">
+                  <td className="py-4 font-bold">{row.vulnerability}</td>
+                  <td className="py-4">
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                      row.threat === 'Critical' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber'
+                    }`}>
+                      {row.threat}
+                    </span>
+                  </td>
+                  <td className="py-4 text-slate-300">{row.mitigation}</td>
+                  <td className="py-4">
+                    <span className="text-safe font-black uppercase text-[9px]">
+                      {row.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

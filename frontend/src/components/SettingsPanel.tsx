@@ -4,6 +4,8 @@ import { X, Check, RotateCcw } from 'lucide-react';
 import { useAccessibilityStore } from '../store/accessibilityStore';
 import type { FontSize, FontWeight, LetterSpacing, Theme, Language } from '../store/accessibilityStore';
 import { useSettingsPanel } from '../hooks/useSettingsPanel';
+import { DeafModePanel } from './DeafModePanel';
+import { buttonAria, switchAria } from '../utils/aria-utils';
 
 export const SettingsPanel: React.FC = () => {
   const { isOpen, close } = useSettingsPanel();
@@ -113,7 +115,7 @@ export const SettingsPanel: React.FC = () => {
               
               {/* Preview Paragraph */}
               <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                <p className="text-(--clr-text) transition-all text-[length:var(--app-font-size)]">
+                <p className="text-(--clr-text) transition-all text-(length:--app-font-size)">
                   Emergency alert sent. Ambulance ETA 6 minutes.
                 </p>
               </div>
@@ -180,12 +182,62 @@ export const SettingsPanel: React.FC = () => {
               </div>
             </section>
 
+            {/* Accessibility Section */}
+            <section className="space-y-6">
+              <h3 className="text-xs font-bold text-(--clr-text-2) uppercase tracking-widest">Accessibility</h3>
+              
+              <DeafModePanel />
+
+              <div className="space-y-4 pt-4 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-(--clr-text)">Voice Navigation</p>
+                    <p className="text-[10px] text-(--clr-text-2)">Control app via "Go home", "Open map" etc.</p>
+                  </div>
+                  <button 
+                    onClick={() => store.setVoiceNavEnabled(!store.voiceNavEnabled)}
+                    className={`w-10 h-5 rounded-full relative transition-colors ${store.voiceNavEnabled ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
+                    {...buttonAria("Toggle Voice Navigation", store.voiceNavEnabled)}
+                  >
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${store.voiceNavEnabled ? 'left-5.5' : 'left-0.5'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-(--clr-text)">Text-to-Speech</p>
+                    <p className="text-[10px] text-(--clr-text-2)">Announce alerts and UI changes</p>
+                  </div>
+                  <button 
+                    onClick={() => store.setTtsEnabled(!store.ttsEnabled)}
+                    className={`w-10 h-5 rounded-full relative transition-colors ${store.ttsEnabled ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
+                    {...buttonAria("Toggle Text-to-Speech", store.ttsEnabled)}
+                  >
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${store.ttsEnabled ? 'left-5.5' : 'left-0.5'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-(--clr-text)">Stress Auto-Mode</p>
+                    <p className="text-[10px] text-(--clr-text-2)">Enable high-contrast mode during emergency</p>
+                  </div>
+                  <button 
+                    onClick={() => store.setHighStressAutoActivate(!store.highStressAutoActivate)}
+                    className={`w-10 h-5 rounded-full relative transition-colors ${store.highStressAutoActivate ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
+                    {...buttonAria("Toggle High Stress Auto-Activation", store.highStressAutoActivate)}
+                  >
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${store.highStressAutoActivate ? 'left-5.5' : 'left-0.5'}`} />
+                  </button>
+                </div>
+              </div>
+            </section>
+
             {/* Simplified Mode Section */}
             <section className="space-y-4">
               <button
                 onClick={() => store.setSimplifiedMode(!store.simplifiedMode)}
-                role="switch"
-                aria-checked={store.simplifiedMode ? 'true' : 'false'}
+                {...switchAria(store.simplifiedMode)}
                 aria-label="Simple Mode"
                 className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                   store.simplifiedMode 
@@ -258,7 +310,7 @@ export const SettingsPanel: React.FC = () => {
                         } else {
                           alert('Error erasing data. Please try again later.');
                         }
-                      } catch (_err) {
+                      } catch {
                         alert('Network error.');
                       }
                     }

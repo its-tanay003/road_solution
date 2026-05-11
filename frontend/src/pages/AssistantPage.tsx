@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, 
   Accessibility, 
-  Settings, 
-  Mic, 
-  Square, 
-  Send, 
+  Settings,
+  Mic,
+  MicOff,
+  Square,
+  Send,
   X,
+  Stethoscope,
   Share2,
   FileDown,
   MessageSquare,
@@ -29,11 +31,20 @@ import { VoiceWaveform } from '../components/assistant/VoiceWaveform';
 import { ttsQueue } from '../utils/ttsQueue';
 import { socket } from '../lib/socket';
 import { generateMedicalReport } from '../utils/ReportGenerator';
+import { MedicalExpertPanel } from '../components/medical/MedicalExpertPanel';
+import { IncidentFeedbackModal } from '../components/IncidentFeedbackModal';
+import { useContinuousLearning } from '../hooks/useContinuousLearning';
 
 const AssistantPage: React.FC = () => {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [textInput, setTextInput] = useState('');
+  const [activeTab, setActiveTab] = useState<'chat' | 'expert'>('chat');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [lastIncidentData, setLastIncidentData] = useState<any>(null);
+  
+  // Initialize ML
+  useContinuousLearning();
   
   const { 
     conversationHistory, 
@@ -47,6 +58,7 @@ const AssistantPage: React.FC = () => {
     updateStreamingText,
     clearStreamingText,
     setAgentOutput,
+    agentOutputs,
     addActiveAgent,
     resetIncident
   } = useAIAssistantStore();
@@ -94,7 +106,7 @@ const AssistantPage: React.FC = () => {
         
         // Trigger TTS for AI response (only for text-heavy agents)
         if (content && (agentName === 'orchestrator' || agentName === 'firstAid')) {
-          const ttsText = typeof data === 'string' ? data : (agentData.summary || agentData.instruction || "Medical report updated.");
+          const ttsText = (typeof data === 'string' ? data : (agentData.summary || agentData.instruction || "Medical report updated.")) as string;
           ttsQueue.speak(ttsText, uiLanguage);
           setIsSpeaking(true);
         }
@@ -139,6 +151,22 @@ const AssistantPage: React.FC = () => {
     sendToAI(content);
   };
 
+  const handleReset = () => {
+    // Capture data for feedback before resetting
+    if (currentIncidentId) {
+      setLastIncidentData({
+        gForce: agentOutputs.triage?.gForce || 4.2,
+        heartRate: agentOutputs.triage?.heartRate || 95,
+        spO2: agentOutputs.triage?.spO2 || 96,
+        movementScore: 1,
+        timeOfDay: new Date().getHours(),
+        roadType: 1
+      });
+      setShowFeedback(true);
+    }
+    resetIncident();
+  };
+
   const quickActions = [
     "I found an accident",
     "Person is unconscious",
@@ -151,7 +179,7 @@ const AssistantPage: React.FC = () => {
       {/* Top Bar */}
       <header className="h-[56px] px-4 flex items-center justify-between border-b border-slate-800 bg-[#080C14]/80 backdrop-blur-md z-50">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-800 rounded-full transition-colors" title="Back">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-800 rounded-full transition-colors" title="Go Back">
             <ChevronLeft size={20} />
           </button>
           <div className="flex flex-col">
@@ -167,112 +195,147 @@ const AssistantPage: React.FC = () => {
 
         <div className="flex items-center gap-1">
           <button 
-            onClick={resetIncident}
+            onClick={handleReset}
             className="p-2 hover:bg-red-500/10 text-gray-400 hover:text-red-400 rounded-full transition-colors" 
             title="Reset Incident"
           >
             <RotateCcw size={18} />
           </button>
-          <button className="p-2 hover:bg-slate-800 rounded-full text-gray-400" title="Accessibility Settings">
+          <button className="p-2 hover:bg-slate-800 rounded-full text-gray-400" title="Accessibility Options">
             <Accessibility size={18} />
           </button>
-          <button className="p-2 hover:bg-slate-800 rounded-full text-gray-400" title="Settings">
+          <button className="p-2 hover:bg-slate-800 rounded-full text-gray-400" title="System Settings">
             <Settings size={18} />
           </button>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative overflow-hidden">
-        {/* Particle Effect Background (Subtle) */}
-        <div className="absolute inset-0 pointer-events-none opacity-20">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full animate-pulse delay-700" />
-        </div>
-
-        {/* Dynamic Panel (Camera or File or Conversation) */}
-        <div className="flex-1 relative overflow-hidden flex flex-col">
-          <AnimatePresence mode="wait">
-            {inputMode === 'camera' ? (
-              <motion.div 
-                key="camera"
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="absolute inset-0 z-10"
-              >
-                <CameraAnalysisPanel />
-                <button 
-                  onClick={() => setInputMode('voice')}
-                  className="absolute top-4 left-4 p-2 bg-black/50 backdrop-blur-md text-white rounded-full border border-white/10"
-                  title="Close Camera"
-                >
-                  <X size={20} />
-                </button>
-              </motion.div>
-            ) : inputMode === 'file' || inputMode === 'photo' || inputMode === 'video' ? (
-              <motion.div 
-                key="file"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="absolute inset-0 z-10"
-              >
-                <FileUploadArea />
-                <button 
-                  onClick={() => setInputMode('voice')}
-                  className="absolute top-4 left-4 p-2 bg-black/50 backdrop-blur-md text-white rounded-full border border-white/10"
-                  title="Close File Upload"
-                >
-                  <X size={20} />
-                </button>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
-          {/* Conversation Area */}
-          <div 
-            ref={scrollRef}
-            className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4 scroll-smooth"
+      <main className="flex-1 flex relative overflow-hidden">
+        {/* Sidebar Tabs (Vertical) */}
+        <div className="w-14 border-r border-slate-800 flex flex-col items-center py-4 gap-4 bg-[#080C14]">
+          <button 
+            onClick={() => setActiveTab('chat')}
+            className={`p-3 rounded-xl transition-all ${activeTab === 'chat' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
+            title="Switch to Chat"
           >
-            {conversationHistory.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center opacity-40">
-                <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                  <MessageSquare size={32} />
-                </div>
-                <p className="text-sm font-medium tracking-wide">How can I help you today?</p>
-              </div>
-            )}
-            
-            {conversationHistory.map((msg, idx) => (
-              <ConversationMessage 
-                key={msg.id} 
-                message={msg} 
-                isLatest={idx === conversationHistory.length - 1} 
-              />
-            ))}
-
-            {/* Interim Transcript */}
-            {isListening && interimTranscript && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex justify-end mb-4"
-              >
-                <div className="bg-slate-800/40 backdrop-blur-sm px-4 py-2 rounded-2xl rounded-tr-none border border-slate-700/50 italic text-gray-400 text-sm">
-                  {interimTranscript}...
-                </div>
-              </motion.div>
-            )}
-          </div>
+            <MessageSquare size={20} />
+          </button>
+          <button 
+            onClick={() => setActiveTab('expert')}
+            className={`p-3 rounded-xl transition-all ${activeTab === 'expert' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
+            title="Switch to Medical Experts"
+          >
+            <Stethoscope size={20} />
+          </button>
         </div>
 
-        {/* Agent Status Bar */}
-        <AgentStatusRow />
+        <div className="flex-1 flex flex-col relative overflow-hidden">
+          {/* Particle Effect Background (Subtle) */}
+          <div className="absolute inset-0 pointer-events-none opacity-20">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full animate-pulse delay-700" />
+          </div>
+
+          {/* Dynamic Panel (Camera or File or Conversation) */}
+          <div className="flex-1 relative overflow-hidden flex flex-col">
+            <AnimatePresence mode="wait">
+              {inputMode === 'camera' ? (
+                <motion.div 
+                  key="camera"
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute inset-0 z-10"
+                >
+                  <CameraAnalysisPanel />
+                  <button 
+                    onClick={() => setInputMode('voice')}
+                    className="absolute top-4 left-4 p-2 bg-black/50 backdrop-blur-md text-white rounded-full border border-white/10"
+                    title="Close Camera Stream"
+                  >
+                    <X size={20} />
+                  </button>
+                </motion.div>
+              ) : inputMode === 'file' || inputMode === 'photo' || inputMode === 'video' ? (
+                <motion.div 
+                  key="file"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="absolute inset-0 z-10"
+                >
+                  <FileUploadArea />
+                  <button 
+                    onClick={() => setInputMode('voice')}
+                    className="absolute top-4 left-4 p-2 bg-black/50 backdrop-blur-md text-white rounded-full border border-white/10"
+                    title="Close File Upload"
+                  >
+                    <X size={20} />
+                  </button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+
+            {/* Conversation Area */}
+            <div 
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4 scroll-smooth"
+            >
+              {conversationHistory.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center opacity-40">
+                  <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                    <MessageSquare size={32} />
+                  </div>
+                  <p className="text-sm font-medium tracking-wide">How can I help you today?</p>
+                </div>
+              )}
+              
+              {conversationHistory.map((msg, idx) => (
+                <ConversationMessage 
+                  key={msg.id} 
+                  message={msg} 
+                  isLatest={idx === conversationHistory.length - 1} 
+                />
+              ))}
+
+              {/* Interim Transcript */}
+              {isListening && interimTranscript && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-end mb-4"
+                >
+                  <div className="bg-slate-800/40 backdrop-blur-sm px-4 py-2 rounded-2xl rounded-tr-none border border-slate-700/50 italic text-gray-400 text-sm">
+                    {interimTranscript}...
+                  </div>
+                </motion.div>
+              )}
+            </div>
+            
+            {/* Medical Expert Panel Overlay */}
+            <AnimatePresence>
+              {activeTab === 'expert' && (
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="absolute inset-y-0 right-0 z-40 w-full md:w-[450px]"
+                >
+                  <MedicalExpertPanel />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          {/* Agent Status Bar */}
+          <AgentStatusRow />
+        </div>
       </main>
 
       {/* Input Area (Bottom) */}
-      <footer className="relative bg-[#080C14] border-t border-slate-800/50 pb-8 pt-2">
+      <div className="relative bg-[#080C14] border-t border-slate-800/50 pb-8 pt-2">
         {/* Mode Selector */}
         <InputModeSelector />
 
@@ -309,6 +372,7 @@ const AssistantPage: React.FC = () => {
                   key={action}
                   onClick={() => setTextInput(action)}
                   className="px-4 py-1.5 bg-slate-900/50 border border-slate-800 rounded-full text-[10px] font-bold text-gray-400 hover:text-white hover:border-gray-600 transition-all whitespace-nowrap"
+                  title={`Quick Action: ${action}`}
                 >
                   {action}
                 </button>
@@ -360,11 +424,12 @@ const AssistantPage: React.FC = () => {
                   isListening 
                     ? 'bg-red-500 text-white shadow-red-500/40' 
                     : isSpeaking
-                    ? 'bg-blue-500 text-white shadow-blue-500/40'
-                    : 'bg-slate-800 text-gray-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-blue-600 text-white shadow-blue-600/40'
+                    : 'bg-slate-800 text-slate-400 hover:text-white'
                 }`}
+                title={isListening ? "Stop Listening" : isSpeaking ? "Stop Speaking" : "Start Voice Assistant"}
               >
-                {isSpeaking ? <Square size={32} /> : <Mic size={32} />}
+                {isListening ? <MicOff size={32} /> : isSpeaking ? <Square size={32} /> : <Mic size={32} />}
               </button>
             </div>
           </div>
@@ -372,18 +437,26 @@ const AssistantPage: React.FC = () => {
 
         {/* Action Controls (Floating) */}
         <div className="absolute bottom-10 right-6 flex flex-col gap-3">
-          <button className="p-3 bg-slate-900 border border-slate-800 rounded-full text-gray-400 hover:text-white transition-all shadow-lg" title="Share Conversation">
+          <button className="p-3 bg-slate-900 border border-slate-800 rounded-full text-gray-400 hover:text-white transition-all shadow-lg" title="Share Conversation Summary">
             <Share2 size={20} />
           </button>
           <button 
             onClick={handleDownloadReport}
             className="p-3 bg-slate-900 border border-slate-800 rounded-full text-gray-400 hover:text-white transition-all shadow-lg" 
-            title="Download Report PDF"
+            title="Download Medical Report PDF"
           >
             <FileDown size={20} />
           </button>
         </div>
-      </footer>
+      </div>
+
+      {/* Feedback Modal */}
+      <IncidentFeedbackModal 
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+        incidentId={currentIncidentId || 'DEMO-123'}
+        incidentData={lastIncidentData || { gForce: 4.2, heartRate: 95, spO2: 96, movementScore: 1, timeOfDay: 14, roadType: 0 }}
+      />
     </div>
   );
 };

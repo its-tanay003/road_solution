@@ -14,7 +14,7 @@ export interface Identity {
   isSimulated: boolean;
 }
 
-export const useIdentityRecognition = (videoRef: React.RefObject<HTMLVideoElement>) => {
+export const useIdentityRecognition = (videoRef: React.RefObject<HTMLVideoElement | null>) => {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [qrData, setQrData] = useState<string | null>(null);
   const [isModelsLoaded, setIsModelsLoaded] = useState(false);
