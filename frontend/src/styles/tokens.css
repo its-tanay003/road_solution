@@ -1,145 +1,160 @@
-@import "tailwindcss";
-
-@theme {
-  --color-emergency: #FF3B3B;
-  --color-emergency-dim: rgba(255, 59, 59, 0.12);
-  --color-emergency-glow: rgba(255, 59, 59, 0.25);
-  --color-safe: #32D74B;
-  --color-safe-dim: rgba(50, 215, 75, 0.12);
-  --color-warning: #FF9F0A;
-  --color-warning-dim: rgba(255, 159, 10, 0.12);
-  --color-ai: #BF5AF2;
-  --color-ai-dim: rgba(191, 90, 242, 0.12);
-  --color-mesh: #5AC8FA;
-  --color-info: #0A84FF;
-  --color-surface: #111827;
-  --color-elevated: #1A2236;
-  --color-glass: rgba(17, 24, 39, 0.72);
-
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-pill: 9999px;
-
-  --shadow-glow-red: 0 0 16px rgba(255, 59, 59, 0.4);
-  --shadow-glow-green: 0 0 16px rgba(50, 215, 75, 0.4);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-
-  --color-border: var(--border);
-}
-
 /* ============================================================
-   THEME DEFINITIONS — activated by data-theme attr or class
+   ROADSoS — NEXUS DARK Design Tokens
+   "Emergency Intelligence meets Human Warmth"
    ============================================================ */
 
-/* Default / dark-hud */
-:root,
-:root.theme-dark-hud,
-[data-theme="dark-hud"] {
-  --bg-primary: #050A14;
-  --bg-secondary: #0A1628;
-  --bg-surface: #0F2040;
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.65);
-  --accent: #00E5FF;
-  --border: rgba(0, 229, 255, 0.12);
-  --sos-red: #FF1744;
+:root {
+  /* ── Backgrounds — layered depth system ─────────────────── */
+  --bg-void:    #05080F;   /* deepest background, body        */
+  --bg-base:    #080C14;   /* page background                 */
+  --bg-raised:  #0D1321;   /* cards, panels                   */
+  --bg-overlay: #131B2B;   /* modals, tooltips                */
+  --bg-hover:   #1A2335;   /* hover states                    */
 
-  /* Map to existing app vars so both systems work */
-  --app-bg: #050A14;
-  --app-surface: #0A1628;
-  --app-text: #FFFFFF;
-  --app-border: rgba(0, 229, 255, 0.12);
+  /* ── Brand / Semantic Colors ─────────────────────────────── */
+  --red:          #FF1744;              /* emergency, danger, SOS */
+  --red-glow:     rgba(255,23,68,0.20);
+  --red-soft:     rgba(255,23,68,0.12);
+
+  --amber:        #FFB300;              /* Golden Hour, warning   */
+  --amber-glow:   rgba(255,179,0,0.18);
+
+  --green:        #00E676;              /* safe, confirmed, online */
+  --green-glow:   rgba(0,230,118,0.15);
+
+  --blue:         #2979FF;              /* AI, data, info          */
+  --blue-glow:    rgba(41,121,255,0.18);
+
+  --saffron:      #FF9933;              /* India accent, primary   */
+  --saffron-glow: rgba(255,153,51,0.20);
+
+  --purple:       #7C4DFF;              /* AI thinking, special    */
+
+  /* ── Text ───────────────────────────────────────────────── */
+  --text-primary:   #F0F4FF;  /* main text, high contrast */
+  --text-secondary: #8892A4;  /* supporting text          */
+  --text-hint:      #4A5568;  /* placeholder, disabled    */
+  --text-inverse:   #05080F;  /* text on light backgrounds */
+
+  /* ── Borders ─────────────────────────────────────────────── */
+  --border:        rgba(255,255,255,0.07);
+  --border-active: rgba(255,255,255,0.18);
+  --border-focus:  rgba(255,153,51,0.60);
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+  --font-hindi:   'Noto Sans Devanagari', sans-serif;
+  --font-tamil:   'Noto Sans Tamil', sans-serif;
+
+  /* ── Spacing Scale — 4px base ────────────────────────────── */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+
+  /* ── Touch Targets — NEVER below 52px ───────────────────── */
+  --touch-sm: 52px;
+  --touch-md: 60px;
+  --touch-lg: 72px;
+  --touch-xl: 88px;
+
+  /* ── Border Radius ───────────────────────────────────────── */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-full: 999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md:      0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg:      0 8px 32px rgba(0,0,0,0.5);
+  --shadow-red:     0 0 30px rgba(255,23,68,0.3), 0 0 60px rgba(255,23,68,0.15);
+  --shadow-saffron: 0 0 30px rgba(255,153,51,0.25);
+  --shadow-green:   0 0 24px rgba(0,230,118,0.20);
+  --shadow-blue:    0 0 24px rgba(41,121,255,0.20);
+
+  /* ── Animation Durations ─────────────────────────────────── */
+  --dur-fast:   150ms;
+  --dur-normal: 250ms;
+  --dur-slow:   400ms;
+  --dur-enter:  350ms;
+
+  /* ── Easing Curves ───────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.0, 0.0, 0.2, 1.0);
+  --ease-in:     cubic-bezier(0.4, 0.0, 1.0, 1.0);
+  --ease-inout:  cubic-bezier(0.4, 0.0, 0.2, 1.0);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.0);
+
+  /* ── Z-Index Scale ───────────────────────────────────────── */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 100;
+  --z-modal:   200;
+  --z-toast:   300;
+  --z-sos:     400;
+  --z-top:     9999;
+
+  /* ── Accessibility / Adaptable Sizes ─────────────────────── */
+  --app-font-size:      16px;
+  --app-font-weight:    400;
+  --app-letter-spacing: normal;
+  --app-line-height:    1.5;
 }
 
-:root.theme-dark-soft,
-[data-theme="dark-soft"] {
-  --bg-primary: #0D0D1A;
-  --bg-secondary: #141428;
-  --bg-surface: #1A1A35;
-  --text-primary: #E8E8F0;
-  --text-secondary: rgba(232, 232, 240, 0.6);
-  --accent: #7B86FF;
-  --border: rgba(123, 134, 255, 0.15);
-  --sos-red: #FF4444;
-  --app-bg: #0D0D1A;
-  --app-surface: #141428;
-  --app-text: #E8E8F0;
-  --app-border: rgba(123, 134, 255, 0.15);
+/* ── Theme: Light ──────────────────────────────────────────── */
+.theme-light {
+  --bg-void:    #FFFFFF;
+  --bg-base:    #F5F7FA;
+  --bg-raised:  #FFFFFF;
+  --bg-overlay: #F0F4FF;
+  --bg-hover:   #E8EDF5;
+
+  --text-primary:   #0A0F1E;
+  --text-secondary: #4A5568;
+  --text-hint:      #9AA0AD;
+  --text-inverse:   #FFFFFF;
+
+  --border:        rgba(0,0,0,0.08);
+  --border-active: rgba(0,0,0,0.20);
+  --border-focus:  rgba(255,153,51,0.70);
+
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.10);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.15);
 }
 
-:root.theme-high-contrast,
-[data-theme="high-contrast"] {
-  --bg-primary: #000000;
-  --bg-secondary: #0A0A0A;
-  --bg-surface: #111111;
-  --text-primary: #FFFF00;
-  --text-secondary: #FFFFFF;
-  --accent: #FFFF00;
-  --border: rgba(255, 255, 0, 0.4);
-  --sos-red: #FF0000;
-  --app-bg: #000000;
-  --app-surface: #111111;
-  --app-text: #FFFF00;
-  --app-border: rgba(255, 255, 0, 0.4);
+/* ── Theme: High Contrast ──────────────────────────────────── */
+.theme-high-contrast {
+  --bg-void:    #000000;
+  --bg-base:    #000000;
+  --bg-raised:  #0A0A0A;
+  --bg-overlay: #111111;
+  --bg-hover:   #1A1A1A;
+
+  --text-primary:   #FFFFFF;
+  --text-secondary: #DDDDDD;
+  --text-hint:      #AAAAAA;
+
+  --border:        rgba(255,255,255,0.50);
+  --border-active: rgba(255,255,255,0.80);
+  --border-focus:  rgba(255,153,51,1.00);
 }
 
-:root.theme-light-clean,
-[data-theme="light-clean"] {
-  --bg-primary: #F8F9FA;
-  --bg-secondary: #FFFFFF;
-  --bg-surface: #FFFFFF;
-  --text-primary: #0D1117;
-  --text-secondary: rgba(13, 17, 23, 0.65);
-  --accent: #0066CC;
-  --border: rgba(0, 0, 0, 0.1);
-  --sos-red: #CC0000;
-  --app-bg: #F8F9FA;
-  --app-surface: #FFFFFF;
-  --app-text: #0D1117;
-  --app-border: rgba(0, 0, 0, 0.1);
-  --clr-bg: #F8F9FA;
-  --clr-text: #0D1117;
-  --clr-text-2: #4B5563;
-  --clr-border: rgba(0, 0, 0, 0.1);
-}
-
-/* Font size + family controlled by settings store */
-html {
-  font-size: var(--app-font-size, 15px);
-}
-* {
-  font-family: var(--app-font-family, 'Inter', sans-serif);
-}
-
-/* Reduced motion */
-:root.reduce-motion *,
-:root.reduce-motion *::before,
-:root.reduce-motion *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-}
-
-/* ============================================================
-   ANIMATION KEYFRAMES
-   ============================================================ */
-
-@keyframes pulse-emergency {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.5); }
-  50% { box-shadow: 0 0 0 20px rgba(255, 59, 59, 0); }
-}
-@keyframes radar-sweep {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-@keyframes aurora {
-  0%, 100% { border-color: rgba(255,59,59,0.5); box-shadow: 0 0 12px rgba(255,59,59,0.2); }
-  33% { border-color: rgba(191,90,242,0.5); box-shadow: 0 0 12px rgba(191,90,242,0.2); }
-  66% { border-color: rgba(10,132,255,0.5); box-shadow: 0 0 12px rgba(10,132,255,0.2); }
+/* ── Theme: Saffron Accent ─────────────────────────────────── */
+.theme-saffron {
+  --saffron:       #FF9933;
+  --border-active: rgba(255,153,51,0.40);
+  --border-focus:  rgba(255,153,51,0.80);
+  --bg-raised:     #0D1321;
 }
