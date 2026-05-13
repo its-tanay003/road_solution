@@ -1,128 +1,178 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BOOT_LOGS = [
-  "Initializing mesh network...",
-  "Loading India road network (MoRTH 2023)...",
-  "Calibrating AI triage engine...",
-  "Connecting to 112 India...",
-  "Verifying AES-GCM encryption...",
-  "System ready."
+const STEPS = [
+  { label: 'Connecting to emergency network…', pct: 25 },
+  { label: 'Loading safety intelligence…',     pct: 55 },
+  { label: 'Calibrating location services…',   pct: 80 },
+  { label: 'Ready.',                            pct: 100 },
 ];
 
-interface Props {
-  onComplete: () => void;
+interface AppLoadingScreenProps {
+  onComplete?: () => void;
 }
 
-export const AppLoadingScreen: React.FC<Props> = ({ onComplete }) => {
-  const [logs, setLogs] = useState<string[]>([]);
-  const [showSubtitle, setShowSubtitle] = useState(false);
-  const [isSkipped, setIsSkipped] = useState(false);
+export function AppLoadingScreen({ onComplete }: AppLoadingScreenProps) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (isSkipped) return;
+    let current = 0;
+    const DELAYS = [400, 700, 600, 500];
 
-    // Subtitle delay
-    const subtitleTimer = setTimeout(() => setShowSubtitle(true), 800);
-
-    // Logs sequencing
-    const logTimers = BOOT_LOGS.map((log, index) => {
-      return setTimeout(() => {
-        setLogs(prev => [...prev, log]);
-        if (index === BOOT_LOGS.length - 1) {
-          setTimeout(onComplete, 1000); // Wait 1s after last log
-        }
-      }, 1000 + index * 300);
-    });
-
-    // Auto-skip after 5s total as fallback
-    const fallback = setTimeout(onComplete, 5000);
-
-    return () => {
-      clearTimeout(subtitleTimer);
-      clearTimeout(fallback);
-      logTimers.forEach(t => clearTimeout(t));
+    const advance = () => {
+      if (current >= STEPS.length - 1) {
+        setStepIndex(STEPS.length - 1);
+        setTimeout(() => {
+          setDone(true);
+          onComplete?.();
+        }, 600);
+        return;
+      }
+      current++;
+      setStepIndex(current);
+      setTimeout(advance, DELAYS[current] ?? 500);
     };
-  }, [onComplete, isSkipped]);
 
-  const handleSkip = () => {
-    setIsSkipped(true);
-    onComplete();
-  };
+    const t = setTimeout(advance, DELAYS[0]);
+    return () => clearTimeout(t);
+  }, [onComplete]);
+
+  const step = STEPS[stepIndex];
 
   return (
-    <motion.div
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      onClick={handleSkip}
-      className="fixed inset-0 z-9999 bg-[#080C14] flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
-    >
-
-      {/* Center Content */}
-      <div className="text-center relative">
+    <AnimatePresence>
+      {!done && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center"
+          key="loading"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 1.04 }}
+          transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'var(--bg-void)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            gap: 40,
+            padding: 32,
+          }}
+          aria-label="Application loading"
+          role="status"
+          aria-live="polite"
         >
-          <div className="w-20 h-20 mb-6 relative">
-            <div className="absolute inset-0 bg-[#FF1744]/20 blur-xl rounded-full animate-pulse" />
-            <img 
-              src="/roadsos-logo.svg" 
-              alt="ROADSoS" 
-              className="w-full h-full relative z-10"
-              onError={(e) => {
-                // Fallback if logo doesn't exist
-                e.currentTarget.src = 'https://api.iconify.design/solar:shield-warning-bold-duotone.svg?color=%23FF1744';
-              }}
-            />
-          </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
-            ROAD<span className="text-[#FF1744]">SoS</span>
-          </h1>
-          <AnimatePresence>
-            {showSubtitle && (
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}
+          >
+            {/* SOS emblem */}
+            <div style={{
+              width: 80, height: 80,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle at 40% 40%, #FF4444, #CC0022)',
+              boxShadow: '0 0 40px rgba(255,23,68,0.40), 0 0 80px rgba(255,23,68,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: 'pulse-ring 2.5s ease-in-out infinite',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 800,
+                fontSize: 22,
+                color: '#FFFFFF',
+                letterSpacing: '0.06em',
+              }}>
+                SOS
+              </span>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 8 }}>
+              <p style={{
+                margin: 0,
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: 28,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.01em',
+              }}>
+                ROAD<span style={{ color: 'var(--red)' }}>SoS</span>
+              </p>
+              <p style={{
+                margin: '4px 0 0',
+                fontFamily: 'var(--font-body)',
+                fontSize: 12,
+                color: 'var(--text-hint)',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+              }}>
+                Emergency Intelligence
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Progress area */}
+          <div style={{ width: '100%', maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* Track */}
+            <div style={{
+              height: 3,
+              background: 'var(--bg-hover)',
+              borderRadius: 999,
+              overflow: 'hidden',
+            }}>
+              <motion.div
+                animate={{ width: `${step.pct}%` }}
+                transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
+                style={{
+                  height: '100%',
+                  borderRadius: 999,
+                  background: 'linear-gradient(90deg, var(--saffron), var(--red))',
+                  boxShadow: '0 0 8px rgba(255,153,51,0.6)',
+                }}
+              />
+            </div>
+
+            {/* Step label */}
+            <AnimatePresence mode="wait">
               <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-(--clr-text-2) text-sm tracking-[0.3em] uppercase font-medium"
+                key={stepIndex}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.25 }}
+                style={{
+                  margin: 0,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--text-secondary)',
+                  textAlign: 'center',
+                  letterSpacing: '0.02em',
+                }}
               >
-                Emergency Intelligence Platform
+                {step.label}
               </motion.p>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
+
+          {/* Bottom tagline */}
+          <p style={{
+            position: 'absolute',
+            bottom: 40,
+            margin: 0,
+            fontFamily: 'var(--font-body)',
+            fontSize: 11,
+            color: 'var(--text-hint)',
+            textAlign: 'center',
+            letterSpacing: '0.04em',
+          }}>
+            Every second matters.
+          </p>
         </motion.div>
-      </div>
-
-      {/* Boot Logs */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full max-w-xs px-6">
-        <div className="space-y-1.5 font-mono text-[10px]">
-          {logs.map((log, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -5 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={i === logs.length - 1 && logs.length === BOOT_LOGS.length 
-                ? "text-green-500 font-bold" 
-                : "text-gray-500"
-              }
-            >
-              <span className="opacity-50 mr-2">&gt;</span>
-              {log}
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Footer Decoration */}
-      <div className="absolute bottom-8 text-[8px] font-mono text-white/10 tracking-widest uppercase">
-        Encrypted P2P Mesh Network Protocol v4.2.0-stable
-      </div>
-      
-      {/* Scanline Overlay */}
-      <div className="scanline-overlay opacity-30 pointer-events-none" />
-    </motion.div>
+      )}
+    </AnimatePresence>
   );
-};
+}
