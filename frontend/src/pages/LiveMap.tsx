@@ -12,6 +12,9 @@ import { RadiusControl } from '../components/map/RadiusControl';
 import { ServiceBottomSheet } from '../components/map/ServiceBottomSheet';
 import { ServiceDetailSheet } from '../components/map/ServiceDetailSheet';
 import { EmergencyMapMode } from '../components/map/EmergencyMapMode';
+import { useRoadReportStore } from '../store/roadReportStore';
+import { RoadReportSheet } from '../components/RoadReportSheet';
+import { AlertTriangle } from 'lucide-react';
 
 const MAP_CONTAINER_STYLE = {
   width: '100%',
@@ -136,6 +139,8 @@ export const LiveMap = () => {
   const { searchRadius } = useMapDataStore();
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
+
+  const { reports, setReporting } = useRoadReportStore();
 
   // useNearbyPlaces relies on user location and the map instance (for the Places service)
   const { places } = useNearbyPlaces(lat, lng, map);
@@ -267,6 +272,21 @@ export const LiveMap = () => {
         place={selectedPlace} 
         onClose={() => setSelectedPlace(null)} 
       />
+
+      {/* Feature 2: Road Condition Reporting */}
+      <RoadReportSheet />
+      
+      <div className="absolute bottom-[240px] right-4 z-[40]">
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setReporting(true)}
+          className="w-16 h-16 bg-orange-600 rounded-2xl flex flex-col items-center justify-center text-white shadow-xl shadow-orange-600/20 border border-white/20 pointer-events-auto"
+        >
+          <AlertTriangle size={24} />
+          <span className="text-[10px] font-black uppercase mt-1">Report</span>
+        </motion.button>
+      </div>
 
     </div>
   );

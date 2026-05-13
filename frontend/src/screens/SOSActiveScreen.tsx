@@ -1,172 +1,245 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useEmergencyStore } from '../store/emergencyStore';
-import { useMedicalProfileStore } from '../store/medicalProfileStore';
+import { useSosStore } from '../store/sosStore';
+import { useUserStore } from '../store/userStore';
+import { useWearableStore } from '../store/wearableStore';
 import { NotificationStatusPanel } from '../components/NotificationStatusPanel';
-import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, Activity, Wind } from 'lucide-react';
+import { hapticSOS } from '../lib/accessibilityHelpers';
 
-export const SOSActiveScreen: React.FC = () => {
-  const { crashDetectedAt, cancelSOS, sosActive, currentIncidentId } = useEmergencyStore();
-  const { profileComplete, name, bloodType } = useMedicalProfileStore();
-  const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(10);
-  const [showMedicalCard, setShowMedicalCard] = useState(false);
+/* ── constants ─────────────────────────────────────────────── */
+const RADIUS = 96;          // SVG circle radius (px inside 220px viewBox)
+const CIRC   = 2 * Math.PI * RADIUS;
+const TOTAL  = 10;           // countdown seconds
 
+/* ── blink keyframes injected once ─────────────────────────── */
+const BLINK_STYLE = `
+@keyframes sos-blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.sos-blink { animation: sos-blink 0.7s ease-in-out infinite }
+`;
+
+/* ── Haptic loop ────────────────────────────────────────────── */
+function useHapticLoop() {
   useEffect(() => {
-    // If SOS is not active, we shouldn't be here
-    if (!sosActive) {
-      navigate('/');
-      return;
+    let id: ReturnType<typeof setInterval>;
+    if ('vibrate' in navigator) {
+      id = setInterval(() => {
+        navigator.vibrate([200, 100, 200, 100]);
+      }, 3000);
+      navigator.vibrate([200, 100, 200, 100]);
     }
+    return () => clearInterval(id);
+  }, []);
+}
 
-    const timer = setInterval(() => {
-      if (crashDetectedAt) {
-        const elapsed = Math.floor((Date.now() - crashDetectedAt) / 1000);
-        const remaining = Math.max(0, 10 - elapsed);
-        setTimeLeft(remaining);
-
-        if (remaining === 0) {
-          clearInterval(timer);
-          navigate(`/dispatched/${currentIncidentId || 'AUTO'}`);
-        }
-      }
-    }, 100);
-
-    return () => clearInterval(timer);
-  }, [crashDetectedAt, navigate, sosActive, currentIncidentId]);
-
+/* ── background red particle canvas ────────────────────────── */
+function RedWashBackground() {
   return (
-    <div className="fixed inset-0 bg-[#080C14] z-10000 flex flex-col items-center p-6 pb-10 overflow-y-auto">
-      {/* Background Ambience */}
-      <div className="fixed inset-0 bg-red-600/5 animate-pulse pointer-events-none" />
-      <div className="fixed top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-red-500/50 to-transparent" />
-      
-      <div className="mt-8 text-center relative z-10 mb-8">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="inline-block px-3 py-1 rounded-full bg-red-600/20 border border-red-500/30 mb-4"
-        >
-          <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em]">Orchestrating Response</span>
-        </motion.div>
-        <h1 className="text-5xl font-black text-white tracking-tighter leading-tight">
-          SOS <span className="text-red-600">ACTIVE</span>
-        </h1>
-        <p className="text-white/40 font-mono text-[10px] tracking-widest mt-2 uppercase">
-          Incident: {currentIncidentId}
-        </p>
-      </div>
+    <>
+      <div className="fixed inset-0 bg-[#080C14]" />
+      <motion.div
+        className="fixed inset-0 pointer-events-none"
+        animate={{ opacity: [0.08, 0.14, 0.08] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ background: 'rgba(255,23,68,0.10)' }}
+      />
+      {/* top/bottom gradient bars */}
+      <div className="fixed top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/80 to-transparent" />
+      <div className="fixed bottom-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+      {/* corner aura */}
+      <div className="fixed top-0 left-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
+    </>
+  );
+}
 
-      {/* 10s Countdown Circle */}
-      <div className="relative flex items-center justify-center mb-10 shrink-0">
-        <svg className="w-56 h-56 -rotate-90">
-          <circle
-            cx="112"
-            cy="112"
-            r="100"
-            fill="transparent"
-            stroke="rgba(255,255,255,0.05)"
-            strokeWidth="12"
-          />
-          <motion.circle
-            cx="112"
-            cy="112"
-            r="100"
-            fill="transparent"
-            stroke="#FF1744"
-            strokeWidth="12"
-            strokeDasharray={2 * Math.PI * 100}
-            animate={{ strokeDashoffset: (1 - timeLeft / 10) * (2 * Math.PI * 100) }}
-            transition={{ duration: 1, ease: 'linear' }}
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <motion.span 
+/* ── countdown SVG ring ─────────────────────────────────────── */
+function CountdownRing({ timeLeft }: { timeLeft: number }) {
+  const offset = CIRC * (1 - timeLeft / TOTAL);
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
+      <svg width={220} height={220} style={{ transform: 'rotate(-90deg)' }}>
+        {/* track */}
+        <circle cx={110} cy={110} r={RADIUS} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={10} />
+        {/* progress */}
+        <motion.circle
+          cx={110} cy={110} r={RADIUS}
+          fill="none"
+          stroke="#FF1744"
+          strokeWidth={10}
+          strokeLinecap="round"
+          strokeDasharray={CIRC}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 0.9, ease: 'linear' }}
+        />
+        {/* glow ring */}
+        <motion.circle
+          cx={110} cy={110} r={RADIUS}
+          fill="none"
+          stroke="#FF1744"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeDasharray={CIRC}
+          animate={{ strokeDashoffset: offset, opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 0.9, ease: 'linear', opacity: { repeat: Infinity, duration: 0.7 } }}
+          style={{ filter: 'blur(4px)' }}
+        />
+      </svg>
+
+      {/* centre content */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+        <AnimatePresence mode="wait">
+          <motion.span
             key={timeLeft}
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 1.3, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-7xl font-black text-white tracking-tighter"
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="font-mono font-black text-white leading-none"
+            style={{ fontSize: 72 }}
           >
             {timeLeft}
           </motion.span>
-          <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-[-10px]">Seconds</span>
-        </div>
-      </div>
-
-      <div className="w-full max-w-sm space-y-4 relative z-10">
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Dispatch Channels</h3>
-          <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
-        </div>
-        
-        {/* LIVE TRACKER */}
-        <NotificationStatusPanel />
-
-        {!profileComplete && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
-            <AlertCircle size={18} className="text-amber-500" />
-            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest leading-relaxed">
-              Medical profile incomplete
-            </p>
-          </div>
-        )}
-
-        {/* Collapsible Medical Card */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-3xl transition-all duration-300">
-          <button 
-            onClick={() => setShowMedicalCard(!showMedicalCard)}
-            className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-red-600/20 flex items-center justify-center text-red-500 font-black text-xs border border-red-500/30">
-                {bloodType || '??'}
-              </div>
-              <div className="text-left">
-                <p className="text-[9px] text-white/30 font-black uppercase tracking-widest">Medical Identity</p>
-                <h4 className="text-sm font-bold text-white tracking-tight">{name || 'Guest User'}</h4>
-              </div>
-            </div>
-            {showMedicalCard ? <ChevronUp size={16} className="text-white/40" /> : <ChevronDown size={16} className="text-white/40" />}
-          </button>
-
-          <AnimatePresence>
-            {showMedicalCard && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="px-5 pb-5 border-t border-white/5"
-              >
-                <div className="pt-4 grid grid-cols-2 gap-3">
-                  <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                    <p className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-0.5">Location</p>
-                    <p className="text-[10px] font-bold text-white/80">28.6139° N, 77.2090° E</p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                    <p className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-0.5">Telemetry</p>
-                    <p className="text-[10px] font-bold text-emerald-500">Live Health Link</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Cancel Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            cancelSOS();
-            navigate('/');
-          }}
-          className="w-full bg-white text-[#080C14] py-5 rounded-2xl font-black text-lg tracking-tighter shadow-[0_20px_50px_rgba(255,255,255,0.1)] flex items-center justify-center gap-3 mt-4"
-        >
-          I AM SAFE — CANCEL
-        </motion.button>
+        </AnimatePresence>
+        <span className="font-mono text-[11px] tracking-[0.25em] text-white/40 uppercase">
+          Seconds
+        </span>
       </div>
     </div>
   );
+}
+
+/* ── main screen ─────────────────────────────────────────────── */
+export const SOSActiveScreen: React.FC = () => {
+  const navigate    = useNavigate();
+  const { isActive, cancelSOS, incidentId, crashDetectedAt } = useSosStore();
+  const { name, medicalInfo } = useUserStore();
+  const wearable    = useWearableStore(s => s.health);
+  const [timeLeft, setTimeLeft] = useState(TOTAL);
+  const resolved    = useRef(false);
+
+  useHapticLoop();
+
+  // redirect guard
+  useEffect(() => {
+    if (!isActive) navigate('/', { replace: true });
+  }, [isActive, navigate]);
+
+  // countdown
+  useEffect(() => {
+    if (!crashDetectedAt) return;
+    const id = setInterval(() => {
+      const elapsed    = Math.floor((Date.now() - crashDetectedAt) / 1000);
+      const remaining  = Math.max(0, TOTAL - elapsed);
+      setTimeLeft(remaining);
+      if (remaining === 0 && !resolved.current) {
+        resolved.current = true;
+        clearInterval(id);
+        navigate(`/dispatched/${incidentId || 'AUTO'}`);
+      }
+    }, 200);
+    return () => clearInterval(id);
+  }, [crashDetectedAt, navigate, incidentId]);
+
+  const handleCancel = useCallback(() => {
+    if ('vibrate' in navigator) navigator.vibrate([50]);
+    cancelSOS();
+    navigate('/', { replace: true });
+  }, [cancelSOS, navigate]);
+
+  const bloodType = medicalInfo?.bloodGroup || 'Unknown';
+  const userName  = name || 'Unknown User';
+  const hasHR     = wearable?.bpmHistory?.length > 0;
+  const lastHR    = hasHR ? wearable.bpmHistory[wearable.bpmHistory.length - 1]?.value : null;
+
+  return (
+    <>
+      <style>{BLINK_STYLE}</style>
+      <RedWashBackground />
+
+      <main
+        className="relative z-10 min-h-screen flex flex-col items-center px-5 pb-10 pt-8 overflow-y-auto"
+        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+        aria-live="assertive"
+        role="alert"
+      >
+        {/* TOP — incident ID */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-[11px] text-white/30 tracking-[0.25em] uppercase mb-6 self-start"
+        >
+          Incident&nbsp;
+          <span className="text-red-400">{incidentId || 'AUTO'}</span>
+        </motion.div>
+
+        {/* blinking header */}
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="sos-blink text-[15px] font-black tracking-[0.3em] text-red-400 uppercase mb-2 text-center"
+          aria-label="Emergency alert sending"
+        >
+          ⚠ Emergency Alert Sending
+        </motion.h1>
+
+        {/* profile line */}
+        <p className="text-white/50 text-[13px] tracking-widest mb-8 text-center">
+          {userName}&nbsp;&nbsp;•&nbsp;&nbsp;Blood Type:&nbsp;
+          <span className="text-red-400 font-black">{bloodType}</span>
+        </p>
+
+        {/* COUNTDOWN RING */}
+        <CountdownRing timeLeft={timeLeft} />
+
+        {/* spacer */}
+        <div className="my-6" />
+
+        {/* wearable vitals mini strip */}
+        {lastHR && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 px-5 py-3 rounded-2xl bg-red-900/20 border border-red-500/20 mb-6 text-[12px]"
+          >
+            <Activity size={14} className="text-red-400" />
+            <span className="text-white/60">HR: <span className="text-red-300 font-black">{lastHR} ↑</span></span>
+            <span className="w-px h-4 bg-white/10" />
+            <Wind size={14} className="text-blue-400" />
+            <span className="text-white/60">SpO₂: <span className="text-blue-300 font-black">{wearable.spO2 ?? 92}%</span></span>
+          </motion.div>
+        )}
+
+        {/* NOTIFICATION STATUS */}
+        <div className="w-full max-w-sm space-y-4 mb-6">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">Dispatch Channels</h2>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+          </div>
+          <NotificationStatusPanel />
+        </div>
+
+        {/* CANCEL CTA */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={handleCancel}
+          className="w-full max-w-sm h-16 rounded-2xl border-2 border-white/20 text-white font-black text-[18px] tracking-tight
+                     bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/40 transition-all duration-200
+                     flex items-center justify-center gap-3 mb-4"
+          aria-label="Cancel SOS — I am safe"
+        >
+          ✓ I AM SAFE — CANCEL
+        </motion.button>
+
+        {/* contact count */}
+        <p className="text-white/30 text-[11px] tracking-widest text-center">
+          Alerting all emergency contacts…
+        </p>
+      </main>
+    </>
+  );
 };
+
+export default SOSActiveScreen;
