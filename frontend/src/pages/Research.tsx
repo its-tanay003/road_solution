@@ -235,7 +235,7 @@ export const Research = () => {
             </div>
           </div>
           <div className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-            ROADSoS PROJECT • NATIONAL ROAD SAFETY CHALLENGE • 2026
+            ROADSoS PROJECT • EMERGENCY INTELLIGENCE OS
           </div>
         </footer>
       </div>

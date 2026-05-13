@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { 
   Milestone, 
   MapPin, 
-  TrendingUp, 
   ShieldCheck, 
   Globe, 
   ChevronRight,
