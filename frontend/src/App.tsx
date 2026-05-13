@@ -1,152 +1,329 @@
-import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useState, useRef } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  Navigate,
+} from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
+// ── Stores ─────────────────────────────────────────────────────────
 import { useAuthStore } from './store/authStore';
 import { useVolunteerStore } from './store/volunteerStore';
+
+// ── Shell components (eager — critical path) ───────────────────────
+import { TopBar }                  from './components/TopBar';
+import { BottomNav }               from './components/BottomNav';
+import { SOSFloatButton }           from './components/SOSFloatButton';
+import { VoiceNavigationListener }  from './components/VoiceNavigationListener';
+import { ToastContainer }           from './components/ToastContainer';
+import { AppLoadingScreen }         from './components/AppLoadingScreen';
+import { HighStressModeOverlay }    from './components/HighStressModeOverlay';
+import { PrivacyConsentBanner }     from './components/PrivacyConsentBanner';
+import { VolunteerAlertScreen }     from './components/VolunteerAlertScreen';
+
+// ── Page loading fallback ──────────────────────────────────────────
 import PageLoadingFallback from './components/PageLoadingFallback';
 
-// Critical Path - Eagerly Loaded
-import HomeScreen from './screens/HomeScreen';
-import { SOSActiveScreen } from './screens/SOSActiveScreen';
-import { Dispatched } from './screens/Dispatched';
+// ── Shared page transition ─────────────────────────────────────────
+import { pageVariants } from './lib/pageTransition';
+import { focusPageHeading, announce } from './lib/accessibilityHelpers';
 
-// Lazy Loaded Pages & Screens
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const Dashboard = lazy(() => import('./pages/Admin/Dashboard').then(m => ({ default: m.Dashboard })));
-const BystanderReport = lazy(() => import('./screens/BystanderReport').then(m => ({ default: m.BystanderReport })));
-const MedicalProfilePage = lazy(() => import('./pages/MedicalProfilePage').then(m => ({ default: m.MedicalProfilePage })));
-const GovernancePortal = lazy(() => import('./screens/GovernancePortal').then(m => ({ default: m.GovernancePortal })));
-const ImpactCalculator = lazy(() => import('./screens/ImpactCalculator').then(m => ({ default: m.ImpactCalculator })));
-const CrashPatternAnalytics = lazy(() => import('./screens/CrashPatternAnalytics'));
-const FamilyPortal = lazy(() => import('./screens/FamilyPortal'));
-const ResponderView = lazy(() => import('./screens/ResponderView'));
-const ARNavigationView = lazy(() => import('./components/ARNavigationView').then(m => ({ default: m.ARNavigationView })));
-const Roadmap = lazy(() => import('./pages/Roadmap').then(m => ({ default: m.Roadmap })));
-const Research = lazy(() => import('./pages/Research').then(m => ({ default: m.Research })));
-const GoodSamaritanGuide = lazy(() => import('./pages/GoodSamaritanGuide').then(m => ({ default: m.GoodSamaritanGuide })));
-const LiveMap = lazy(() => import('./pages/LiveMap').then(m => ({ default: m.LiveMap })));
-const HospitalFinder = lazy(() => import('./screens/HospitalFinder').then(m => ({ default: m.HospitalFinder })));
-const IncidentTimeline = lazy(() => import('./components/IncidentTimeline').then(m => ({ default: m.IncidentTimeline })));
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
-const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
-const TrustedContactsPage = lazy(() => import('./pages/TrustedContactsPage').then(m => ({ default: m.TrustedContactsPage })));
-const WhatsAppConnectPage = lazy(() => import('./pages/WhatsAppConnectPage').then(m => ({ default: m.WhatsAppConnectPage })));
+// ── Critical screens (eager — needed on first paint or SOS) ────────
+import HomeScreen           from './screens/HomeScreen';
+import { SOSActiveScreen }  from './screens/SOSActiveScreen';
+import { Dispatched }       from './screens/Dispatched';
+
+// ── Lazy pages ─────────────────────────────────────────────────────
+const LoginPage            = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const AssistantPage        = lazy(() => import('./pages/AssistantPage'));
+const LiveMap              = lazy(() => import('./pages/LiveMap').then(m => ({ default: m.LiveMap })));
+const Profile              = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile ?? m.default })));
+const MedicalProfilePage   = lazy(() => import('./pages/MedicalProfilePage').then(m => ({ default: m.MedicalProfilePage })));
+const SettingsPage         = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const FirstAid             = lazy(() => import('./pages/FirstAid').then(m => ({ default: m.FirstAid ?? m.default })));
+const TrustedContactsPage  = lazy(() => import('./pages/TrustedContactsPage').then(m => ({ default: m.TrustedContactsPage })));
+const WhatsAppConnectPage  = lazy(() => import('./pages/WhatsAppConnectPage').then(m => ({ default: m.WhatsAppConnectPage })));
 const ConsentManagementPage = lazy(() => import('./pages/ConsentManagementPage').then(m => ({ default: m.ConsentManagementPage })));
-const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard').then(m => ({ default: m.SecurityDashboard })));
+const PrivacyPage          = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const SecurityDashboard    = lazy(() => import('./pages/SecurityDashboard').then(m => ({ default: m.SecurityDashboard })));
+const GoodSamaritanGuide   = lazy(() => import('./pages/GoodSamaritanGuide').then(m => ({ default: m.GoodSamaritanGuide })));
+const Roadmap              = lazy(() => import('./pages/Roadmap').then(m => ({ default: m.Roadmap })));
+const Research             = lazy(() => import('./pages/Research').then(m => ({ default: m.Research })));
+const NotificationCenter   = lazy(() => import('./pages/NotificationCenter').then(m => ({ default: m.NotificationCenter ?? m.default })));
+const FamilyTracker        = lazy(() => import('./pages/FamilyTracker').then(m => ({ default: m.FamilyTracker ?? m.default })));
 
-const AssistantPage = lazy(() => import('./pages/AssistantPage'));
-
-// Layouts & UI Components
-import { PrivacyConsentBanner } from './components/PrivacyConsentBanner';
-import { VolunteerAlertScreen } from './components/VolunteerAlertScreen';
+// ── Lazy screens ───────────────────────────────────────────────────
+const BystanderReport      = lazy(() => import('./screens/BystanderReport').then(m => ({ default: m.BystanderReport })));
+const GovernancePortal     = lazy(() => import('./screens/GovernancePortal').then(m => ({ default: m.GovernancePortal })));
+const ImpactCalculator     = lazy(() => import('./screens/ImpactCalculator').then(m => ({ default: m.ImpactCalculator })));
+const CrashPatternAnalytics = lazy(() => import('./screens/CrashPatternAnalytics'));
+const FamilyPortal         = lazy(() => import('./screens/FamilyPortal'));
+const ResponderView        = lazy(() => import('./screens/ResponderView'));
+const HospitalFinder       = lazy(() => import('./screens/HospitalFinder').then(m => ({ default: m.HospitalFinder })));
+const ARNavigationView     = lazy(() => import('./components/ARNavigationView').then(m => ({ default: m.ARNavigationView })));
 const VolunteerResponderNetwork = lazy(() => import('./components/VolunteerResponderNetwork').then(m => ({ default: m.VolunteerResponderNetwork })));
-import { NHAISmartHighwayPanel } from './components/NHAISmartHighwayPanel';
-import { SettingsButton } from './components/SettingsButton';
-import { SettingsPanel } from './components/SettingsPanel';
-import { VoiceNavigationAnnouncer } from './components/VoiceNavigationAnnouncer';
-import { HighStressModeOverlay } from './components/HighStressModeOverlay';
-import { useVoiceNavigation } from './hooks/useVoiceNavigation';
 
-// Protect routes behind auth
+// ── Admin ──────────────────────────────────────────────────────────
+const Dashboard = lazy(() => import('./pages/Admin/Dashboard').then(m => ({ default: m.Dashboard })));
+
+// ══════════════════════════════════════════════════════════════════
+// Auth guard
+// ══════════════════════════════════════════════════════════════════
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
-const PageWrapper = ({ children }: { children: React.ReactNode }) => (
-  <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
-    transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-    className="w-full h-full"
-  >
-    {children}
-  </motion.div>
-);
-
-const AppContent = () => {
-  const location = useLocation();
-  useVoiceNavigation(); // Initialize global voice command system
-  
+// ══════════════════════════════════════════════════════════════════
+// Page wrapper — applies shared Framer Motion transition to every page
+// ══════════════════════════════════════════════════════════════════
+function Page({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full min-h-screen bg-[#080C14] text-[#E8EDF5] selection:bg-[#2979FF]/30 overflow-hidden font-sans">
-      <VoiceNavigationAnnouncer />
-      
-      <HighStressModeOverlay>
-        <main id="main-content" className="w-full h-full focus:outline-none" tabIndex={-1}>
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      style={{ width: '100%', minHeight: '100%' }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// Shell pages that hide the bottom nav / SOS button
+// ══════════════════════════════════════════════════════════════════
+const FULLSCREEN_PATHS = ['/sos-active', '/login', '/dispatched'];
+
+// ══════════════════════════════════════════════════════════════════
+// AppContent — renders inside BrowserRouter
+// ══════════════════════════════════════════════════════════════════
+function AppContent() {
+  const location = useLocation();
+  const prevPath = useRef(location.pathname);
+
+  // Focus management on route change
+  useEffect(() => {
+    if (prevPath.current !== location.pathname) {
+      prevPath.current = location.pathname;
+      focusPageHeading();
+    }
+  }, [location.pathname]);
+
+  const isFullscreen = FULLSCREEN_PATHS.some(p => location.pathname.startsWith(p));
+
+  return (
+    <>
+      {/* ── Accessibility regions ─────────────────────────────── */}
+      <a
+        href="#main-content"
+        className="skip-link"
+        style={{
+          position: 'fixed', top: -100, left: 16, zIndex: 9999,
+          background: 'var(--saffron)', color: 'var(--text-inverse)',
+          padding: '10px 18px', borderRadius: 8, fontWeight: 600,
+          fontSize: 14, textDecoration: 'none',
+          transition: 'top 0.2s',
+        }}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.top = '16px'; }}
+        onBlur={e  => { (e.currentTarget as HTMLElement).style.top = '-100px'; }}
+      >
+        Skip to main content
+      </a>
+
+      <div id="announcer-assertive" aria-live="assertive" aria-atomic="true"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
+      />
+      <div id="announcer-polite" aria-live="polite" aria-atomic="true"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
+      />
+
+      {/* ── App shell ─────────────────────────────────────────── */}
+      <div
+        style={{
+          width: '100%',
+          minHeight: '100vh',
+          minHeight: '100dvh',
+          background: 'var(--bg-base)',
+          color: 'var(--text-primary)',
+          fontFamily: 'var(--font-body)',
+          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Top bar */}
+        {!isFullscreen && <TopBar />}
+
+        {/* Page content */}
+        <main
+          id="main-content"
+          tabIndex={-1}
+          style={{
+            flex: 1,
+            paddingTop:    isFullscreen ? 0 : 56,
+            paddingBottom: isFullscreen ? 0 : 'calc(72px + env(safe-area-inset-bottom, 0px) + 24px)',
+            outline: 'none',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            position: 'relative',
+          }}
+        >
           <Suspense fallback={<PageLoadingFallback />}>
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
               <Routes location={location} key={location.pathname}>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/settings" element={<PageWrapper><SettingsPage /></PageWrapper>} />
-                <Route path="/settings/trusted-contacts" element={<PageWrapper><TrustedContactsPage /></PageWrapper>} />
-                <Route path="/settings/whatsapp" element={<PageWrapper><WhatsAppConnectPage /></PageWrapper>} />
-                <Route path="/settings/consent" element={<PageWrapper><ConsentManagementPage /></PageWrapper>} />
-                <Route path="/" element={<ProtectedRoute><PageWrapper><HomeScreen /></PageWrapper></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><PageWrapper><MedicalProfilePage /></PageWrapper></ProtectedRoute>} />
-                <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
-                <Route path="/governance" element={<PageWrapper><GovernancePortal /></PageWrapper>} />
-                <Route path="/impact" element={<PageWrapper><ImpactCalculator /></PageWrapper>} />
-                <Route path="/volunteer" element={<PageWrapper><VolunteerResponderNetwork /></PageWrapper>} />
-                <Route path="/sos-active" element={<PageWrapper><SOSActiveScreen /></PageWrapper>} />
-                <Route path="/assistant" element={<ProtectedRoute><PageWrapper><AssistantPage /></PageWrapper></ProtectedRoute>} />
-                <Route path="/report/:incidentId" element={<PageWrapper><BystanderReport /></PageWrapper>} />
-                <Route path="/dispatched/:id" element={<PageWrapper><Dispatched /></PageWrapper>} />
-                <Route path="/analytics" element={<PageWrapper><CrashPatternAnalytics /></PageWrapper>} />
-                <Route path="/family/:incidentId" element={<PageWrapper><FamilyPortal /></PageWrapper>} />
-                <Route path="/responder/:unitId" element={<PageWrapper><ResponderView /></PageWrapper>} />
-                <Route path="/responder/:incidentId/ar" element={<PageWrapper><ARNavigationView /></PageWrapper>} />
-                <Route path="/map" element={<PageWrapper><LiveMap /></PageWrapper>} />
-                <Route path="/hospitals" element={<PageWrapper><HospitalFinder /></PageWrapper>} />
-                
-                {/* Repurposed Evaluation Pages */}
-                <Route path="/vision" element={<PageWrapper><Roadmap /></PageWrapper>} />
-                <Route path="/impact-data" element={<PageWrapper><Research /></PageWrapper>} />
-                <Route path="/good-samaritan" element={<PageWrapper><GoodSamaritanGuide /></PageWrapper>} />
-                <Route path="/security" element={<PageWrapper><SecurityDashboard /></PageWrapper>} />
-                
-                {/* Redirect old evaluation routes */}
-                <Route path="/roadmap" element={<Navigate to="/vision" replace />} />
-                <Route path="/research" element={<Navigate to="/impact-data" replace />} />
+
+                {/* ── Public ──────────────────────────────────── */}
+                <Route path="/login"   element={<Page><LoginPage /></Page>} />
+                <Route path="/privacy" element={<Page><PrivacyPage /></Page>} />
+
+                {/* ── Core tabs (Protected) ───────────────────── */}
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Page><HomeScreen /></Page>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/map" element={
+                  <ProtectedRoute>
+                    <Page><LiveMap /></Page>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/assistant" element={
+                  <ProtectedRoute>
+                    <Page><AssistantPage /></Page>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Page><Profile /></Page>
+                  </ProtectedRoute>
+                } />
+
+                {/* ── Emergency flows ──────────────────────────── */}
+                <Route path="/sos-active"   element={<Page><SOSActiveScreen /></Page>} />
+                <Route path="/dispatched"   element={<Page><Dispatched /></Page>} />
+                <Route path="/dispatched/:id" element={<Page><Dispatched /></Page>} />
+                <Route path="/bystander"    element={<Page><VolunteerResponderNetwork /></Page>} />
+                <Route path="/report/:incidentId" element={<Page><BystanderReport /></Page>} />
+
+                {/* ── Settings & Account ───────────────────────── */}
+                <Route path="/settings"                  element={<Page><SettingsPage /></Page>} />
+                <Route path="/settings/trusted-contacts" element={<Page><TrustedContactsPage /></Page>} />
+                <Route path="/settings/whatsapp"         element={<Page><WhatsAppConnectPage /></Page>} />
+                <Route path="/settings/consent"          element={<Page><ConsentManagementPage /></Page>} />
+                <Route path="/security"                  element={<Page><SecurityDashboard /></Page>} />
+
+                {/* ── Medical ──────────────────────────────────── */}
+                <Route path="/medical" element={
+                  <ProtectedRoute>
+                    <Page><MedicalProfilePage /></Page>
+                  </ProtectedRoute>
+                } />
+
+                {/* ── Info / Resources ─────────────────────────── */}
+                <Route path="/first-aid"      element={<Page><FirstAid /></Page>} />
+                <Route path="/good-samaritan" element={<Page><GoodSamaritanGuide /></Page>} />
+                <Route path="/emergency-contacts" element={
+                  <ProtectedRoute>
+                    <Page><TrustedContactsPage /></Page>
+                  </ProtectedRoute>
+                } />
+
+                {/* ── Map variants ─────────────────────────────── */}
+                <Route path="/map/full"   element={<Page><LiveMap /></Page>} />
+                <Route path="/hospitals"  element={<Page><HospitalFinder /></Page>} />
+
+                {/* ── Notifications ────────────────────────────── */}
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <Page><NotificationCenter /></Page>
+                  </ProtectedRoute>
+                } />
+
+                {/* ── Community / Family ───────────────────────── */}
+                <Route path="/family/:incidentId" element={<Page><FamilyPortal /></Page>} />
+                <Route path="/family-tracker"     element={<Page><FamilyTracker /></Page>} />
+                <Route path="/volunteer"          element={<Page><VolunteerResponderNetwork /></Page>} />
+
+                {/* ── Responder ────────────────────────────────── */}
+                <Route path="/responder/:unitId"         element={<Page><ResponderView /></Page>} />
+                <Route path="/responder/:incidentId/ar"  element={<Page><ARNavigationView /></Page>} />
+
+                {/* ── Analytics & Impact ───────────────────────── */}
+                <Route path="/analytics"   element={<Page><CrashPatternAnalytics /></Page>} />
+                <Route path="/impact"      element={<Page><ImpactCalculator /></Page>} />
+                <Route path="/impact-data" element={<Page><Research /></Page>} />
+                <Route path="/governance"  element={<Page><GovernancePortal /></Page>} />
+
+                {/* ── Admin ────────────────────────────────────── */}
+                <Route path="/dashboard" element={<Page><Dashboard /></Page>} />
+
+                {/* ── Static / docs ────────────────────────────── */}
+                <Route path="/vision"   element={<Page><Roadmap /></Page>} />
+
+                {/* ── Legacy redirects ─────────────────────────── */}
+                <Route path="/roadmap"   element={<Navigate to="/vision" replace />} />
+                <Route path="/research"  element={<Navigate to="/impact-data" replace />} />
                 <Route path="/technical" element={<Navigate to="/security" replace />} />
 
-                <Route path="/incident-report" element={<PageWrapper><IncidentTimeline /></PageWrapper>} />
+                {/* ── Catch all ────────────────────────────────── */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </AnimatePresence>
           </Suspense>
         </main>
-      </HighStressModeOverlay>
 
-      <PrivacyConsentBanner />
-      <VolunteerAlertScreen />
-      <NHAISmartHighwayPanel />
-      
-      <SettingsButton />
-      <SettingsPanel />
-    </div>
+        {/* ── Bottom chrome (hidden on fullscreen pages) ──────── */}
+        {!isFullscreen && (
+          <>
+            <BottomNav />
+            <SOSFloatButton />
+          </>
+        )}
+
+        {/* ── Always-on listeners & banners ───────────────────── */}
+        <VoiceNavigationListener />
+        <HighStressModeOverlay>
+          <></>
+        </HighStressModeOverlay>
+        <PrivacyConsentBanner />
+        <VolunteerAlertScreen />
+      </div>
+    </>
   );
-};
+}
 
-const App = () => {
+// ══════════════════════════════════════════════════════════════════
+// Root App
+// ══════════════════════════════════════════════════════════════════
+export default function App() {
   const { init, isRegistered } = useVolunteerStore();
+  const [loading, setLoading] = useState(true);
 
+  // Initialise volunteer socket when already registered
   useEffect(() => {
-    // Initialize socket and listeners if user is already a registered volunteer
-    if (isRegistered) {
-      init();
-    }
+    if (isRegistered) init();
   }, [isRegistered, init]);
 
-  console.log('[DEBUG] Rendering App, React Version:', React.version);
   return (
     <BrowserRouter>
-      <AppContent />
+      <ToastContainer>
+        {/* Boot screen — fades out after assets are ready */}
+        {loading && (
+          <AppLoadingScreen onComplete={() => setLoading(false)} />
+        )}
+
+        {/* Main app — always mounted so routes preload */}
+        <div style={{ visibility: loading ? 'hidden' : 'visible' }}>
+          <AppContent />
+        </div>
+      </ToastContainer>
     </BrowserRouter>
   );
-};
-
-export default App;
+}
