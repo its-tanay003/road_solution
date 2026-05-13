@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 // ── Stores ─────────────────────────────────────────────────────────
 import { useAuthStore } from './store/authStore';
 import { useVolunteerStore } from './store/volunteerStore';
+import { useDriveModeStore } from './store/driveModeStore';
 
 // ── Shell components (eager — critical path) ───────────────────────
 import { TopBar }                  from './components/TopBar';
@@ -28,12 +29,13 @@ import PageLoadingFallback from './components/PageLoadingFallback';
 
 // ── Shared page transition ─────────────────────────────────────────
 import { pageVariants } from './lib/pageTransition';
-import { focusPageHeading, announce } from './lib/accessibilityHelpers';
+import { focusPageHeading } from './lib/accessibilityHelpers';
+import { SafetyTimerStrip } from './components/SafetyTimerStrip';
 
 // ── Critical screens (eager — needed on first paint or SOS) ────────
 import HomeScreen           from './screens/HomeScreen';
 import { SOSActiveScreen }  from './screens/SOSActiveScreen';
-import { Dispatched }       from './screens/Dispatched';
+
 
 // ── Lazy pages ─────────────────────────────────────────────────────
 const LoginPage            = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -41,8 +43,7 @@ const AssistantPage        = lazy(() => import('./pages/AssistantPage'));
 const LiveMap              = lazy(() => import('./pages/LiveMap').then(m => ({ default: m.LiveMap })));
 const Profile              = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile ?? m.default })));
 const MedicalProfilePage   = lazy(() => import('./pages/MedicalProfilePage').then(m => ({ default: m.MedicalProfilePage })));
-const SettingsPage         = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
-const FirstAid             = lazy(() => import('./pages/FirstAid').then(m => ({ default: m.FirstAid ?? m.default })));
+
 const TrustedContactsPage  = lazy(() => import('./pages/TrustedContactsPage').then(m => ({ default: m.TrustedContactsPage })));
 const WhatsAppConnectPage  = lazy(() => import('./pages/WhatsAppConnectPage').then(m => ({ default: m.WhatsAppConnectPage })));
 const ConsentManagementPage = lazy(() => import('./pages/ConsentManagementPage').then(m => ({ default: m.ConsentManagementPage })));
@@ -64,6 +65,17 @@ const ResponderView        = lazy(() => import('./screens/ResponderView'));
 const HospitalFinder       = lazy(() => import('./screens/HospitalFinder').then(m => ({ default: m.HospitalFinder })));
 const ARNavigationView     = lazy(() => import('./components/ARNavigationView').then(m => ({ default: m.ARNavigationView })));
 const VolunteerResponderNetwork = lazy(() => import('./components/VolunteerResponderNetwork').then(m => ({ default: m.VolunteerResponderNetwork })));
+// ── NEW screens (Prompt 5) ───────────────────────────────────────────
+const DispatchedScreen         = lazy(() => import('./screens/DispatchedScreen'));
+const FirstAidScreen           = lazy(() => import('./screens/FirstAidScreen'));
+const EmergencyContactsScreen  = lazy(() => import('./screens/EmergencyContactsScreen'));
+const SettingsScreen           = lazy(() => import('./screens/SettingsScreen'));
+const AIAssistantScreen        = lazy(() => import('./screens/AIAssistantScreen'));
+const SafetyTimerPage          = lazy(() => import('./pages/SafetyTimerPage'));
+const DriveModeScreen          = lazy(() => import('./screens/DriveModeScreen').then(m => ({ default: m.DriveModeScreen })));
+const BloodDonationConnect     = lazy(() => import('./screens/BloodDonationConnect'));
+const SafetyScoreScreen        = lazy(() => import('./screens/SafetyScoreScreen'));
+const OnboardingPage           = lazy(() => import('./pages/OnboardingPage'));
 
 // ── Admin ──────────────────────────────────────────────────────────
 const Dashboard = lazy(() => import('./pages/Admin/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -145,7 +157,6 @@ function AppContent() {
       <div
         style={{
           width: '100%',
-          minHeight: '100vh',
           minHeight: '100dvh',
           background: 'var(--bg-base)',
           color: 'var(--text-primary)',
@@ -155,6 +166,9 @@ function AppContent() {
           flexDirection: 'column',
         }}
       >
+        {/* Safety Timer Strip */}
+        <SafetyTimerStrip />
+
         {/* Top bar */}
         {!isFullscreen && <TopBar />}
 
@@ -206,32 +220,51 @@ function AppContent() {
                 } />
 
                 {/* ── Emergency flows ──────────────────────────── */}
-                <Route path="/sos-active"   element={<Page><SOSActiveScreen /></Page>} />
-                <Route path="/dispatched"   element={<Page><Dispatched /></Page>} />
-                <Route path="/dispatched/:id" element={<Page><Dispatched /></Page>} />
-                <Route path="/bystander"    element={<Page><VolunteerResponderNetwork /></Page>} />
+                <Route path="/sos-active"     element={<Page><SOSActiveScreen /></Page>} />
+                <Route path="/dispatched"     element={<Page><DispatchedScreen /></Page>} />
+                <Route path="/dispatched/:id" element={<Page><DispatchedScreen /></Page>} />
+                <Route path="/bystander"      element={<Page><BystanderScreen /></Page>} />
                 <Route path="/report/:incidentId" element={<Page><BystanderReport /></Page>} />
 
                 {/* ── Settings & Account ───────────────────────── */}
-                <Route path="/settings"                  element={<Page><SettingsPage /></Page>} />
+                <Route path="/settings"                  element={<Page><SettingsScreen /></Page>} />
                 <Route path="/settings/trusted-contacts" element={<Page><TrustedContactsPage /></Page>} />
                 <Route path="/settings/whatsapp"         element={<Page><WhatsAppConnectPage /></Page>} />
                 <Route path="/settings/consent"          element={<Page><ConsentManagementPage /></Page>} />
                 <Route path="/security"                  element={<Page><SecurityDashboard /></Page>} />
 
                 {/* ── Medical ──────────────────────────────────── */}
-                <Route path="/medical" element={
+                <Route path="/medical-profile" element={
                   <ProtectedRoute>
                     <Page><MedicalProfilePage /></Page>
                   </ProtectedRoute>
                 } />
+                <Route path="/medical" element={<Navigate to="/medical-profile" replace />} />
 
                 {/* ── Info / Resources ─────────────────────────── */}
-                <Route path="/first-aid"      element={<Page><FirstAid /></Page>} />
+                <Route path="/first-aid"      element={<Page><FirstAidScreen /></Page>} />
                 <Route path="/good-samaritan" element={<Page><GoodSamaritanGuide /></Page>} />
                 <Route path="/emergency-contacts" element={
                   <ProtectedRoute>
-                    <Page><TrustedContactsPage /></Page>
+                    <Page><EmergencyContactsScreen /></Page>
+                  </ProtectedRoute>
+                } />
+                <Route path="/safety-timer" element={
+                  <ProtectedRoute>
+                    <Page><SafetyTimerPage /></Page>
+                  </ProtectedRoute>
+                } />
+                <Route path="/safety-score" element={
+                  <ProtectedRoute>
+                    <Page><SafetyScoreScreen /></Page>
+                  </ProtectedRoute>
+                } />
+                <Route path="/onboarding" element={<Page><OnboardingPage /></Page>} />
+
+                {/* ── AI Assistant ─────────────────────────────── */}
+                <Route path="/assistant" element={
+                  <ProtectedRoute>
+                    <Page><AIAssistantScreen /></Page>
                   </ProtectedRoute>
                 } />
 
@@ -294,6 +327,7 @@ function AppContent() {
         </HighStressModeOverlay>
         <PrivacyConsentBanner />
         <VolunteerAlertScreen />
+        <DriveModeListener />
       </div>
     </>
   );

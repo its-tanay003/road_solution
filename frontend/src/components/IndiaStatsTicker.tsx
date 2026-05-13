@@ -1,66 +1,104 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useSpring, animate } from 'framer-motion';
 
-const DEATH_INTERVAL_SEC = 204;
-const INJURY_RATIO = 2.88;
-
-export const IndiaStatsTicker: React.FC = () => {
-  const [now, setNow] = useState(new Date());
+// ── Animated counter ─────────────────────────────────────────────
+function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: number }) {
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const prev    = useRef(value);
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
+    const node = nodeRef.current;
+    if (!node) return;
+    const ctrl = animate(prev.current, value, {
+      duration: 0.8,
+      ease: 'easeOut',
+      onUpdate(v) { node.textContent = v.toFixed(decimals); },
+    });
+    prev.current = value;
+    return () => ctrl.stop();
+  }, [value, decimals]);
+
+  return <span ref={nodeRef}>{value.toFixed(decimals)}</span>;
+}
+
+// ── Stat card ─────────────────────────────────────────────────────
+interface StatItem {
+  emoji:    string;
+  label:    string;
+  value:    number;
+  decimals?: number;
+  suffix?:  string;
+  color:    string;
+}
+
+function StatCard({ emoji, label, value, decimals, suffix, color }: StatItem) {
+  return (
+    <div style={{
+      background: 'var(--bg-raised)', border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-lg)', padding: '14px 16px',
+      display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0,
+    }}>
+      <span style={{ fontSize: 18, lineHeight: 1 }}>{emoji}</span>
+      <p style={{
+        margin: 0, fontFamily: 'var(--font-mono)', fontWeight: 700,
+        fontSize: 22, color, lineHeight: 1,
+        letterSpacing: '-0.02em',
+      }}>
+        <AnimatedNumber value={value} decimals={decimals ?? 0} />
+        {suffix && <span style={{ fontSize: 14, marginLeft: 2 }}>{suffix}</span>}
+      </p>
+      <p style={{
+        margin: 0, fontFamily: 'var(--font-body)', fontSize: 11,
+        color: 'var(--text-secondary)', lineHeight: 1.3,
+      }}>
+        {label}
+      </p>
+    </div>
+  );
+}
+
+// ── Death toll real-time simulation ──────────────────────────────
+// India average: ~421 deaths/day → 1 death every ~3.4 min = 204 sec
+function useDeathTicker(base: number) {
+  const [count, setCount] = useState(base);
+  useEffect(() => {
+    const interval = setInterval(() => setCount(c => c + 1), 204_000);
+    return () => clearInterval(interval);
   }, []);
+  return count;
+}
 
-  const stats = useMemo(() => {
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    const secondsSinceYear = (now.getTime() - startOfYear.getTime()) / 1000;
-    const secondsSinceDay = (now.getTime() - startOfDay.getTime()) / 1000;
+export function IndiaStatsTicker() {
+  const deaths = useDeathTicker(421);
 
-    const deathsYear = Math.floor(secondsSinceYear / DEATH_INTERVAL_SEC);
-    const deathsToday = Math.floor(secondsSinceDay / DEATH_INTERVAL_SEC);
-    const injuriesToday = Math.floor(deathsToday * INJURY_RATIO);
-
-    return { deathsYear, deathsToday, injuriesToday };
-  }, [now]);
+  const stats: StatItem[] = [
+    { emoji: '💀', label: 'Deaths today (India)',      value: deaths,  color: 'var(--red)' },
+    { emoji: '🚑', label: 'Avg ambulance response',   value: 9.2,  decimals: 1, suffix: ' min', color: 'var(--amber)' },
+    { emoji: '⚡', label: 'ROADSoS response target',  value: 87,   suffix: ' sec', color: 'var(--green)' },
+    { emoji: '📊', label: 'Incidents in your area',   value: 3,    color: 'var(--blue)' },
+  ];
 
   return (
-    <div className="flex items-center justify-center gap-8 h-full">
-      <div className="flex items-center gap-2">
-        <span className="text-(--clr-text-2) text-[9px] font-mono tracking-widest uppercase">DEATHS TODAY</span>
-        <Odometer value={stats.deathsToday} color="text-(--clr-red)" />
+    <section aria-label="India Road Safety Statistics" style={{ padding: '0 var(--sp-4)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-4)' }}>
+        <h2 style={{
+          margin: 0, fontFamily: 'var(--font-display)', fontWeight: 600,
+          fontSize: 18, color: 'var(--text-primary)',
+        }}>
+          Live Statistics
+        </h2>
+        <span style={{
+          background: 'rgba(0,230,118,0.12)', color: 'var(--green)',
+          border: '1px solid rgba(0,230,118,0.30)',
+          borderRadius: 999, fontSize: 10, fontFamily: 'var(--font-mono)',
+          fontWeight: 700, padding: '2px 8px', letterSpacing: '0.06em',
+        }}>
+          ● LIVE
+        </span>
       </div>
-
-      <div className="flex items-center gap-2 border-l border-(--clr-border) pl-8">
-        <span className="text-(--clr-text-2) text-[9px] font-mono tracking-widest uppercase">THIS YEAR</span>
-        <Odometer value={stats.deathsYear} color="text-(--clr-text)" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+        {stats.map(s => <StatCard key={s.label} {...s} />)}
       </div>
-
-      <div className="flex items-center gap-2 border-l border-(--clr-border) pl-8">
-        <span className="text-(--clr-text-2) text-[9px] font-mono tracking-widest uppercase">SAVED BY RSOS</span>
-        <span className="font-mono text-xs font-bold text-(--clr-green)">1,402</span>
-      </div>
-    </div>
+    </section>
   );
-};
-
-const Odometer: React.FC<{ value: number; color: string }> = ({ value, color }) => {
-  const digits = value.toString().padStart(value > 999 ? 6 : 2, '0').split('');
-  
-  return (
-    <div className={`flex overflow-hidden h-4 font-mono font-bold text-xs ${color}`}>
-      {digits.map((digit, idx) => (
-        <div 
-          key={idx} 
-          className="relative w-[7px] flex flex-col transition-transform duration-500" 
-          style={{ transform: `translateY(-${parseInt(digit) * 10}%)` } as React.CSSProperties}
-        >
-          {[0,1,2,3,4,5,6,7,8,9].map(num => (
-            <span key={num} className="h-4 flex items-center justify-center">{num}</span>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-};
+}

@@ -1,268 +1,240 @@
-import React, { useEffect, useRef, useState, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { IndiaStatsTicker } from '../components/IndiaStatsTicker';
-import { Shield, Activity, Globe, Navigation2, BookOpen, X, Building2 } from 'lucide-react';
-import { useSocket } from '../hooks/useSocket';
-import { ProfileCompleteBadge } from '../components/ProfileCompleteBadge';
-import { SOSButton } from '../components/SOSButton';
-import { MapMiniPreview } from '../components/map/MapMiniPreview';
 
-// Lazy load awareness component
-const RoadSafetyAwareness = React.lazy(() => import('../components/RoadSafetyAwareness').then(m => ({ default: m.RoadSafetyAwareness })));
+// ── Store ────────────────────────────────────────────────────────
+import { useAuthStore }          from '../store/authStore';
+import { useSocket }             from '../hooks/useSocket';
 
+// ── Components ───────────────────────────────────────────────────
+import { ParticleNetworkBackground } from '../components/ParticleNetworkBackground';
+import { SOSHeroButton }             from '../components/SOSHeroButton';
+import { QuickActionsGrid }          from '../components/QuickActionsGrid';
+import { IndiaStatsTicker }          from '../components/IndiaStatsTicker';
+import { NearbyServicesStrip }       from '../components/NearbyServicesStrip';
+import { WearableStatusBar }         from '../components/WearableStatusBar';
+import { PanicButton }               from '../components/PanicButton';
+import { WeatherAlertBanner }        from '../components/WeatherAlertBanner';
 
+// ══════════════════════════════════════════════════════════════════
+// Status badges bar
+// ══════════════════════════════════════════════════════════════════
+interface BadgeProps { dot?: string; children: React.ReactNode }
+function Badge({ dot, children }: BadgeProps) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 5,
+      background: 'var(--bg-raised)', border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-full)', padding: '5px 10px',
+      flexShrink: 0,
+    }}>
+      {dot && (
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+      )}
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+        {children}
+      </span>
+    </div>
+  );
+}
 
-// --- Particle Canvas Background ---
-const ParticleCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let particles: Particle[] = [];
-
-    class Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-
-      constructor() {
-        this.x = Math.random() * canvas!.width;
-        this.y = Math.random() * canvas!.height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 2;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        if (this.x < 0) this.x = canvas!.width;
-        if (this.x > canvas!.width) this.x = 0;
-        if (this.y < 0) this.y = canvas!.height;
-        if (this.y > canvas!.height) this.y = 0;
-      }
-
-      draw() {
-        ctx!.fillStyle = 'rgba(41, 121, 255, 0.35)';
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx!.fill();
-      }
-    }
-
-    const init = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      particles = Array.from({ length: 150 }, () => new Particle());
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p, i) => {
-        p.update();
-        p.draw();
-
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 100) {
-            ctx.strokeStyle = `rgba(41, 121, 255, ${0.35 * (1 - dist / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        }
-      });
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    init();
-    animate();
-
-    window.addEventListener('resize', init);
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', init);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-50" />;
-};
-
-import { useAccessibilityStore } from '../store/accessibilityStore';
-
-// --- Particle Canvas Background ---
-// ... (ParticleCanvas component remains same)
-
-// --- Main HomeScreen Component ---
-const HomeScreen: React.FC = () => {
-  const { connected } = useSocket();
-  const navigate = useNavigate();
-  const [gForce, setGForce] = useState(0.9);
-  const [showAwareness, setShowAwareness] = useState(false);
-  const { simplifiedMode } = useAccessibilityStore();
+function StatusBadgesRow({ connected }: { connected: boolean }) {
+  const [battery, setBattery] = useState<number | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGForce(0.9 + (Math.random() - 0.5) * 0.2);
-    }, 500);
-    return () => clearInterval(interval);
+    // Web Battery API
+    (navigator as any).getBattery?.().then((b: any) => {
+      setBattery(Math.round(b.level * 100));
+      b.addEventListener('levelchange', () => setBattery(Math.round(b.level * 100)));
+    });
   }, []);
-
-  const allCards = [
-    { id: 'report', label: 'BYSTANDER REPORT', icon: Shield, path: '/report/new' },
-    { id: 'profile', label: 'MEDICAL PROFILE', icon: Activity, path: '/profile' },
-    { id: 'impact', label: 'IMPACT ANALYSIS', icon: Activity, path: '/impact', color: 'text-(--clr-blue)' },
-    { id: 'governance', label: 'GOV INTELLIGENCE', icon: Building2, path: '/governance', color: 'text-(--clr-blue)' },
-    { id: 'vision', label: 'OUR VISION', icon: Globe, path: '/vision', color: 'text-(--clr-green)' },
-    { id: 'awareness', label: 'ROAD SAFETY IQ', icon: BookOpen, path: '#', color: 'text-(--clr-saffron)' }
-  ];
-
-  const visibleCards = allCards;
 
   return (
-    <div className="relative w-full h-screen flex flex-col bg-(--clr-bg) text-(--clr-text) overflow-hidden">
-      <ParticleCanvas />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.6, duration: 0.4 }}
+      style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', padding: '0 var(--sp-5)' }}
+      aria-label="Device status"
+    >
+      <Badge dot={connected ? 'var(--green)' : 'var(--amber)'}>
+        {connected ? 'ONLINE' : 'MESH'}
+      </Badge>
+      <Badge>📍 GPS: ±4m</Badge>
+      {battery !== null && <Badge>🔋 {battery}%</Badge>}
+      <Badge dot="var(--amber)">⌚ Searching…</Badge>
+    </motion.div>
+  );
+}
 
-      {/* Top Bar */}
-      <header className="h-12 border-b border-(--clr-border) flex items-center justify-between px-4 z-20 bg-(--clr-bg)/80 backdrop-blur-md">
-        <div className="flex flex-col">
-          <h1 className="text-xl font-bold hologram-text leading-none">ROADSoS</h1>
-          {!simplifiedMode && (
-            <span className="text-[10px] font-mono text-(--clr-saffron) tracking-widest mt-0.5">
-              EMERGENCY INTELLIGENCE PLATFORM
-            </span>
-          )}
-        </div>
+// ══════════════════════════════════════════════════════════════════
+// Offline banner
+// ══════════════════════════════════════════════════════════════════
+function OfflineBanner() {
+  const [offline, setOffline] = useState(!navigator.onLine);
+  useEffect(() => {
+    const on  = () => setOffline(false);
+    const off = () => setOffline(true);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
+  }, []);
+  if (!offline) return null;
+  return (
+    <div role="alert" style={{
+      position: 'sticky', top: 0, zIndex: 40,
+      background: 'rgba(255,153,51,0.15)', borderBottom: '1px solid rgba(255,153,51,0.3)',
+      padding: '8px 20px', textAlign: 'center',
+      fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--amber)',
+      fontWeight: 600, letterSpacing: '0.05em',
+    }}>
+      📡 OFFLINE — Mesh mode active
+    </div>
+  );
+}
 
-        <div className="flex-1 max-w-xl mx-8">
-          {!simplifiedMode && <IndiaStatsTicker />}
-        </div>
+// ══════════════════════════════════════════════════════════════════
+// Greeting
+// ══════════════════════════════════════════════════════════════════
+const GREETINGS: Record<string, string> = {
+  en: 'Hello',
+  hi: 'नमस्ते',
+  ta: 'வணக்கம்',
+  mr: 'नमस्कार',
+};
 
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1.5 ml-2">
-            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-(--clr-green)' : 'bg-amber-500'} pulse-dot`} />
-            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-(--clr-blue)' : 'bg-white/10'}`} />
-          </div>
-        </div>
-      </header>
+// ══════════════════════════════════════════════════════════════════
+// HomeScreen — main export
+// ══════════════════════════════════════════════════════════════════
+const HomeScreen: React.FC = () => {
+  const { user }          = useAuthStore();
+  const { connected }     = useSocket();
+  const scrollRef         = useRef<HTMLDivElement>(null);
+  const [sosActive, setSosActive] = useState(false);
+  const lang = (user as any)?.language ?? 'en';
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 pb-20">
-        {/* G-Force Display */}
-        {!simplifiedMode && (
-          <motion.div 
-            className="font-mono text-sm text-(--clr-text-2) mb-8 flex flex-col items-center"
-            animate={{ y: [0, -2, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+  // Shake detector → voice assistant
+  useEffect(() => {
+    let lastShake = 0;
+    let lastX = 0, lastY = 0, lastZ = 0;
+
+    const handleMotion = (e: DeviceMotionEvent) => {
+      const acc = e.acceleration;
+      if (!acc) return;
+      const dx = Math.abs((acc.x ?? 0) - lastX);
+      const dy = Math.abs((acc.y ?? 0) - lastY);
+      const dz = Math.abs((acc.z ?? 0) - lastZ);
+      lastX = acc.x ?? 0; lastY = acc.y ?? 0; lastZ = acc.z ?? 0;
+      if (dx + dy + dz > 30 && Date.now() - lastShake > 2000) {
+        lastShake = Date.now();
+        // Trigger voice assistant
+        document.dispatchEvent(new CustomEvent('roadsosVoiceActivate'));
+      }
+    };
+
+    window.addEventListener('devicemotion', handleMotion, { passive: true });
+    return () => window.removeEventListener('devicemotion', handleMotion);
+  }, []);
+
+  const greeting = GREETINGS[lang] ?? GREETINGS.en;
+  const firstName = (user as any)?.name?.split(' ')[0] ?? null;
+
+  return (
+    <div style={{ position: 'relative', minHeight: '100%' }}>
+      {/* Offline bar */}
+      <OfflineBanner />
+
+      {/* ── ZONE 1: HERO (60vh) ───────────────────────────────── */}
+      <section
+        aria-label="Emergency SOS"
+        style={{
+          position: 'relative',
+          height: '60vh',
+          minHeight: 380,
+          maxHeight: 650,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Three.js background */}
+        <ParticleNetworkBackground sosActive={sosActive} />
+
+        {/* Gradient overlay — fades 3D into page bg at bottom */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          height: 80,
+          background: 'linear-gradient(to bottom, transparent, var(--bg-base))',
+          zIndex: 2, pointerEvents: 'none',
+        }} />
+
+        {/* Hero content layer */}
+        <div style={{
+          position: 'relative', zIndex: 3,
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          gap: 20, width: '100%',
+          padding: '0 20px',
+        }}>
+          {/* Greeting */}
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            style={{ textAlign: 'center' }}
           >
-            <span className="text-[10px] tracking-[0.3em] opacity-50 mb-1">IMPACT TELEMETRY</span>
-            <span className="text-xl tracking-tighter">
-              G: <span className="text-(--clr-text)">{gForce.toFixed(1)}G</span> ±0.1
-            </span>
+            <h1 style={{
+              margin: 0,
+              fontFamily: 'var(--font-display)', fontWeight: 600,
+              fontSize: 22, color: 'var(--text-primary)',
+              letterSpacing: '-0.01em', lineHeight: 1.2,
+            }}>
+              {firstName
+                ? <>{greeting}, <span style={{ color: 'var(--saffron)' }}>{firstName}</span></>
+                : 'Welcome to ROADSoS'
+              }
+            </h1>
           </motion.div>
-        )}
 
-        <div className="mb-12">
-          {!simplifiedMode && <ProfileCompleteBadge />}
+          {/* Status badges */}
+          <StatusBadgesRow connected={connected} />
+
+          {/* SOS button */}
+          <SOSHeroButton lang={lang} onActivate={() => setSosActive(true)} />
         </div>
+      </section>
 
-        <SOSButton />
+      {/* ── ZONE 2: QUICK ACTIONS ─────────────────────────────── */}
+      <section style={{
+        paddingTop: 'var(--sp-6)',
+        display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)',
+      }}>
+        <WeatherAlertBanner />
+        <QuickActionsGrid />
+      </section>
 
-        <div className="mt-12 w-full flex justify-center px-4">
-          <MapMiniPreview />
-        </div>
+      {/* ── ZONE 3: LIVE STATUS ───────────────────────────────── */}
+      <section style={{
+        paddingTop: 'var(--sp-6)',
+        paddingBottom: 'var(--sp-8)',
+        display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)',
+      }}>
+        {/* Wearable vitals */}
+        <WearableStatusBar />
 
-      {/* Action Cards */}
-        <div className="mt-8 flex flex-wrap justify-center gap-4 max-w-3xl">
-          {visibleCards.map((card) => (
-            <motion.button
-              key={card.id}
-              whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.03)' }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                if (card.id === 'awareness') setShowAwareness(true);
-                else navigate(card.path);
-              }}
-              className="w-[140px] h-[88px] border border-(--clr-border) rounded-lg flex flex-col items-center justify-center gap-2 group transition-all"
-            >
-              <card.icon size={20} className={`${card.color || 'text-(--clr-blue)'} group-hover:text-(--clr-text) transition-colors`} />
-              <span className="text-[9px] font-mono tracking-widest text-(--clr-text-2)">{card.label}</span>
-            </motion.button>
-          ))}
-        </div>
+        {/* India stats */}
+        <IndiaStatsTicker />
 
-        <AnimatePresence>
-          {showAwareness && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
-            >
-              <motion.div 
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-(--clr-bg) border border-(--clr-border) rounded-[2.5rem] p-8 relative shadow-2xl"
-              >
-                <button 
-                  onClick={() => setShowAwareness(false)}
-                  title="Open Road Safety IQ Hub"
-                  className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-                >
-                  <X size={20} />
-                </button>
-                <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[#2979FF]/20 border-t-[#2979FF] animate-spin" /></div>}>
-                  <RoadSafetyAwareness />
-                </Suspense>
-              </motion.div>
+        {/* Nearby hospitals */}
+        <NearbyServicesStrip />
 
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+        {/* Footer space */}
+        <div style={{ height: 8 }} />
+      </section>
 
-      {/* Bottom Status Bar */}
-      <footer className="h-9 border-t border-(--clr-border) bg-(--clr-bg)/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-2 py-0.5 bg-(--clr-green)/10 border border-(--clr-green)/20 rounded">
-            <span className="w-1.5 h-1.5 rounded-full bg-(--clr-green)" />
-            <span className="text-[9px] font-mono font-bold text-(--clr-green) tracking-wider">MESH READY / ONLINE</span>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-mono text-(--clr-text-2)">
-            <Globe size={12} />
-            <span>CHENNAI_DC_01</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6 text-[10px] font-mono text-(--clr-text-2)">
-          <div className="flex items-center gap-2">
-            <Navigation2 size={12} className="rotate-45" />
-            <span>ACCURACY: <span className="text-(--clr-text)">±2.4M</span></span>
-          </div>
-          <div className="flex items-center gap-2 border-l border-(--clr-border) pl-6">
-            <span className="opacity-50">LAST SYNC:</span>
-            <span className="text-(--clr-text)">14:02:55.042</span>
-          </div>
-        </div>
-      </footer>
-
-      {/* CRT Scanline Texture Layer */}
-      <div className="fixed inset-0 pointer-events-none z-10001 opacity-[0.03] bg-[url('/noise.svg')] blend-multiply" />
+      {/* ── FLOATING: Panic button ────────────────────────────── */}
+      <PanicButton />
     </div>
   );
 };

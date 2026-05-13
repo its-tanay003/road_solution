@@ -9,12 +9,11 @@ import {
   Bell, 
   Navigation2, 
   Smartphone, 
-  Siren,
-  LucideIcon 
+  Siren
 } from 'lucide-react';
 
 interface ChannelConfig {
-  icon: LucideIcon;
+  icon: React.ElementType;
   label: string;
   color: string;
   description: string;
