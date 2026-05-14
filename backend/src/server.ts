@@ -234,6 +234,45 @@ app.post('/api/bystander-report', bystanderReportLimiter, validateBystanderRepor
   res.json({ success: true, reportId: data![0].id });
 });
 
+// --- Road Hazard Reports (Potholes, Obstructions, etc.) ---
+app.get('/api/road-reports', async (req, res) => {
+  const { data, error } = await supabase
+    .from('road_reports')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post('/api/road-reports', bystanderReportLimiter, async (req, res) => {
+  const { type, severity, lat, lng, description, image } = req.body;
+  
+  const { data, error } = await supabase
+    .from('road_reports')
+    .insert([
+      { 
+        type,
+        severity,
+        location: `POINT(${lng} ${lat})`, 
+        description,
+        image_url: image
+      }
+    ])
+    .select();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Broadcast to map clients
+  const socketIo = req.app.get('io');
+  if (socketIo) {
+    socketIo.emit('road:report', data![0]);
+  }
+
+  res.json({ success: true, reportId: data![0].id });
+});
+
 // Responder Routing Endpoint
 app.get('/api/responders', requireAuth, async (req, res) => {
   const lat = parseFloat(req.query.lat as string) || 28.6139;

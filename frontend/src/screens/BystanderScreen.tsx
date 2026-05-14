@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, HelpCircle, ChevronRight, ArrowLeft, Info } from 'lucide-react';
+import { ChevronRight, ArrowLeft, Info, Shield } from 'lucide-react';
 
 /* ── Good Samaritan banner ──────────────────────────────────── */
 function GSLBanner() {
@@ -10,7 +10,7 @@ function GSLBanner() {
     <div className="mx-4 mt-4">
       <motion.button onClick={() => setExpanded(e => !e)} className="w-full text-left">
         <div className="px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center gap-3">
-          <Shield16 />
+          <Shield size={16} className="text-amber-500 shrink-0" />
           <p className="flex-1 text-[12px] text-amber-300 font-medium leading-tight">
             You are protected by India's Good Samaritan Law (2016)
           </p>
@@ -33,25 +33,21 @@ function GSLBanner() {
   );
 }
 
-function Shield16() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#FFB300" strokeWidth={2} strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 /* ── Entry option card ──────────────────────────────────────── */
-function OptionCard({ emoji, title, subtitle, color, bg, border, onClick }: {
+function OptionCard({ emoji, title, subtitle, titleClassName, bg, border, onClick }: {
   emoji: string; title: string; subtitle: string;
-  color: string; bg: string; border: string; onClick: () => void;
+  titleClassName: string; bg: string; border: string; onClick: () => void;
 }) {
   return (
-    <motion.button whileTap={{ scale: 0.97 }} onClick={onClick}
-      className={`w-full h-[130px] rounded-3xl ${bg} border ${border} flex items-center gap-5 px-6 text-left`}>
-      <span className="text-5xl shrink-0">{emoji}</span>
+    <motion.button 
+      whileTap={{ scale: 0.97 }} 
+      onClick={onClick}
+      className={`w-full h-[130px] rounded-3xl ${bg} border ${border} flex items-center gap-5 px-6 text-left focus:outline-none focus:ring-2 focus:ring-white/20`}
+      aria-label={`${title}: ${subtitle}`}
+    >
+      <span className="text-5xl shrink-0" aria-hidden="true">{emoji}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[20px] font-black leading-tight" style={{ color }}>{title}</p>
+        <p className={`text-[20px] font-black leading-tight ${titleClassName}`}>{title}</p>
         <p className="text-[13px] text-white/50 mt-1 leading-snug">{subtitle}</p>
       </div>
       <ChevronRight size={20} className="text-white/30 shrink-0" />
@@ -79,17 +75,29 @@ function ReportFlow({ onDone, onBack }: { onDone: () => void; onBack: () => void
   };
 
   return (
-    <div className="min-h-screen bg-[#080C14] flex flex-col px-4">
+    <div className="min-h-dvh bg-void flex flex-col px-4">
       {/* progress */}
       <div className="flex items-center gap-3 pt-12 pb-8">
-        <button onClick={onBack} className="p-2 rounded-xl bg-white/5"><ArrowLeft size={20} className="text-white" /></button>
+        <button 
+          onClick={onBack} 
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
+          aria-label="Go back"
+        >
+          <ArrowLeft size={20} className="text-white" />
+        </button>
         <div className="flex gap-2 flex-1">
           {REPORT_STEPS.map((_, i) => (
-            <div key={i} className="h-1.5 rounded-full flex-1 transition-all duration-300"
-              style={{ background: i <= step ? '#FF1744' : 'rgba(255,255,255,0.12)' }} />
+            <div 
+              key={i} 
+              className={`h-1.5 rounded-full flex-1 transition-all duration-300 ${
+                i <= step ? 'bg-red-accent' : 'bg-white/12'
+              }`}
+            />
           ))}
         </div>
-        <span className="text-[12px] text-white/30 font-mono">{step + 1}/{REPORT_STEPS.length}</span>
+        <span className="text-[12px] text-white/30 font-mono" aria-label={`Step ${step + 1} of ${REPORT_STEPS.length}`}>
+          {step + 1}/{REPORT_STEPS.length}
+        </span>
       </div>
 
       <motion.div key={step} initial={{ x: 40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -40, opacity: 0 }}>
@@ -117,19 +125,19 @@ export const BystanderScreen: React.FC = () => {
   if (view === 'report') return <ReportFlow onDone={() => setView('done')} onBack={() => setView('entry')} />;
 
   if (view === 'done') return (
-    <div className="min-h-screen bg-[#080C14] flex flex-col items-center justify-center px-5 gap-6">
+    <div className="min-h-dvh bg-void flex flex-col items-center justify-center px-5 gap-6">
       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}>
-        <span className="text-8xl">🆘</span>
+        <span className="text-8xl" role="img" aria-label="SOS success">🆘</span>
       </motion.div>
       <h2 className="text-2xl font-black text-white text-center">Help is on the way!</h2>
       <p className="text-white/50 text-center text-[15px]">Emergency services have been notified. Stay with the victim and keep them calm.</p>
       <div className="w-full space-y-3 mt-4">
         <button onClick={() => navigate('/first-aid')}
-          className="w-full py-4 rounded-2xl bg-amber-400 text-black font-black text-[16px]">
+          className="w-full py-4 rounded-2xl bg-amber-400 text-black font-black text-[16px] hover:bg-amber-300 transition-colors">
           Open First Aid Guide
         </button>
         <button onClick={() => navigate('/')}
-          className="w-full py-4 rounded-2xl border border-white/10 text-white/60 font-bold text-[14px]">
+          className="w-full py-4 rounded-2xl border border-white/10 text-white/60 font-bold text-[14px] hover:bg-white/5 transition-colors">
           Return Home
         </button>
       </div>
@@ -137,7 +145,7 @@ export const BystanderScreen: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#080C14] flex flex-col">
+    <div className="min-h-dvh bg-void flex flex-col">
       {/* header */}
       <div className="px-4 pt-12 pb-6">
         <h1 className="text-3xl font-black text-white tracking-tight">Bystander Mode</h1>
@@ -151,13 +159,13 @@ export const BystanderScreen: React.FC = () => {
         <OptionCard
           emoji="🚨" title="I FOUND AN ACCIDENT"
           subtitle="Report incident and get emergency help dispatched immediately"
-          color="#FF1744" bg="bg-red-600/8" border="border-red-500/25"
+          titleClassName="text-red-accent" bg="bg-red-600/8" border="border-red-500/25"
           onClick={() => setView('report')}
         />
         <OptionCard
           emoji="🤝" title="I WANT TO HELP SOMEONE"
           subtitle="Get step-by-step first aid guidance for the situation"
-          color="#FFB300" bg="bg-amber-500/8" border="border-amber-500/25"
+          titleClassName="text-amber-500" bg="bg-amber-500/8" border="border-amber-500/25"
           onClick={() => navigate('/first-aid')}
         />
       </div>
@@ -167,9 +175,13 @@ export const BystanderScreen: React.FC = () => {
         <p className="text-[11px] text-white/30 uppercase tracking-widest mb-3">Quick Emergency Dial</p>
         <div className="grid grid-cols-3 gap-3">
           {[['📞 112', 'Emergency', '112'], ['🚑 108', 'Ambulance', '108'], ['🔥 101', 'Fire', '101']].map(([label, sub, num]) => (
-            <button key={num} onClick={() => window.location.href = `tel:${num}`}
-              className="py-3 rounded-2xl bg-white/5 border border-white/8 flex flex-col items-center gap-1 active:scale-95 transition-transform">
-              <span className="text-lg">{label.split(' ')[0]}</span>
+            <button 
+              key={num} 
+              onClick={() => window.location.href = `tel:${num}`}
+              className="py-3 rounded-2xl bg-white/5 border border-white/8 flex flex-col items-center gap-1 active:scale-95 transition-transform hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-white/20"
+              aria-label={`Call ${sub}: ${num}`}
+            >
+              <span className="text-lg" aria-hidden="true">{label.split(' ')[0]}</span>
               <span className="text-[13px] font-black text-white">{num}</span>
               <span className="text-[10px] text-white/40">{sub}</span>
             </button>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Languages, Shield, ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
+import { requestSensorPermissions } from '../hooks/useSensors';
 
 const LANGUAGES = [
   { id: 'en', label: 'English', sub: 'Standard' },
@@ -15,13 +17,24 @@ export const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [selectedLang, setSelectedLang] = useState('en');
   const [isTriggered, setIsTriggered] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
 
   const { isListening, start, stop, transcript, error } = useVoiceRecognition((command) => {
     if (command.includes('help me roadsos') || command.includes('help me road sos')) {
       setIsTriggered(true);
-      // provide haptic or audio feedback here
     }
   });
+
+  const handlePermissionRequest = async () => {
+    const granted = await requestSensorPermissions();
+    setPermissionsGranted(granted);
+    if (granted) {
+      setStep(2);
+    } else {
+      // Fallback or alert if denied
+      setStep(2); // Still proceed but sensors might not work
+    }
+  };
 
   // Auto-voice greeting based on step
   useEffect(() => {
@@ -54,7 +67,7 @@ export const OnboardingPage: React.FC = () => {
               ))}
             </div>
 
-            <button onClick={() => setStep(2)} className="w-full h-16 rounded-2xl bg-white text-black font-black text-lg mb-12 flex items-center justify-center gap-2">
+            <button onClick={handlePermissionRequest} className="w-full h-16 rounded-2xl bg-white text-black font-black text-lg mb-12 flex items-center justify-center gap-2">
               Continue <ChevronRight size={20} />
             </button>
           </motion.div>
