@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Mic, Send, Camera, Upload, MessageSquare, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Mic, Send, Camera, Upload, MessageSquare, ChevronRight, ArrowLeft, type LucideIcon } from 'lucide-react';
 import { Brain3D } from '../components/Brain3D';
 
 type AIState = 'idle' | 'processing' | 'done';
@@ -11,12 +11,12 @@ interface Message { role: 'user' | 'ai'; text: string; time: string; }
 
 /* ── scenario buttons (entry state) ─────────────────────────── */
 const SCENARIOS = [
-  { emoji: '🚨', text: "There's been an accident near me", color: '#FF1744', bg: 'bg-red-600/10', border: 'border-red-500/25' },
-  { emoji: '🩺', text: 'I need medical advice',           color: '#2979FF', bg: 'bg-blue-600/10', border: 'border-blue-500/25' },
-  { emoji: '❓', text: 'I have a question',               color: '#9E9E9E', bg: 'bg-white/5',     border: 'border-white/10' },
+  { emoji: '🚨', text: "There's been an accident near me", textColor: 'text-red', bg: 'bg-red/10', border: 'border-red/25' },
+  { emoji: '🩺', text: 'I need medical advice',           textColor: 'text-blue', bg: 'bg-blue/10', border: 'border-blue/25' },
+  { emoji: '❓', text: 'I have a question',               textColor: 'text-text/50', bg: 'bg-white/5',     border: 'border-white/10' },
 ];
 
-const MODES: { id: Mode; label: string; icon: React.ElementType }[] = [
+const MODES: { id: Mode; label: string; icon: LucideIcon }[] = [
   { id: 'chat',   label: 'Chat',   icon: MessageSquare },
   { id: 'voice',  label: 'Voice',  icon: Mic },
   { id: 'camera', label: 'Camera', icon: Camera },
@@ -44,15 +44,15 @@ function Bubble({ msg }: { msg: Message }) {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
       {!isUser && (
-        <div className="w-7 h-7 rounded-full bg-blue-600/30 border border-blue-500/30 flex items-center justify-center text-[11px] mr-2 mt-auto shrink-0">
+        <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-blue to-purple flex items-center justify-center text-white font-black text-lg shrink-0 shadow-lg shadow-blue/20 mr-2 mt-auto">
           🤖
         </div>
       )}
       <div className={`max-w-[78%] px-4 py-3 rounded-2xl ${isUser
-        ? 'bg-amber-400 text-black rounded-br-sm'
-        : 'bg-white/8 text-white/90 border border-white/8 rounded-bl-sm'}`}>
+        ? 'bg-accent text-neutral-950 rounded-br-sm font-medium'
+        : 'bg-surface text-neutral-100 border border-neutral-800 rounded-bl-sm'}`}>
         <p className="text-[14px] leading-relaxed">{msg.text}</p>
-        <p className={`text-[10px] mt-1.5 ${isUser ? 'text-black/50' : 'text-white/30'}`}>{msg.time}</p>
+        <p className={`text-[10px] mt-1.5 ${isUser ? 'text-neutral-900/50' : 'text-neutral-400/50'}`}>{msg.time}</p>
       </div>
     </motion.div>
   );
@@ -90,60 +90,85 @@ export const AIAssistantScreen: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#080C14] flex flex-col">
+    <div className="fixed inset-0 bg-background flex flex-col overflow-hidden">
       {/* header */}
-      <div className="flex items-center gap-3 px-4 pt-10 pb-3 border-b border-white/5">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white/5">
+      <header className="flex items-center gap-3 px-4 pt-10 pb-3 border-b border-neutral-800">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="p-2 rounded-xl bg-surface border border-neutral-800 hover:border-neutral-700 transition-colors" 
+          aria-label="Go back"
+        >
           <ArrowLeft size={18} className="text-white" />
         </button>
         <div className="flex-1">
           <h1 className="text-[17px] font-black text-white">AI Assistant</h1>
-          <p className="text-[11px] text-white/40">Powered by ROADSoS Intelligence</p>
+          <p className="text-[11px] text-neutral-500">Powered by NEXUS Intelligence</p>
         </div>
         {/* Brain 3D */}
         <Brain3D aiState={aiState} size={52} />
-      </div>
+      </header>
 
       {/* mode selector */}
-      <div className="flex gap-2 px-4 pt-3 pb-2 overflow-x-auto no-scrollbar">
+      <nav className="flex gap-2 px-4 pt-3 pb-2 overflow-x-auto no-scrollbar" aria-label="Input mode selector">
         {MODES.map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setMode(id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold shrink-0 transition-all ${mode === id ? 'bg-amber-400 text-black' : 'bg-white/5 text-white/50'}`}>
+          <button 
+            key={id} 
+            onClick={() => setMode(id)}
+            aria-pressed={mode === id ? "true" : "false"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold shrink-0 transition-all border ${
+              mode === id 
+                ? 'bg-accent text-neutral-950 border-accent' 
+                : 'bg-surface text-neutral-400 border-neutral-800 hover:border-neutral-700'
+            }`}
+          >
             <Icon size={13} /> {label}
           </button>
         ))}
-      </div>
+      </nav>
 
       {/* ENTRY or CHAT */}
-      <div className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto" aria-live="polite">
         <AnimatePresence mode="wait">
           {!started ? (
-            <motion.div key="entry" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="flex flex-col px-4 pt-8 pb-6 h-full">
-              <h2 className="text-[26px] font-black text-white mb-2">How can I help you right now?</h2>
-              <p className="text-white/40 text-[14px] mb-8">Choose a situation or describe what's happening</p>
+            <motion.div 
+              key="entry" 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="flex flex-col px-4 pt-8 pb-6 h-full"
+            >
+              <h2 className="text-[26px] font-black text-white mb-2">How can I help you?</h2>
+              <p className="text-neutral-500 text-[14px] mb-8">Choose a scenario or type below</p>
 
-              <div className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8" role="list">
                 {SCENARIOS.map(s => (
-                  <motion.button key={s.text} whileTap={{ scale: 0.97 }} onClick={() => sendMessage(s.text)}
-                    className={`w-full h-[80px] rounded-2xl ${s.bg} border ${s.border} flex items-center gap-4 px-5 text-left`}>
-                    <span className="text-3xl shrink-0">{s.emoji}</span>
-                    <span className="text-[16px] font-bold" style={{ color: s.color }}>{s.text}</span>
-                    <ChevronRight size={16} className="text-white/20 ml-auto shrink-0" />
-                  </motion.button>
+                  <li key={s.text} role="listitem">
+                    <button 
+                      onClick={() => sendMessage(s.text)}
+                      className={`w-full p-4 rounded-2xl border ${s.border} ${s.bg} flex items-center gap-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98]`}
+                    >
+                      <span className="text-3xl shrink-0" aria-hidden="true">{s.emoji}</span>
+                      <span className={`text-[16px] font-bold ${s.textColor}`}>{s.text}</span>
+                      <ChevronRight size={16} className="text-neutral-500 ml-auto shrink-0" />
+                    </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </motion.div>
           ) : (
-            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="px-4 pt-4 pb-4">
+            <motion.div 
+              key="chat" 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }}
+              className="px-4 pt-4 pb-4"
+            >
               {messages.map((m, i) => <Bubble key={i} msg={m} />)}
               {aiState === 'processing' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 mb-3 ml-9">
                   {[0, 1, 2].map(i => (
                     <motion.div key={i} animate={{ scale: [0.5, 1, 0.5] }}
                       transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.18 }}
-                      className="w-2 h-2 rounded-full bg-blue-400" />
+                      className="w-2 h-2 rounded-full bg-blue-500" />
                   ))}
                 </motion.div>
               )}
@@ -151,36 +176,55 @@ export const AIAssistantScreen: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </main>
 
       {/* input bar */}
-      <div className="border-t border-white/5 px-4 py-3 pb-6 bg-[#0A1020]">
+      <footer className="border-t border-neutral-800 px-4 py-3 pb-6 bg-surface">
         {mode === 'voice' ? (
-          <motion.button whileTap={{ scale: 0.93 }} onClick={() => sendMessage('What should I do in a road accident?')}
-            className="w-full h-14 rounded-2xl bg-red-600/15 border border-red-500/25 flex items-center justify-center gap-3 text-red-400 font-black">
+          <button 
+            onClick={() => sendMessage('What should I do in a road accident?')}
+            className="w-full h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center gap-3 text-red-500 font-black active:scale-[0.98]"
+            aria-label="Hold to speak"
+          >
             <Mic size={20} /> Hold to Speak
-          </motion.button>
+          </button>
         ) : (
           <div className="flex gap-3 items-end">
-            <button className="p-3 rounded-xl bg-white/5 shrink-0"><Mic size={18} className="text-white/50" /></button>
-            <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-2">
+            <button 
+              className="p-3 rounded-xl bg-base border border-white/5 hover:border-white/10 shrink-0" 
+              aria-label="Use voice input"
+            >
+              <Mic size={18} className="text-white/50" />
+            </button>
+            <div className="flex-1 bg-base border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-2 focus-within:border-(--saffron)/50 transition-colors">
+              <label htmlFor="ai-input" className="sr-only">Message AI Assistant</label>
               <input
+                id="ai-input"
                 value={input} onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && sendMessage(input)}
                 placeholder={started ? 'Type your message…' : 'Or speak to me…'}
                 className="flex-1 bg-transparent text-white text-[14px] placeholder:text-white/30 outline-none"
               />
             </div>
-            <motion.button whileTap={{ scale: 0.9 }} onClick={() => sendMessage(input)}
+            <motion.button 
+              whileTap={{ scale: 0.9 }} 
+              onClick={() => sendMessage(input)}
               disabled={!input.trim()}
-              className={`p-3 rounded-xl shrink-0 transition-all ${input.trim() ? 'bg-amber-400' : 'bg-white/5'}`}>
-              <Send size={18} className={input.trim() ? 'text-black' : 'text-white/30'} />
+              className={`p-3 rounded-xl shrink-0 transition-all border ${
+                input.trim() 
+                  ? 'bg-saffron text-void border-(--saffron)' 
+                  : 'bg-base text-white/30 border-white/5'
+              }`}
+              aria-label="Send message"
+            >
+              <Send size={18} />
             </motion.button>
           </div>
         )}
-      </div>
+      </footer>
     </div>
   );
 };
 
 export default AIAssistantScreen;
+

@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { ActionCard, type ActionCardData } from './ActionCard';
 import { useNavigate } from 'react-router-dom';
@@ -60,11 +59,10 @@ const MedicalIcon = () => (
 // ── Small badge components ────────────────────────────────────────
 function CountBadge({ label, color }: { label: string; color: string }) {
   return (
-    <span style={{
-      background: `${color}18`, color, border: `1px solid ${color}30`,
-      borderRadius: 999, fontSize: 10, fontFamily: 'var(--font-mono)',
-      fontWeight: 600, padding: '2px 7px', whiteSpace: 'nowrap',
-    }}>
+    <span 
+      className="rounded-full px-2 py-0.5 font-mono font-bold text-[10px] whitespace-nowrap border bg-[color-mix(in_srgb,var(--accent-badge),transparent_85%)] text-(--accent-badge) border-[color-mix(in_srgb,var(--accent-badge),transparent_70%)]"
+      style={{ '--accent-badge': color } as React.CSSProperties}
+    >
       {label}
     </span>
   );
@@ -77,27 +75,27 @@ const CARDS: ActionCardData[] = [
     title: 'Live Map',
     subtitle: 'Hospitals · Police · Ambulance',
     route: '/map',
-    accent: '#2979FF',
+    accent: 'var(--blue)',
     icon: <MapIcon />,
-    badge: <CountBadge label="12 nearby" color="#2979FF" />,
+    badge: <CountBadge label="12 nearby" color="var(--blue)" />,
   },
   {
     id: 'ai',
     title: 'AI Help',
     subtitle: 'Talk to emergency AI',
     route: '/assistant',
-    accent: '#7C4DFF',
+    accent: 'var(--purple)',
     icon: <BrainIcon />,
-    badge: <CountBadge label="24/7" color="#00E676" />,
+    badge: <CountBadge label="24/7" color="var(--green)" />,
   },
   {
     id: 'firstaid',
     title: 'First Aid',
     subtitle: 'Step-by-step voice guide',
     route: '/first-aid',
-    accent: '#FF1744',
+    accent: 'var(--red)',
     icon: <CrossIcon />,
-    badge: <CountBadge label="Voice" color="#FF9933" />,
+    badge: <CountBadge label="Voice" color="var(--saffron)" />,
     pulse: true,
   },
   {
@@ -105,27 +103,27 @@ const CARDS: ActionCardData[] = [
     title: "I'm a Bystander",
     subtitle: 'Help someone else',
     route: '/bystander',
-    accent: '#FFB300',
+    accent: 'var(--amber)',
     icon: <PeopleIcon />,
-    badge: <CountBadge label="QR" color="#FFB300" />,
+    badge: <CountBadge label="QR" color="var(--amber)" />,
   },
   {
     id: 'contacts',
     title: 'Emergency Contacts',
     subtitle: 'Your trusted contacts',
     route: '/emergency-contacts',
-    accent: '#00E676',
+    accent: 'var(--green)',
     icon: <ContactsIcon />,
-    badge: <CountBadge label="Ready" color="#00E676" />,
+    badge: <CountBadge label="Ready" color="var(--green)" />,
   },
   {
     id: 'medical',
     title: 'My Medical Info',
     subtitle: 'Blood type · Conditions · Meds',
     route: '/medical',
-    accent: '#2979FF',
+    accent: 'var(--blue)',
     icon: <MedicalIcon />,
-    badge: <CountBadge label="82%" color="#2979FF" />,
+    badge: <CountBadge label="82%" color="var(--blue)" />,
   },
 ];
 
@@ -143,28 +141,21 @@ export function QuickActionsGrid() {
   const navigate = useNavigate();
 
   return (
-    <section aria-label="Quick Actions" style={{ padding: '0 var(--sp-4)' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-5)' }}>
-        <h2 style={{
-          margin: 0, fontFamily: 'var(--font-display)', fontWeight: 600,
-          fontSize: 20, color: 'var(--text-primary)',
-        }}>
+    <section className="px-(--sp-4) py-6">
+      <div className="flex items-center justify-between mb-(--sp-5)">
+        <h2 className="text-xl font-display font-semibold text-(--text-primary) tracking-tight">
           Quick Actions
         </h2>
-        <div style={{ height: 3, width: 32, background: 'var(--saffron)', borderRadius: 2 }} />
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-(--saffron) text-black font-bold text-[10px] uppercase tracking-wider">
+          <Zap size={10} fill="currentColor" /> Priority
+        </div>
       </div>
 
-      {/* 2×3 Grid */}
-      <motion.div
+      <motion.div 
         variants={staggerContainer}
         initial="initial"
         animate="animate"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: 12,
-        }}
+        className="grid grid-cols-2 gap-(--sp-4) mb-8"
       >
         {CARDS.map((card, i) => (
           <ActionCard key={card.id} {...card} index={i} />
@@ -173,26 +164,14 @@ export function QuickActionsGrid() {
 
       {/* Secondary pills — horizontal scroll */}
       <div
-        style={{
-          display: 'flex', gap: 8, marginTop: 16,
-          overflowX: 'auto', paddingBottom: 4,
-          scrollbarWidth: 'none',
-        }}
+        className="flex gap-2 mt-4 overflow-x-auto pb-1 no-scrollbar"
         aria-label="More options"
       >
         {SECONDARY.map(item => (
           <button
             key={item.label}
             onClick={() => { hapticLight(); navigate(item.route); }}
-            style={{
-              flexShrink: 0,
-              background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-full)', padding: '7px 14px',
-              fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 500,
-              color: 'var(--text-secondary)', cursor: 'pointer', whiteSpace: 'nowrap',
-              transition: 'all 0.15s ease',
-              WebkitTapHighlightColor: 'transparent',
-            }}
+            className="shrink-0 bg-hover border border-border rounded-full px-3.5 py-[7px] font-(--font-body) text-[12px] text-text-secondary cursor-pointer whitespace-nowrap transition-all duration-150 active:scale-95 touch-none"
           >
             {item.label}
           </button>

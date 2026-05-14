@@ -15,23 +15,25 @@ const CHENNAI_DEFAULT = {
 };
 
 export const useUserLocation = () => {
-  const [location, setLocation] = useState<LocationState>({
-    lat: null,
-    lng: null,
-    accuracy: null,
-    error: null,
-    loading: true,
+  const [location, setLocation] = useState<LocationState>(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      return {
+        ...CHENNAI_DEFAULT,
+        error: typeof navigator === 'undefined' ? null : 'Geolocation is not supported by your browser',
+        loading: false,
+      };
+    }
+    return {
+      lat: null,
+      lng: null,
+      accuracy: null,
+      error: null,
+      loading: true,
+    };
   });
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocation({
-        ...CHENNAI_DEFAULT,
-        error: 'Geolocation is not supported by your browser',
-        loading: false,
-      });
-      return;
-    }
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
 
     const handleSuccess = (position: GeolocationPosition) => {
       setLocation({

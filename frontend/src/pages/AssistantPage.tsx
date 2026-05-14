@@ -41,7 +41,15 @@ const AssistantPage: React.FC = () => {
   const [textInput, setTextInput] = useState('');
   const [activeTab, setActiveTab] = useState<'chat' | 'expert'>('chat');
   const [showFeedback, setShowFeedback] = useState(false);
-  const [lastIncidentData, setLastIncidentData] = useState<any>(null);
+interface IncidentSnapshot {
+  gForce: number;
+  heartRate: number;
+  spO2: number;
+  movementScore: number;
+  timeOfDay: number;
+  roadType: number;
+}
+  const [lastIncidentData, setLastIncidentData] = useState<IncidentSnapshot | null>(null);
   
   // Initialize ML
   useContinuousLearning();

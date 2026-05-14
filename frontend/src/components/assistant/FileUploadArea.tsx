@@ -4,36 +4,45 @@ import { FileUp, Video, FileText, X, Loader2, Play } from 'lucide-react';
 import { extractMultipleFrames } from '../../utils/frameExtractor';
 import { useAssistantOrchestrator } from '../../hooks/useAssistantOrchestrator';
 
+interface ProcessedFile {
+  file: File;
+  id: string;
+  preview: string | null;
+  type: string;
+}
+
 export const FileUploadArea: React.FC = () => {
-  const [files, setFiles] = useState<any[]>([]);
+  const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [processingState, setProcessingState] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const { sendToAI } = useAssistantOrchestrator();
 
-  const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFiles(Array.from(e.dataTransfer.files));
-  }, []);
-
-  const handleFiles = async (newFiles: File[]) => {
-    const processed = newFiles.map(file => ({
+  const handleFiles = useCallback((newFiles: File[]) => {
+    const processed: ProcessedFile[] = newFiles.map(file => ({
       file,
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
       type: file.type
     }));
     setFiles(prev => [...prev, ...processed]);
-  };
+  }, []);
 
-  const removeFile = (id: string) => {
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFiles(Array.from(e.dataTransfer.files));
+  }, [handleFiles]);
+
+  const removeFile = useCallback((id: string) => {
     setFiles(prev => {
-      const file = prev.find(f => f.id === id);
-      if (file?.preview) URL.revokeObjectURL(file.preview);
+      const fileToRemove = prev.find(f => f.id === id);
+      if (fileToRemove?.preview) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
       return prev.filter(f => f.id !== id);
     });
-  };
+  }, []);
 
   const analyseFiles = async () => {
     setProcessingState('Extracting context...');

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Languages, Shield, ChevronRight, Check } from 'lucide-react';
+import { Mic, Languages, ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
 import { requestSensorPermissions } from '../hooks/useSensors';
@@ -17,7 +17,6 @@ export const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [selectedLang, setSelectedLang] = useState('en');
   const [isTriggered, setIsTriggered] = useState(false);
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
 
   const { isListening, start, stop, transcript, error } = useVoiceRecognition((command) => {
     if (command.includes('help me roadsos') || command.includes('help me road sos')) {
@@ -27,7 +26,6 @@ export const OnboardingPage: React.FC = () => {
 
   const handlePermissionRequest = async () => {
     const granted = await requestSensorPermissions();
-    setPermissionsGranted(granted);
     if (granted) {
       setStep(2);
     } else {

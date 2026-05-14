@@ -3,7 +3,7 @@ import React from 'react';
 import { Mic, Camera, FileUp, Image, Video, Watch, Type } from 'lucide-react';
 import { useAIAssistantStore, type InputMode } from '../../store/aiAssistantStore';
 
-const MODES: { id: InputMode; label: string; icon: any }[] = [
+const MODES: { id: InputMode; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
   { id: 'voice', label: 'Voice', icon: Mic },
   { id: 'camera', label: 'Camera', icon: Camera },
   { id: 'file', label: 'File', icon: FileUp },

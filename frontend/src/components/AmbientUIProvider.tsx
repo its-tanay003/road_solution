@@ -10,10 +10,13 @@ export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) =
 
   // iOS 13+ requires explicit permission for DeviceMotionEvent
   const requestMotionPermission = async () => {
-    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+    const DeviceMotionEventWithPermission = DeviceMotionEvent as unknown as DeviceMotionEventStatic;
+    
+    if (typeof DeviceMotionEventWithPermission.requestPermission === 'function') {
       try {
-        const permission = await (DeviceMotionEvent as any).requestPermission();
+        const permission = await DeviceMotionEventWithPermission.requestPermission();
         setPermissionGranted(permission === 'granted');
+
       } catch (error) {
         logger.error('Error requesting motion permission:', error);
         setPermissionGranted(false);
@@ -71,28 +74,29 @@ export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) =
 
   return (
     <>
-      {permissionGranted === null && typeof (DeviceMotionEvent as any).requestPermission === 'function' && (
-        <div className="fixed inset-0 z-[100] bg-navy/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
-          <div className="bg-background border border-white/10 p-6 rounded-2xl max-w-sm">
-            <h2 className="text-xl font-bold font-condensed mb-4 text-white">Enable Sensor Triage</h2>
-            <p className="text-sm text-muted mb-6">
+      {permissionGranted === null && typeof (DeviceMotionEvent as unknown as DeviceMotionEventStatic).requestPermission === 'function' && (
+        <div className="fixed inset-0 z-100 bg-void/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-raised border border-border-active p-6 rounded-2xl max-w-sm">
+            <h2 className="text-xl font-bold font-display mb-4 text-primary">Enable Sensor Triage</h2>
+            <p className="text-sm text-secondary mb-6">
               ROADSoS uses your device's motion sensors to automatically detect severe crashes and adapt the UI under stress.
             </p>
             <button 
               onClick={requestMotionPermission}
-              className="w-full bg-(--color-safe) text-navy font-bold py-3 rounded-xl hover:bg-safe/80 transition-colors"
+              className="w-full bg-(--color-safe) text-void font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
             >
               Grant Sensor Access
             </button>
             <button 
               onClick={() => setPermissionGranted(false)}
-              className="w-full mt-3 bg-transparent text-muted text-sm py-2"
+              className="w-full mt-3 bg-transparent text-secondary text-sm py-2 hover:text-primary transition-colors"
             >
               Skip for now
             </button>
           </div>
         </div>
       )}
+
       {children}
     </>
   );

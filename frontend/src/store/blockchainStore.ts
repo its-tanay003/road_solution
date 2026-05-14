@@ -1,13 +1,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface BlockData extends Record<string, unknown> {
+  tampered?: boolean;
+  maliciousPayload?: string;
+  location?: string;
+  method?: string;
+  focus?: string;
+  initialScore?: number;
+  profileId?: string;
+  clearance?: string;
+  unitId?: string;
+  eta?: string;
+  hospital?: string;
+  traumaLevel?: number;
+}
+
 export interface Block {
   index: number;
   timestamp: number;
   incidentId: string;
   action: string;
   actorId: string;
-  data: unknown;
+  data: BlockData;
   previousHash: string;
   hash: string;
 }
@@ -17,9 +32,9 @@ interface BlockchainState {
   isChainValid: boolean;
   
   // Actions
-  addBlock: (incidentId: string, action: string, actorId: string, data: unknown) => Promise<void>;
+  addBlock: (incidentId: string, action: string, actorId: string, data: BlockData) => Promise<void>;
   validateChain: () => Promise<boolean>;
-  tamperBlock: (index: number, newData: unknown) => void;
+  tamperBlock: (index: number, newData: BlockData) => void;
   resetChain: () => void;
 }
 

@@ -82,7 +82,7 @@ export const ImpactCalculator: React.FC = () => {
   };
 
   const generatePDF = () => {
-    const { jsPDF } = (window as any).jspdf || {};
+    const { jsPDF } = window.jspdf || {};
     if (!jsPDF) {
       alert("PDF generation engine loading... please try again in a moment.");
       return;
@@ -117,7 +117,7 @@ export const ImpactCalculator: React.FC = () => {
       ["Total Implementation", `₹${results.totalCost.toLocaleString()}`, "CAPEX"]
     ];
 
-    (doc as any).autoTable({
+    doc.autoTable({
       startY: 65,
       head: [tableData[0]],
       body: tableData.slice(1),
@@ -127,7 +127,7 @@ export const ImpactCalculator: React.FC = () => {
     });
 
     // Disclaimer
-    const finalY = (doc as any).lastAutoTable.finalY || 150;
+    const finalY = doc.lastAutoTable.finalY || 150;
     doc.setFontSize(8);
     doc.setTextColor(120, 120, 120);
     doc.text("CONFIDENTIAL: This report is a simulation based on MoRTH 2023 datasets.", 15, finalY + 20);

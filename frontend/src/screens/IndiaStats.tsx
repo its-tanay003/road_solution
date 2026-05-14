@@ -27,54 +27,54 @@ export const IndiaStats: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex-1 bg-night overflow-y-auto px-6 pb-32">
+    <div className="flex-1 bg-base overflow-y-auto px-6 pb-32">
       {/* Background India Map Silhouette */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center p-12">
+      <div className="fixed bottom-0 inset-x-0 px-4 pb-6 pt-4 bg-linear-to-t from-base to-transparent opacity-[0.03] flex items-center justify-center p-12">
         <Map size={600} className="text-white" />
       </div>
 
       <div className="pt-12 mb-12 relative z-10">
-        <h1 className="text-3xl font-extrabold text-white mb-2">War Room</h1>
-        <p className="text-text-muted font-medium uppercase tracking-widest text-xs">National Road Safety Dashboard</p>
+        <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">War Room</h1>
+        <p className="text-text-secondary font-medium uppercase tracking-widest text-xs">National Road Safety Dashboard</p>
       </div>
 
       {/* HERO STAT */}
       <div className="hud-card mb-8 relative z-10 overflow-hidden group">
         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-          <AlertTriangle size={80} className="text-(--color-warning)" />
+          <AlertTriangle size={80} className="text-amber" />
         </div>
-        <span className="text-(--color-warning) font-black uppercase tracking-[0.2em] text-xs mb-2 block">Accidents in India This Year</span>
+        <span className="text-amber font-black uppercase tracking-[0.2em] text-xs mb-2 block">Accidents in India This Year</span>
         <div className="flex items-baseline gap-2">
-          <h2 className="text-6xl font-black text-(--color-warning) tabular-nums tracking-tighter">
+          <h2 className="text-6xl font-black text-amber tabular-nums tracking-tighter">
             {liveAccidents.toLocaleString()}
           </h2>
           <motion.div 
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 1, repeat: Infinity }}
-            className="w-3 h-3 bg-(--color-emergency) rounded-full mb-2"
+            className="w-3 h-3 bg-red rounded-full mb-2"
           />
         </div>
         <p className="text-text-secondary mt-4 font-medium italic">
-          That's one accident every <span className="text-(--color-emergency) font-bold">1.2 minutes</span>.
+          That's one accident every <span className="text-red font-bold">1.2 minutes</span>.
         </p>
       </div>
 
       {/* STAT GRID */}
       <div className="grid grid-cols-2 gap-4 mb-8 relative z-10">
-        <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-(--color-emergency) text-[10px] font-black uppercase tracking-widest mb-1 block">Deaths</span>
+        <div className="bg-raised border border-white/5 p-6 rounded-4xl">
+          <span className="text-red text-[10px] font-black uppercase tracking-widest mb-1 block">Deaths</span>
           <span className="text-2xl font-bold text-white tabular-nums">168,491</span>
         </div>
-        <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-(--color-warning) text-[10px] font-black uppercase tracking-widest mb-1 block">Injured</span>
+        <div className="bg-raised border border-white/5 p-6 rounded-4xl">
+          <span className="text-amber text-[10px] font-black uppercase tracking-widest mb-1 block">Injured</span>
           <span className="text-2xl font-bold text-white tabular-nums">439,262</span>
         </div>
-        <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-cyan text-[10px] font-black uppercase tracking-widest mb-1 block">On Highways</span>
+        <div className="bg-raised border border-white/5 p-6 rounded-4xl">
+          <span className="text-blue text-[10px] font-black uppercase tracking-widest mb-1 block">On Highways</span>
           <span className="text-2xl font-bold text-white tabular-nums">53%</span>
         </div>
-        <div className="bg-night-2 border border-white/5 p-6 rounded-4xl">
-          <span className="text-(--color-safe)-green text-[10px] font-black uppercase tracking-widest mb-1 block">Preventable</span>
+        <div className="bg-raised border border-white/5 p-6 rounded-4xl">
+          <span className="text-green text-[10px] font-black uppercase tracking-widest mb-1 block">Preventable</span>
           <span className="text-2xl font-bold text-white tabular-nums">71%</span>
         </div>
       </div>
@@ -82,7 +82,7 @@ export const IndiaStats: React.FC = () => {
       {/* CHART SECTION */}
       <div className="hud-card mb-8 h-[400px] relative z-10">
         <h3 className="text-white font-bold mb-6 flex items-center gap-2">
-          <TrendingDown size={20} className="text-(--color-emergency)" /> Deaths by State (Top 10)
+          <TrendingDown size={20} className="text-red" /> Deaths by State (Top 10)
         </h3>
         <ResponsiveContainer width="100%" height="80%">
           <BarChart data={DATA} layout="vertical" margin={{ left: 0, right: 20 }}>
@@ -97,11 +97,11 @@ export const IndiaStats: React.FC = () => {
             />
             <Tooltip 
               cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-              contentStyle={{ background: '#0A1628', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '12px' }}
+              contentStyle={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-active)', borderRadius: '12px' }}
             />
             <Bar dataKey="deaths" radius={[0, 4, 4, 0]} barSize={20}>
               {DATA.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={index < 3 ? '#FF1744' : '#FFB300'} />
+                <Cell key={`cell-${index}`} fill={index < 3 ? 'var(--red)' : 'var(--amber)'} />
               ))}
             </Bar>
           </BarChart>
@@ -110,18 +110,18 @@ export const IndiaStats: React.FC = () => {
 
       {/* IMPACT SECTION */}
       <div className="grid grid-cols-2 gap-4 relative z-10 mb-8">
-        <div className="bg-sos-red/5 border border-(--color-emergency)/20 p-6 rounded-4xl text-center">
-          <span className="text-(--color-emergency) text-xs font-black uppercase tracking-widest mb-2 block">Standard response</span>
+        <div className="bg-red/5 border border-red/20 p-6 rounded-4xl text-center">
+          <span className="text-red text-xs font-black uppercase tracking-widest mb-2 block">Standard response</span>
           <span className="text-3xl font-black text-white">18m</span>
         </div>
-        <div className="bg-(--color-safe)/5 border border-(--color-safe)-green/20 p-6 rounded-4xl text-center">
-          <span className="text-(--color-safe)-green text-xs font-black uppercase tracking-widest mb-2 block">ROADSoS Aim</span>
+        <div className="bg-green/5 border border-green/20 p-6 rounded-4xl text-center">
+          <span className="text-green text-xs font-black uppercase tracking-widest mb-2 block">ROADSoS Aim</span>
           <span className="text-3xl font-black text-white">6m</span>
         </div>
       </div>
 
-      <div className="bg-cyan/10 border border-cyan/20 p-6 rounded-4xl text-center relative z-10">
-        <p className="text-cyan font-black text-xl uppercase tracking-tighter">
+      <div className="bg-blue/10 border border-blue/20 p-6 rounded-4xl text-center relative z-10">
+        <p className="text-blue font-black text-xl uppercase tracking-tighter">
           -66% RESPONSE TIME
         </p>
         <p className="text-text-secondary text-sm font-medium mt-1">Projected impact on survival rates</p>

@@ -40,7 +40,7 @@ export const IncidentFeedbackModal: React.FC<IncidentFeedbackModalProps> = ({
 
   const handleComplete = () => {
     // Map outcome to ML label
-    let label = [0, 0, 0, 0];
+    let label: number[];
     if (feedback.overallOutcome === 'critical') label = [1, 0, 0, 0];
     else if (feedback.overallOutcome === 'hospitalized') label = [0, 1, 0, 0];
     else if (feedback.overallOutcome === 'ok') label = [0, 0, 1, 0];

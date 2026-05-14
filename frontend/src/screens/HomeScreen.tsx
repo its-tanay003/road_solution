@@ -1,8 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-
-// ── Store ────────────────────────────────────────────────────────
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useAuthStore }          from '../store/authStore';
 import { useSocket }             from '../hooks/useSocket';
 
@@ -22,16 +19,14 @@ import { WeatherAlertBanner }        from '../components/WeatherAlertBanner';
 interface BadgeProps { dot?: string; children: React.ReactNode }
 function Badge({ dot, children }: BadgeProps) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 5,
-      background: 'var(--bg-raised)', border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-full)', padding: '5px 10px',
-      flexShrink: 0,
-    }}>
+    <div className="flex items-center gap-[5px] bg-(--bg-raised) border border-(--border) rounded-full px-[10px] py-[5px] shrink-0">
       {dot && (
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+        <span 
+          className="w-[7px] h-[7px] rounded-full shrink-0" 
+          style={{ background: dot }} // Keeping dynamic background color as inline style is acceptable for dynamic values, but since it's a fixed token often, we check.
+        />
       )}
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+      <span className="font-mono text-[11px] text-(--text-secondary) whitespace-nowrap uppercase tracking-wider">
         {children}
       </span>
     </div>
@@ -43,7 +38,8 @@ function StatusBadgesRow({ connected }: { connected: boolean }) {
 
   useEffect(() => {
     // Web Battery API
-    (navigator as any).getBattery?.().then((b: any) => {
+    // @ts-expect-error - navigator.getBattery is not in all browser types
+    navigator.getBattery?.().then((b: { level: number; addEventListener: (t: string, cb: () => void) => void }) => {
       setBattery(Math.round(b.level * 100));
       b.addEventListener('levelchange', () => setBattery(Math.round(b.level * 100)));
     });
@@ -54,7 +50,7 @@ function StatusBadgesRow({ connected }: { connected: boolean }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.4 }}
-      style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', padding: '0 var(--sp-5)' }}
+      className="flex gap-2 overflow-x-auto scrollbar-none px-0 py-0 mx-(--sp-5)"
       aria-label="Device status"
     >
       <Badge dot={connected ? 'var(--green)' : 'var(--amber)'}>
@@ -81,13 +77,7 @@ function OfflineBanner() {
   }, []);
   if (!offline) return null;
   return (
-    <div role="alert" style={{
-      position: 'sticky', top: 0, zIndex: 40,
-      background: 'rgba(255,153,51,0.15)', borderBottom: '1px solid rgba(255,153,51,0.3)',
-      padding: '8px 20px', textAlign: 'center',
-      fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--amber)',
-      fontWeight: 600, letterSpacing: '0.05em',
-    }}>
+    <div role="alert" className="sticky top-0 z-40 bg-orange-500/15 border-b border-orange-500/30 px-5 py-2 text-center font-mono text-[12px] text-(--amber) font-semibold tracking-wider">
       📡 OFFLINE — Mesh mode active
     </div>
   );
@@ -109,9 +99,8 @@ const GREETINGS: Record<string, string> = {
 const HomeScreen: React.FC = () => {
   const { user }          = useAuthStore();
   const { connected }     = useSocket();
-  const scrollRef         = useRef<HTMLDivElement>(null);
   const [sosActive, setSosActive] = useState(false);
-  const lang = (user as any)?.language ?? 'en';
+  const lang = user?.language ?? 'en';
 
   // Shake detector → voice assistant
   useEffect(() => {
@@ -136,62 +125,37 @@ const HomeScreen: React.FC = () => {
     return () => window.removeEventListener('devicemotion', handleMotion);
   }, []);
 
-  const greeting = GREETINGS[lang] ?? GREETINGS.en;
-  const firstName = (user as any)?.name?.split(' ')[0] ?? null;
+  const greeting = GREETINGS[lang as keyof typeof GREETINGS] ?? GREETINGS.en;
+  const firstName = user?.name?.split(' ')[0] ?? null;
 
   return (
-    <div style={{ position: 'relative', minHeight: '100%' }}>
+    <div className="relative min-h-full">
       {/* Offline bar */}
       <OfflineBanner />
 
       {/* ── ZONE 1: HERO (60vh) ───────────────────────────────── */}
       <section
         aria-label="Emergency SOS"
-        style={{
-          position: 'relative',
-          height: '60vh',
-          minHeight: 380,
-          maxHeight: 650,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-        }}
+        className="relative h-[60vh] min-h-[380px] max-h-[650px] flex flex-col items-center justify-center overflow-hidden"
       >
         {/* Three.js background */}
         <ParticleNetworkBackground sosActive={sosActive} />
 
         {/* Gradient overlay — fades 3D into page bg at bottom */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: 80,
-          background: 'linear-gradient(to bottom, transparent, var(--bg-base))',
-          zIndex: 2, pointerEvents: 'none',
-        }} />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-(--bg-base) z-2 pointer-events-none" />
 
         {/* Hero content layer */}
-        <div style={{
-          position: 'relative', zIndex: 3,
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          gap: 20, width: '100%',
-          padding: '0 20px',
-        }}>
+        <div className="relative z-3 flex flex-col items-center gap-5 w-full px-5">
           {/* Greeting */}
           <motion.div
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-            style={{ textAlign: 'center' }}
+            className="text-center"
           >
-            <h1 style={{
-              margin: 0,
-              fontFamily: 'var(--font-display)', fontWeight: 600,
-              fontSize: 22, color: 'var(--text-primary)',
-              letterSpacing: '-0.01em', lineHeight: 1.2,
-            }}>
+            <h1 className="m-0 font-(--font-display) font-semibold text-[22px] text-(--text-primary) tracking-tight leading-tight">
               {firstName
-                ? <>{greeting}, <span style={{ color: 'var(--saffron)' }}>{firstName}</span></>
+                ? <>{greeting}, <span className="text-(--saffron)">{firstName}</span></>
                 : 'Welcome to ROADSoS'
               }
             </h1>
@@ -206,20 +170,13 @@ const HomeScreen: React.FC = () => {
       </section>
 
       {/* ── ZONE 2: QUICK ACTIONS ─────────────────────────────── */}
-      <section style={{
-        paddingTop: 'var(--sp-6)',
-        display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)',
-      }}>
+      <section className="pt-(--sp-6) flex flex-col gap-(--sp-6)">
         <WeatherAlertBanner />
         <QuickActionsGrid />
       </section>
 
       {/* ── ZONE 3: LIVE STATUS ───────────────────────────────── */}
-      <section style={{
-        paddingTop: 'var(--sp-6)',
-        paddingBottom: 'var(--sp-8)',
-        display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)',
-      }}>
+      <section className="pt-(--sp-6) pb-(--sp-8) flex flex-col gap-(--sp-6)">
         {/* Wearable vitals */}
         <WearableStatusBar />
 
@@ -230,7 +187,7 @@ const HomeScreen: React.FC = () => {
         <NearbyServicesStrip />
 
         {/* Footer space */}
-        <div style={{ height: 8 }} />
+        <div className="h-2" />
       </section>
 
       {/* ── FLOATING: Panic button ────────────────────────────── */}

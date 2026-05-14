@@ -125,7 +125,14 @@ export const FirstAid = () => {
   );
 };
 
-const StepItem = ({ num, title, text, active }: any) => (
+interface StepItemProps {
+  num: string;
+  title: string;
+  text: string;
+  active?: boolean;
+}
+
+const StepItem = ({ num, title, text, active }: StepItemProps) => (
   <div className="flex gap-6 group">
      <div className={`w-10 h-10 shrink-0 border rounded-sm flex items-center justify-center font-mono font-black text-sm transition-all ${active ? 'bg-(--nx-red-primary) border-(--nx-red-primary) text-white shadow-[0_0_15px_rgba(255,59,59,0.3)]' : 'bg-white/2 border-(--nx-border) text-(--nx-text-tertiary)'}`}>
         {num}

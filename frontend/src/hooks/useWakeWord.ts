@@ -9,15 +9,14 @@ export const useWakeWord = (
   const [error, setError] = useState<string | null>(null);
 
   const startListening = useCallback(() => {
-    // @ts-ignore - SpeechRecognition is vendor-prefixed in many browsers
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     
-    if (!SpeechRecognition) {
+    if (!SpeechRecognitionAPI) {
       setError("Speech Recognition API is not supported in this browser.");
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const recognition = new SpeechRecognitionAPI();
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
@@ -27,7 +26,7 @@ export const useWakeWord = (
       setError(null);
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const current = event.resultIndex;
       const transcript = event.results[current][0].transcript.toLowerCase().trim();
       
@@ -41,7 +40,7 @@ export const useWakeWord = (
       }
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       logger.error("Speech Recognition Error:", event.error);
       if (event.error !== 'no-speech') {
         setError(event.error);

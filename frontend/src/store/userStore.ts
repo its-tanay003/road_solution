@@ -53,7 +53,7 @@ interface UserState {
   profileComplete: boolean;
 
   updateMedicalInfo: (info: Partial<UserState['medicalInfo']>) => void;
-  setProfile: (profile: any) => void;
+  setProfile: (profile: Partial<UserState['medicalInfo']>) => void;
   setBloodType: (type: string) => void;
   setConditions: (conds: string[]) => void;
   resetMedicalInfo: () => void;
@@ -141,7 +141,7 @@ export const useUserStore = create<UserState>()(
       setBloodType: (bloodType) => get().updateMedicalInfo({ bloodGroup: bloodType }),
       setConditions: (conditions) => set({ conditions }),
       
-      resetMedicalInfo: () => set((state) => ({
+      resetMedicalInfo: () => set(() => ({
         medicalInfo: {
           bloodGroup: 'Unknown',
           allergies: '',

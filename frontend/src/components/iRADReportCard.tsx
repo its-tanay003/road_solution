@@ -126,14 +126,26 @@ export const IRADReportCard: React.FC<IRADReportCardProps> = ({ report, ackId })
   );
 };
 
-const SectionHeader = ({ icon: Icon, title }: any) => (
+interface SectionHeaderProps {
+  icon: React.ComponentType<{ size?: number }>;
+  title: string;
+}
+
+const SectionHeader = ({ icon: Icon, title }: SectionHeaderProps) => (
   <div className="flex items-center gap-2 text-nx-text-dim border-b border-white/5 pb-2">
     <Icon size={14} />
     <span className="text-[10px] font-black uppercase tracking-[0.2em]">{title}</span>
   </div>
 );
 
-const DataField = ({ label, value, color, className }: any) => (
+interface DataFieldProps {
+  label: string;
+  value: string;
+  color?: string;
+  className?: string;
+}
+
+const DataField = ({ label, value, color, className }: DataFieldProps) => (
   <div className={`space-y-1 ${className}`}>
     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{label}</p>
     <p className={`text-xs font-bold font-mono uppercase truncate ${color || 'text-white'}`}>{value}</p>

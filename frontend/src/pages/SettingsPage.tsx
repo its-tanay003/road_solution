@@ -32,33 +32,49 @@ const Row = ({
   onClick, 
   danger 
 }: { 
-  icon: any, 
+  icon: React.ElementType, 
   label: string, 
   value?: string, 
   right?: React.ReactNode, 
   onClick?: () => void,
   danger?: boolean
-}) => (
-  <div
-    onClick={onClick}
-    role={onClick ? "button" : undefined}
-    tabIndex={onClick ? 0 : undefined}
-    className={`w-full flex items-center gap-4 px-6 py-4 transition-colors border-b border-white/5 last:border-0 text-left ${onClick ? 'hover:bg-white/5 cursor-pointer' : ''}`}
-  >
-    <div className={`p-2 rounded-lg ${danger ? 'bg-red-500/10 text-red-500' : 'bg-white/5 text-(--clr-text-2)'}`}>
-      <Icon size={20} />
-    </div>
-    <div className="flex-1">
-      <p className={`text-sm font-medium ${danger ? 'text-red-500' : 'text-(--clr-text)'}`}>{label}</p>
-      {value && <p className="text-xs text-(--clr-text-2) mt-0.5">{value}</p>}
-    </div>
-    {right || <ChevronRight size={18} className="text-(--clr-text-2) opacity-50" />}
-  </div>
-);
+}) => {
+  const baseClass = `w-full flex items-center gap-4 px-6 py-4 transition-colors border-b border-white/5 last:border-0 text-left`;
+  const content = (
+    <>
+      <div className={`p-2 rounded-lg ${danger ? 'bg-red-500/10 text-red-500' : 'bg-white/5 text-(--clr-text-2)'}`}>
+        <Icon size={20} />
+      </div>
+      <div className="flex-1">
+        <p className={`text-sm font-medium ${danger ? 'text-red-500' : 'text-(--clr-text)'}`}>{label}</p>
+        {value && <p className="text-xs text-(--clr-text-2) mt-0.5">{value}</p>}
+      </div>
+      {right || <ChevronRight size={18} className="text-(--clr-text-2) opacity-50" />}
+    </>
+  );
 
-const Toggle = ({ active, onToggle }: { active: boolean, onToggle: () => void }) => (
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        className={`${baseClass} hover:bg-white/5 cursor-pointer`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={baseClass}>{content}</div>;
+};
+
+const Toggle = ({ active, onToggle, label }: { active: boolean, onToggle: () => void, label: string }) => (
   <button
+    type="button"
     onClick={(e) => { e.stopPropagation(); onToggle(); }}
+    aria-label={label}
+    aria-pressed={active}
     className={`w-12 h-6 rounded-full transition-all relative ${active ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
   >
     <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'translate-x-6' : 'translate-x-0'}`} />
@@ -87,6 +103,8 @@ export const SettingsPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/')}
+            aria-label="Go back to home"
+            title="Go back to home"
             className="p-2 hover:bg-white/5 rounded-full transition-colors"
           >
             <ArrowLeft size={24} />
@@ -110,6 +128,7 @@ export const SettingsPage: React.FC = () => {
               <p className="text-sm text-(--clr-text-2)">{user?.email || user?.phone || 'Emergency Profile'}</p>
             </div>
             <button 
+              type="button"
               onClick={() => navigate('/profile')}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-colors"
             >
@@ -121,14 +140,14 @@ export const SettingsPage: React.FC = () => {
             icon={Phone} 
             label="Phone Number" 
             value={user?.phone || 'Not connected'}
-            right={user?.phone ? <div className="flex items-center gap-1.5 text-green-500 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full"><CheckCircle2 size={12} /> Verified</div> : <button onClick={() => setIsPhoneModalOpen(true)} className="text-(--clr-blue) text-xs font-bold hover:underline">Connect</button>}
+            right={user?.phone ? <div className="flex items-center gap-1.5 text-green-500 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full"><CheckCircle2 size={12} /> Verified</div> : <button type="button" onClick={() => setIsPhoneModalOpen(true)} className="text-(--clr-blue) text-xs font-bold hover:underline">Connect</button>}
             onClick={() => !user?.phone && setIsPhoneModalOpen(true)}
           />
           <Row 
             icon={Mail} 
             label="Email Address" 
             value={user?.email || 'Not connected'}
-            right={user?.email ? <div className="flex items-center gap-1.5 text-green-500 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full"><CheckCircle2 size={12} /> Verified</div> : <button onClick={() => setIsEmailModalOpen(true)} className="text-(--clr-blue) text-xs font-bold hover:underline">Connect</button>}
+            right={user?.email ? <div className="flex items-center gap-1.5 text-green-500 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full"><CheckCircle2 size={12} /> Verified</div> : <button type="button" onClick={() => setIsEmailModalOpen(true)} className="text-(--clr-blue) text-xs font-bold hover:underline">Connect</button>}
             onClick={() => !user?.email && setIsEmailModalOpen(true)}
           />
           <Row 
@@ -162,17 +181,17 @@ export const SettingsPage: React.FC = () => {
           <Row 
             icon={Bell} 
             label="Emergency SOS Alerts" 
-            right={<div className="flex items-center gap-2"><Toggle active={true} onToggle={() => {}} /><Info size={14} className="text-(--clr-text-2)" /></div>}
+            right={<div className="flex items-center gap-2"><Toggle label="Toggle SOS Alerts" active={true} onToggle={() => {}} /><Info size={14} className="text-(--clr-text-2)" /></div>}
           />
           <Row 
             icon={MapPin} 
             label="Nearby Crash Alerts" 
-            right={<Toggle active={true} onToggle={() => {}} />}
+            right={<Toggle label="Toggle Nearby Crash Alerts" active={true} onToggle={() => {}} />}
           />
           <Row 
             icon={Activity} 
             label="Volunteer Dispatch Alerts" 
-            right={<Toggle active={false} onToggle={() => {}} />}
+            right={<Toggle label="Toggle Volunteer Dispatch Alerts" active={false} onToggle={() => {}} />}
           />
           <Row 
             icon={Volume2} 
@@ -182,7 +201,7 @@ export const SettingsPage: React.FC = () => {
           <Row 
             icon={Vibration} 
             label="Notification Vibration" 
-            right={<Toggle active={true} onToggle={() => {}} />}
+            right={<Toggle label="Toggle Notification Vibration" active={true} onToggle={() => {}} />}
           />
         </Section>
 
@@ -235,6 +254,7 @@ export const SettingsPage: React.FC = () => {
               {(['dark', 'light', 'high-contrast', 'saffron'] as Theme[]).map((t) => (
                 <button
                   key={t}
+                  type="button"
                   onClick={() => setTheme(t)}
                   className={`flex-1 py-3 rounded-xl border-2 transition-all capitalize text-xs font-bold ${
                     theme === t ? 'border-(--clr-blue) bg-(--clr-blue)/10' : 'border-white/5 bg-white/5 hover:border-white/20'
@@ -251,6 +271,7 @@ export const SettingsPage: React.FC = () => {
               {(['sm', 'md', 'lg', 'xl', 'xxl'] as FontSize[]).map((s) => (
                 <button
                   key={s}
+                  type="button"
                   onClick={() => setFontSize(s)}
                   className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                     fontSize === s ? 'bg-(--clr-blue) text-white shadow-lg' : 'hover:bg-white/5 text-(--clr-text-2)'
@@ -264,7 +285,7 @@ export const SettingsPage: React.FC = () => {
           <Row 
             icon={Palette} 
             label="Simplified Mode" 
-            right={<Toggle active={simplifiedMode} onToggle={() => setSimplifiedMode(!simplifiedMode)} />}
+            right={<Toggle label="Toggle Simplified Mode" active={simplifiedMode} onToggle={() => setSimplifiedMode(!simplifiedMode)} />}
           />
           <div className="px-6 py-4">
             <p className="text-xs font-bold text-(--clr-text-2) mb-3 uppercase tracking-wider">Language</p>
@@ -272,6 +293,7 @@ export const SettingsPage: React.FC = () => {
               {(['en', 'hi', 'ta', 'te', 'bn'] as Language[]).map((l) => (
                 <button
                   key={l}
+                  type="button"
                   onClick={() => setLanguage(l)}
                   className={`py-2.5 rounded-xl border transition-all text-sm font-bold ${
                     language === l ? 'border-(--clr-blue) bg-(--clr-blue)/10 text-(--clr-text)' : 'border-white/5 bg-white/5 text-(--clr-text-2)'
@@ -286,7 +308,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Section 5: Permissions */}
         <Section title="App Permissions">
-          <Row icon={MapPin} label="Location" value="Always allowed" right={<button className="text-xs font-bold text-(--clr-blue)">Manage</button>} />
+          <Row icon={MapPin} label="Location" value="Always allowed" right={<button type="button" className="text-xs font-bold text-(--clr-blue)">Manage</button>} />
           <Row icon={Camera} label="Camera" value="Allowed" />
           <Row icon={Mic} label="Microphone" value="Allowed" />
           <Row icon={Bell} label="Notifications" value="Allowed" />
@@ -323,6 +345,7 @@ export const SettingsPage: React.FC = () => {
         </Section>
 
         <button 
+          type="button"
           onClick={() => setShowLogoutConfirm(true)}
           className="w-full flex items-center justify-center gap-3 py-6 text-red-500 font-bold hover:bg-red-500/5 transition-colors"
         >
@@ -351,6 +374,7 @@ export const SettingsPage: React.FC = () => {
               </p>
               <div className="space-y-3">
                 <button 
+                  type="button"
                   onClick={async () => {
                     await logout();
                     navigate('/');
@@ -360,6 +384,7 @@ export const SettingsPage: React.FC = () => {
                   LOG OUT
                 </button>
                 <button 
+                  type="button"
                   onClick={() => setShowLogoutConfirm(false)}
                   className="w-full py-4 bg-white/5 hover:bg-white/10 text-(--clr-text) font-bold rounded-xl transition-all"
                 >

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-export type NotificationChannel = 'WHATSAPP' | 'PUSH' | 'NEARBY' | 'SMS' | 'INDIA_112';
-export type DeliveryStatus = 'IDLE' | 'SENDING' | 'SENT' | 'DELIVERED' | 'FAILED';
+export type NotificationChannel = 'WHATSAPP' | 'PUSH' | 'NEARBY' | 'SMS' | 'INDIA_112' | 'MESH';
+export type DeliveryStatus = 'IDLE' | 'SENDING' | 'SENT' | 'DELIVERED' | 'FAILED' | 'CONNECTED' | 'DISCONNECTED';
 
 interface ChannelStatus {
   status: DeliveryStatus;
@@ -21,6 +21,7 @@ const initialChannels: Record<NotificationChannel, ChannelStatus> = {
   NEARBY: { status: 'IDLE' },
   SMS: { status: 'IDLE' },
   INDIA_112: { status: 'IDLE' },
+  MESH: { status: 'IDLE' },
 };
 
 export const useNotificationStatusStore = create<NotificationStatusState>((set) => ({

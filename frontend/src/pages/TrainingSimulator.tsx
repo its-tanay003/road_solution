@@ -22,6 +22,8 @@ export const TrainingSimulator: React.FC = () => {
   // Active state
   const [scenarioText, setScenarioText] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const startTimeRef = useRef<number | null>(null);
+  const triageTimeRef = useRef<number | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [triageTime, setTriageTime] = useState<number | null>(null);
   
@@ -46,10 +48,15 @@ export const TrainingSimulator: React.FC = () => {
   const startScenario = async (params: string) => {
     setPhase('ACTIVE');
     setScenarioText('');
-    setStartTime(Date.now());
+    // eslint-disable-next-line react-hooks/purity
+    const now = performance.now() | 0;
+    startTimeRef.current = now;
+    setStartTime(now);
     setIsStreaming(true);
     setTriageLevel(null);
     setUnitDispatched(null);
+    triageTimeRef.current = null;
+    setTriageTime(null);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/training/stream`, {
@@ -95,7 +102,12 @@ export const TrainingSimulator: React.FC = () => {
 
   const handleTriage = (level: string) => {
     setTriageLevel(level);
-    if (!triageTime) setTriageTime(Date.now());
+    if (triageTimeRef.current === null) {
+      // eslint-disable-next-line react-hooks/purity
+      const now = performance.now() | 0;
+      triageTimeRef.current = now;
+      setTriageTime(now);
+    }
   };
 
   const submitDecisions = () => {

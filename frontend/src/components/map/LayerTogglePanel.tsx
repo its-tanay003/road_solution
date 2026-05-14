@@ -8,7 +8,7 @@ import {
 import { useMapDataStore } from '../../store/mapDataStore';
 import type { ServiceLayerType } from '../../store/mapDataStore';
 
-const LAYERS: { id: ServiceLayerType; label: string; icon: any; color: string }[] = [
+const LAYERS: { id: ServiceLayerType; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; color: string }[] = [
   { id: 'hospitals', label: 'Hospitals', icon: Building2, color: 'text-red-500' },
   { id: 'clinics', label: 'Clinics', icon: Cross, color: 'text-pink-500' },
   { id: 'pharmacies', label: 'Pharmacies', icon: Pill, color: 'text-green-500' },

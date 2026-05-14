@@ -183,7 +183,7 @@ const MedicalReport: React.FC<{ data: MedicalData, agent: string }> = ({ data, a
     return (
       <IdentityResultCard 
         data={{
-          status: data.status as any || 'UNCONFIRMED',
+          status: (data.status as 'CONFIRMED' | 'UNCONFIRMED' | 'SIMULATED') || 'UNCONFIRMED',
           name: data.name,
           age: data.age,
           bloodGroup: data.bloodGroup,

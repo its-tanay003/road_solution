@@ -3,29 +3,7 @@ import { useAIAssistantStore } from '../store/aiAssistantStore';
 import { useAccessibilityStore } from '../store/accessibilityStore';
 import { useAssistantOrchestrator } from './useAssistantOrchestrator';
 
-// TypeScript declaration for Web Speech API
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  onresult: (event: any) => void;
-  onend: () => void;
-  onerror: (event: any) => void;
-}
-
-interface SpeechRecognitionConstructor {
-  new (): SpeechRecognition;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition: SpeechRecognitionConstructor | undefined;
-    webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
-  }
-}
+// SpeechRecognition types provided by src/types/speech.d.ts
 
 const langMap: Record<string, string> = {
   en: 'en-IN',
@@ -78,7 +56,7 @@ export const useVoiceAssistant = () => {
     recognition.interimResults = true;
     recognition.lang = langMap[language] || 'en-IN';
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interimTranscript = '';
       let finalTranscript = '';
 

@@ -9,11 +9,11 @@ import {
   ArrowRight,
   X
 } from 'lucide-react';
-import { useVolunteerStore } from '../store/volunteerStore';
+import { useVolunteerStore, type ActiveIncident } from '../store/volunteerStore';
 
 export const VolunteerAlertScreen: React.FC = () => {
   const { nearbyIncidents, removeIncident, updateStats } = useVolunteerStore();
-  const [activeAlert, setActiveAlert] = useState<any>(nearbyIncidents[0] || null);
+  const [activeAlert, setActiveAlert] = useState<ActiveIncident | null>(nearbyIncidents[0] || null);
 
   useEffect(() => {
     // Safely update active alert when incidents change without triggering cascading renders if same

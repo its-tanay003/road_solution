@@ -19,12 +19,7 @@ import 'leaflet/dist/leaflet.css';
 import { logger } from '../lib/logger';
 
 // Fix for default Leaflet icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: unknown })._getIconUrl;
 
 // Custom Ambulance Marker Component
 const AmbulanceMarker = ({ ambulance, isDispatched }: { ambulance: Ambulance, isDispatched: boolean }) => {
@@ -156,7 +151,7 @@ export const AmbulanceTracker: React.FC = () => {
     try {
       // OSRM Routing
       const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${unit.currentLng},${unit.currentLat};${location.lng},${location.lat}?overview=full&geometries=geojson`);
-      const data = await response.json();
+      const data = (await response.json()) as OSRMResponse;
 
       if (data.routes && data.routes[0]) {
         const route: [number, number][] = data.routes[0].geometry.coordinates.map((c: [number, number]) => [c[1], c[0]]); // Swap to [lat, lng]

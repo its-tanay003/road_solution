@@ -10,7 +10,7 @@ export const DriveModeScreen: React.FC = () => {
   const [activeCommand, setActiveCommand] = useState<string | null>(null);
 
   // 1. Hook into real sensors
-  const { speed, isImpactDetected } = useSensors(() => {
+  const { speed } = useSensors(() => {
     // Handle impact detection (e.g., auto-trigger SOS)
     setActiveCommand("CRASH DETECTED! TRIGGERING SOS...");
   });

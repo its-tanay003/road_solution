@@ -3,7 +3,7 @@ import React from 'react';
 interface PanelProps {
   title?: string;
   subtitle?: string;
-  icon?: React.ElementType;
+  icon?: React.ComponentType<{ className?: string; size?: number }>;
   children: React.ReactNode;
   className?: string;
   action?: React.ReactNode;
@@ -43,7 +43,6 @@ export const Panel: React.FC<PanelProps> = ({
         <div className="px-4 py-3 border-b border-inherit flex items-center justify-between bg-white/2">
           <div className="flex items-center gap-3">
             {Icon && (
-              /* @ts-ignore */
               <Icon className={getIconColor()} size={16} />
             )}
             <div>

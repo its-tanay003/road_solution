@@ -1,6 +1,6 @@
 # 🚨 ROADSoS — Emergency Intelligence OS
 
-> **Live Demo:** [road-solution.vercel.app](https://road-solution.vercel.app) | **Pitch Video:** [YouTube URL — pending upload]
+> **Live Demo:** [road-solution.vercel.app](https://road-solution.vercel.app)
 > **GitHub:** [its-tanay003/road_solution](https://github.com/its-tanay003/road_solution)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fits-tanay003%2Froadsos&env=ANTHROPIC_API_KEY,VITE_API_URL,VITE_SOCKET_URL)
@@ -97,11 +97,11 @@ A dedicated workflow empowering untrained bystanders to assist effectively durin
 * **Vaahan Integration**: Real-time vehicle telemetry (owner, insurance, PUC) queried via TN-RTO databases to provide responders with victim-vehicle context.
 * **Impact Simulation**: High-fidelity crash physics breakdown (G-force, deceleration, impact point) for precise medical preparation.
 
-### 8. Presentation & Product Walkthroughs
+### 8. Simulation & Training Center
 
-* **Immersive Fullscreen Deck**: Built-in 5-slide presentation for product walkthroughs, featuring live-ticking casualty counters and platform architecture deep-dives.
-* **Demo Orchestration**: A central "War Room" HUD allowing stakeholders to trigger specific scenarios (Urban Crash, Rural Mesh, Bystander Intervention) and control time dilation.
-* **Operational Shortcuts**: Comprehensive keyboard-driven architecture for rapid, error-free live demonstrations.
+* **Immersive Scenario Simulation**: Built-in training modules for responders and citizens, featuring live-ticking casualty counters and platform architecture deep-dives.
+* **Operational War Room**: A central HUD allowing stakeholders to simulate specific scenarios (Urban Crash, Rural Mesh, Bystander Intervention) and study response dynamics.
+* **Rapid Response Shortcuts**: Keyboard-driven architecture optimized for professional dispatchers and emergency coordinators.
 
 ## 🏛️ Government-Ready Architecture
 
@@ -144,7 +144,5 @@ npm run dev
 
 *This starts both the Vite frontend and Node backend simultaneously.*
 
-4. Access the demo at `http://localhost:5173`.
- backend simultaneously.*
 
 4. Access the demo at `http://localhost:5173`.

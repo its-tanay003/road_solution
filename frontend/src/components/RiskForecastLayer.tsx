@@ -17,6 +17,16 @@ interface Incident {
   severity: number; // 1-5
 }
 
+interface HeatLayerOptions {
+  radius?: number;
+  blur?: number;
+  maxZoom?: number;
+  max?: number;
+  minOpacity?: number;
+  gradient?: Record<number, string>;
+}
+
+
 export const RiskForecastLayer = () => {
   const map = useMap();
   const heatLayerRef = useRef<L.Layer | null>(null);
@@ -54,7 +64,7 @@ export const RiskForecastLayer = () => {
     // Ideally we'd use a shared store, but let's implement a quick local one if not found
     const loadModel = async () => {
       try {
-        const model = await tf.sequential();
+        const model = tf.sequential();
         model.add(tf.layers.dense({ units: 16, activation: 'relu', inputShape: [8] }));
         model.add(tf.layers.dense({ units: 8, activation: 'relu' }));
         model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
@@ -130,7 +140,7 @@ export const RiskForecastLayer = () => {
       map.removeLayer(heatLayerRef.current);
     }
 
-    const heatLayer = (L as { heatLayer: (points: [number, number, number][], options: any) => L.Layer }).heatLayer(gridPoints, {
+    const heatLayer = L.heatLayer(gridPoints, {
       radius: 25,
       blur: 15,
       maxZoom: 13,
@@ -138,7 +148,7 @@ export const RiskForecastLayer = () => {
     }).addTo(map);
 
     heatLayerRef.current = heatLayer;
-  }, [map, tfModel]);
+  }, [map, tfModel, weatherData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -170,7 +180,7 @@ export const RiskForecastLayer = () => {
       clearInterval(interval);
       if (heatLayerRef.current) map.removeLayer(heatLayerRef.current);
     };
-  }, [map, updateHeatmap]);
+  }, [map, updateHeatmap, weatherData]);
 
   return (
     <div className="absolute top-4 right-4 z-1000 w-80 pointer-events-none">

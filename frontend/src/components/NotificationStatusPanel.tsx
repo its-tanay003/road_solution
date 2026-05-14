@@ -20,31 +20,31 @@ interface ChannelConfig {
 }
 
 const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
-  whatsapp: { 
+  WHATSAPP: { 
     icon: MessageSquare, 
     label: 'WhatsApp', 
     color: 'text-emerald-400',
     description: 'Emergency contacts notified via WhatsApp'
   },
-  push: { 
+  PUSH: { 
     icon: Bell, 
     label: 'Push Notification', 
     color: 'text-blue-400',
     description: 'In-app alerts sent to nearby verified users'
   },
-  nearby: { 
+  NEARBY: { 
     icon: Navigation2, 
     label: 'Nearby Volunteers', 
     color: 'text-orange-400',
     description: 'Dispatching trained first responders in vicinity'
   },
-  sms: { 
+  SMS: { 
     icon: Smartphone, 
     label: 'Emergency SMS', 
     color: 'text-purple-400',
     description: 'Fallback SMS gateway activated'
   },
-  '112': { 
+  INDIA_112: { 
     icon: Siren, 
     label: 'India 112', 
     color: 'text-red-400',
@@ -53,7 +53,7 @@ const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
 };
 
 export const NotificationStatusPanel: React.FC = () => {
-  const { statuses } = useNotificationStatusStore();
+  const { channels } = useNotificationStatusStore();
 
   return (
     <div className="space-y-3 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
@@ -67,7 +67,7 @@ export const NotificationStatusPanel: React.FC = () => {
       
       <div className="grid gap-2">
         {Object.entries(CHANNEL_CONFIGS).map(([id, config]) => {
-          const status = statuses[id as keyof typeof statuses] || 'IDLE';
+          const status = channels[id as keyof typeof channels]?.status || 'IDLE';
           const Icon = config.icon;
           
           return (

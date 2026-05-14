@@ -29,35 +29,55 @@ interface VaahanData {
   queriedAt: string;
 }
 
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => ISpeechRecognition;
+    webkitSpeechRecognition?: new () => ISpeechRecognition;
+  }
+}
+
+interface ISpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: (event: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => void;
+  onerror: (event: unknown) => void;
+  onend: (event: unknown) => void;
+  start: () => void;
+  stop: () => void;
+}
+
 export const VaahanLookup: React.FC = () => {
   const [regNumber, setRegNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VaahanData | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-IN';
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-IN';
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.toUpperCase().replace(/[\s-]/g, '');
         setRegNumber(transcript);
         setIsListening(false);
       };
 
-      recognitionRef.current.onerror = () => {
+      recognition.onerror = () => {
         setIsListening(false);
       };
 
-      recognitionRef.current.onend = () => {
+      recognition.onend = () => {
         setIsListening(false);
       };
+
+      recognitionRef.current = recognition;
     }
   }, []);
 
@@ -85,13 +105,17 @@ export const VaahanLookup: React.FC = () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/vaahan/${regNumber}`);
       setResult(response.data);
-    } catch (err: any) {
-      if (err.response?.status === 400) {
-        setError('Please enter in format: XX00XX0000');
-      } else if (err.response?.status === 404) {
-        setError('Vehicle not found in Vaahan registry.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 400) {
+          setError('Please enter in format: XX00XX0000');
+        } else if (err.response?.status === 404) {
+          setError('Vehicle not found in Vaahan registry.');
+        } else {
+          setError('Vaahan service temporarily unavailable.');
+        }
       } else {
-        setError('Vaahan service temporarily unavailable.');
+        setError('An unexpected error occurred');
       }
     } finally {
       setLoading(false);

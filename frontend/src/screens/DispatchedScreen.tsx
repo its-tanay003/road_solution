@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useSosStore } from '../store/sosStore';
 import { AnimatedAmbulance3D } from '../components/AnimatedAmbulance3D';
 import {
   Phone, Share2, Users, ChevronDown, ChevronUp,
-  Clock, Siren, Hospital, Navigation
+  Hospital, Navigation
 } from 'lucide-react';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -20,11 +19,11 @@ const ROUTE_COORDS: [number, number][] = [
 
 /* Custom Leaflet icons */
 const redIcon = L.divIcon({
-  html: `<div style="width:18px;height:18px;border-radius:50%;background:#FF1744;border:3px solid white;box-shadow:0 0 0 4px rgba(255,23,68,0.3)"></div>`,
+  html: `<div class="w-[18px] h-[18px] rounded-full bg-[#FF1744] border-[3px] border-white shadow-[0_0_0_4px_rgba(255,23,68,0.3)]"></div>`,
   iconSize: [18, 18], iconAnchor: [9, 9], className: ''
 });
 const greenIcon = L.divIcon({
-  html: `<div style="width:28px;height:28px;border-radius:50%;background:#00C853;border:2px solid white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:white">H</div>`,
+  html: `<div class="w-[28px] h-[28px] rounded-full bg-[#00C853] border-2 border-white flex items-center justify-center font-black text-[12px] text-white">H</div>`,
   iconSize: [28, 28], iconAnchor: [14, 14], className: ''
 });
 
@@ -45,16 +44,19 @@ function GoldenHourTimer({ goldenHourStart }: { goldenHourStart: number }) {
   const pct = remaining / 3600;
   const mm  = String(Math.floor(remaining / 60)).padStart(2, '0');
   const ss  = String(remaining % 60).padStart(2, '0');
-  const color = pct > 0.6 ? '#00C853' : pct > 0.3 ? '#FF8F00' : '#FF1744';
+  
+  // Map color to Tailwind classes
+  const colorClass = pct > 0.6 ? 'text-green-500' : pct > 0.3 ? 'text-amber-500' : 'text-red-500';
+  const strokeColor = pct > 0.6 ? '#00C853' : pct > 0.3 ? '#FF8F00' : '#FF1744';
 
   return (
     <div className="flex items-center gap-3">
-      <div className="relative" style={{ width: 56, height: 56 }}>
-        <svg width={56} height={56} style={{ transform: 'rotate(-90deg)' }}>
+      <div className="relative w-14 h-14">
+        <svg width={56} height={56} className="-rotate-90">
           <circle cx={28} cy={28} r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={4} />
           <motion.circle
             cx={28} cy={28} r={radius}
-            fill="none" stroke={color} strokeWidth={4}
+            fill="none" stroke={strokeColor} strokeWidth={4}
             strokeDasharray={circ}
             animate={{ strokeDashoffset: circ * (1 - pct) }}
             transition={{ duration: 1 }}
@@ -66,7 +68,7 @@ function GoldenHourTimer({ goldenHourStart }: { goldenHourStart: number }) {
       </div>
       <div>
         <p className="text-[10px] text-white/40 uppercase tracking-widest">Golden Hour</p>
-        <p className="font-mono font-black text-white text-lg" style={{ color }}>
+        <p className={`font-mono font-black text-lg ${colorClass}`}>
           {mm}:{ss} <span className="text-[10px] text-white/40 font-normal">remaining</span>
         </p>
       </div>
@@ -151,7 +153,7 @@ function AmbulanceProgressBar({ eta, totalEta }: { eta: number; totalEta: number
       </div>
       <div className="h-2 rounded-full bg-white/10 overflow-hidden">
         <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500"
+          className="h-full rounded-full bg-linear-to-r from-amber-500 to-red-500"
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 1 }}
@@ -165,13 +167,15 @@ function AmbulanceProgressBar({ eta, totalEta }: { eta: number; totalEta: number
   );
 }
 
+import { MapContainer, TileLayer, Marker, Polyline, Circle } from 'react-leaflet';
+
 /* ── map wrapper ─────────────────────────────────────────────── */
 function DarkMap() {
   return (
     <MapContainer
       center={USER_POS}
       zoom={14}
-      style={{ width: '100%', height: '100%' }}
+      className="w-full h-full"
       zoomControl={false}
       attributionControl={false}
     >
@@ -199,8 +203,10 @@ function DarkMap() {
 export const DispatchedScreen: React.FC = () => {
   const navigate = useNavigate();
   const { incidentId } = useParams();
-  const { goldenHourActive, cancelSOS } = useSosStore();
-  const goldenStart = useRef(Date.now());
+  const { cancelSOS, crashDetectedAt: storeTime } = useSosStore();
+  const [fallbackTime] = useState(() => Date.now());
+  const crashDetectedAt = storeTime || fallbackTime;
+  
   const [eta, setEta] = useState(6 * 60); // 6 min in seconds
 
   useEffect(() => {
@@ -214,10 +220,10 @@ export const DispatchedScreen: React.FC = () => {
   return (
     <div className="fixed inset-0 bg-[#080C14] flex flex-col overflow-hidden">
       {/* ── TOP HALF: Leaflet map ── */}
-      <div className="h-[40vh] min-h-[200px] relative flex-shrink-0">
+      <div className="h-[40vh] min-h-[200px] relative shrink-0">
         <DarkMap />
         {/* overlay: incident tag */}
-        <div className="absolute top-3 left-3 z-[500] px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10">
+        <div className="absolute top-3 left-3 z-500 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10">
           <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
             Incident {incidentId}
           </span>
@@ -227,7 +233,7 @@ export const DispatchedScreen: React.FC = () => {
       {/* ── BOTTOM HALF: info ── */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {/* Golden hour */}
-        <GoldenHourTimer goldenHourStart={goldenStart.current} />
+        <GoldenHourTimer goldenHourStart={crashDetectedAt} />
 
         {/* Ambulance 3D preview */}
         <div className="flex justify-center">

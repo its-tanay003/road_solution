@@ -18,6 +18,13 @@ const LAYER_CONFIGS: Record<ServiceLayerType, { gmapTypes: string[], overpassQue
   hazards: { gmapTypes: [], overpassQuery: '' }, // Real-time sockets
 };
 
+interface OverpassElement {
+  id: number;
+  lat: number;
+  lon: number;
+  tags?: Record<string, string>;
+}
+
 export const useNearbyPlaces = (lat: number | null, lng: number | null, mapInstance: google.maps.Map | null) => {
   const { activeLayers, searchRadius, cachePlaces, getCachedPlaces } = useMapDataStore();
   const [places, setPlaces] = useState<MapPlace[]>([]);
@@ -96,7 +103,7 @@ export const useNearbyPlaces = (lat: number | null, lng: number | null, mapInsta
             const data = await response.json();
             
             if (data && data.elements) {
-              layerResults = data.elements.map((el: any) => ({
+              layerResults = data.elements.map((el: OverpassElement) => ({
                 id: el.id.toString(),
                 name: el.tags?.name || `Unknown ${layer}`,
                 lat: el.lat,
@@ -143,7 +150,8 @@ export const useNearbyPlaces = (lat: number | null, lng: number | null, mapInsta
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [lat, lng, activeLayers, searchRadius, mapInstance]);
+  }, [lat, lng, activeLayers, searchRadius, mapInstance, cachePlaces, getCachedPlaces]);
 
   return { places, isLoading };
 };
+

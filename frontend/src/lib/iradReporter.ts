@@ -46,7 +46,33 @@ export interface iRADReport {
   };
 }
 
-export function generateiRADReport(incident: Record<string, any>, triage: Record<string, any>): iRADReport {
+interface IncidentData {
+  lat?: number;
+  lng?: number;
+  roadType?: iRADReport['accidentLocation']['roadType'];
+  nhNumber?: string;
+  state?: string;
+  district?: string;
+  pincode?: string;
+  landmark?: string;
+  timestamp?: string;
+  vehicleCount?: number;
+  vehicleType?: string;
+  injuredCount?: number;
+  weather?: iRADReport['accidentDetails']['weatherCondition'];
+  roadCondition?: iRADReport['accidentDetails']['roadCondition'];
+  sosTime?: string;
+  responseTimeSeconds?: number;
+  hospital?: string;
+  gForce?: number;
+}
+
+interface TriageData {
+  score?: number;
+  confidence?: number;
+}
+
+export function generateiRADReport(incident: IncidentData, triage: TriageData): iRADReport {
   const now = new Date();
   const hour = now.getHours();
   
