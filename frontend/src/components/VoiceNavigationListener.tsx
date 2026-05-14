@@ -13,7 +13,7 @@ const COMMANDS: Array<{ phrases: string[]; action: (nav: ReturnType<typeof useNa
   { phrases: ['emergency contacts', 'my contacts'],        action: n => n('/emergency-contacts'), label: 'Emergency Contacts' },
   { phrases: ['medical records', 'my medical', 'medical'], action: n => n('/medical'),          label: 'Medical Records' },
   { phrases: ['hospitals', 'find hospital', 'nearest hospital'], action: n => n('/hospitals'),  label: 'Hospitals' },
-  { phrases: ['sos', 'help me sos', 'emergency'],          action: n => n('/sos-active'),       label: 'SOS' },
+  { phrases: ['sos', 'help me sos', 'emergency', 'help me roadsos'],          action: n => n('/sos-active'),       label: 'SOS' },
   { phrases: ['go back', 'back'],                          action: n => n(-1 as any),           label: 'back' },
 ];
 

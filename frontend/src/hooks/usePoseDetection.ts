@@ -1,16 +1,36 @@
 import { useEffect, useRef, useState } from 'react';
 
+export interface Landmark {
+  x: number;
+  y: number;
+  z: number;
+  visibility?: number;
+}
+
+export interface PoseResults {
+  poseLandmarks?: Landmark[];
+}
+
 declare global {
   interface Window {
-    Pose: any;
-    Camera: any;
+    // MediaPipe Pose loaded from CDN — no official type package
+    Pose: new (opts: { locateFile: (f: string) => string }) => {
+      setOptions(opts: Record<string, unknown>): void;
+      onResults(cb: (results: PoseResults) => void): void;
+      send(args: { image: HTMLVideoElement }): Promise<void>;
+      close(): void;
+    };
+    Camera: new (
+      el: HTMLVideoElement,
+      opts: { onFrame: () => Promise<void>; width: number; height: number }
+    ) => { start(): Promise<void>; stop(): void };
   }
 }
 
 export const usePoseDetection = (videoRef: React.RefObject<HTMLVideoElement | null>) => {
-  const [pose, setPose] = useState<any>(null);
+  const [pose, setPose] = useState<PoseResults | null>(null);
   const [isReady, setIsReady] = useState(false);
-  const poseRef = useRef<any>(null);
+  const poseRef = useRef<InstanceType<Window['Pose']> | null>(null);
 
   useEffect(() => {
     if (!videoRef.current || !window.Pose) return;
@@ -29,7 +49,7 @@ export const usePoseDetection = (videoRef: React.RefObject<HTMLVideoElement | nu
       minTrackingConfidence: 0.5,
     });
 
-    poseInstance.onResults((results: any) => {
+    poseInstance.onResults((results: PoseResults) => {
       setPose(results);
     });
 

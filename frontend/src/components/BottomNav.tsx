@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { hapticLight, announce } from '../lib/accessibilityHelpers';
 
@@ -75,25 +75,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary navigation"
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: `calc(72px + env(safe-area-inset-bottom, 0px))`,
-        background: 'rgba(8,12,20,0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-around',
-        paddingTop: 6,
-        paddingBottom: 0,
-        paddingLeft: 8,
-        paddingRight: 8,
-        zIndex: 200,
-      }}
+      className="fixed bottom-0 left-0 right-0 flex items-start justify-around px-2 pt-1.5 pb-(--safe-bottom) h-[calc(72px+var(--safe-bottom))] bg-secondary/95 backdrop-blur-xl border-t border-white/5 z-200"
     >
       {/* Left two tabs */}
       {TABS.slice(0, 2).map(tab => (
@@ -108,8 +90,9 @@ export function BottomNav() {
       {/* Centre SOS spacer — the actual button lives in SOSFloatButton */}
       <div
         aria-hidden="true"
-        style={{ minWidth: 'var(--touch-md)', flex: 1 }}
+        className="min-w-(--touch-md) flex-1"
       />
+
 
       {/* Right two tabs */}
       {TABS.slice(2).map(tab => (
@@ -136,59 +119,30 @@ function NavTabItem({ tab, isActive, onClick }: {
       aria-label={tab.ariaLabel}
       aria-current={isActive ? 'page' : undefined}
       onClick={onClick}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 3,
-        flex: 1,
-        minHeight: 64,
-        paddingTop: 6,
-        paddingBottom: 4,
-        paddingLeft: 6,
-        paddingRight: 6,
-        borderRadius: 12,
-        textDecoration: 'none',
-        position: 'relative',
-        WebkitTapHighlightColor: 'transparent',
-        background: isActive ? 'var(--bg-hover)' : 'transparent',
-        transition: 'background 150ms ease',
-        color: isActive ? 'var(--saffron)' : 'var(--text-secondary)',
-      }}
+      className={`flex flex-col items-center gap-0.5 flex-1 min-h-[64px] pt-1.5 pb-1 px-1.5 rounded-xl no-underline relative transition-colors duration-150 ${
+        isActive ? 'bg-white/5 text-saffron' : 'bg-transparent text-slate-400 hover:text-slate-200'
+      }`}
     >
       {/* Active indicator dot — slides with layoutId */}
       <AnimatePresence>
         {isActive && (
           <motion.span
             layoutId="nav-active-dot"
-            style={{
-              position: 'absolute',
-              top: 2,
-              width: 4,
-              height: 4,
-              borderRadius: '50%',
-              background: 'var(--saffron)',
-              boxShadow: '0 0 6px rgba(255,153,51,0.8)',
-            }}
+            className="absolute top-0.5 w-1 h-1 rounded-full bg-saffron shadow-[0_0_6px_rgba(255,153,51,0.8)]"
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           />
         )}
       </AnimatePresence>
 
       {/* Icon */}
-      <span style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span className="w-7 h-7 flex items-center justify-center">
         {tab.icon}
       </span>
 
       {/* Label — always visible */}
-      <span style={{
-        fontFamily: 'var(--font-body)',
-        fontWeight: isActive ? 600 : 500,
-        fontSize: 11,
-        lineHeight: 1,
-        color: isActive ? 'var(--saffron)' : 'var(--text-secondary)',
-        transition: 'color 150ms ease',
-      }}>
+      <span className={`font-sans text-[11px] leading-none transition-colors duration-150 ${
+        isActive ? 'font-semibold' : 'font-medium'
+      }`}>
         {tab.label}
       </span>
     </NavLink>

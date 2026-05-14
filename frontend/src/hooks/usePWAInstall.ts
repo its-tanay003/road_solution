@@ -1,27 +1,24 @@
 import { useState, useEffect } from 'react';
 
 export const usePWAInstall = () => {
-  const [installable, setInstallable] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installable, setInstallable] = useState(!!window.deferredPrompt);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(
+    window.deferredPrompt || null
+  );
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      const event = e as BeforeInstallPromptEvent;
       // Prevent the default browser banner
-      e.preventDefault();
+      event.preventDefault();
       // Stash the event so it can be triggered later.
-      setDeferredPrompt(e);
+      setDeferredPrompt(event);
       setInstallable(true);
       // Also save to window for global access if needed
-      (window as any).deferredPrompt = e;
+      window.deferredPrompt = event;
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Check if already installable (if event fired before component mount)
-    if ((window as any).deferredPrompt) {
-      setDeferredPrompt((window as any).deferredPrompt);
-      setInstallable(true);
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -32,20 +29,18 @@ export const usePWAInstall = () => {
     if (!deferredPrompt) return;
 
     // Show the install prompt
-    deferredPrompt.prompt();
+    await deferredPrompt.prompt();
 
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
       setInstallable(false);
       setDeferredPrompt(null);
-      (window as any).deferredPrompt = null;
-    } else {
-      console.log('User dismissed the install prompt');
+      window.deferredPrompt = undefined;
     }
   };
 
   return { installable, handleInstallClick };
 };
+

@@ -45,10 +45,15 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
   return R * c;
 };
 
+interface Responder {
+  unitId: string;
+  location: { lat: number; lng: number };
+}
+
 export const notifyNearbyResponders = async (
   incidentLocation: { lat: number, lng: number },
   incidentRoad: string,
-  responders: any[]
+  responders: Responder[]
 ) => {
   const permission = await requestNotificationPermission();
   if (!permission) return;

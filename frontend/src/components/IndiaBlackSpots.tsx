@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Circle, Popup } from 'react-leaflet';
 import { useSosStore } from '../store';
 import { AlertTriangle } from 'lucide-react';
@@ -41,20 +41,16 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 
 export const IndiaBlackSpots = () => {
   const { location } = useSosStore();
-  const [warningSpot, setWarningSpot] = useState<{name: string} | null>(null);
 
-  useEffect(() => {
-    if (location) {
-      let foundWarning = null;
-      for (const spot of BLACK_SPOTS) {
-        const dist = getDistanceFromLatLonInKm(location.lat, location.lng, spot.lat, spot.lng);
-        if (dist <= 2.0) {
-          foundWarning = spot;
-          break;
-        }
+  const warningSpot = useMemo(() => {
+    if (!location) return null;
+    for (const spot of BLACK_SPOTS) {
+      const dist = getDistanceFromLatLonInKm(location.lat, location.lng, spot.lat, spot.lng);
+      if (dist <= 2.0) {
+        return spot;
       }
-      setWarningSpot(foundWarning);
     }
+    return null;
   }, [location]);
 
   return (

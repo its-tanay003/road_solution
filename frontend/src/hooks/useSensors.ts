@@ -12,9 +12,9 @@ interface SensorData {
 }
 
 export const requestSensorPermissions = async (): Promise<boolean> => {
-  if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+  if (typeof (DeviceMotionEvent as unknown as DeviceMotionEventStatic).requestPermission === 'function') {
     try {
-      const response = await (DeviceMotionEvent as any).requestPermission();
+      const response = await (DeviceMotionEvent as unknown as DeviceMotionEventStatic).requestPermission!();
       return response === 'granted';
     } catch (e) {
       console.error('Permission request failed:', e);
@@ -79,8 +79,8 @@ export const useSensors = (onImpact?: () => void): SensorData => {
 
     if ('DeviceMotionEvent' in window) {
       // Request permission for iOS 13+
-      if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
-        (DeviceMotionEvent as any).requestPermission()
+      if (typeof (DeviceMotionEvent as unknown as DeviceMotionEventStatic).requestPermission === 'function') {
+        (DeviceMotionEvent as unknown as DeviceMotionEventStatic).requestPermission!()
           .then((response: string) => {
             if (response === 'granted') {
               window.addEventListener('devicemotion', handleMotion);

@@ -10,6 +10,7 @@ interface User {
   name: string;
   avatar?: string;
   provider: string;
+  language?: 'en' | 'hi' | 'ta';
 }
 
 interface Contact {
@@ -87,8 +88,8 @@ export const useAuthStore = create<AuthState>()(
               user_metadata: { full_name: user.name },
               app_metadata: { provider: user.provider },
               created_at: new Date().toISOString()
-            } as any
-          }
+            } as unknown as Session['user']
+          } as Session
         });
       },
 

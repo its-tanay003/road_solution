@@ -3,16 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Stethoscope, 
   Search, 
-  Filter, 
-  MapPin, 
-  Star,
-  Globe,
-  Clock,
   ArrowRight
 } from 'lucide-react';
 import { ExpertCard } from './ExpertCard';
 
-export const EXPERT_NETWORK = [
+const EXPERT_NETWORK = [
   { 
     id: 1, 
     name: "Dr. Priya Sharma", 

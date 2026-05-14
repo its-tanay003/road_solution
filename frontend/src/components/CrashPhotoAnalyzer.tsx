@@ -270,7 +270,7 @@ export const CrashPhotoAnalyzer = ({ onClose }: CrashPhotoAnalyzerProps) => {
 const MetricCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: React.ElementType; color: string }) => (
   <div className="bg-slate-950/30 border border-white/5 p-4 rounded-2xl">
     <div className="flex items-center gap-2 text-slate-500 mb-1">
-      {/* @ts-ignore */}
+      {/* @ts-expect-error Lucide icons types occasionally mismatch in complex HOCs */}
       <Icon size={12} />
       <span className="text-[9px] font-mono uppercase">{label}</span>
     </div>

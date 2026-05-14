@@ -24,7 +24,7 @@ interface SosState {
   
   // Dispatch Info
   isDispatched: boolean;
-  dispatchData: any | null;
+  dispatchData: Record<string, unknown> | null;
   dispatchConfirmed: boolean;
   
   // Golden Hour
@@ -33,13 +33,15 @@ interface SosState {
   
   // Physics/Sensor Data
   gForceData: { x: number; y: number; z: number };
+  location: { lat: number; lng: number } | null;
+  iradReport: Record<string, unknown> | null;
   
   // Actions
   setCountdown: (count: number) => void;
   setCrashType: (type: CrashType) => void;
   triggerSOS: (incidentId?: string) => Promise<void>;
   cancelSOS: () => void;
-  confirmDispatch: (data: any) => void;
+  confirmDispatch: (data: Record<string, unknown>) => void;
   resolveIncident: () => void;
   
   setGoldenHourActive: (active: boolean) => void;
@@ -47,9 +49,10 @@ interface SosState {
   setGForceData: (data: { x: number; y: number; z: number }) => void;
   setCrashTriggered: (triggered: boolean) => void;
   setCrashDetectedAt: (time: number | null) => void;
-  
-  // Process Orchestration
-  startRescueLoop: (incidentId: string) => void;
+  startCountdown: () => void;
+  updateIradReport: (report: Record<string, unknown>, ackId: string) => void;
+  setLocation: (loc: { lat: number; lng: number }) => void;
+  startRescueLoop: (id: string) => void;
 }
 
 export const useSosStore = create<SosState>()(
@@ -73,6 +76,8 @@ export const useSosStore = create<SosState>()(
       goldenHourExpired: false,
       
       gForceData: { x: 0, y: 0, z: 0 },
+      location: { lat: 12.9716, lng: 77.5946 }, // Default to Bangalore
+      iradReport: null,
 
       setCountdown: (count) => set({ countdown: count }),
       setCrashType: (type) => set({ crashType: type }),
@@ -225,6 +230,14 @@ export const useSosStore = create<SosState>()(
       setGForceData: (data) => set({ gForceData: data }),
       setCrashTriggered: (triggered) => set({ crashTriggered: triggered }),
       setCrashDetectedAt: (time) => set({ crashDetectedAt: time }),
+
+      startCountdown: () => set({ countdown: 10, status: 'TRIGGERED' }),
+      
+      updateIradReport: (report, ackId) => set({ 
+        iradReport: { ...report, ackId } 
+      }),
+
+      setLocation: (location) => set({ location }),
 
       startRescueLoop: (id) => {
         set({ status: 'GOLDEN_HOUR', goldenHourActive: true, incidentId: id, currentIncidentId: id, sosActive: true, isActive: true });

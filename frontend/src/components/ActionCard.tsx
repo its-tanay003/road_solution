@@ -20,74 +20,44 @@ interface ActionCardProps extends ActionCardData {
   index: number;
 }
 
-export function ActionCard({ id, title, subtitle, route, accent, icon, badge, pulse, index }: ActionCardProps) {
+export function ActionCard({ title, subtitle, route, accent, icon, badge, pulse }: ActionCardProps) {
   const navigate = useNavigate();
 
   return (
     <motion.button
       variants={staggerItem}
-      whileTap={{ scale: 0.96 }}
-      whileHover={{ y: -2, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+      whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => { hapticLight(); navigate(route); }}
       animate={pulse ? { boxShadow: ['0 0 0 0 rgba(255,23,68,0)', '0 0 0 6px rgba(255,23,68,0.12)', '0 0 0 0 rgba(255,23,68,0)'] } : {}}
       transition={pulse ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.15 }}
       aria-label={`${title} — ${subtitle}`}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        background: 'var(--bg-raised)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-xl)',
-        padding: 20,
-        minHeight: 108,
-        width: '100%',
-        textAlign: 'left',
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden',
-        WebkitTapHighlightColor: 'transparent',
-        transition: 'border-color 0.15s ease, background 0.15s ease',
-      }}
+      style={{ '--accent': accent } as React.CSSProperties}
+      className="relative group w-full text-left p-5 rounded-xl bg-(--bg-raised) border border-(--border) overflow-hidden transition-all duration-300 shadow-xl shadow-black/20"
     >
       {/* Accent glow strip */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-        background: accent, opacity: 0.6, borderRadius: '16px 16px 0 0',
-      }} />
+      <div className="absolute top-0 left-0 right-0 h-[2px] opacity-60 rounded-t-[16px] bg-(--accent)" />
 
-      {/* Top row: icon + badge */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%' }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 12,
-          background: `${accent}18`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: accent, flexShrink: 0,
-        }}>
+      {/* Icon & Badge Row */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-(--accent)/10 text-(--accent)">
           {icon}
         </div>
         {badge && (
-          <div style={{ marginTop: 2 }}>
+          <div className="mt-0.5">
             {badge}
           </div>
         )}
       </div>
 
       {/* Bottom: text */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 12 }}>
-        <span style={{
-          fontFamily: 'var(--font-display)', fontWeight: 600,
-          fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.2,
-        }}>
+      <div className="flex flex-col gap-[3px] mt-3">
+        <h3 className="text-lg font-(--font-display) font-semibold text-(--text-primary) tracking-tight mb-1">
           {title}
-        </span>
-        <span style={{
-          fontFamily: 'var(--font-body)', fontSize: 12,
-          color: 'var(--text-secondary)', lineHeight: 1.4,
-        }}>
+        </h3>
+        <p className="text-sm font-(--font-body) text-(--text-secondary) leading-relaxed">
           {subtitle}
-        </span>
+        </p>
       </div>
     </motion.button>
   );

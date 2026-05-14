@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Volume2, VolumeX, ArrowLeft, AlertTriangle } from 'lucide-react';
@@ -79,12 +79,16 @@ function StepCard({ step, total, accent }: { step: Step; total: number; accent: 
   return (
     <motion.div key={step.n} initial={{ x: 60, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
       exit={{ x: -60, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-      className="flex flex-col gap-5">
+      className="flex flex-col gap-5"
+      style={{ '--accent': accent } as React.CSSProperties}>
       {/* dots */}
       <div className="flex gap-2 justify-center mt-2">
         {Array.from({ length: total }).map((_, i) => (
           <div key={i} className="h-2 rounded-full transition-all duration-300"
-            style={{ width: i === step.n - 1 ? 24 : 8, background: i === step.n - 1 ? accent : 'rgba(255,255,255,0.15)' }} />
+            style={{ 
+              width: i === step.n - 1 ? 24 : 8, 
+              backgroundColor: i === step.n - 1 ? 'var(--accent)' : 'rgba(255,255,255,0.15)' 
+            } as React.CSSProperties} />
         ))}
       </div>
       {/* illustration */}
@@ -94,8 +98,7 @@ function StepCard({ step, total, accent }: { step: Step; total: number; accent: 
       {/* badge + text */}
       <div>
         <div className="inline-flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-black"
-            style={{ background: accent }}>{step.n}</div>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-black bg-(--accent)">{step.n}</div>
           <h2 className="text-xl font-black text-white tracking-tight">{step.title}</h2>
         </div>
         <p className="text-[17px] leading-relaxed text-white/80 mb-4">{step.instruction}</p>
@@ -131,22 +134,22 @@ function GuideScreen({ cat, onBack }: { cat: Category; onBack: () => void }) {
   }, [step, voiceOn, cur]);
 
   if (!cur) return (
-    <div className="min-h-screen bg-[#080C14] flex flex-col items-center justify-center px-5 gap-6">
+    <div className="min-h-screen bg-base flex flex-col items-center justify-center px-5 gap-6">
       <span className="text-7xl">✅</span>
       <h2 className="text-2xl font-black text-white text-center">All steps complete!</h2>
       <p className="text-white/50 text-center">Call 112 if the situation hasn't improved.</p>
-      <button onClick={onBack} className="w-full py-4 rounded-2xl font-black text-xl text-black" style={{ background: cat.accent }}>
+      <button onClick={onBack} aria-label="Back to First Aid" className="w-full py-4 rounded-2xl font-black text-xl text-black bg-(--accent)">
         Back to First Aid
       </button>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#080C14] flex flex-col">
+    <div className="min-h-screen bg-base flex flex-col" style={{ '--accent': cat.accent } as React.CSSProperties}>
       <div className="flex items-center justify-between px-4 pt-10 pb-4">
-        <button onClick={onBack} className="p-2 rounded-xl bg-white/5"><ArrowLeft size={20} className="text-white" /></button>
+        <button onClick={onBack} aria-label="Back" className="p-2 rounded-xl bg-white/5"><ArrowLeft size={20} className="text-white" /></button>
         <h1 className="text-[15px] font-black text-white">{cat.icon} {cat.name}</h1>
-        <button onClick={() => setVoiceOn(v => !v)} className={`p-2 rounded-xl ${voiceOn ? 'bg-amber-400/20' : 'bg-white/5'}`}>
+        <button onClick={() => setVoiceOn(v => !v)} aria-label={voiceOn ? "Turn off voice guidance" : "Turn on voice guidance"} className={`p-2 rounded-xl ${voiceOn ? 'bg-amber-400/20' : 'bg-white/5'}`}>
           {voiceOn ? <Volume2 size={20} className="text-amber-400" /> : <VolumeX size={20} className="text-white/40" />}
         </button>
       </div>
@@ -160,10 +163,10 @@ function GuideScreen({ cat, onBack }: { cat: Category; onBack: () => void }) {
           <button onClick={() => navigate('/assistant')} className="text-[11px] font-black text-amber-400 underline">AI Help</button>
         </div>
       </div>
-      <div className="fixed bottom-0 inset-x-0 px-4 pb-6 pt-4 bg-gradient-to-t from-[#080C14] to-transparent">
+      <div className="fixed bottom-0 inset-x-0 px-4 pb-6 pt-4 bg-linear-to-t from-base to-transparent">
         <motion.button whileTap={{ scale: 0.97 }} onClick={() => setStep(s => s + 1)}
-          className="w-full h-[72px] rounded-2xl font-black text-xl text-black flex items-center justify-center gap-3"
-          style={{ background: cat.accent }}>
+          aria-label="Next Step"
+          className="w-full h-[72px] rounded-2xl font-black text-xl text-black flex items-center justify-center gap-3 bg-(--accent)">
           Next Step <ChevronRight size={22} />
         </motion.button>
       </div>
@@ -179,7 +182,7 @@ export const FirstAidScreen: React.FC = () => {
     <AnimatePresence mode="wait">
       {!selected ? (
         <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="min-h-screen bg-[#080C14] px-4 pb-24">
+          className="min-h-screen bg-base px-4 pb-24">
           <div className="pt-12 pb-6">
             <h1 className="text-3xl font-black text-white tracking-tight">🩺 First Aid</h1>
             <p className="text-white/40 text-sm mt-1">Tap any situation to begin guided steps</p>
@@ -189,8 +192,9 @@ export const FirstAidScreen: React.FC = () => {
               <motion.button key={cat.id} onClick={() => cat.id === 'unsure' ? navigate('/assistant') : setSelected(cat)}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.055 }}
                 whileTap={{ scale: 0.95 }}
-                className={`h-[120px] rounded-2xl bg-gradient-to-br ${cat.from} to-[#0D1420] border border-white/10 p-4 flex flex-col items-start justify-between text-left`}
-                style={{ boxShadow: `0 4px 20px ${cat.accent}20` }}>
+                aria-label={`Select ${cat.name} guide`}
+                className={`h-[120px] rounded-2xl bg-linear-to-br ${cat.from} to-raised border border-white/10 p-4 flex flex-col items-start justify-between text-left shadow-[0_4px_20px_color-mix(in_srgb,var(--accent),transparent_80%)]`}
+                style={{ '--accent': cat.accent } as React.CSSProperties}>
                 <span className="text-4xl">{cat.icon}</span>
                 <div>
                   <p className="text-[15px] font-black text-white leading-tight">{cat.name}</p>

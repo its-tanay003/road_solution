@@ -22,8 +22,9 @@ window.addEventListener('error', (e) => {
 // Capture install prompt for custom HUD button
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
-  (window as any).deferredPrompt = e;
+  window.deferredPrompt = e as BeforeInstallPromptEvent;
 });
+
 
 console.log('Mounting App...');
 try {

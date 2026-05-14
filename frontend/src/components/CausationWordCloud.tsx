@@ -1,11 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Hash } from 'lucide-react';
 
-declare global {
-  interface Window {
-    d3: any;
-  }
-}
 
 const words = [
   { text: "SPEEDING", size: 98, category: "human error" },
@@ -24,7 +19,7 @@ export const CausationWordCloud: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null);
 
   const initCloud = () => {
-    const d3 = (window as any).d3;
+    const d3 = window.d3;
     if (!d3 || !svgRef.current) return;
 
     const width = 500;

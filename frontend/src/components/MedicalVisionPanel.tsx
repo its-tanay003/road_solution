@@ -1,18 +1,25 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Activity, User, QrCode, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
-import { usePoseDetection } from '../hooks/usePoseDetection';
+import { usePoseDetection, type Landmark } from '../hooks/usePoseDetection';
 import { useIdentityRecognition } from '../hooks/useIdentityRecognition';
 import axios from 'axios';
 
+interface VisionResult {
+  estimatedSeverity: 'CRITICAL' | 'SERIOUS' | 'MINOR';
+  observedConditions?: string[];
+  urgencyIndicators?: string[];
+  additionalObservations?: string;
+}
+
 interface MedicalVisionPanelProps {
-  onAnalysisComplete?: (result: any) => void;
+  onAnalysisComplete?: (result: VisionResult) => void;
 }
 
 export const MedicalVisionPanel: React.FC<MedicalVisionPanelProps> = ({ onAnalysisComplete }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [visionResult, setVisionResult] = useState<any>(null);
+  const [visionResult, setVisionResult] = useState<VisionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { pose, isReady: isPoseReady } = usePoseDetection(videoRef);
@@ -29,7 +36,7 @@ export const MedicalVisionPanel: React.FC<MedicalVisionPanelProps> = ({ onAnalys
     // Draw landmarks if present
     if (pose.poseLandmarks) {
       ctx.fillStyle = '#00FF00';
-      pose.poseLandmarks.forEach((landmark: any) => {
+      pose.poseLandmarks.forEach((landmark: Landmark) => {
         ctx.beginPath();
         ctx.arc(landmark.x * canvasRef.current!.width, landmark.y * canvasRef.current!.height, 3, 0, 2 * Math.PI);
         ctx.fill();
@@ -57,8 +64,12 @@ export const MedicalVisionPanel: React.FC<MedicalVisionPanelProps> = ({ onAnalys
         });
         setVisionResult(response.data);
         if (onAnalysisComplete) onAnalysisComplete(response.data);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Analysis failed');
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.error || 'Analysis failed');
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setIsAnalyzing(false);
       }
@@ -154,7 +165,7 @@ export const MedicalVisionPanel: React.FC<MedicalVisionPanelProps> = ({ onAnalys
                 <p className="text-sm opacity-80">{error}</p>
               </div>
             </div>
-          ) : (
+          ) : visionResult ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -197,7 +208,7 @@ export const MedicalVisionPanel: React.FC<MedicalVisionPanelProps> = ({ onAnalys
                 </div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import './AnimatedAmbulance3D.css';
 
 /* ── simple box-built ambulance ─────────────────────────────── */
-function AmbulanceModel({ progress }: { progress: React.MutableRefObject<number> }) {
+function AmbulanceModel({ progressRef }: { progressRef: React.MutableRefObject<number> }) {
   const groupRef = useRef<THREE.Group>(null);
 
   // Bezier: hospital (right) → user (left)
@@ -15,10 +16,10 @@ function AmbulanceModel({ progress }: { progress: React.MutableRefObject<number>
   );
 
   useFrame((_, delta) => {
-    progress.current = (progress.current + delta * 0.06) % 1;
+    progressRef.current = (progressRef.current + delta * 0.06) % 1;
     if (groupRef.current) {
-      const pos = curve.getPoint(progress.current);
-      const tan = curve.getTangent(progress.current);
+      const pos = curve.getPoint(progressRef.current);
+      const tan = curve.getTangent(progressRef.current);
       groupRef.current.position.copy(pos);
       groupRef.current.lookAt(pos.clone().add(tan));
     }
@@ -75,10 +76,14 @@ export const AnimatedAmbulance3D: React.FC<{ width?: number; height?: number }> 
   width = 320,
   height = 180,
 }) => {
-  const progress = useRef(0);
+  const progressRef = useRef(0);
 
   return (
-    <div style={{ width, height }} aria-label="Animated ambulance approaching">
+    <div 
+      className="ambulance-3d-container" 
+      style={{ '--width': `${width}px`, '--height': `${height}px` } as React.CSSProperties}
+      aria-label="Animated ambulance approaching"
+    >
       <Canvas
         camera={{ position: [0, 2.5, 5], fov: 42 }}
         dpr={[1, 1.5]}
@@ -88,7 +93,7 @@ export const AnimatedAmbulance3D: React.FC<{ width?: number; height?: number }> 
         <directionalLight position={[5, 8, 5]} intensity={1} />
         <pointLight position={[0, 3, 0]} color="#FF1744" intensity={0.6} />
         <Road />
-        <AmbulanceModel progress={progress} />
+        <AmbulanceModel progressRef={progressRef} />
       </Canvas>
     </div>
   );

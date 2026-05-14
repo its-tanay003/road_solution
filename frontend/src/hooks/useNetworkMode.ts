@@ -12,11 +12,12 @@ export const useNetworkMode = () => {
     window.addEventListener('offline', handleOffline);
 
     // Check connection speed if available
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (connection) {
       const updateConnectionStatus = () => {
-        setIsLowBandwidth(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g' || connection.saveData);
+        setIsLowBandwidth(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g' || !!connection.saveData);
       };
+
       
       updateConnectionStatus();
       connection.addEventListener('change', updateConnectionStatus);

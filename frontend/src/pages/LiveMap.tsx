@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 import { useMapDataStore } from '../store/mapDataStore';
@@ -140,7 +141,7 @@ export const LiveMap = () => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
 
-  const { reports, setReporting } = useRoadReportStore();
+  const { setReporting } = useRoadReportStore();
 
   // useNearbyPlaces relies on user location and the map instance (for the Places service)
   const { places } = useNearbyPlaces(lat, lng, map);

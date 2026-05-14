@@ -22,6 +22,7 @@ import { AppLoadingScreen }         from './components/AppLoadingScreen';
 import { HighStressModeOverlay }    from './components/HighStressModeOverlay';
 import { PrivacyConsentBanner }     from './components/PrivacyConsentBanner';
 import { VolunteerAlertScreen }     from './components/VolunteerAlertScreen';
+import { DriveModeListener }      from './components/DriveModeListener';
 
 // ── Page loading fallback ──────────────────────────────────────────
 import PageLoadingFallback from './components/PageLoadingFallback';
@@ -39,9 +40,8 @@ import { SOSActiveScreen }  from './screens/SOSActiveScreen';
 
 // ── Lazy pages ─────────────────────────────────────────────────────
 const LoginPage            = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const AssistantPage        = lazy(() => import('./pages/AssistantPage'));
 const LiveMap              = lazy(() => import('./pages/LiveMap').then(m => ({ default: m.LiveMap })));
-const Profile              = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile ?? m.default })));
+const Profile              = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const MedicalProfilePage   = lazy(() => import('./pages/MedicalProfilePage').then(m => ({ default: m.MedicalProfilePage })));
 
 const TrustedContactsPage  = lazy(() => import('./pages/TrustedContactsPage').then(m => ({ default: m.TrustedContactsPage })));
@@ -52,8 +52,8 @@ const SecurityDashboard    = lazy(() => import('./pages/SecurityDashboard').then
 const GoodSamaritanGuide   = lazy(() => import('./pages/GoodSamaritanGuide').then(m => ({ default: m.GoodSamaritanGuide })));
 const Roadmap              = lazy(() => import('./pages/Roadmap').then(m => ({ default: m.Roadmap })));
 const Research             = lazy(() => import('./pages/Research').then(m => ({ default: m.Research })));
-const NotificationCenter   = lazy(() => import('./pages/NotificationCenter').then(m => ({ default: m.NotificationCenter ?? m.default })));
-const FamilyTracker        = lazy(() => import('./pages/FamilyTracker').then(m => ({ default: m.FamilyTracker ?? m.default })));
+const NotificationCenter   = lazy(() => import('./pages/NotificationCenter').then(m => ({ default: m.NotificationCenter })));
+const FamilyTracker        = lazy(() => import('./pages/FamilyTracker').then(m => ({ default: m.FamilyTracker })));
 
 // ── Lazy screens ───────────────────────────────────────────────────
 const BystanderReport      = lazy(() => import('./screens/BystanderReport').then(m => ({ default: m.BystanderReport })));
@@ -97,7 +97,7 @@ function Page({ children }: { children: React.ReactNode }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      style={{ width: '100%', minHeight: '100%' }}
+      className="w-full min-h-full"
     >
       {children}
     </motion.div>
@@ -179,7 +179,7 @@ function AppContent() {
 
                 <Route path="/assistant" element={
                   <ProtectedRoute>
-                    <Page><AssistantPage /></Page>
+                    <Page><AIAssistantScreen /></Page>
                   </ProtectedRoute>
                 } />
 
@@ -231,12 +231,6 @@ function AppContent() {
                 } />
                 <Route path="/onboarding" element={<Page><OnboardingPage /></Page>} />
 
-                {/* ── AI Assistant ─────────────────────────────── */}
-                <Route path="/assistant" element={
-                  <ProtectedRoute>
-                    <Page><AIAssistantScreen /></Page>
-                  </ProtectedRoute>
-                } />
 
                 {/* ── Map variants ─────────────────────────────── */}
                 <Route path="/map/full"   element={<Page><LiveMap /></Page>} />
@@ -325,7 +319,7 @@ export default function App() {
         )}
 
         {/* Main app — always mounted so routes preload */}
-        <div style={{ visibility: loading ? 'hidden' : 'visible' }}>
+        <div className={loading ? 'invisible' : 'visible'}>
           <AppContent />
         </div>
       </ToastContainer>

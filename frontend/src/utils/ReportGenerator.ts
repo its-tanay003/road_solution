@@ -131,8 +131,10 @@ export const generateMedicalReport = (
   });
 
   // Footer on all pages
-  // @ts-ignore - internal is not fully typed in jspdf
-  const internal = doc.internal as any;
+  const internal = doc.internal as {
+    getNumberOfPages: () => number;
+    pageSize: { height: number; width: number };
+  };
   const pageCount = internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);

@@ -25,7 +25,7 @@ export interface OfflineService {
   lat: number;
   lng: number;
   savedAt: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface QueuedIncident {
@@ -35,7 +35,7 @@ export interface QueuedIncident {
   lat: number;
   lng: number;
   details?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface RecentCall {
@@ -134,7 +134,7 @@ export async function syncIncidentQueue(syncFn: (incident: QueuedIncident) => Pr
   return queue.length;
 }
 
-export async function saveEmergencyNumbers(country: string, data: Record<string, any>) {
+export async function saveEmergencyNumbers(country: string, data: Record<string, unknown>) {
   const db = await openDB();
   const tx = db.transaction('emergencyContacts', 'readwrite');
   tx.objectStore('emergencyContacts').put({ country, ...data, savedAt: Date.now() });

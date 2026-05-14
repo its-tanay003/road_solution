@@ -2,9 +2,27 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 
 declare global {
   interface Window {
-    faceapi: any;
-    jsQR: any;
+    faceapi: {
+      nets: {
+        tinyFaceDetector: { loadFromUri: (url: string) => Promise<void> };
+        faceLandmark68Net: { loadFromUri: (url: string) => Promise<void> };
+        faceRecognitionNet: { loadFromUri: (url: string) => Promise<void> };
+      };
+      detectAllFaces: (input: HTMLVideoElement, options: unknown) => {
+        withFaceLandmarks: () => {
+          withFaceDescriptors: () => Promise<FaceDetection[]>;
+        };
+      };
+      TinyFaceDetectorOptions: new () => unknown;
+    };
+    jsQR: (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null;
   }
+}
+
+interface FaceDetection {
+  detection: {
+    score: number;
+  };
 }
 
 export interface Identity {

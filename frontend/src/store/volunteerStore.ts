@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { socket } from '../lib/socket';
 
-interface ActiveIncident {
+export interface ActiveIncident {
   incidentId: string;
   type: string;
   location: { lat: number; lng: number };

@@ -5,7 +5,7 @@ import { useNetworkStore } from './networkStore';
 import { useNotificationStore } from './notificationStore';
 import { useAmbulanceStore } from './ambulanceStore';
 import { useWearableStore } from './wearableStore';
-import { useLeaderboardStore } from './leaderboardStore';
+
 import { generateiRADReport, submitiRADReport } from '../lib/iradReporter';
 
 interface DemoState {
@@ -116,7 +116,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
   
   resetAll: () => {
     const sosStore = useSosStore.getState();
-    sosStore.cancelSos();
+    sosStore.cancelSOS();
     sosStore.setGoldenHourActive(false);
     sosStore.setCrashDetectedAt(null);
     sosStore.setCrashTriggered(false);
@@ -158,7 +158,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
       // t=11: Dispatch
       setTimeout(() => {
         if (get().isPaused) return;
-        sosStore.triggerSos();
+        sosStore.triggerSOS();
         useNotificationStore.getState().addNotification({
           type: 'CRITICAL',
           title: 'AMBULANCE DISPATCHED',

@@ -31,6 +31,22 @@
   --color-text-secondary: var(--text-secondary);
   --color-border:         var(--border);
   --color-border-active:  var(--border-active);
+
+  /* Custom Spacing & Touch Targets */
+  --spacing-touch-sm: var(--touch-sm);
+  --spacing-touch-md: var(--touch-md);
+  --spacing-touch-lg: var(--touch-lg);
+  --spacing-touch-xl: var(--touch-xl);
+
+  /* Semantic Aliases */
+  --color-safe: var(--green);
+  --color-danger: var(--red);
+  --color-warning: var(--amber);
+  --color-info: var(--blue);
+
+  /* Safe Area Insets (exposed for arbitrary values) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ── Base Reset ──────────────────────────────────────────────── */
@@ -41,6 +57,9 @@
     font-size: var(--app-font-size);
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {

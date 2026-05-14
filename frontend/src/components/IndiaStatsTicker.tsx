@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring, animate } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { animate } from 'framer-motion';
 
 // ── Animated counter ─────────────────────────────────────────────
 function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: number }) {
@@ -31,26 +31,24 @@ interface StatItem {
   color:    string;
 }
 
+const COLOR_CLASS_MAP: Record<string, string> = {
+  'var(--red)':   'stat-value--red',
+  'var(--amber)': 'stat-value--amber',
+  'var(--green)': 'stat-value--green',
+  'var(--blue)':  'stat-value--blue',
+};
+
 function StatCard({ emoji, label, value, decimals, suffix, color }: StatItem) {
+  const valueClass = `stat-value ${COLOR_CLASS_MAP[color] || ''}`;
+  
   return (
-    <div style={{
-      background: 'var(--bg-raised)', border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-lg)', padding: '14px 16px',
-      display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0,
-    }}>
-      <span style={{ fontSize: 18, lineHeight: 1 }}>{emoji}</span>
-      <p style={{
-        margin: 0, fontFamily: 'var(--font-mono)', fontWeight: 700,
-        fontSize: 22, color, lineHeight: 1,
-        letterSpacing: '-0.02em',
-      }}>
+    <div className="stat-card">
+      <span className="stat-emoji">{emoji}</span>
+      <p className={valueClass}>
         <AnimatedNumber value={value} decimals={decimals ?? 0} />
-        {suffix && <span style={{ fontSize: 14, marginLeft: 2 }}>{suffix}</span>}
+        {suffix && <span className="stat-suffix">{suffix}</span>}
       </p>
-      <p style={{
-        margin: 0, fontFamily: 'var(--font-body)', fontSize: 11,
-        color: 'var(--text-secondary)', lineHeight: 1.3,
-      }}>
+      <p className="stat-label">
         {label}
       </p>
     </div>
@@ -79,24 +77,16 @@ export function IndiaStatsTicker() {
   ];
 
   return (
-    <section aria-label="India Road Safety Statistics" style={{ padding: '0 var(--sp-4)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-4)' }}>
-        <h2 style={{
-          margin: 0, fontFamily: 'var(--font-display)', fontWeight: 600,
-          fontSize: 18, color: 'var(--text-primary)',
-        }}>
+    <section aria-label="India Road Safety Statistics" className="stats-ticker-container">
+      <div className="stats-ticker-header">
+        <h2 className="stats-ticker-title">
           Live Statistics
         </h2>
-        <span style={{
-          background: 'rgba(0,230,118,0.12)', color: 'var(--green)',
-          border: '1px solid rgba(0,230,118,0.30)',
-          borderRadius: 999, fontSize: 10, fontFamily: 'var(--font-mono)',
-          fontWeight: 700, padding: '2px 8px', letterSpacing: '0.06em',
-        }}>
+        <span className="live-badge">
           ● LIVE
         </span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+      <div className="stats-ticker-grid">
         {stats.map(s => <StatCard key={s.label} {...s} />)}
       </div>
     </section>

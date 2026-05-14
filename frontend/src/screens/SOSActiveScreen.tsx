@@ -5,19 +5,12 @@ import { useSosStore } from '../store/sosStore';
 import { useUserStore } from '../store/userStore';
 import { useWearableStore } from '../store/wearableStore';
 import { NotificationStatusPanel } from '../components/NotificationStatusPanel';
-import { AlertCircle, Activity, Wind } from 'lucide-react';
-import { hapticSOS } from '../lib/accessibilityHelpers';
+import { Activity, Wind } from 'lucide-react';
 
 /* ── constants ─────────────────────────────────────────────── */
 const RADIUS = 96;          // SVG circle radius (px inside 220px viewBox)
 const CIRC   = 2 * Math.PI * RADIUS;
 const TOTAL  = 10;           // countdown seconds
-
-/* ── blink keyframes injected once ─────────────────────────── */
-const BLINK_STYLE = `
-@keyframes sos-blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
-.sos-blink { animation: sos-blink 0.7s ease-in-out infinite }
-`;
 
 /* ── Haptic loop ────────────────────────────────────────────── */
 function useHapticLoop() {
@@ -37,19 +30,18 @@ function useHapticLoop() {
 function RedWashBackground() {
   return (
     <>
-      <div className="fixed inset-0 bg-[#080C14]" />
+      <div className="fixed inset-0 bg-base" />
       <motion.div
-        className="fixed inset-0 pointer-events-none"
-        animate={{ opacity: [0.08, 0.14, 0.08] }}
+        className="fixed inset-0 pointer-events-none bg-red/10"
+        animate={{ opacity: [0.8, 1, 0.8] }}
         transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ background: 'rgba(255,23,68,0.10)' }}
       />
       {/* top/bottom gradient bars */}
-      <div className="fixed top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/80 to-transparent" />
-      <div className="fixed bottom-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+      <div className="fixed top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red/80 to-transparent" />
+      <div className="fixed bottom-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red/50 to-transparent" />
       {/* corner aura */}
-      <div className="fixed top-0 left-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
+      <div className="fixed top-0 left-0 w-64 h-64 bg-red/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-64 h-64 bg-red/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
     </>
   );
 }
@@ -58,15 +50,15 @@ function RedWashBackground() {
 function CountdownRing({ timeLeft }: { timeLeft: number }) {
   const offset = CIRC * (1 - timeLeft / TOTAL);
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
-      <svg width={220} height={220} style={{ transform: 'rotate(-90deg)' }}>
+    <div className="relative flex items-center justify-center w-[220px] h-[220px]">
+      <svg width={220} height={220} className="-rotate-90">
         {/* track */}
         <circle cx={110} cy={110} r={RADIUS} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={10} />
         {/* progress */}
         <motion.circle
           cx={110} cy={110} r={RADIUS}
           fill="none"
-          stroke="#FF1744"
+          stroke="var(--red)"
           strokeWidth={10}
           strokeLinecap="round"
           strokeDasharray={CIRC}
@@ -77,13 +69,13 @@ function CountdownRing({ timeLeft }: { timeLeft: number }) {
         <motion.circle
           cx={110} cy={110} r={RADIUS}
           fill="none"
-          stroke="#FF1744"
+          stroke="var(--red)"
           strokeWidth={2}
           strokeLinecap="round"
           strokeDasharray={CIRC}
           animate={{ strokeDashoffset: offset, opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 0.9, ease: 'linear', opacity: { repeat: Infinity, duration: 0.7 } }}
-          style={{ filter: 'blur(4px)' }}
+          className="blur-[4px]"
         />
       </svg>
 
@@ -96,8 +88,7 @@ function CountdownRing({ timeLeft }: { timeLeft: number }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="font-mono font-black text-white leading-none"
-            style={{ fontSize: 72 }}
+            className="font-mono font-black text-white leading-none text-[72px]"
           >
             {timeLeft}
           </motion.span>
@@ -155,12 +146,10 @@ export const SOSActiveScreen: React.FC = () => {
 
   return (
     <>
-      <style>{BLINK_STYLE}</style>
       <RedWashBackground />
 
       <main
-        className="relative z-10 min-h-screen flex flex-col items-center px-5 pb-10 pt-8 overflow-y-auto"
-        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+        className="relative z-10 min-h-screen flex flex-col items-center px-5 pb-10 pt-8 overflow-y-auto font-mono"
         aria-live="assertive"
         role="alert"
       >
@@ -168,26 +157,26 @@ export const SOSActiveScreen: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-[11px] text-white/30 tracking-[0.25em] uppercase mb-6 self-start"
+          className="text-[11px] text-text-secondary tracking-[0.25em] uppercase mb-6 self-start"
         >
           Incident&nbsp;
-          <span className="text-red-400">{incidentId || 'AUTO'}</span>
+          <span className="text-red">{incidentId || 'AUTO'}</span>
         </motion.div>
 
         {/* blinking header */}
         <motion.h1
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="sos-blink text-[15px] font-black tracking-[0.3em] text-red-400 uppercase mb-2 text-center"
+          className="animate-blink text-[15px] font-black tracking-[0.3em] text-red uppercase mb-2 text-center"
           aria-label="Emergency alert sending"
         >
           ⚠ Emergency Alert Sending
         </motion.h1>
 
         {/* profile line */}
-        <p className="text-white/50 text-[13px] tracking-widest mb-8 text-center">
+        <p className="text-text-secondary text-[13px] tracking-widest mb-8 text-center">
           {userName}&nbsp;&nbsp;•&nbsp;&nbsp;Blood Type:&nbsp;
-          <span className="text-red-400 font-black">{bloodType}</span>
+          <span className="text-red font-black">{bloodType}</span>
         </p>
 
         {/* COUNTDOWN RING */}
@@ -201,21 +190,21 @@ export const SOSActiveScreen: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 px-5 py-3 rounded-2xl bg-red-900/20 border border-red-500/20 mb-6 text-[12px]"
+            className="flex items-center gap-4 px-5 py-3 rounded-2xl bg-red/10 border border-red/20 mb-6 text-[12px]"
           >
-            <Activity size={14} className="text-red-400" />
-            <span className="text-white/60">HR: <span className="text-red-300 font-black">{lastHR} ↑</span></span>
+            <Activity size={14} className="text-red" />
+            <span className="text-text-secondary">HR: <span className="text-red font-black">{lastHR} ↑</span></span>
             <span className="w-px h-4 bg-white/10" />
-            <Wind size={14} className="text-blue-400" />
-            <span className="text-white/60">SpO₂: <span className="text-blue-300 font-black">{wearable.spO2 ?? 92}%</span></span>
+            <Wind size={14} className="text-blue" />
+            <span className="text-text-secondary">SpO₂: <span className="text-blue font-black">{wearable.spO2 ?? 92}%</span></span>
           </motion.div>
         )}
 
         {/* NOTIFICATION STATUS */}
         <div className="w-full max-w-sm space-y-4 mb-6">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">Dispatch Channels</h2>
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+            <h2 className="text-[10px] text-text-secondary uppercase tracking-[0.2em] font-black">Dispatch Channels</h2>
+            <span className="w-1.5 h-1.5 rounded-full bg-red animate-ping" />
           </div>
           <NotificationStatusPanel />
         </div>
@@ -234,7 +223,7 @@ export const SOSActiveScreen: React.FC = () => {
         </motion.button>
 
         {/* contact count */}
-        <p className="text-white/30 text-[11px] tracking-widest text-center">
+        <p className="text-text-secondary text-[11px] tracking-widest text-center">
           Alerting all emergency contacts…
         </p>
       </main>

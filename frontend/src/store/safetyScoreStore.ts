@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 export interface SafetyEvent {
   id: string;
-  type: 'hard_brake' | 'overspeed' | 'sos_triggered' | 'safe_trip';
+  type: 'hard_brake' | 'overspeed' | 'sos_triggered' | 'safe_trip' | 'hard_corner' | 'rapid_accel';
   scoreImpact: number;
   timestamp: number;
   description: string;
