@@ -11,7 +11,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 // ── Stores ─────────────────────────────────────────────────────────
 import { useAuthStore } from './store/authStore';
 import { useVolunteerStore } from './store/volunteerStore';
-import { useDriveModeStore } from './store/driveModeStore';
 
 // ── Shell components (eager — critical path) ───────────────────────
 import { TopBar }                  from './components/TopBar';
@@ -31,6 +30,7 @@ import PageLoadingFallback from './components/PageLoadingFallback';
 import { pageVariants } from './lib/pageTransition';
 import { focusPageHeading } from './lib/accessibilityHelpers';
 import { SafetyTimerStrip } from './components/SafetyTimerStrip';
+import { SafetyGuardian } from './components/SafetyGuardian';
 
 // ── Critical screens (eager — needed on first paint or SOS) ────────
 import HomeScreen           from './screens/HomeScreen';
@@ -57,6 +57,7 @@ const FamilyTracker        = lazy(() => import('./pages/FamilyTracker').then(m =
 
 // ── Lazy screens ───────────────────────────────────────────────────
 const BystanderReport      = lazy(() => import('./screens/BystanderReport').then(m => ({ default: m.BystanderReport })));
+const BystanderScreen      = lazy(() => import('./screens/BystanderScreen'));
 const GovernancePortal     = lazy(() => import('./screens/GovernancePortal').then(m => ({ default: m.GovernancePortal })));
 const ImpactCalculator     = lazy(() => import('./screens/ImpactCalculator').then(m => ({ default: m.ImpactCalculator })));
 const CrashPatternAnalytics = lazy(() => import('./screens/CrashPatternAnalytics'));
@@ -72,8 +73,6 @@ const EmergencyContactsScreen  = lazy(() => import('./screens/EmergencyContactsS
 const SettingsScreen           = lazy(() => import('./screens/SettingsScreen'));
 const AIAssistantScreen        = lazy(() => import('./screens/AIAssistantScreen'));
 const SafetyTimerPage          = lazy(() => import('./pages/SafetyTimerPage'));
-const DriveModeScreen          = lazy(() => import('./screens/DriveModeScreen').then(m => ({ default: m.DriveModeScreen })));
-const BloodDonationConnect     = lazy(() => import('./screens/BloodDonationConnect'));
 const SafetyScoreScreen        = lazy(() => import('./screens/SafetyScoreScreen'));
 const OnboardingPage           = lazy(() => import('./pages/OnboardingPage'));
 
@@ -132,40 +131,16 @@ function AppContent() {
       {/* ── Accessibility regions ─────────────────────────────── */}
       <a
         href="#main-content"
-        className="skip-link"
-        style={{
-          position: 'fixed', top: -100, left: 16, zIndex: 9999,
-          background: 'var(--saffron)', color: 'var(--text-inverse)',
-          padding: '10px 18px', borderRadius: 8, fontWeight: 600,
-          fontSize: 14, textDecoration: 'none',
-          transition: 'top 0.2s',
-        }}
-        onFocus={e => { (e.currentTarget as HTMLElement).style.top = '16px'; }}
-        onBlur={e  => { (e.currentTarget as HTMLElement).style.top = '-100px'; }}
+        className="fixed -top-24 left-4 z-9999 bg-amber-500 text-black px-4 py-2 rounded-lg font-semibold text-sm no-underline transition-all focus:top-4"
       >
         Skip to main content
       </a>
 
-      <div id="announcer-assertive" aria-live="assertive" aria-atomic="true"
-        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
-      />
-      <div id="announcer-polite" aria-live="polite" aria-atomic="true"
-        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
-      />
+      <div id="announcer-assertive" aria-live="assertive" aria-atomic="true" className="sr-only" />
+      <div id="announcer-polite" aria-live="polite" aria-atomic="true" className="sr-only" />
 
       {/* ── App shell ─────────────────────────────────────────── */}
-      <div
-        style={{
-          width: '100%',
-          minHeight: '100dvh',
-          background: 'var(--bg-base)',
-          color: 'var(--text-primary)',
-          fontFamily: 'var(--font-body)',
-          overflowX: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div className="w-full min-h-dvh bg-void text-white flex flex-col overflow-x-hidden">
         {/* Safety Timer Strip */}
         <SafetyTimerStrip />
 
@@ -176,15 +151,10 @@ function AppContent() {
         <main
           id="main-content"
           tabIndex={-1}
-          style={{
-            flex: 1,
-            paddingTop:    isFullscreen ? 0 : 56,
-            paddingBottom: isFullscreen ? 0 : 'calc(72px + env(safe-area-inset-bottom, 0px) + 24px)',
-            outline: 'none',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            position: 'relative',
-          }}
+          className={`flex-1 outline-none overflow-y-auto overflow-x-hidden relative ${
+            isFullscreen ? 'pt-0 pb-0' : 'pt-14 pb-[calc(72px+env(safe-area-inset-bottom,0)+24px)]'
+          }`}
+          aria-label="Main Content Area"
         >
           <Suspense fallback={<PageLoadingFallback />}>
             <AnimatePresence mode="wait" initial={false}>
@@ -328,6 +298,7 @@ function AppContent() {
         <PrivacyConsentBanner />
         <VolunteerAlertScreen />
         <DriveModeListener />
+        <SafetyGuardian />
       </div>
     </>
   );

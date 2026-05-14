@@ -11,6 +11,19 @@ interface SensorData {
   isImpactDetected: boolean;
 }
 
+export const requestSensorPermissions = async (): Promise<boolean> => {
+  if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+    try {
+      const response = await (DeviceMotionEvent as any).requestPermission();
+      return response === 'granted';
+    } catch (e) {
+      console.error('Permission request failed:', e);
+      return false;
+    }
+  }
+  return true; // Already granted or not required
+};
+
 export const useSensors = (onImpact?: () => void): SensorData => {
   const [speed, setSpeed] = useState<number | null>(0);
   const [accuracy, setAccuracy] = useState<number | null>(null);
