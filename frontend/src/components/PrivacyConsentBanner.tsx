@@ -39,18 +39,12 @@ const ConsentChip = ({
 );
 
 export const PrivacyConsentBanner: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(() => !privacyConsent.hasConsent());
   const [consents, setConsents] = useState({
     emergencyLocation: true, // Initially true but user must see it
     analytics: false,
     incidentHistory: false,
   });
-
-  useEffect(() => {
-    if (!privacyConsent.hasConsent()) {
-      setIsVisible(true);
-    }
-  }, []);
 
   const handleAccept = () => {
     privacyConsent.set({

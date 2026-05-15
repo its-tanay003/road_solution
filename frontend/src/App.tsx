@@ -110,6 +110,20 @@ function Page({ children }: { children: React.ReactNode }) {
 const FULLSCREEN_PATHS = ['/sos-active', '/login', '/dispatched'];
 
 // ══════════════════════════════════════════════════════════════════
+// AppInitializer — handles core app initialization logic
+// ══════════════════════════════════════════════════════════════════
+function AppInitializer() {
+  const { init, isRegistered } = useVolunteerStore();
+
+  // Initialise volunteer socket when already registered
+  useEffect(() => {
+    if (isRegistered) init();
+  }, [isRegistered, init]);
+
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════════════
 // AppContent — renders inside BrowserRouter
 // ══════════════════════════════════════════════════════════════════
 function AppContent() {
@@ -302,16 +316,11 @@ function AppContent() {
 // Root App
 // ══════════════════════════════════════════════════════════════════
 export default function App() {
-  const { init, isRegistered } = useVolunteerStore();
   const [loading, setLoading] = useState(true);
-
-  // Initialise volunteer socket when already registered
-  useEffect(() => {
-    if (isRegistered) init();
-  }, [isRegistered, init]);
 
   return (
     <BrowserRouter>
+      <AppInitializer />
       <ToastContainer>
         {/* Boot screen — fades out after assets are ready */}
         {loading && (

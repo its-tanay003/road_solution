@@ -131,11 +131,9 @@ export const generateMedicalReport = (
   });
 
   // Footer on all pages
-  const internal = doc.internal as {
-    getNumberOfPages: () => number;
-    pageSize: { height: number; width: number };
-  };
-  const pageCount = internal.getNumberOfPages();
+  const pageCount = doc.getNumberOfPages();
+  const pageSize = doc.internal.pageSize;
+
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
@@ -143,13 +141,13 @@ export const generateMedicalReport = (
     doc.text(
       'CONFIDENTIAL MEDICAL RECORD - YIRC AI ASSISTANT PROTOCOL',
       105,
-      internal.pageSize.height - 10,
+      pageSize.height - 10,
       { align: 'center' }
     );
     doc.text(
       `Page ${i} of ${pageCount}`,
-      internal.pageSize.width - 20,
-      internal.pageSize.height - 10
+      pageSize.width - 20,
+      pageSize.height - 10
     );
   }
 

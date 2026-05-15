@@ -3,7 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, AlertTriangle, ChevronRight } from 'lucide-react';
 import { useAnalyticsStore, type Hotspot } from '../store/analyticsStore';
 
-const mockIncidents = [
+interface IncidentPoint {
+  lat: number;
+  lng: number;
+  name: string;
+}
+
+const mockIncidents: IncidentPoint[] = [
   { lat: 13.0827, lng: 80.2707, name: "Chennai Central" },
   { lat: 13.0837, lng: 80.2717, name: "Chennai Central" },
   { lat: 13.0817, lng: 80.2697, name: "Chennai Central" },
@@ -16,12 +22,12 @@ const mockIncidents = [
 ];
 
 // Simple K-means implementation
-const kmeans = (data: any[], k: number, iterations = 10) => {
+const kmeans = (data: IncidentPoint[], k: number, iterations = 10) => {
   // Initialize centroids randomly from data
   let centroids = data.slice(0, k).map(d => ({ lat: d.lat, lng: d.lng }));
   
   for (let i = 0; i < iterations; i++) {
-    const clusters: any[][] = Array.from({ length: k }, () => []);
+    const clusters: IncidentPoint[][] = Array.from({ length: k }, () => []);
     
     // Assign points to nearest centroid
     data.forEach(point => {

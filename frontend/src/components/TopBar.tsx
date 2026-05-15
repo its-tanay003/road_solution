@@ -1,27 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { hapticLight, announce } from '../lib/accessibilityHelpers';
+import './TopBar.css';
 
 // ── SVG Icons ──────────────────────────────────────────────────────
 const BellIcon = ({ count }: { count: number }) => (
-  <div style={{ position: 'relative' }}>
+  <div className="relative">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="1.8" fill="none"/>
       <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
     {count > 0 && (
-      <span style={{
-        position: 'absolute', top: -3, right: -3,
-        background: 'var(--red)',
-        color: '#fff',
-        fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700,
-        minWidth: 14, height: 14,
-        borderRadius: 7,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '0 3px',
-        lineHeight: 1,
-      }}>
+      <span className="notification-badge">
         {count > 9 ? '9+' : count}
       </span>
     )}
@@ -29,19 +20,13 @@ const BellIcon = ({ count }: { count: number }) => (
 );
 
 const GlobeIcon = ({ lang }: { lang: string }) => (
-  <div style={{ position: 'relative' }}>
+  <div className="relative">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
       <path d="M12 3c-4 0-7 4-7 9s3 9 7 9 7-4 7-9-3-9-7-9z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
       <path d="M3 12h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
-    <span style={{
-      position: 'absolute', bottom: -2, right: -4,
-      fontSize: 8, fontFamily: 'var(--font-mono)', fontWeight: 700,
-      color: 'var(--saffron)',
-      lineHeight: 1,
-      letterSpacing: '0.02em',
-    }}>
+    <span className="lang-badge">
       {lang.toUpperCase()}
     </span>
   </div>
@@ -107,64 +92,18 @@ export function TopBar({ notificationCount = 0, currentLang = 'EN' }: TopBarProp
     Object.entries(PAGE_TITLES).find(([k]) => location.pathname.startsWith(k))?.[1] ??
     'ROADSoS';
 
-  const iconBtnStyle: React.CSSProperties = {
-    width: 44, height: 44,
-    borderRadius: '50%',
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--text-secondary)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    transition: 'background 150ms ease, color 150ms ease',
-    WebkitTapHighlightColor: 'transparent',
-    flexShrink: 0,
-  };
-
   return (
     <motion.header
-      animate={{ backgroundColor: scrolled ? 'rgba(8,12,20,0.96)' : 'transparent' }}
-      transition={{ duration: 0.25 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 56,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: 'var(--sp-4)',
-        paddingRight: 'var(--sp-4)',
-        zIndex: 200,
-        backdropFilter: scrolled ? 'blur(16px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(16px)' : 'none',
-        borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
-      }}
+      className={`top-bar ${scrolled ? 'scrolled' : ''}`}
     >
       {/* Left — logo or back */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', flex: 1, minWidth: 0 }}>
+      <div className="top-bar-left">
         {isHome ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, minWidth: 0 }}>
-            <span style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: 18,
-              color: 'var(--text-primary)',
-              lineHeight: 1.15,
-              letterSpacing: '-0.01em',
-            }}>
-              ROAD<span style={{ color: 'var(--red)' }}>SoS</span>
+          <div className="top-bar-logo">
+            <span className="top-bar-logo-main">
+              ROAD<span className="sos-accent">SoS</span>
             </span>
-            <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 10,
-              color: 'var(--text-secondary)',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              lineHeight: 1,
-            }}>
+            <span className="top-bar-logo-sub">
               Emergency Intelligence
             </span>
           </div>
@@ -172,20 +111,12 @@ export function TopBar({ notificationCount = 0, currentLang = 'EN' }: TopBarProp
           <>
             <button
               onClick={() => { hapticLight(); navigate(-1); announce(`Going back`); }}
-              style={iconBtnStyle}
+              className="icon-btn"
               aria-label="Go back"
             >
               <BackIcon />
             </button>
-            <span style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 600,
-              fontSize: 17,
-              color: 'var(--text-primary)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>
+            <span className="top-bar-title">
               {pageTitle}
             </span>
           </>
@@ -193,9 +124,9 @@ export function TopBar({ notificationCount = 0, currentLang = 'EN' }: TopBarProp
       </div>
 
       {/* Right — notifications, language, settings */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+      <div className="top-bar-right">
         <button
-          style={iconBtnStyle}
+          className="icon-btn"
           aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ''}`}
           onClick={() => { hapticLight(); navigate('/notifications'); announce('Opening notifications'); }}
         >
@@ -203,7 +134,7 @@ export function TopBar({ notificationCount = 0, currentLang = 'EN' }: TopBarProp
         </button>
 
         <button
-          style={iconBtnStyle}
+          className="icon-btn"
           aria-label={`Language: ${currentLang}. Tap to change`}
           onClick={() => { hapticLight(); announce('Language switcher opened'); }}
         >
@@ -211,7 +142,7 @@ export function TopBar({ notificationCount = 0, currentLang = 'EN' }: TopBarProp
         </button>
 
         <button
-          style={iconBtnStyle}
+          className="icon-btn"
           aria-label="Settings"
           onClick={() => { hapticLight(); navigate('/settings'); announce('Opening settings'); }}
         >

@@ -14,7 +14,7 @@ const COMMANDS: Array<{ phrases: string[]; action: (nav: ReturnType<typeof useNa
   { phrases: ['medical records', 'my medical', 'medical'], action: n => n('/medical'),          label: 'Medical Records' },
   { phrases: ['hospitals', 'find hospital', 'nearest hospital'], action: n => n('/hospitals'),  label: 'Hospitals' },
   { phrases: ['sos', 'help me sos', 'emergency', 'help me roadsos'],          action: n => n('/sos-active'),       label: 'SOS' },
-  { phrases: ['go back', 'back'],                          action: n => n(-1 as any),           label: 'back' },
+  { phrases: ['go back', 'back'],                          action: n => n(-1 as number),           label: 'back' },
 ];
 
 /** Fuzzy match — checks if transcript contains any phrase */
@@ -32,9 +32,11 @@ export function VoiceNavigationListener() {
   const isListeningRef = useRef(false);
   const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const startListeningRef = useRef<() => void>(() => {});
+
   const startListening = useCallback(() => {
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return; // Not supported — fail silently
 
     if (isListeningRef.current) return;
@@ -43,10 +45,10 @@ export function VoiceNavigationListener() {
     recognition.continuous    = true;
     recognition.interimResults = false;
     recognition.lang           = 'en-IN'; // India English, better accent recognition
-    recognition.maxAlternatives = 3;
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const last = event.results[event.results.length - 1];
+      const results = event.results;
+      const last = results[results.length - 1];
       if (!last.isFinal) return;
 
       // Check all alternatives for best match
@@ -65,7 +67,7 @@ export function VoiceNavigationListener() {
       isListeningRef.current = false;
       // Auto-restart after 500ms so it stays always-on
       restartTimerRef.current = setTimeout(() => {
-        startListening();
+        startListeningRef.current();
       }, 500);
     };
 
@@ -87,9 +89,13 @@ export function VoiceNavigationListener() {
   }, [navigate]);
 
   useEffect(() => {
+    startListeningRef.current = startListening;
+  }, [startListening]);
+
+  useEffect(() => {
     // Only start if browser supports it
     const supported = !!(
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      window.SpeechRecognition || window.webkitSpeechRecognition
     );
     if (!supported) return;
 
