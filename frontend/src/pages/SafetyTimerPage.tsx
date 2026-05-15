@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useSafetyTimerStore } from '../store/safetyTimerStore';
-import { useUserStore } from '../userStore';
+import { useUserStore, type EmergencyContact } from '../store/userStore';
 
 const PRESETS = [
   { label: '5 min',  ms: 5   * 60_000 },
@@ -20,7 +20,7 @@ export const SafetyTimerPage: React.FC = () => {
 
   const [chosen, setChosen] = useState(PRESETS[2].ms);
   const [customMin, setCustomMin] = useState('');
-  const [selected, setSelected] = useState<string[]>(contacts.slice(0, 1).map(c => c.id));
+  const [selected, setSelected] = useState<string[]>(contacts.slice(0, 1).map((c: EmergencyContact) => c.id));
   const [done, setDone] = useState(false);
 
   const toggle = (id: string) =>
@@ -94,7 +94,7 @@ export const SafetyTimerPage: React.FC = () => {
           </button>
         ) : (
           <div className="space-y-2">
-            {contacts.map(c => {
+            {contacts.map((c: EmergencyContact) => {
               const on = selected.includes(c.id);
               return (
                 <motion.button key={c.id} onClick={() => toggle(c.id)} whileTap={{ scale: 0.98 }}

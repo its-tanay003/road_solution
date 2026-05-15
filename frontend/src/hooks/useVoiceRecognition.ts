@@ -10,6 +10,15 @@ interface VoiceRecognitionHook {
   resetTranscript: () => void;
 }
 
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 export const useVoiceRecognition = (onCommand?: (command: string) => void): VoiceRecognitionHook => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -32,7 +41,7 @@ export const useVoiceRecognition = (onCommand?: (command: string) => void): Voic
     
     if (!SpeechRecognitionAPI) return;
 
-    const recognition = new SpeechRecognitionAPI();
+    const recognition = new (SpeechRecognitionAPI as unknown as { new (): SpeechRecognition })();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';

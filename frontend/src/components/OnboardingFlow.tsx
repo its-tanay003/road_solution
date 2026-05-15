@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Camera, MapPin, Mic, CheckCircle2, ChevronRight, Heart, Phone } from 'lucide-react';
-import { useMedicalProfileStore, type MedicalContact } from '../store/medicalProfileStore';
+import { useUserStore, type EmergencyContact } from '../store';
 import { sanitizeInput } from '../utils/inputSanitizer';
 
 const DEATH_INTERVAL_SEC = 204;
 
 export const OnboardingFlow: React.FC = () => {
   const { 
-    setProfile 
-  } = useMedicalProfileStore();
+    setProfile
+  } = useUserStore();
 
   const [deathCount, setDeathCount] = useState(0);
 
@@ -151,14 +151,14 @@ const Step1 = ({ deathCount, onNext }: { deathCount: number, onNext: () => void 
 
 const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) => {
   const { 
-    name, age, bloodType, setProfile, 
+    name, age, bloodType, setProfile, setName,
     contacts, setContacts
-  } = useMedicalProfileStore();
+  } = useUserStore();
 
-  const firstContact: MedicalContact = contacts[0] ?? { name: '', phone: '', relationship: 'Emergency' };
+  const firstContact: EmergencyContact = contacts[0] ?? { id: '1', name: '', phone: '', relationship: 'Emergency', notifySms: true, notifyPush: true, notifyEmail: false, alertViaWhatsApp: true, alertOnSos: true };
 
-  const updateFirstContact = (updates: Partial<MedicalContact>) => {
-    const updated = contacts.length > 0 ? [...contacts] : [{ name: '', phone: '', relationship: 'Emergency' }];
+  const updateFirstContact = (updates: Partial<EmergencyContact>) => {
+    const updated = contacts.length > 0 ? [...contacts] : [{ id: '1', name: '', phone: '', relationship: 'Emergency', notifySms: true, notifyPush: true, notifyEmail: false, alertViaWhatsApp: true, alertOnSos: true }];
     updated[0] = { ...updated[0], ...updates };
     setContacts(updated);
   };
@@ -182,7 +182,7 @@ const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
             <div className="space-y-2 text-left">
               <label className="text-[10px] font-mono text-gray-500 uppercase">Full Name</label>
               <input 
-                value={name} onChange={e => setProfile({ name: sanitizeInput(e.target.value, 100) })}
+                value={name} onChange={e => setName(sanitizeInput(e.target.value, 100))}
                 className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:border-[#2979FF] outline-none transition-all"
                 placeholder="Rajesh Kumar"
               />
@@ -202,7 +202,7 @@ const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
             <div className="grid grid-cols-4 gap-2">
               {bloodTypes.map(t => (
                 <button 
-                  key={t} onClick={() => setProfile({ bloodType: t })}
+                  key={t} onClick={() => setProfile({ bloodGroup: t })}
                   className={`py-3 text-sm font-bold border rounded-xl transition-all ${
                     bloodType === t ? 'border-[#2979FF] bg-[#2979FF]/20 shadow-[0_0_15px_rgba(41,121,255,0.3)]' : 'border-white/10 bg-white/5'
                   }`}
@@ -250,7 +250,7 @@ const Step2 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
 const Step3 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) => {
   const [isListening, setIsListening] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { language, setProfile } = useMedicalProfileStore();
+  const { language, setLanguage } = useUserStore();
 
   const triggers: Record<'en' | 'hi' | 'ta', { phrase: string, phonetic: string }> = {
     en: { phrase: "Help Me Now", phonetic: "HEHLP MEE NOW" },
@@ -275,7 +275,7 @@ const Step3 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
       <div className="w-full flex gap-2 mb-8">
         {(['en', 'hi', 'ta'] as const).map(l => (
           <button 
-            key={l} onClick={() => { setProfile({ language: l }); setSuccess(false); }}
+            key={l} onClick={() => { setLanguage(l); setSuccess(false); }}
             className={`flex-1 py-2 text-[10px] font-bold border rounded-lg transition-all ${
               language === l ? 'border-[#2979FF] bg-[#2979FF]/20' : 'border-white/10 bg-white/5'
             }`}
@@ -287,8 +287,8 @@ const Step3 = ({ onNext, onBack }: { onNext: () => void, onBack: () => void }) =
 
       <div className="w-full p-10 border border-white/10 rounded-[2.5rem] bg-white/5 mb-10 relative overflow-hidden group">
         <p className="text-[10px] font-mono text-gray-500 tracking-[0.2em] mb-4 uppercase">Speak clearly</p>
-        <p className="text-4xl font-bold text-white mb-2 leading-tight">"{triggers[language].phrase}"</p>
-        <p className="text-[10px] font-mono text-[#2979FF] tracking-widest">{triggers[language].phonetic}</p>
+        <p className="text-4xl font-bold text-white mb-2 leading-tight">"{triggers[language as keyof typeof triggers].phrase}"</p>
+        <p className="text-[10px] font-mono text-[#2979FF] tracking-widest">{triggers[language as keyof typeof triggers].phonetic}</p>
         
         {isListening && (
           <div className="absolute inset-x-0 bottom-0 h-1 bg-[#FF1744] flex items-end">

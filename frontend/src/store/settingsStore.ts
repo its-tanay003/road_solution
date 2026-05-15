@@ -8,7 +8,7 @@ export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn';
 export type SosMode = 'hold3s' | 'tap3x' | 'voice' | 'shake';
 export type ColorScheme = 'default' | 'protanopia' | 'deuteranopia';
 
-interface SettingsState {
+export interface SettingsState {
   theme: Theme;
   textSize: TextSize;
   fontStyle: FontStyle;

@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAccessibilityStore } from '../store/accessibilityStore';
-import { useEmergencyStore } from '../store/emergencyStore';
+import { useSosStore } from '../store/sosStore';
 import { useAIAssistantStore } from '../store/aiAssistantStore';
 
 // Web Speech API types
@@ -60,7 +60,7 @@ export const useVoiceNavigation = () => {
     setSimplifiedMode,
     lastAnnouncement 
   } = useAccessibilityStore();
-  const { triggerSOS, cancelSOS } = useEmergencyStore();
+   const { triggerSOS, cancelSOS } = useSosStore();
   const { setIsListening, setIsSpeaking } = useAIAssistantStore();
   
   const recognitionRef = useRef<SpeechRecognition | null>(null);

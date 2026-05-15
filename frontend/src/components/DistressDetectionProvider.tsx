@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { useDistressStore } from '../store/distressStore';
+import { useSosStore } from '../store';
 import { logger } from '../lib/logger';
 
 export const DistressDetectionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isActive, addEvent, recalculate } = useDistressStore();
+  const { isDistressEngineActive: isActive, addDistressEvent: addEvent, recalculateDistress: recalculate } = useSosStore();
   
   const lastTapRef = useRef<number>(0);
   const scrollYRef = useRef<number>(window.scrollY);

@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { useEmergencyStore } from '../store';
+import { useSosStore } from '../store';
 
 export const useBiometricsContext = (heartRate: number, spo2: number, movement: boolean) => {
-  const { crashTriggered } = useEmergencyStore();
+  const { crashTriggered } = useSosStore();
 
   const contextString = useMemo(() => {
     if (!crashTriggered) return "Biometrics: Normal Baseline";

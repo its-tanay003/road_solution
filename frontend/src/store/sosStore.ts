@@ -7,8 +7,22 @@ import { useWearableStore } from './wearableStore';
 import { buildSOSMessage } from '../utils/whatsappNotify';
 import { socket } from '../lib/socket';
 
-export type SosStatus = 'IDLE' | 'TRIGGERED' | 'DISPATCH' | 'GOLDEN_HOUR' | 'RESOLVED';
-export type CrashType = 'MAJOR' | 'MINOR' | 'SYSTEM_FAIL' | null;
+export interface DispatchUnit {
+  unitId: string;
+  type: string;
+  status: string;
+  driverName: string;
+  driverPhone: string;
+}
+
+export interface Dispatch108 {
+  dispatchId: string;
+  unit: DispatchUnit;
+  eta: string;
+  distanceKm: number;
+  currentLat: number;
+  currentLng: number;
+}
 
 interface SosState {
   // Core Status
@@ -20,7 +34,19 @@ interface SosState {
   incidentId: string | null;
   currentIncidentId: string | null; // Alias for incidentId (backward compatibility)
   crashDetectedAt: number | null;
-  crashTriggered: boolean; // Added for backward compatibility
+  crashTriggered: boolean;
+  dispatch108: Dispatch108 | boolean;
+  countdownTime: number; // Alias for countdown
+  
+  // Distress Engine (Merged from distressStore)
+  isDistressEngineActive: boolean;
+  distressScore: number;
+  distressEvents: DistressEvent[];
+  uiSimplified: boolean;
+  autoPromptActive: boolean;
+
+  // Nearby Alerts (Merged from alertStore)
+  activeAlert: AlertData | null;
   
   // Dispatch Info
   isDispatched: boolean;
@@ -34,15 +60,19 @@ interface SosState {
   // Physics/Sensor Data
   gForceData: { x: number; y: number; z: number };
   location: { lat: number; lng: number } | null;
-  iradReport: Record<string, unknown> | null;
+  india112Alerted: boolean;
   
   // Actions
   setCountdown: (count: number) => void;
   setCrashType: (type: CrashType) => void;
   triggerSOS: (incidentId?: string) => Promise<void>;
+  triggerSos: (incidentId?: string) => Promise<void>; // Alias
   cancelSOS: () => void;
+  cancelSos: () => void; // Alias for cancelSOS
+  cancelCountdown: () => void; // Alias for cancelSOS
   confirmDispatch: (data: Record<string, unknown>) => void;
   resolveIncident: () => void;
+  decrementCountdown: () => void;
   
   setGoldenHourActive: (active: boolean) => void;
   setGoldenHourExpired: (expired: boolean) => void;
@@ -53,7 +83,26 @@ interface SosState {
   updateIradReport: (report: Record<string, unknown>, ackId: string) => void;
   setLocation: (loc: { lat: number; lng: number }) => void;
   startRescueLoop: (id: string) => void;
+  updateDispatchPosition: (lat: number, lng: number, etaSeconds: number, status: string) => void;
+
+  // Distress Actions
+  toggleDistressEngine: (active: boolean) => void;
+  addDistressEvent: (type: string, weight: number) => void;
+  recalculateDistress: () => void;
+  dismissAutoPrompt: () => void;
+  clearDistressEvents: () => void;
+
+  // Alert Actions
+  triggerNearbyAlert: (alert: AlertData) => void;
+  clearNearbyAlert: () => void;
+
+  // Computed/Derived States
+  countdownActive: boolean;
+  isTriggering: boolean;
+  iradAckId: string | null;
 }
+
+const DISTRESS_ROLLING_WINDOW_MS = 30000;
 
 export const useSosStore = create<SosState>()(
   persist(
@@ -67,7 +116,19 @@ export const useSosStore = create<SosState>()(
       currentIncidentId: null,
       crashDetectedAt: null,
       crashTriggered: false,
+      dispatch108: false,
+      countdownTime: 10,
       
+      // Distress Defaults
+      isDistressEngineActive: false,
+      distressScore: 0,
+      distressEvents: [],
+      uiSimplified: false,
+      autoPromptActive: false,
+
+      // Alert Defaults
+      activeAlert: null,
+
       isDispatched: false,
       dispatchData: null,
       dispatchConfirmed: false,
@@ -78,8 +139,12 @@ export const useSosStore = create<SosState>()(
       gForceData: { x: 0, y: 0, z: 0 },
       location: { lat: 12.9716, lng: 77.5946 }, // Default to Bangalore
       iradReport: null,
+      iradAckId: null,
+      india112Alerted: false,
+      countdownActive: false,
+      isTriggering: false,
 
-      setCountdown: (count) => set({ countdown: count }),
+      setCountdown: (count) => set({ countdown: count, countdownTime: count }),
       setCrashType: (type) => set({ crashType: type }),
 
       triggerSOS: async (manualIncidentId) => {
@@ -95,7 +160,9 @@ export const useSosStore = create<SosState>()(
           goldenHourActive: true,
           isDispatched: false,
           dispatchConfirmed: false,
-          crashTriggered: true
+          crashTriggered: true,
+          countdownActive: true,
+          isTriggering: true
         });
 
         const statusStore = useNotificationStatusStore.getState();
@@ -173,6 +240,7 @@ export const useSosStore = create<SosState>()(
           statusStore.updateStatus('INDIA_112', 'SENDING');
           try {
             await axios.post('/api/sos/112', { incidentId: id });
+            set({ india112Alerted: true });
             statusStore.updateStatus('INDIA_112', 'SENT');
           } catch {
             statusStore.updateStatus('INDIA_112', 'FAILED');
@@ -211,18 +279,31 @@ export const useSosStore = create<SosState>()(
         useNotificationStatusStore.getState().resetAll();
       },
 
+      cancelSos: () => get().cancelSOS(),
+      cancelCountdown: () => get().cancelSOS(),
+      triggerSos: (id) => get().triggerSOS(id),
+
+      decrementCountdown: () => set((state) => ({ 
+        countdown: Math.max(0, state.countdown - 1),
+        countdownTime: Math.max(0, state.countdownTime - 1)
+      })),
+
       confirmDispatch: (data) => set({
         status: 'DISPATCH',
         isDispatched: true,
         dispatchConfirmed: true,
-        dispatchData: data
+        dispatchData: data,
+        isTriggering: false,
+        countdownActive: false
       }),
 
       resolveIncident: () => set({
         isActive: false,
         sosActive: false,
         status: 'RESOLVED',
-        goldenHourActive: false
+        goldenHourActive: false,
+        isTriggering: false,
+        countdownActive: false
       }),
 
       setGoldenHourActive: (active) => set({ goldenHourActive: active }),
@@ -231,23 +312,94 @@ export const useSosStore = create<SosState>()(
       setCrashTriggered: (triggered) => set({ crashTriggered: triggered }),
       setCrashDetectedAt: (time) => set({ crashDetectedAt: time }),
 
-      startCountdown: () => set({ countdown: 10, status: 'TRIGGERED' }),
+      startCountdown: () => set({ 
+        countdown: 10, 
+        countdownTime: 10,
+        status: 'TRIGGERED', 
+        countdownActive: true, 
+        isTriggering: true 
+      }),
       
       updateIradReport: (report, ackId) => set({ 
-        iradReport: { ...report, ackId } 
+        iradReport: { ...report, ackId },
+        iradAckId: ackId
       }),
 
       setLocation: (location) => set({ location }),
 
       startRescueLoop: (id) => {
         set({ status: 'GOLDEN_HOUR', goldenHourActive: true, incidentId: id, currentIncidentId: id, sosActive: true, isActive: true });
-      }
+      },
+
+      updateDispatchPosition: (lat, lng, etaSeconds, status) => set((state) => {
+        if (!state.dispatch108 || typeof state.dispatch108 === 'boolean') return state;
+        
+        // Complex ETA object logic
+        const etaDisplay = `${Math.floor(etaSeconds / 60)}m`;
+        
+        return {
+          dispatch108: {
+            ...state.dispatch108,
+            currentLat: lat,
+            currentLng: lng,
+            eta: etaDisplay, // Assuming string eta based on Dispatch108 interface
+            unit: {
+              ...state.dispatch108.unit,
+              status
+            }
+          }
+        };
+      }),
+
+      // Distress Actions
+      toggleDistressEngine: (active) => set({ 
+        isDistressEngineActive: active, 
+        distressScore: 0, 
+        distressEvents: [], 
+        uiSimplified: false, 
+        autoPromptActive: false 
+      }),
+
+      addDistressEvent: (type, weight) => {
+        const { isDistressEngineActive } = get();
+        if (!isDistressEngineActive) return;
+
+        set((state) => ({
+          distressEvents: [...state.distressEvents, { type, weight, timestamp: Date.now() }]
+        }));
+        get().recalculateDistress();
+      },
+
+      recalculateDistress: () => {
+        const { distressEvents, isDistressEngineActive, autoPromptActive } = get();
+        if (!isDistressEngineActive) return;
+
+        const now = Date.now();
+        const validEvents = distressEvents.filter(e => now - e.timestamp <= DISTRESS_ROLLING_WINDOW_MS);
+        
+        let newScore = validEvents.reduce((sum, e) => sum + e.weight, 0);
+        newScore = Math.min(Math.max(0, newScore), 100);
+
+        const uiSimplified = newScore >= 61;
+        const newAutoPrompt = autoPromptActive || newScore >= 86;
+
+        set({
+          distressEvents: validEvents,
+          distressScore: newScore,
+          uiSimplified,
+          autoPromptActive: newAutoPrompt
+        });
+      },
+
+      dismissAutoPrompt: () => set({ autoPromptActive: false }),
+      clearDistressEvents: () => set({ distressEvents: [], distressScore: 0, uiSimplified: false, autoPromptActive: false }),
+
+      // Alert Actions
+      triggerNearbyAlert: (alert) => set({ activeAlert: alert }),
+      clearNearbyAlert: () => set({ activeAlert: null })
     }),
     {
       name: 'yirc-sos-store'
     }
   )
 );
-
-// Unified export for backward compatibility
-export const useEmergencyStore = useSosStore;

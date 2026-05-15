@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useUIStore } from '../store';
-import { useDistressStore } from '../store/distressStore';
+import { useUIStore, useSosStore } from '../store';
 import { logger } from '../lib/logger';
 
 export const AmbientUIProvider = ({ children }: { children: React.ReactNode }) => {
   const { isStressed, setStressed } = useUIStore();
-  const { uiSimplified } = useDistressStore();
+  const { uiSimplified } = useSosStore();
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
 
   // iOS 13+ requires explicit permission for DeviceMotionEvent

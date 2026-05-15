@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Github, Star, ExternalLink 
+  ArrowLeft, Code, Star, ExternalLink 
 } from 'lucide-react';
 
 /* ── Helpers ────────────────────────────────────────────── */
@@ -376,7 +376,7 @@ export default function RoadmapPage() {
               <a href="https://github.com/its-tanay003/road_solution" target="_blank" rel="noopener noreferrer"
                 aria-label="Contribute on GitHub"
                 className="flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 p-4 rounded-2xl border border-white/10 transition-all font-black text-white group/btn">
-                <Github size={20} className="group-hover/btn:scale-110 transition-transform" /> 
+                <Code size={20} className="group-hover/btn:scale-110 transition-transform" /> 
                 GitHub Source
               </a>
               <a href="mailto:roadsos@example.com?subject=Partnership Inquiry"

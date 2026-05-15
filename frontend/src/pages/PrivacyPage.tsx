@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, Trash2, ArrowLeft, Building2, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const Section = ({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
+const Section = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
   <div className="mb-10">
     <div className="flex items-center gap-3 mb-4">
       <div className="p-2 bg-(--clr-blue)/10 text-(--clr-blue) rounded-lg">

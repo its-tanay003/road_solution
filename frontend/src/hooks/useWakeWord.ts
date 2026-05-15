@@ -1,6 +1,15 @@
 import { useState, useCallback } from 'react';
 import { logger } from '../lib/logger';
 
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 export const useWakeWord = (
   wakeWords: string[], 
   onWakeWordDetected: (word: string) => void
@@ -16,7 +25,7 @@ export const useWakeWord = (
       return;
     }
 
-    const recognition = new SpeechRecognitionAPI();
+    const recognition = new (SpeechRecognitionAPI as unknown as { new (): SpeechRecognition })();
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = 'en-US';

@@ -9,7 +9,6 @@
 export * from './hospitalStore';
 export type { Hospital } from './hospitalStore';
 export * from './blockchainStore';
-export * from './distressStore';
 export * from './notificationStore';
 export * from './trainingStore';
 export * from './wearableStore';
@@ -21,7 +20,8 @@ export * from './routeStore';
 export * from './volunteerStore';
 export * from './weatherStore';
 export * from './pushNotificationStore';
-export * from './settingsStore';
+export { useSettingsStore } from './settingsStore';
+export type { SettingsState, Theme as SettingsTheme, Language as SettingsLanguage } from './settingsStore';
 export * from './authStore';
 export * from './awarenessStore';
 export * from './analyticsStore';
@@ -32,14 +32,14 @@ export * from './sosStore';
 export * from './uiStore';
 export * from './networkStore';
 export * from './servicesStore';
-export * from './alertStore';
 export * from './judgeStore';
 export * from './chaosStore';
 export * from './demoStore';
 export * from './leaderboardStore';
 export * from './debriefStore';
-export * from './accessibilityStore';
+export { useAccessibilityStore } from './accessibilityStore';
+export type { AccessibilityState, Theme as AccessibilityTheme, Language as AccessibilityLanguage } from './accessibilityStore';
 export * from './droneRegistryStore';
 export * from './droneStore'; // Single drone status store
 
-// Note: emergencyStore.ts and medicalProfileStore.ts are deprecated and merged into sosStore and userStore respectively.
+// Note: emergencyStore, medicalProfileStore, distressStore, and alertStore are deprecated and merged into sosStore and userStore.

@@ -3,8 +3,7 @@ import { openWhatsApp } from '../lib/whatsappAlert';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import { useUIStore, useUserStore } from '../store';
-import { useDistressStore } from '../store/distressStore';
+import { useUIStore, useUserStore, useSosStore } from '../store';
 import { useCrashDetection } from '../hooks/useCrashDetection';
 import { Panel } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
@@ -20,7 +19,7 @@ export const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const { setStressed } = useUIStore();
   const { medicalInfo, updateMedicalInfo, isResponder, toggleResponderMode, contacts } = useUserStore();
-  const { isActive: distressActive, toggleEngine: toggleDistressEngine } = useDistressStore();
+  const { isDistressEngineActive: distressActive, toggleDistressEngine } = useSosStore();
 
   const [editForm, setEditForm] = useState(medicalInfo);
   

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useAccessibilityStore } from '../store/accessibilityStore';
-import { useEmergencyStore } from '../store/emergencyStore';
+import { useSosStore } from '../store';
 import { useWearableStore } from '../store/wearableStore';
 import { Phone, ArrowRight } from 'lucide-react';
 import { buttonAria } from '../utils/aria-utils';
@@ -14,7 +14,7 @@ export const HighStressModeOverlay: React.FC<{ children: React.ReactNode }> = ({
     setTheme,
     setFontSize
   } = useAccessibilityStore();
-  const { sosActive } = useEmergencyStore();
+  const { sosActive } = useSosStore();
   const { health } = useWearableStore();
 
   const currentBpm = useMemo(() => {

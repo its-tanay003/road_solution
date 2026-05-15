@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, AlertCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useMedicalProfileStore } from '../store/medicalProfileStore';
+import { useMedicalProfileStore } from '../store';
 
 export const ProfileCompleteBadge: React.FC = () => {
   const navigate = useNavigate();
