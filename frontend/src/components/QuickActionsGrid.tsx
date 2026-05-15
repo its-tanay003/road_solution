@@ -3,6 +3,7 @@ import { ActionCard, type ActionCardData } from './ActionCard';
 import { useNavigate } from 'react-router-dom';
 import { hapticLight } from '../lib/accessibilityHelpers';
 import { staggerContainer } from '../lib/pageTransition';
+import { Zap } from 'lucide-react';
 
 // ── Icons ────────────────────────────────────────────────────────
 const MapIcon = () => (

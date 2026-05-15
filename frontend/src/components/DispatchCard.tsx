@@ -39,7 +39,7 @@ export const DispatchCard: React.FC = () => {
     };
   }, [socket, updateDispatchPosition]);
 
-  if (!dispatch108) return null;
+  if (!dispatch108 || typeof dispatch108 === 'boolean') return null;
 
   const unit = dispatch108.unit;
   const status = unit.status;
@@ -85,7 +85,7 @@ export const DispatchCard: React.FC = () => {
                 <p className="text-sm font-black text-white">{unit.unitId}</p>
                 <div className="flex gap-1 mt-1">
                   <Badge variant="mesh" className="text-[8px] py-0">{unit.type}</Badge>
-                  {unit.certifications.slice(0, 2).map(c => (
+                  {(unit as any).certifications?.slice(0, 2).map((c: string) => (
                     <Badge key={c} variant="info" className="text-[8px] py-0 border-white/20 text-white/60">{c}</Badge>
                   ))}
                 </div>
@@ -98,8 +98,8 @@ export const DispatchCard: React.FC = () => {
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Paramedic / Driver</p>
-                <p className="text-sm font-black text-white">{unit.paramedic}</p>
-                <p className="text-[10px] text-slate-400">{unit.driver} (Pilot)</p>
+                <p className="text-sm font-black text-white">{(unit as any).paramedic || 'Assigned Paramedic'}</p>
+                <p className="text-[10px] text-slate-400">{(unit as any).driver || unit.driverName || 'Assigned Driver'} (Pilot)</p>
               </div>
             </div>
           </div>
@@ -108,7 +108,7 @@ export const DispatchCard: React.FC = () => {
             <Clock className="text-emerald-400 mb-2" size={24} />
             <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Estimated Arrival</p>
             <div className="text-3xl font-black text-white tracking-tighter my-1">
-              {status === 'ON_SCENE' ? 'ARRIVED' : eta.display}
+              {status === 'ON_SCENE' ? 'ARRIVED' : (typeof eta === 'string' ? eta : (eta as any).display)}
             </div>
             <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400/60">
               <Navigation size={10} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, MapPin, BarChart3, History, Check, ExternalLink } from 'lucide-react';
 import { privacyConsent } from '../utils/privacyConsent';
@@ -11,7 +11,7 @@ const ConsentChip = ({
   required, 
   onClick 
 }: { 
-  icon: React.ElementType; 
+  icon: any; 
   label: string; 
   active: boolean; 
   required?: boolean;

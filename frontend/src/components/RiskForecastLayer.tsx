@@ -17,14 +17,6 @@ interface Incident {
   severity: number; // 1-5
 }
 
-interface HeatLayerOptions {
-  radius?: number;
-  blur?: number;
-  maxZoom?: number;
-  max?: number;
-  minOpacity?: number;
-  gradient?: Record<number, string>;
-}
 
 
 export const RiskForecastLayer = () => {

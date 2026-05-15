@@ -43,7 +43,7 @@ export const GlobalServiceMode: React.FC = () => {
     switchCountry(code);
 
     // 2. Map FlyTo (via location update in store)
-    setLocation(profile.capitalCoords[0], profile.capitalCoords[1]);
+    setLocation({ lat: profile.capitalCoords[0], lng: profile.capitalCoords[1] });
 
     // 3. Language Switch
     i18n.changeLanguage(profile.language);

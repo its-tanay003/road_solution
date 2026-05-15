@@ -14,7 +14,11 @@ export const DriverBehaviorScore: React.FC = () => {
   const { closedIncidents } = useSosStore();
   
   // Use the latest incident or mock one if empty
-  const latestIncident = closedIncidents[0] || MOCK_LATEST_INCIDENT;
+  const rawLatest = closedIncidents[0] || MOCK_LATEST_INCIDENT;
+  const latestIncident = {
+    ...rawLatest,
+    behaviorScore: rawLatest.behaviorScore ?? MOCK_LATEST_INCIDENT.behaviorScore
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'var(--clr-green)';
