@@ -41,7 +41,7 @@ export function VoiceNavigationListener() {
 
     if (isListeningRef.current) return;
 
-    const recognition: SpeechRecognition = new SpeechRecognition();
+    const recognition: any = new SpeechRecognition();
     recognition.continuous    = true;
     recognition.interimResults = false;
     recognition.lang           = 'en-IN'; // India English, better accent recognition

@@ -7,6 +7,86 @@ import { useWearableStore } from './wearableStore';
 import { buildSOSMessage } from '../utils/whatsappNotify';
 import { socket } from '../lib/socket';
 
+export type SosStatus = 
+  | 'idle' 
+  | 'countdown' 
+  | 'active' 
+  | 'dispatched' 
+  | 'resolved' 
+  | 'cancelled'
+  | 'IDLE'
+  | 'TRIGGERED'
+  | 'DISPATCH'
+  | 'RESOLVED'
+  | 'GOLDEN_HOUR';
+
+export type CrashType = 
+  | 'urban' 
+  | 'rural' 
+  | 'highway' 
+  | 'manual' 
+  | 'gforce' 
+  | 'voice'
+  | null;
+
+export interface DistressEvent {
+  id?: string
+  timestamp: number
+  type: CrashType | string
+  lat?: number
+  lng?: number
+  gForce?: number
+  description?: string
+  weight?: number
+}
+
+export interface AlertData {
+  incidentId: string
+  lat: number
+  lng: number
+  severity: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR' | string
+  timestamp: number | string
+  victimName?: string
+  bloodType?: string
+  message?: string
+  user?: any
+  distance?: number | string
+  type?: string
+  [key: string]: any
+}
+
+export interface IradReport {
+  reportId: string
+  incidentId: string
+  generatedAt: number
+  format: 'JSON' | 'PDF'
+  status: 'pending' | 'submitted' | 'acknowledged'
+  data: Record<string, unknown>
+  ackId?: string
+}
+
+export interface ClosedIncident {
+  id: string
+  closedAt: number
+  openedAt: number
+  severity: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR' | string
+  location: { lat: number; lng: number } | string | any
+  aiTriageSummary?: string
+  responderName?: string
+  hospitalName?: string
+  responseTimeSeconds?: number
+  driverBehaviorScore?: number
+  behaviorScore?: number
+  iradReportId?: string
+  insuranceClaimId?: string
+  timestamp?: string | number
+  weather?: any
+  triageScore?: any
+  timeline?: any
+  [key: string]: any
+}
+
+
 export interface DispatchUnit {
   unitId: string;
   type: string;
@@ -100,6 +180,8 @@ interface SosState {
   countdownActive: boolean;
   isTriggering: boolean;
   iradAckId: string | null;
+  iradReport: IradReport | null;
+  closedIncidents: ClosedIncident[];
 }
 
 const DISTRESS_ROLLING_WINDOW_MS = 30000;
@@ -143,6 +225,7 @@ export const useSosStore = create<SosState>()(
       india112Alerted: false,
       countdownActive: false,
       isTriggering: false,
+      closedIncidents: [],
 
       setCountdown: (count) => set({ countdown: count, countdownTime: count }),
       setCrashType: (type) => set({ crashType: type }),
@@ -321,7 +404,7 @@ export const useSosStore = create<SosState>()(
       }),
       
       updateIradReport: (report, ackId) => set({ 
-        iradReport: { ...report, ackId },
+        iradReport: { ...report, ackId } as unknown as IradReport,
         iradAckId: ackId
       }),
 
@@ -377,7 +460,7 @@ export const useSosStore = create<SosState>()(
         const now = Date.now();
         const validEvents = distressEvents.filter(e => now - e.timestamp <= DISTRESS_ROLLING_WINDOW_MS);
         
-        let newScore = validEvents.reduce((sum, e) => sum + e.weight, 0);
+        let newScore = validEvents.reduce((sum, e) => sum + (e.weight || 0), 0);
         newScore = Math.min(Math.max(0, newScore), 100);
 
         const uiSimplified = newScore >= 61;

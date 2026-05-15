@@ -43,3 +43,4 @@ export * from './droneRegistryStore';
 export * from './droneStore'; // Single drone status store
 
 // Note: emergencyStore, medicalProfileStore, distressStore, and alertStore are deprecated and merged into sosStore and userStore.
+export { useSosStore as useEmergencyStore } from './sosStore';

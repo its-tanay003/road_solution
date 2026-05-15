@@ -25,6 +25,8 @@ export interface OfflineService {
   lat: number;
   lng: number;
   savedAt: number;
+  distance?: number;
+  phone?: string;
   [key: string]: unknown;
 }
 

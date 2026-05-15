@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -23,7 +23,7 @@ const CONDITIONS = [
   'None'
 ] as const;
 
-export const MedicalProfilePage: React.FC = () => {
+export const MedicalProfilePage: FC = () => {
   const { i18n } = useTranslation();
   const store = useMedicalProfileStore();
   const navigate = useNavigate();
@@ -36,8 +36,8 @@ export const MedicalProfilePage: React.FC = () => {
     allergies: store.allergies,
     medications: store.medications,
     contacts: store.contacts.length > 0 ? store.contacts : [
-      { name: '', phone: '', relationship: 'Primary' },
-      { name: '', phone: '', relationship: 'Secondary' }
+      { id: '1', name: '', phone: '', relationship: 'Primary', notifySms: true, notifyPush: true, notifyEmail: false, alertViaWhatsApp: true, alertOnSos: true },
+      { id: '2', name: '', phone: '', relationship: 'Secondary', notifySms: true, notifyPush: true, notifyEmail: false, alertViaWhatsApp: true, alertOnSos: true }
     ],
     language: store.language,
     profileComplete: store.profileComplete

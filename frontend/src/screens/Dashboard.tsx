@@ -1,12 +1,12 @@
-import React from 'react';
+import { lazy, Suspense, type FC } from 'react';
 import { motion } from 'framer-motion';
 import { ImpactCalculator } from '../components/ImpactCalculator';
-const RoadIntelligenceReport = React.lazy(() => import('../components/RoadIntelligenceReport').then(m => ({ default: m.RoadIntelligenceReport })));
+const RoadIntelligenceReport = lazy(() => import('../components/RoadIntelligenceReport').then(m => ({ default: m.RoadIntelligenceReport })));
 import PageLoadingFallback from '../components/PageLoadingFallback';
 import { PredictiveRiskEngine } from '../components/PredictiveRiskEngine';
 import { Activity, Shield, Map as MapIcon, Zap, AlertCircle } from 'lucide-react';
 
-export const Dashboard: React.FC = () => {
+export const Dashboard: FC = () => {
   return (
     <div className="min-h-screen bg-(--clr-bg) text-(--clr-text) p-6 lg:p-10 font-ui relative overflow-hidden">
       {/* Background HUD elements */}
@@ -92,9 +92,9 @@ export const Dashboard: React.FC = () => {
               <div className="h-4 w-1 bg-(--clr-red) rounded-full" />
               <h2 className="text-sm font-mono tracking-widest uppercase text-(--clr-text-2)">AI Intelligence</h2>
             </div>
-            <React.Suspense fallback={<PageLoadingFallback />}>
+            <Suspense fallback={<PageLoadingFallback />}>
               <RoadIntelligenceReport />
-            </React.Suspense>
+            </Suspense>
           </section>
         </div>
       </main>

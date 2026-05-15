@@ -1,4 +1,4 @@
-import React from 'react';
+import { type FC } from 'react';
 import { motion } from 'framer-motion';
 import { useNotificationStatusStore } from '../store/notificationStatusStore';
 import { 
@@ -9,11 +9,12 @@ import {
   Bell, 
   Navigation2, 
   Smartphone, 
-  Siren
+  Siren,
+  type LucideIcon
 } from 'lucide-react';
 
 interface ChannelConfig {
-  icon: React.ElementType;
+  icon: LucideIcon;
   label: string;
   color: string;
   description: string;
@@ -52,7 +53,7 @@ const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   }
 };
 
-export const NotificationStatusPanel: React.FC = () => {
+export const NotificationStatusPanel: FC = () => {
   const { channels } = useNotificationStatusStore();
 
   return (
@@ -105,7 +106,7 @@ export const NotificationStatusPanel: React.FC = () => {
   );
 };
 
-const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+const StatusBadge: FC<{ status: string }> = ({ status }) => {
   switch (status) {
     case 'SENDING':
       return (

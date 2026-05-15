@@ -138,7 +138,7 @@ export const useUserStore = create<UserState>()(
       setContacts: (contacts) => set({ contacts }),
       setPrimaryEmergencyContact: (phone) => set({ primaryEmergencyContact: phone }),
 
-      updateMedicalInfo: (info: Partial<MedicalProfile>) => set((state) => {
+      updateMedicalInfo: (info: any) => set((state) => {
         const medicalInfo = { ...state.medicalInfo };
         
         // Map fields to medicalInfo object

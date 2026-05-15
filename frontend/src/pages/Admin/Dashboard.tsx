@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { 
   ShieldCheck, Activity, Users, MapPin, 
   AlertTriangle, Clock, Radio, 
@@ -270,7 +270,7 @@ export const Dashboard = () => {
 interface MetricCardProps {
   title: string;
   value: string | number;
-  icon: React.ReactNode;
+  icon: ReactNode;
   variant: 'critical' | 'active' | 'mesh' | 'info' | 'ai';
 }
 

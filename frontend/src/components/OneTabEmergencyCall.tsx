@@ -342,7 +342,7 @@ export const OneTabEmergencyCall: React.FC = () => {
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-[10px] text-blue-400 font-mono">{(s.distance || 0).toFixed(1)} km</span>
                         <div className="w-1 h-1 rounded-full bg-slate-700" />
-                        <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">~{Math.ceil(s.distance * 3)}m Arrival</span>
+                        <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">~{Math.ceil((s.distance || 0) * 3)}m Arrival</span>
                       </div>
                       {s.savedAt && (
                         <p className="text-[8px] text-slate-600 font-bold uppercase mt-1">

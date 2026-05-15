@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -15,7 +15,7 @@ function ParticleNetwork({ sosActive }: { sosActive: boolean }) {
   const CONNECT_DIST = 3;
 
   // Build geometry once
-  const { positions, linePositions, lineIndices } = useMemo(() => {
+  const { positions, linePositions } = useMemo(() => {
     const positions: number[] = [];
     for (let i = 0; i < COUNT; i++) {
       positions.push(
@@ -43,7 +43,7 @@ function ParticleNetwork({ sosActive }: { sosActive: boolean }) {
         }
       }
     }
-    return { positions, linePositions, lineIndices };
+    return { positions, linePositions };
   }, [COUNT]);
 
   // Geometry buffers
@@ -114,10 +114,9 @@ function ParticleNetwork({ sosActive }: { sosActive: boolean }) {
 // ── Exported canvas wrapper ──────────────────────────────────────
 interface Props {
   sosActive?: boolean;
-  height?: string;
 }
 
-export function ParticleNetworkBackground({ sosActive = false, height = '60vh' }: Props) {
+export function ParticleNetworkBackground({ sosActive = false }: Props) {
   return (
     <div style={{
       position: 'absolute',

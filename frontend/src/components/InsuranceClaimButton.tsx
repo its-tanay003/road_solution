@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FC } from 'react';
 import { Button } from './ui/Button';
 import { FileText, Download, CheckCircle, AlertCircle } from 'lucide-react';
 import type { InsuranceClaimData } from '../utils/generateClaimPDF';
@@ -12,7 +12,7 @@ interface InsuranceClaimButtonProps {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger-outline';
 }
 
-export const InsuranceClaimButton: React.FC<InsuranceClaimButtonProps> = ({ 
+export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({ 
   incidentId, 
   variant = 'primary' 
 }) => {
@@ -38,7 +38,7 @@ export const InsuranceClaimButton: React.FC<InsuranceClaimButtonProps> = ({
     try {
       const claimData: InsuranceClaimData = {
         incidentId: incident.id,
-        timestamp: new Date(incident.timestamp).getTime(),
+        timestamp: incident.timestamp ? new Date(incident.timestamp).getTime() : Date.now(),
         location: incident.location || { lat: 0, lng: 0 },
         vaahan: {
           plate: vaahanData.plate,
