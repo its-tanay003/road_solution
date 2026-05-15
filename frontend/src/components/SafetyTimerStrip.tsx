@@ -26,7 +26,10 @@ export const SafetyTimerStrip: React.FC = () => {
   }, [active, expiresAt, graceActive, triggerGrace]);
 
   useEffect(() => {
-    if (!graceActive) { setGrace(30); return; }
+    if (!graceActive) {
+      requestAnimationFrame(() => setGrace(30));
+      return;
+    }
     const iv = setInterval(() => {
       setGrace(g => {
         if (g <= 1) { fireAlert(); return 0; }
@@ -59,7 +62,7 @@ export const SafetyTimerStrip: React.FC = () => {
       <AnimatePresence>
         {graceActive && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-red-950/95 flex flex-col items-center justify-center px-6 gap-6">
+            className="fixed inset-0 z-200 bg-red-950/95 flex flex-col items-center justify-center px-6 gap-6">
             <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ repeat: Infinity, duration: 0.9 }}
               className="text-8xl">🚨</motion.div>
             <h1 className="text-4xl font-black text-white text-center">CHECK IN NOW</h1>

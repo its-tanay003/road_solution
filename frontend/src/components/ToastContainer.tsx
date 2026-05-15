@@ -1,30 +1,9 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toastVariants } from '../lib/pageTransition';
+import './ToastContainer.css';
 
-// ── Types ────────────────────────────────────────────────────────
-export type ToastType = 'info' | 'success' | 'error' | 'warning';
-
-export interface Toast {
-  id:      string;
-  type:    ToastType;
-  title:   string;
-  message?: string;
-  duration?: number; // ms, default 4000
-}
-
-// ── Context ───────────────────────────────────────────────────────
-interface ToastCtx {
-  show: (toast: Omit<Toast, 'id'>) => void;
-  dismiss: (id: string) => void;
-}
-
-const ToastContext = createContext<ToastCtx>({
-  show:    () => {},
-  dismiss: () => {},
-});
-
-export const useToast = () => useContext(ToastContext);
+import { type Toast, type ToastType, ToastContext } from '../hooks/useToast';
 
 // ── Convenience helpers ───────────────────────────────────────────
 const ICONS: Record<ToastType, string> = {
@@ -32,13 +11,6 @@ const ICONS: Record<ToastType, string> = {
   error:   '🔴',
   warning: '⚠️',
   info:    'ℹ️',
-};
-
-const BORDER_COLORS: Record<ToastType, string> = {
-  success: 'rgba(0,230,118,0.40)',
-  error:   'rgba(255,23,68,0.45)',
-  warning: 'rgba(255,179,0,0.40)',
-  info:    'rgba(41,121,255,0.35)',
 };
 
 // ── Provider ──────────────────────────────────────────────────────
@@ -64,18 +36,7 @@ export function ToastContainer({ children }: { children?: React.ReactNode }) {
       <div
         aria-live="polite"
         aria-atomic="false"
-        style={{
-          position: 'fixed',
-          top: 68,           // below TopBar
-          right: 16,
-          zIndex: 300,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          pointerEvents: 'none',
-          maxWidth: 360,
-          width: 'calc(100vw - 32px)',
-        }}
+        className="toast-portal"
       >
         <AnimatePresence initial={false}>
           {toasts.map(toast => (
@@ -98,47 +59,21 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       animate="animate"
       exit="exit"
       layout
-      style={{
-        pointerEvents: 'all',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 12,
-        background: 'rgba(19, 27, 43, 0.96)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: `1px solid ${BORDER_COLORS[toast.type]}`,
-        borderRadius: 16,
-        padding: '14px 16px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        cursor: 'pointer',
-      }}
+      className={`toast-item ${toast.type}`}
       onClick={() => onDismiss(toast.id)}
     >
       {/* Icon */}
-      <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0, marginTop: 1 }}>
+      <span className="toast-icon">
         {ICONS[toast.type]}
       </span>
 
       {/* Text */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          margin: 0,
-          fontFamily: 'var(--font-display)',
-          fontWeight: 600,
-          fontSize: 14,
-          color: 'var(--text-primary)',
-          lineHeight: 1.3,
-        }}>
+      <div className="toast-content">
+        <p className="toast-title">
           {toast.title}
         </p>
         {toast.message && (
-          <p style={{
-            margin: '4px 0 0',
-            fontFamily: 'var(--font-body)',
-            fontSize: 13,
-            color: 'var(--text-secondary)',
-            lineHeight: 1.4,
-          }}>
+          <p className="toast-message">
             {toast.message}
           </p>
         )}
@@ -148,11 +83,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       <button
         aria-label="Dismiss notification"
         onClick={e => { e.stopPropagation(); onDismiss(toast.id); }}
-        style={{
-          background: 'none', border: 'none', color: 'var(--text-hint)',
-          cursor: 'pointer', padding: 0, fontSize: 16, lineHeight: 1,
-          flexShrink: 0, marginTop: 1,
-        }}
+        className="toast-close"
       >
         ×
       </button>

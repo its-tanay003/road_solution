@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, MapPin, X, ChevronRight, Camera } from 'lucide-react';
+import { X, ChevronRight, Camera } from 'lucide-react';
+import type { RoadReport } from '../store/roadReportStore';
 import { useRoadReportStore } from '../store/roadReportStore';
 
 const CATEGORIES = [
@@ -19,7 +20,7 @@ export const RoadReportSheet: React.FC = () => {
   const submit = (severity: 'low' | 'medium' | 'high') => {
     // Mock location
     addReport({
-      type: selectedCat as any,
+      type: selectedCat as RoadReport['type'], 
       severity,
       lat: 28.6139,
       lng: 77.2090,
@@ -36,18 +37,18 @@ export const RoadReportSheet: React.FC = () => {
           {/* Backdrop */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setReporting(false)}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm" />
+            className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm" />
 
           {/* Sheet */}
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 z-[101] bg-[#121826] rounded-t-[32px] px-6 pb-12 pt-4 border-t border-white/10 max-h-[85vh] overflow-y-auto">
+            className="fixed inset-x-0 bottom-0 z-101 bg-[#121826] rounded-t-[32px] px-6 pb-12 pt-4 border-t border-white/10 max-h-[85vh] overflow-y-auto">
             
             <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
 
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-black text-white">Report Hazard</h2>
-              <button onClick={() => setReporting(false)} className="p-2 rounded-full bg-white/5">
+              <button onClick={() => setReporting(false)} className="p-2 rounded-full bg-white/5" title="Close">
                 <X size={20} className="text-white/40" />
               </button>
             </div>
@@ -79,8 +80,8 @@ export const RoadReportSheet: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {['low', 'medium', 'high'].map(sev => (
-                    <button key={sev} onClick={() => submit(sev as any)}
+                  {['low', 'medium', 'high'].map((sev) => (
+                    <button key={sev} onClick={() => submit(sev as 'low' | 'medium' | 'high')}
                       className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 group hover:border-amber-400/40 transition-all">
                       <div className="flex flex-col text-left">
                         <span className="capitalize font-black text-white text-lg">{sev}</span>

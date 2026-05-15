@@ -1,0 +1,98 @@
+.sos-float-container {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sos-float-tooltip {
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-lg);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+
+.sos-float-btn {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #FF4444, #CC0022);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-red);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.sos-pulse-ring-inner {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 23, 68, 0.5);
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.sos-pulse-ring-outer {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 23, 68, 0.25);
+  animation: pulse-ring 2s ease-in-out infinite 0.4s;
+}
+
+.sos-progress-svg {
+  position: absolute;
+  inset: -6px;
+  width: 76px;
+  height: 76px;
+}
+
+.sos-progress-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 3;
+}
+
+.sos-progress-fill {
+  fill: none;
+  stroke: #FF4444;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.05s linear;
+}
+
+.sos-btn-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.06em;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.sos-btn-label.counting {
+  font-size: 11px;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 0.4; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}

@@ -16,15 +16,25 @@ declare global {
   }
 
   /* ── Speech Recognition ────────────────────────────────────── */
+  interface SpeechRecognitionAlternative {
+    readonly transcript: string;
+    readonly confidence: number;
+  }
+
+  interface SpeechRecognitionResult {
+    readonly isFinal: boolean;
+    readonly length: number;
+    [index: number]: SpeechRecognitionAlternative;
+  }
+
+  interface SpeechRecognitionResultList {
+    readonly length: number;
+    [index: number]: SpeechRecognitionResult;
+  }
+
   interface SpeechRecognitionEvent extends Event {
-    results: {
-      [key: number]: {
-        [key: number]: {
-          transcript: string;
-        };
-      };
-      length: number;
-    };
+    readonly resultIndex: number;
+    readonly results: SpeechRecognitionResultList;
   }
 
   interface SpeechRecognitionErrorEvent extends Event {
@@ -36,11 +46,20 @@ declare global {
     continuous: boolean;
     interimResults: boolean;
     lang: string;
+    maxAlternatives: number;
+    onaudiostart: (event: Event) => void;
+    onsoundstart: (event: Event) => void;
+    onspeechstart: (event: Event) => void;
+    onspeechend: (event: Event) => void;
+    onsoundend: (event: Event) => void;
+    onaudioend: (event: Event) => void;
+    onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: (event: SpeechRecognitionErrorEvent) => void;
+    onstart: (event: Event) => void;
+    onend: () => void;
     start(): void;
     stop(): void;
-    onresult: (event: SpeechRecognitionEvent) => void;
-    onerror: (event: any) => void;
-    onend: () => void;
+    abort(): void;
   }
 
   /* ── D3 Global ─────────────────────────────────────────────── */

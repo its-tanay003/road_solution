@@ -52,7 +52,8 @@ export const RoadIntelligenceReport: React.FC = () => {
   };
 
   useEffect(() => {
-    generateReport();
+    const t = setTimeout(() => generateReport(), 0);
+    return () => clearTimeout(t);
   }, []);
 
   const downloadPDF = () => {
@@ -107,6 +108,8 @@ export const RoadIntelligenceReport: React.FC = () => {
         <button 
           onClick={generateReport}
           disabled={loading}
+          title="Regenerate Report"
+          aria-label="Regenerate Intelligence Report"
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-(--clr-text-2) transition-all disabled:opacity-50"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
@@ -213,6 +216,8 @@ export const RoadIntelligenceReport: React.FC = () => {
       <div className="p-6 border-t border-(--clr-border) bg-white/2">
         <button 
           onClick={downloadPDF}
+          title="Download as PDF"
+          aria-label="Download Intelligence Report as PDF"
           className="w-full py-4 bg-white/5 border border-(--clr-border) hover:bg-white/10 rounded-xl font-bold flex items-center justify-center gap-3 transition-all"
         >
           <Download size={18} /> DOWNLOAD AS PDF

@@ -1,7 +1,8 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
+import { useCallback, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { hapticSOS, announce } from '../lib/accessibilityHelpers';
+import { announce } from '../lib/accessibilityHelpers';
+import './SOSHeroButton.css';
 
 const HOLD_DURATION = 3000; // ms
 const RADIUS = 44;          // SVG ring radius
@@ -76,32 +77,25 @@ export function SOSHeroButton({ onActivate, lang = 'en' }: SOSHeroButtonProps) {
   };
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
-      position: 'relative', zIndex: 10,
-    }}>
+    <div className="sos-hero-container">
       {/* Outer pulse rings */}
-      <div style={{ position: 'relative', width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="sos-hero-ring-wrapper">
 
         {/* Ring 3 — slowest */}
         <motion.div animate={{ scale: holding ? [1, 1.1, 1] : [1, 1.05, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(255,23,68,0.08)' }} />
+          className="sos-hero-ring-3" />
         {/* Ring 2 */}
         <motion.div animate={{ scale: holding ? [1, 1.12, 1] : [1, 1.06, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-          style={{ position: 'absolute', inset: 20, borderRadius: '50%', background: 'rgba(255,23,68,0.12)' }} />
+          className="sos-hero-ring-2" />
         {/* Ring 1 — fastest */}
         <motion.div animate={{ scale: holding ? [1, 1.15, 1] : [1, 1.07, 1] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-          style={{ position: 'absolute', inset: 40, borderRadius: '50%', background: 'rgba(255,23,68,0.18)' }} />
+          className="sos-hero-ring-1" />
 
         {/* SVG progress ring */}
-        <svg
-          style={{ position: 'absolute', inset: 56, width: 88, height: 88 }}
-          viewBox="0 0 96 96"
-          aria-hidden="true"
-        >
+        <svg className="sos-hero-svg" viewBox="0 0 96 96" aria-hidden="true">
           {/* Track */}
           <circle cx="48" cy="48" r={RADIUS} fill="none"
             stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
@@ -130,23 +124,7 @@ export function SOSHeroButton({ onActivate, lang = 'en' }: SOSHeroButtonProps) {
           whileTap={{ scale: 0.95 }}
           animate={flashing ? { backgroundColor: ['#FF4444', '#FFFFFF', '#FF4444'] } : {}}
           transition={{ duration: 0.3, repeat: flashing ? 2 : 0 }}
-          style={{
-            position: 'relative',
-            width: 88, height: 88,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle at 38% 38%, #FF4444, #CC0022)',
-            border: 'none', cursor: 'pointer',
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: 2,
-            boxShadow: holding
-              ? '0 0 60px rgba(255,23,68,0.7), 0 8px 32px rgba(0,0,0,0.5)'
-              : '0 0 40px rgba(255,23,68,0.5), 0 8px 32px rgba(0,0,0,0.5)',
-            WebkitTapHighlightColor: 'transparent',
-            touchAction: 'none',
-            userSelect: 'none',
-            zIndex: 5,
-            transition: 'box-shadow 0.2s ease',
-          }}
+          className={`sos-hero-btn ${holding ? 'holding' : ''}`}
         >
           {/* Shield icon */}
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -154,10 +132,7 @@ export function SOSHeroButton({ onActivate, lang = 'en' }: SOSHeroButtonProps) {
               stroke="white" strokeWidth="1.8" fill="rgba(255,255,255,0.15)" strokeLinejoin="round"/>
             <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span style={{
-            fontFamily: 'var(--font-display)', fontWeight: 700,
-            fontSize: 13, color: '#FFFFFF', letterSpacing: '0.1em', lineHeight: 1,
-          }}>SOS</span>
+          <span className="sos-hero-label">SOS</span>
         </motion.button>
       </div>
 
@@ -165,12 +140,7 @@ export function SOSHeroButton({ onActivate, lang = 'en' }: SOSHeroButtonProps) {
       <motion.p
         animate={{ opacity: [0.6, 1, 0.6] }}
         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          margin: 0,
-          fontFamily: 'var(--font-body)', fontSize: 14,
-          color: 'var(--text-secondary)', textAlign: 'center',
-          maxWidth: 220,
-        }}
+        className="sos-hero-instruction"
       >
         {LABELS[lang]}
       </motion.p>
@@ -180,18 +150,14 @@ export function SOSHeroButton({ onActivate, lang = 'en' }: SOSHeroButtonProps) {
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.5 }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: 'var(--bg-raised)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-full)', padding: '6px 14px',
-        }}
+        className="sos-hero-voice-hint"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" stroke="var(--saffron)" strokeWidth="2" fill="none"/>
           <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" stroke="var(--saffron)" strokeWidth="2" strokeLinecap="round"/>
         </svg>
-        <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-secondary)' }}>
-          Or say: <strong style={{ color: 'var(--text-primary)' }}>Hey ROADSoS</strong>
+        <span className="sos-hero-voice-text">
+          Or say: <strong className="sos-hero-voice-command">Hey ROADSoS</strong>
         </span>
       </motion.div>
     </div>
