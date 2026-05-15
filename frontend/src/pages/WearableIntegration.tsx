@@ -39,7 +39,7 @@ export const WearableIntegration = () => {
     removeAlert
   } = useWearableStore();
   
-  const { triggerSos } = useSosStore();
+  const { triggerSOS } = useSosStore();
   const [, setIsScanning] = useState(false);
 
   // Simulation loop for BPM
@@ -85,7 +85,7 @@ export const WearableIntegration = () => {
       }
     };
     
-    triggerSos();
+    triggerSOS();
     
     localStorage.setItem('roadsos_biometric_context', JSON.stringify({
       bpm: health.bpmHistory[health.bpmHistory.length-1].value,

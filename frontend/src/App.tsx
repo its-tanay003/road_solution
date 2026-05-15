@@ -1,6 +1,6 @@
-import React, { lazy, Suspense, useEffect, useState, useRef } from 'react';
+import * as React from 'react';
+const { lazy, Suspense, useEffect, useState, useRef } = React;
 import {
-  BrowserRouter,
   Routes,
   Route,
   useLocation,
@@ -22,7 +22,7 @@ import { AppLoadingScreen }         from './components/AppLoadingScreen';
 import { HighStressModeOverlay }    from './components/HighStressModeOverlay';
 import { PrivacyConsentBanner }     from './components/PrivacyConsentBanner';
 import { VolunteerAlertScreen }     from './components/VolunteerAlertScreen';
-import { DriveModeListener }      from './components/DriveModeListener';
+import { DriveModeListener }        from './components/DriveModeListener';
 
 // ── Page loading fallback ──────────────────────────────────────────
 import PageLoadingFallback from './components/PageLoadingFallback';
@@ -319,7 +319,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <BrowserRouter>
+    <>
       <AppInitializer />
       <ToastContainer>
         {/* Boot screen — fades out after assets are ready */}
@@ -332,6 +332,6 @@ export default function App() {
           <AppContent />
         </div>
       </ToastContainer>
-    </BrowserRouter>
+    </>
   );
 }

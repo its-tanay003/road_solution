@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, CheckCircle2, Clock, Send, MessageSquare } from 'lucide-react';
-import { useMedicalProfileStore } from '../store/medicalProfileStore';
+import { useMedicalProfileStore } from '../store';
 import { getWhatsAppLink, buildSOSMessage } from '../utils/whatsappNotify';
 import { Button } from './ui/Button';
 

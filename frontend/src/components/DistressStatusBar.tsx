@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDistressStore } from '../store/distressStore';
+import { useSosStore } from '../store';
 
 export const DistressStatusBar: React.FC = () => {
-  const { score, isActive } = useDistressStore();
+  const { distressScore: score, isDistressEngineActive: isActive } = useSosStore();
 
   const isVisible = isActive && score > 30;
 
@@ -18,7 +18,7 @@ export const DistressStatusBar: React.FC = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 4 }}
           exit={{ opacity: 0, height: 0 }}
-          className="fixed top-0 left-0 w-full z-[9999] bg-black/50"
+          className="fixed top-0 left-0 w-full z-9999 bg-black/50"
         >
           <motion.div
             className={`h-full ${colorClass} transition-colors duration-500`}

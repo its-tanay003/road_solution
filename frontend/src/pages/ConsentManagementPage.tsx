@@ -11,40 +11,43 @@ interface RowProps {
   critical?: boolean;
 }
 
-const Row: React.FC<RowProps> = ({ 
-  icon: Icon, 
+const Row = ({ 
+  icon, 
   title, 
   desc, 
   active, 
   onToggle,
   critical = false 
-}) => (
-  <div className="p-6 border-b border-white/5 last:border-0">
-    <div className="flex items-start gap-4">
-      <div className={`p-3 rounded-xl ${critical ? 'bg-red-500/10 text-red-500' : 'bg-white/5 text-(--clr-text-2)'}`}>
-        <Icon size={20} />
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center justify-between mb-1">
-          <h4 className="font-bold text-sm">{title}</h4>
-          <button
-            onClick={onToggle}
-            aria-label={`Toggle ${title}`}
-            className={`w-12 h-6 rounded-full transition-all relative ${active ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
-          >
-            <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'translate-x-6' : 'translate-x-0'}`} />
-          </button>
+}: RowProps) => {
+  const Icon = icon as any;
+  return (
+    <div className="p-6 border-b border-white/5 last:border-0">
+      <div className="flex items-start gap-4">
+        <div className={`p-3 rounded-xl ${critical ? 'bg-red-500/10 text-red-500' : 'bg-white/5 text-(--clr-text-2)'}`}>
+          <Icon size={20} />
         </div>
-        <p className="text-xs text-(--clr-text-2) leading-relaxed">{desc}</p>
-        {critical && active && (
-          <div className="mt-3 flex items-center gap-2 text-[10px] text-amber-500 font-bold bg-amber-500/10 px-2 py-1 rounded">
-            <AlertTriangle size={12} /> CRITICAL FOR SOS
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-bold text-sm">{title}</h4>
+            <button
+              onClick={onToggle}
+              aria-label={`Toggle ${title}`}
+              className={`w-12 h-6 rounded-full transition-all relative ${active ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
+            >
+              <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
           </div>
-        )}
+          <p className="text-xs text-(--clr-text-2) leading-relaxed">{desc}</p>
+          {critical && active && (
+            <div className="mt-3 flex items-center gap-2 text-[10px] text-amber-500 font-bold bg-amber-500/10 px-2 py-1 rounded">
+              <AlertTriangle size={12} /> CRITICAL FOR SOS
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const ConsentManagementPage: React.FC = () => {
   const navigate = useNavigate();

@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Check } from 'lucide-react';
-import { useDistressStore } from '../store/distressStore';
 import { useSosStore } from '../store';
 
 export const DistressAutoPrompt: React.FC = () => {
-  const { autoPromptActive, dismissAutoPrompt, clearEvents } = useDistressStore();
-  const { triggerSos } = useSosStore();
+  const { autoPromptActive, dismissAutoPrompt, clearDistressEvents: clearEvents, triggerSos } = useSosStore();
   const [timeLeft, setTimeLeft] = useState(10);
 
   useEffect(() => {
@@ -49,7 +47,7 @@ export const DistressAutoPrompt: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm"
+          className="fixed inset-0 z-10000 bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm"
         >
           <motion.div
             initial={{ scale: 0.9, y: 20 }}

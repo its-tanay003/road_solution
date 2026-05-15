@@ -8,7 +8,7 @@ export type LetterSpacing = 'normal' | 'spaced';
 export type Theme = 'dark' | 'light' | 'high-contrast' | 'saffron';
 export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn';
 
-interface AccessibilityState {
+export interface AccessibilityState {
   // Appearance
   fontSize: FontSize;
   fontWeight: FontWeight;

@@ -15,6 +15,18 @@ export interface EmergencyContact {
   alertOnSos: boolean;
 }
 
+export interface MedicalProfile {
+  name:            string;
+  age:             string;
+  bloodType:       string;
+  conditions:      string[];
+  medications:     string;
+  allergies:       string;
+  contacts:        EmergencyContact[];
+  language:        'en' | 'hi' | 'ta' | string;
+  profileComplete: boolean;
+}
+
 interface UserState {
   // Account & Localization
   name: string;
@@ -52,8 +64,8 @@ interface UserState {
   medications: string;
   profileComplete: boolean;
 
-  updateMedicalInfo: (info: Partial<UserState['medicalInfo']>) => void;
-  setProfile: (profile: Partial<UserState['medicalInfo']>) => void;
+  updateMedicalInfo: (info: Partial<UserState['medicalInfo'] | MedicalProfile>) => void;
+  setProfile: (profile: Partial<UserState['medicalInfo'] | MedicalProfile>) => void;
   setBloodType: (type: string) => void;
   setConditions: (conds: string[]) => void;
   resetMedicalInfo: () => void;
@@ -62,6 +74,7 @@ interface UserState {
   // Responder Mode
   isResponder: boolean;
   toggleResponderMode: () => void;
+  syncWithSupabase: () => Promise<void>; // Alias for syncMedicalInfo
 }
 
 export const useUserStore = create<UserState>()(
@@ -125,17 +138,40 @@ export const useUserStore = create<UserState>()(
       setContacts: (contacts) => set({ contacts }),
       setPrimaryEmergencyContact: (phone) => set({ primaryEmergencyContact: phone }),
 
-      updateMedicalInfo: (info) => set((state) => {
-        const newInfo = { ...state.medicalInfo, ...info };
-        return { 
-          medicalInfo: newInfo,
-          // Sync legacy props
-          bloodType: newInfo.bloodGroup,
-          age: newInfo.age,
-          allergies: newInfo.allergies,
-          medications: newInfo.medications,
-          profileComplete: newInfo.profileComplete
-        };
+      updateMedicalInfo: (info: Partial<MedicalProfile>) => set((state) => {
+        const medicalInfo = { ...state.medicalInfo };
+        
+        // Map fields to medicalInfo object
+        if (info.bloodType) medicalInfo.bloodGroup = info.bloodType;
+        if (info.allergies) medicalInfo.allergies = info.allergies;
+        if (info.age) medicalInfo.age = String(info.age);
+        if (info.medications) medicalInfo.medications = info.medications;
+        if (info.profileComplete !== undefined) medicalInfo.profileComplete = info.profileComplete;
+        
+        // Sync comma-separated conditions to medicalInfo if array is provided
+        if (Array.isArray(info.conditions)) {
+          medicalInfo.conditions = info.conditions.join(', ');
+        }
+
+        const updates: Partial<UserState> = { medicalInfo };
+        
+        // Handle top-level fields
+        if (info.name) updates.name = info.name;
+        if (info.language) updates.language = info.language;
+        if (info.contacts) updates.contacts = info.contacts;
+        
+        // Sync legacy top-level aliases
+        updates.bloodType = medicalInfo.bloodGroup;
+        updates.age = medicalInfo.age;
+        updates.allergies = medicalInfo.allergies;
+        updates.medications = medicalInfo.medications;
+        updates.profileComplete = medicalInfo.profileComplete;
+        
+        if (Array.isArray(info.conditions)) {
+          updates.conditions = info.conditions;
+        }
+
+        return updates;
       }),
       setProfile: (profile) => get().updateMedicalInfo(profile),
       setBloodType: (bloodType) => get().updateMedicalInfo({ bloodGroup: bloodType }),
@@ -162,7 +198,8 @@ export const useUserStore = create<UserState>()(
       },
       
       isResponder: false,
-      toggleResponderMode: () => set((state) => ({ isResponder: !state.isResponder }))
+      toggleResponderMode: () => set((state) => ({ isResponder: !state.isResponder })),
+      syncWithSupabase: () => get().syncMedicalInfo()
     }),
     {
       name: 'yirc-user-store'

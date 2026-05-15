@@ -32,7 +32,7 @@ const Row = ({
   onClick, 
   danger 
 }: { 
-  icon: React.ElementType, 
+  icon: any, 
   label: string, 
   value?: string, 
   right?: React.ReactNode, 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMedicalProfileStore } from '../../store/medicalProfileStore';
+import { useUserStore } from '../../store';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'Unknown'];
 const COMMON_ALLERGIES = ['Penicillin', 'Aspirin', 'Latex', 'Iodine', 'Sulfa drugs', 'None'];
@@ -10,7 +10,7 @@ export function MedicalProfile() {
     conditions, setConditions, 
     contacts, setContacts,
     syncWithSupabase 
-  } = useMedicalProfileStore();
+  } = useUserStore();
 
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -109,7 +109,7 @@ export function MedicalProfile() {
             value={contacts[0]?.phone || ''}
             onChange={e => {
               const phone = e.target.value.replace(/\D/g, '').slice(0, 10);
-              setContacts([{ name: 'Emergency', phone, relationship: 'Contact' }]);
+              setContacts([{ id: 'default', name: 'Emergency', phone, relationship: 'Contact', notifySms: true, notifyPush: true, notifyEmail: false, alertViaWhatsApp: true, alertOnSos: true }]);
             }}
             placeholder="10-digit number"
             className="flex-1 h-[54px] px-4 rounded-r-xl border border-white/15 bg-white/5 text-inherit text-base box-border focus:outline-none focus:border-emergency/50 transition-colors"

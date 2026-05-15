@@ -1,13 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEmergencyStore } from '../store/emergencyStore';
+import { useSosStore } from '../store';
 import { socket } from '../lib/socket';
 
 export const useSOSButton = () => {
   const [holdProgress, setHoldProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
   const [countdown, setCountdown] = useState(10);
-  const { sosActive, triggerSOS, cancelSOS, crashDetectedAt } = useEmergencyStore();
+  const { sosActive, triggerSOS, cancelSOS, crashDetectedAt } = useSosStore();
   const navigate = useNavigate();
   const requestRef = useRef<number | null>(null);
 

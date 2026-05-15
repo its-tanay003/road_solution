@@ -10,7 +10,7 @@ import {
   Activity, 
   ShieldCheck
 } from 'lucide-react';
-import { useDroneStore, useJudgeStore } from '../store';
+import { useDroneRegistryStore, useJudgeStore } from '../store';
 
 // Custom Drone Icon with Animated Propeller
 const createDroneIcon = (status: string) => {
@@ -40,7 +40,7 @@ const createDroneIcon = (status: string) => {
 };
 
 export const DroneDispatchLayer = () => {
-  const { drones, updateDronePos, dispatchDrone, toggleCamera } = useDroneStore();
+  const { drones, updateDronePos, dispatchDrone, toggleCamera } = useDroneRegistryStore();
   const { activeIncidents } = useJudgeStore();
   const [selectedDroneId, setSelectedDroneId] = useState<string | null>(null);
   const [isThermal, setIsThermal] = useState(false);

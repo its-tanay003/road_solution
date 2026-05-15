@@ -1,4 +1,5 @@
 export interface iRADReport {
+  [key: string]: any;
   reportId: string;
   schemaVersion: '3.1';
   timestamp: string;
@@ -93,7 +94,7 @@ export function generateiRADReport(incident: IncidentData, triage: TriageData): 
     },
     accidentDetails: {
       dateTime: incident.timestamp || now.toISOString(),
-      severity: triage?.score > 80 ? 'Grievous Hurt' : triage?.score > 50 ? 'Minor Hurt' : 'Damage Only',
+      severity: (triage?.score ?? 0) > 80 ? 'Grievous Hurt' : (triage?.score ?? 0) > 50 ? 'Minor Hurt' : 'Damage Only',
       vehiclesInvolved: incident.vehicleCount || 1,
       vehicleType: incident.vehicleType || 'Car/Jeep/Taxi',
       personsInjured: incident.injuredCount || 1,
@@ -120,7 +121,7 @@ export function generateiRADReport(incident: IncidentData, triage: TriageData): 
       triageModel: 'claude-sonnet-4-5',
       agentsUsed: ['Crash Analyst', 'Medical Triage', 'Resource Optimizer'],
       crashAnalysisScore: incident.gForce ? Math.min(incident.gForce * 7, 100) : 75,
-      medicalPriorityLevel: triage?.score > 80 ? 'P1' : triage?.score > 50 ? 'P2' : 'P3',
+      medicalPriorityLevel: (triage?.score ?? 0) > 80 ? 'P1' : (triage?.score ?? 0) > 50 ? 'P2' : 'P3',
     },
   };
 }

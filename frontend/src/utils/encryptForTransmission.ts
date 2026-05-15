@@ -1,4 +1,4 @@
-import type { MedicalProfile } from '../store/medicalProfileStore';
+import type { MedicalProfile } from '../store/userStore';
 
 /**
  * Encrypts the medical profile for transmission to the backend.

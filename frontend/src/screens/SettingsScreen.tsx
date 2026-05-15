@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronRight, ExternalLink, AlertTriangle, Info,
   MapPin, Bell, Mic, Eye, Shield, Trash2, LogOut, Moon,
-  User, Phone, Languages, HelpCircle, Github, Star
+  User, Phone, Languages, HelpCircle, Code, Star
 } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
 
@@ -12,7 +12,7 @@ import { useUserStore } from '../store/userStore';
 function Row({
   icon: Icon, label, value, color = 'text-(--blue)', onClick, danger, right
 }: {
-  icon: React.ElementType; label: string; value?: string; color?: string;
+  icon: any; label: string; value?: string; color?: string;
   onClick?: () => void; danger?: boolean; right?: React.ReactNode;
 }) {
   return (
@@ -205,7 +205,7 @@ export const SettingsScreen: React.FC = () => {
       <Section title="About">
         <Row icon={Info} label="Version" value="1.0.0-beta" color="text-white/40" onClick={() => {}} />
         <Row icon={Star} label="ROADSoS Team" color="text-(--saffron)" onClick={() => {}} />
-        <Row icon={Github} label="GitHub" color="text-white/60" onClick={() => window.open('https://github.com', '_blank')} />
+        <Row icon={Code} label="GitHub" color="text-white/60" onClick={() => window.open('https://github.com', '_blank')} />
       </Section>
 
       {/* LOGOUT */}

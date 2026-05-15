@@ -10,7 +10,7 @@ import {
   Globe
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useMedicalProfileStore, type MedicalProfile } from '../store/medicalProfileStore';
+import { useMedicalProfileStore, type MedicalProfile } from '../store';
 import { useNavigate } from 'react-router-dom';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
@@ -55,9 +55,9 @@ export const MedicalProfilePage: React.FC = () => {
       if (condition === 'None') {
         return { ...prev, conditions: ['None'] };
       }
-      const newConditions = prev.conditions.filter(c => c !== 'None');
+      const newConditions = prev.conditions.filter((c: string) => c !== 'None');
       if (newConditions.includes(condition)) {
-        return { ...prev, conditions: newConditions.filter(c => c !== condition) };
+        return { ...prev, conditions: newConditions.filter((c: string) => c !== condition) };
       }
       return { ...prev, conditions: [...newConditions, condition] };
     });

@@ -1,4 +1,4 @@
-import { useEmergencyStore } from '../store';
+import { useSosStore } from '../store';
 import { useWearableStore } from '../store/wearableStore';
 
 export interface OfflineTriageResult {
@@ -13,7 +13,7 @@ export interface OfflineTriageResult {
  * This runs entirely on-device with zero network dependency.
  */
 export const runOfflineTriage = (): OfflineTriageResult => {
-  const { gForceData } = useEmergencyStore.getState();
+  const { gForceData } = useSosStore.getState();
   const { health } = useWearableStore.getState();
   
   const gForceMagnitude = Math.sqrt(

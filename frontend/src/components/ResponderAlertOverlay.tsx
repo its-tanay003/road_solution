@@ -1,8 +1,8 @@
 import { AlertTriangle, MapPin, X, Navigation } from 'lucide-react';
-import { useAlertStore } from '../store';
+import { useSosStore } from '../store';
 
 export const ResponderAlertOverlay = () => {
-  const { activeAlert, clearAlert } = useAlertStore();
+  const { activeAlert, clearNearbyAlert: clearAlert } = useSosStore();
 
   if (!activeAlert) return null;
 
