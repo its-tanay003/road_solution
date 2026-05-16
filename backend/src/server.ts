@@ -40,7 +40,7 @@ import { supabaseAdmin as supabase } from './services/supabaseClient';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 
 // --- Security Headers ---
 app.use(helmet({
@@ -494,6 +494,8 @@ app.post('/api/demo/reset', requireAuth, (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`ROADSoS Backend running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log(`ROADSoS Backend running on port ${PORT}`);
+  });
+}

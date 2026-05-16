@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
 
-/* ── Row ─────────────────────────────────────────────────────── */
 function Row({
   icon: Icon, label, value, color = 'text-(--blue)', onClick, danger, right
 }: {
@@ -27,7 +26,7 @@ function Row({
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.() }
       } : undefined}
       aria-label={isInteractive ? `${label}${value ? `: ${value}` : ''}` : undefined}
-      className={`w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left 
+      className={`w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left rounded-xl
         ${isInteractive ? 'cursor-pointer hover:bg-white/4 active:bg-white/6' : ''} 
         ${danger ? 'text-(--accent)' : ''}`}>
       <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${danger ? 'bg-(--accent)/15' : 'bg-white/6'}`}>
@@ -35,7 +34,7 @@ function Row({
       </div>
       <span className={`flex-1 text-[15px] font-medium ${danger ? 'text-(--accent)' : 'text-white'}`}>{label}</span>
       {value && <span className="text-[13px] text-white/35 mr-1">{value}</span>}
-      <div onClick={(e) => e.stopPropagation()}>
+      <div onClick={(e) => e.stopPropagation()} className="flex items-center">
         {right ?? <ChevronRight size={14} className="text-white/20" />}
       </div>
     </motion.div>
@@ -44,15 +43,23 @@ function Row({
 
 function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: () => void }) {
   return (
-    <motion.button onClick={onChange} 
+    <button 
+      type="button"
       role="switch"
-      aria-checked={value}
+      aria-checked={value ? "true" : "false"}
       aria-label={label}
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange();
+      }}
       className={`relative w-11 h-6 rounded-full transition-colors ${value ? 'bg-(--saffron)' : 'bg-white/15'}`}
-      whileTap={{ scale: 0.93 }}>
-      <motion.div animate={{ x: value ? 22 : 2 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm" />
-    </motion.button>
+    >
+      <motion.div 
+        animate={{ x: value ? 22 : 2 }} 
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm" 
+      />
+    </button>
   );
 }
 
@@ -88,8 +95,8 @@ function ThemePicker() {
             {t.colors.map((c, i) => (
               <div 
                 key={i} 
-                className="w-full h-full bg-(--theme-color)" 
-                style={{ '--theme-color': c } as React.CSSProperties} 
+                className="w-full h-full bg-[var(--theme-c)]" 
+                style={{ '--theme-c': c } as React.CSSProperties} 
               />
             ))}
           </div>
@@ -131,7 +138,7 @@ export const SettingsScreen: React.FC = () => {
             <h2 className="text-[18px] font-black text-white">{name || 'Guest User'}</h2>
             <p className="text-[12px] text-white/40 mt-0.5">Emergency Intelligence OS</p>
             <button onClick={() => navigate('/profile')}
-              aria-label="Edit Profile"
+              title="Edit Profile"
               className="mt-2 px-3 py-1 rounded-xl border border-white/15 text-[12px] text-white/60 font-bold hover:bg-white/5 transition-all">
               Edit Profile
             </button>

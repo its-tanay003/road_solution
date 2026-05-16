@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../lib/db';
 import { getSocket } from '../lib/socket';
 import { logger } from '../lib/logger';
+import { getCurrentPosition } from '../utils/geolocation';
 
 interface Service {
   id: string;
@@ -118,17 +119,10 @@ export const NearbyServicesPanel: React.FC = () => {
   };
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        fetchNearbyServices(pos.coords.latitude, pos.coords.longitude);
-      },
-      () => {
-        const def = { lat: 13.0617, lng: 80.2520 };
-        setUserLocation(def);
-        fetchNearbyServices(def.lat, def.lng);
-      }
-    );
+    getCurrentPosition().then((pos) => {
+      setUserLocation({ lat: pos.lat, lng: pos.lng });
+      fetchNearbyServices(pos.lat, pos.lng);
+    });
 
     const socket = getSocket();
     socket.on('hospital_updates', (updates: any[]) => {

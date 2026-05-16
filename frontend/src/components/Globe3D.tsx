@@ -1,7 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sphere, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { Timer } from 'three';
+import { threeCanvasRegistry } from '../utils/threeCanvasRegistry';
 
 /* Incident dot markers — lat/lon → 3D position on unit sphere */
 const INCIDENTS = [
@@ -27,11 +29,12 @@ function latLonToVec3(lat: number, lon: number, r = 1.05) {
   );
 }
 
-function IncidentDot({ lat, lon }: { lat: number; lon: number }) {
+function IncidentDot({ lat, lon, timer }: { lat: number; lon: number; timer: Timer }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (meshRef.current) {
-      meshRef.current.scale.setScalar(1 + 0.3 * Math.sin(clock.elapsedTime * 2.5 + lat));
+      const elapsed = timer.getElapsed();
+      meshRef.current.scale.setScalar(1 + 0.3 * Math.sin(elapsed * 2.5 + lat));
     }
   });
   const pos = latLonToVec3(lat, lon);
@@ -45,7 +48,11 @@ function IncidentDot({ lat, lon }: { lat: number; lon: number }) {
 
 function IndiaGlobe() {
   const groupRef = useRef<THREE.Group>(null);
-  useFrame((_, delta) => {
+  const timer = useMemo(() => new Timer(), []);
+
+  useFrame(() => {
+    timer.update();
+    const delta = timer.getDelta();
     if (groupRef.current) groupRef.current.rotation.y += delta * 0.18;
   });
 
@@ -77,7 +84,7 @@ function IndiaGlobe() {
       </lineSegments>
       {/* Incident markers */}
       {INCIDENTS.map((inc, i) => (
-        <IncidentDot key={i} lat={inc.lat} lon={inc.lon} />
+        <IncidentDot key={i} lat={inc.lat} lon={inc.lon} timer={timer} />
       ))}
     </group>
   );
@@ -88,28 +95,58 @@ interface Globe3DProps {
   className?: string;
 }
 
-export const Globe3D: React.FC<Globe3DProps> = ({ size = 200, className = '' }) => (
-  <div
-    className={className}
-    style={{ width: size, height: size }}
-    role="img"
-    aria-label="Rotating India globe with incident markers"
-  >
-    <Canvas
-      camera={{ position: [0, 0, 2.8], fov: 35 }}
-      dpr={[1, 1.5]}
-      gl={{ antialias: true, alpha: true }}
+export const Globe3D: React.FC<Globe3DProps> = ({ size = 200, className = '' }) => {
+  const [canRender, setCanRender] = useState(false);
+
+  useEffect(() => {
+    const registered = threeCanvasRegistry.register();
+    requestAnimationFrame(() => setCanRender(registered));
+    return () => {
+      if (registered) threeCanvasRegistry.unregister();
+    };
+  }, []);
+
+  if (!canRender) {
+    return (
+      <div 
+        className={`${className} flex items-center justify-center bg-white/5 rounded-full animate-pulse w-[--globe-size] h-[--globe-size]`}
+        style={{ '--globe-size': `${size}px` } as React.CSSProperties}
+      >
+        <div className="w-1/2 h-1/2 bg-white/10 rounded-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${className} relative w-(--globe-size) h-(--globe-size) perspective-[1000px]`}
+      style={{ '--globe-size': `${size}px` } as React.CSSProperties}
+      role="img"
+      aria-label="Rotating India globe with incident markers"
     >
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[3, 3, 3]} intensity={0.8} color="#FFFFFF" />
-      <directionalLight position={[-2, -1, -2]} intensity={0.15} color="#2979FF" />
-      <IndiaGlobe />
-      <OrbitControls
-        enableZoom={false}
-        enablePan={false}
-        autoRotate={false}
-        enableRotate
-      />
-    </Canvas>
-  </div>
-);
+      <Canvas
+        camera={{ position: [0, 0, 2.8], fov: 35 }}
+        dpr={[1, 1.5]}
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          powerPreference: 'low-power',
+          failIfMajorPerformanceCaveat: false,
+        }}
+        frameloop="demand"
+      >
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[3, 3, 3]} intensity={0.8} color="#FFFFFF" />
+        <directionalLight position={[-2, -1, -2]} intensity={0.15} color="#2979FF" />
+        <IndiaGlobe />
+        <OrbitControls
+          enableZoom={false}
+          enablePan={false}
+          autoRotate={false}
+          enableRotate
+        />
+      </Canvas>
+    </div>
+  );
+};
+

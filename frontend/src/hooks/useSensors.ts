@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { watchPosition } from '../utils/geolocation';
 
 interface SensorData {
   speed: number | null; // in km/h
@@ -34,23 +35,19 @@ export const useSensors = (onImpact?: () => void): SensorData => {
   const IMPACT_THRESHOLD = 25; // Significant spike in acceleration
 
   useEffect(() => {
-    // 1. Geolocation for Speed
-    if ('geolocation' in navigator) {
-      const watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          // speed is in m/s, convert to km/h
-          const speedKmh = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
-          setSpeed(speedKmh);
-          setAccuracy(position.coords.accuracy);
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-        },
-        { enableHighAccuracy: true }
-      );
+    const unwatch = watchPosition(
+      (pos) => {
+        // speed is in m/s, convert to km/h
+        const speedKmh = pos.speed ? Math.round(pos.speed * 3.6) : 0;
+        setSpeed(speedKmh);
+        setAccuracy(pos.accuracy);
+      },
+      (error) => {
+        console.error('Geolocation error in useSensors:', error);
+      }
+    );
 
-      return () => navigator.geolocation.clearWatch(watchId);
-    }
+    return () => unwatch();
   }, []);
 
   useEffect(() => {

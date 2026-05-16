@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, Circle, useMap } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
+import L from 'leaflet';
 import { useMapDataStore } from '../store/mapDataStore';
 import type { MapPlace } from '../store/mapDataStore';
 import { useUserLocation } from '../hooks/useUserLocation';
@@ -17,102 +18,7 @@ import { useRoadReportStore } from '../store/roadReportStore';
 import { RoadReportSheet } from '../components/RoadReportSheet';
 import { AlertTriangle } from 'lucide-react';
 
-const MAP_CONTAINER_STYLE = {
-  width: '100%',
-  height: '100vh',
-};
-
-// Tactical dark map style
-const MAP_OPTIONS: google.maps.MapOptions = {
-  disableDefaultUI: true,
-  zoomControl: false,
-  mapTypeControl: false,
-  scaleControl: false,
-  streetViewControl: false,
-  rotateControl: false,
-  fullscreenControl: false,
-  styles: [
-    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-    {
-      featureType: "administrative.locality",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#d59563" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#d59563" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [{ color: "#263c3f" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#6b9a76" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#38414e" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#212a37" }],
-    },
-    {
-      featureType: "road",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9ca5b3" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry",
-      stylers: [{ color: "#746855" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#1f2835" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#f3d19c" }],
-    },
-    {
-      featureType: "transit",
-      elementType: "geometry",
-      stylers: [{ color: "#2f3948" }],
-    },
-    {
-      featureType: "transit.station",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#d59563" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#17263c" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#515c6d" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.stroke",
-      stylers: [{ color: "#17263c" }],
-    },
-  ],
-};
-
+// Marker Colors mapping
 const MARKER_COLORS: Record<string, string> = {
   hospitals: '#ef4444',
   clinics: '#ec4899',
@@ -128,60 +34,78 @@ const MARKER_COLORS: Record<string, string> = {
   hazards: '#f97316'
 };
 
+// Custom Marker Creator
+const createMarkerIcon = (color: string) => {
+  return L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
+};
+
+const userIcon = L.divIcon({
+  className: 'user-location-icon',
+  html: `<div style="background-color: #3b82f6; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8]
+});
+
+// Map Controller for panning and zooming
+const MapController = ({ center, zoom }: { center: [number, number], zoom?: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, zoom || map.getZoom(), { animate: true });
+    }
+  }, [center, zoom, map]);
+  return null;
+};
+
 export const LiveMap = () => {
   const navigate = useNavigate();
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY || '',
-    libraries: ['places']
-  });
-
   const { lat, lng, loading: locLoading } = useUserLocation();
   const { searchRadius } = useMapDataStore();
-  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const initialLockRef = useRef(false);
+  const [mapZoom, setMapZoom] = useState(14);
 
   const { setReporting } = useRoadReportStore();
+  const { places, fetchNearby } = useNearbyPlaces();
 
-  // useNearbyPlaces relies on user location and the map instance (for the Places service)
-  const { places } = useNearbyPlaces(lat, lng, map);
-
-  const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
-    setMap(mapInstance);
-  }, []);
-
-  const onUnmount = useCallback(function callback() {
-    setMap(null);
-  }, []);
-
-  const center = useMemo(() => ({ lat: lat || 13.0827, lng: lng || 80.2707 }), [lat, lng]);
-
-  const handlePlaceSelected = (placeResult: google.maps.places.PlaceResult) => {
-    if (placeResult.geometry?.location && map) {
-      map.panTo(placeResult.geometry.location);
-      map.setZoom(15);
+  // Set initial center once location is available
+  useEffect(() => {
+    if (lat && lng && !initialLockRef.current) {
+      setMapCenter([lat, lng]);
+      initialLockRef.current = true;
     }
+  }, [lat, lng]);
+
+  // Fetch nearby places when location or radius changes
+  useEffect(() => {
+    if (lat && lng) {
+      fetchNearby(lat, lng, searchRadius);
+    }
+  }, [lat, lng, searchRadius, fetchNearby]);
+
+  const handleLocationSelect = (lat: number, lng: number) => {
+    setMapCenter([lat, lng]);
+    setMapZoom(16);
   };
 
-  if (loadError) {
-    return (
-      <div className="w-full h-screen flex flex-col items-center justify-center bg-base text-white p-6 text-center">
-        <h2 className="text-xl font-bold text-red mb-2">Map Load Error</h2>
-        <p className="text-sm text-text-secondary">Please check your Google Maps API Key configuration.</p>
-        <button onClick={() => navigate('/')} className="mt-6 px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
-          Return to Home
-        </button>
-      </div>
-    );
-  }
+  const centerPosition = useMemo(() => {
+    if (lat && lng) return [lat, lng] as [number, number];
+    return [13.0827, 80.2707] as [number, number]; // Chennai fallback
+  }, [lat, lng]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-base">
       {/* Tactical Scanline Overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-5" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-400" />
 
       {/* Top Header/Action Bar */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-black/80 to-transparent z-40 pointer-events-none flex justify-between p-4 items-start">
+      <div className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-black/80 to-transparent z-500 pointer-events-none flex justify-between p-4 items-start">
         <button 
           onClick={() => navigate('/')}
           aria-label="Go Back"
@@ -195,49 +119,43 @@ export const LiveMap = () => {
       </div>
 
       <EmergencyMapMode />
-      <SearchBar onPlaceSelected={handlePlaceSelected} />
+      <SearchBar onLocationSelect={handleLocationSelect} />
       <LayerTogglePanel />
       <RadiusControl />
 
-      {(!isLoaded || locLoading) ? (
-        <div className="w-full h-full flex flex-col items-center justify-center">
+      {locLoading ? (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#050A14]">
           <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
           <p className="text-white/50 text-sm font-mono tracking-widest uppercase">Initializing SAT-LINK...</p>
         </div>
       ) : (
-        <GoogleMap
-          mapContainerStyle={MAP_CONTAINER_STYLE}
-          center={center}
+        <MapContainer
+          center={centerPosition}
           zoom={14}
-          onLoad={onLoad}
-          onUnmount={onUnmount}
-          options={MAP_OPTIONS}
+          zoomControl={false}
+          style={{ width: '100%', height: '100vh' }}
+          className="z-10"
         >
-          {/* User Location Marker */}
+          <MapController center={mapCenter || centerPosition} zoom={mapZoom} />
+          
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          />
+
+          {/* User Location Marker & Search Radius */}
           {lat && lng && (
             <>
-              <Marker
-                position={{ lat, lng }}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 8,
-                  fillColor: '#3b82f6',
-                  fillOpacity: 1,
-                  strokeColor: '#ffffff',
-                  strokeWeight: 2,
-                }}
-                zIndex={100}
-              />
-              <Circle
-                center={{ lat, lng }}
+              <Marker position={[lat, lng]} icon={userIcon} zIndexOffset={1000} />
+              <Circle 
+                center={[lat, lng]} 
                 radius={searchRadius}
-                options={{
-                  strokeColor: '#3b82f6',
-                  strokeOpacity: 0.2,
-                  strokeWeight: 1,
+                pathOptions={{
+                  color: '#3b82f6',
+                  weight: 1,
+                  opacity: 0.2,
                   fillColor: '#3b82f6',
-                  fillOpacity: 0.05,
-                  clickable: false
+                  fillOpacity: 0.05
                 }}
               />
             </>
@@ -249,27 +167,27 @@ export const LiveMap = () => {
             return (
               <Marker
                 key={place.id}
-                position={{ lat: place.lat, lng: place.lng }}
-                onClick={() => setSelectedPlace(place)}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 6,
-                  fillColor: color,
-                  fillOpacity: 0.9,
-                  strokeColor: '#ffffff',
-                  strokeWeight: 1,
+                position={[place.lat, place.lng]}
+                icon={createMarkerIcon(color)}
+                eventHandlers={{
+                  click: () => setSelectedPlace(place as unknown as MapPlace),
                 }}
               />
             );
           })}
-        </GoogleMap>
+        </MapContainer>
       )}
 
       {/* Bottom Sheets */}
       <ServiceBottomSheet 
-        places={places} 
-        onPlaceClick={(place) => setSelectedPlace(place)} 
+        places={places as unknown as MapPlace[]} 
+        onPlaceClick={(place) => {
+          setSelectedPlace(place);
+          setMapCenter([place.lat, place.lng]);
+          setMapZoom(17);
+        }} 
       />
+      
       <ServiceDetailSheet 
         place={selectedPlace} 
         onClose={() => setSelectedPlace(null)} 
@@ -278,7 +196,7 @@ export const LiveMap = () => {
       {/* Feature 2: Road Condition Reporting */}
       <RoadReportSheet />
       
-      <div className="absolute bottom-[240px] right-4 z-40">
+      <div className="absolute bottom-[240px] right-4 z-30">
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -289,7 +207,6 @@ export const LiveMap = () => {
           <span className="text-[10px] font-black uppercase mt-1">Report</span>
         </motion.button>
       </div>
-
     </div>
   );
 };

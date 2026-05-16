@@ -12,6 +12,8 @@ import {
 import { io, Socket } from 'socket.io-client';
 import { logger } from '../lib/logger';
 
+import { getCurrentPosition } from '../utils/geolocation';
+
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const JudgeMobileView: React.FC = () => {
@@ -25,17 +27,14 @@ export const JudgeMobileView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Acquire GPS
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setLocation([pos.coords.latitude, pos.coords.longitude]),
-        (err) => {
-          logger.error(err);
-          setError('GPS Access Denied. Using mock location.');
-          setLocation([28.6139, 77.2090]); // Fallback Delhi
-        }
-      );
-    }
+    // Acquire GPS using utility
+    getCurrentPosition()
+      .then((pos) => setLocation([pos.lat, pos.lng]))
+      .catch((err) => {
+        logger.error(err);
+        setError('GPS Access Denied. Using mock location.');
+        setLocation([28.6139, 77.2090]); // Fallback Delhi
+      });
 
     const s = io(SOCKET_URL);
     s.on('connect', () => {

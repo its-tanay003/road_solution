@@ -1,21 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { Timer } from 'three';
+import { threeCanvasRegistry } from '../utils/threeCanvasRegistry';
 import './AnimatedAmbulance3D.css';
 
 /* ── simple box-built ambulance ─────────────────────────────── */
-function AmbulanceModel({ progressRef }: { progressRef: React.MutableRefObject<number> }) {
+function AmbulanceModel({ progressRef, timer }: { progressRef: React.MutableRefObject<number>; timer: Timer }) {
   const groupRef = useRef<THREE.Group>(null);
 
   // Bezier: hospital (right) → user (left)
-  const curve = new THREE.CubicBezierCurve3(
+  const curve = useMemo(() => new THREE.CubicBezierCurve3(
     new THREE.Vector3(2.5,  0,  0.5),
     new THREE.Vector3(1.2,  0,  1.2),
     new THREE.Vector3(-0.8, 0,  0.8),
     new THREE.Vector3(-2.2, 0,  0),
-  );
+  ), []);
 
-  useFrame((_, delta) => {
+  useFrame(() => {
+    const delta = timer.getDelta();
     progressRef.current = (progressRef.current + delta * 0.06) % 1;
     if (groupRef.current) {
       const pos = curve.getPoint(progressRef.current);
@@ -77,24 +80,56 @@ export const AnimatedAmbulance3D: React.FC<{ width?: number; height?: number }> 
   height = 180,
 }) => {
   const progressRef = useRef(0);
+  const [canRender, setCanRender] = useState(false);
+  const timer = useMemo(() => new Timer(), []);
+
+  useEffect(() => {
+    const registered = threeCanvasRegistry.register();
+    requestAnimationFrame(() => setCanRender(registered));
+    return () => {
+      if (registered) threeCanvasRegistry.unregister();
+    };
+  }, []);
+
+  useFrame(() => {
+    timer.update();
+  });
+
+  if (!canRender) {
+    return (
+      <div 
+        className="ambulance-3d-container flex items-center justify-center bg-white/5 rounded-2xl animate-pulse w-(--amb-w) h-(--amb-h)" 
+        style={{ '--amb-w': `${width}px`, '--amb-h': `${height}px` } as React.CSSProperties}
+      >
+        <div className="text-white/10 text-[10px] font-mono">MAP OVERLAY STANDBY</div>
+      </div>
+    );
+  }
 
   return (
     <div 
-      className="ambulance-3d-container" 
-      style={{ '--width': `${width}px`, '--height': `${height}px` } as React.CSSProperties}
+      className="ambulance-3d-container w-(--amb-w) h-(--amb-h)" 
+      style={{ '--amb-w': `${width}px`, '--amb-h': `${height}px` } as React.CSSProperties}
       aria-label="Animated ambulance approaching"
     >
       <Canvas
         camera={{ position: [0, 2.5, 5], fov: 42 }}
         dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          powerPreference: 'low-power',
+          failIfMajorPerformanceCaveat: false,
+        }}
+        frameloop="demand"
       >
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 8, 5]} intensity={1} />
         <pointLight position={[0, 3, 0]} color="#FF1744" intensity={0.6} />
         <Road />
-        <AmbulanceModel progressRef={progressRef} />
+        <AmbulanceModel progressRef={progressRef} timer={timer} />
       </Canvas>
     </div>
   );
 };
+

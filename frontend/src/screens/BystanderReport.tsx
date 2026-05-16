@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { sanitizeInput } from '../utils/inputSanitizer';
 import { io } from 'socket.io-client';
+import { getCurrentPosition } from '../utils/geolocation';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -37,21 +38,20 @@ export const BystanderReport: React.FC = () => {
   const [victimStatus, setVictimStatus] = useState<VictimStatus>('CONSCIOUS');
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
 
-  const requestLocation = () => {
+  const requestLocation = async () => {
     setLocationStatus('requesting');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocationStatus('granted');
-        setTimeout(() => setStep(2), 1000);
-      },
-      (err) => {
-        console.error('Location error:', err);
-        setLocationStatus('denied');
-        setError('Location access denied. Please enable GPS.');
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+    try {
+      const pos = await getCurrentPosition();
+      setCoords({ lat: pos.lat, lng: pos.lng });
+      setLocationStatus('granted');
+      setTimeout(() => setStep(2), 1000);
+    } catch (err) {
+      console.error('Location error:', err);
+      setLocationStatus('denied');
+      setError('Location access failed. Using default region.');
+      // Still allow proceeding after a short delay if we want to be "agentic", 
+      // but here we follow the existing UI flow.
+    }
   };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

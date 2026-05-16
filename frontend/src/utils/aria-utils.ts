@@ -29,6 +29,10 @@ export const switchAria = (checked: boolean) => ({
   'aria-checked': checked ? ('true' as const) : ('false' as const),
 });
 
+export const getAriaExpanded = (expanded: boolean) => ({
+  'aria-expanded': expanded ? ('true' as const) : ('false' as const),
+});
+
 /**
  * Standardizes image alt text
  */

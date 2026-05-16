@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { getCurrentPosition } from '../utils/geolocation';
+
 interface WeatherAlert {
   message: string;
   severity: 'warning' | 'danger';
@@ -32,10 +34,10 @@ export function WeatherAlertBanner() {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(async pos => {
-      const a = await fetchWeatherAlert(pos.coords.latitude, pos.coords.longitude);
+    getCurrentPosition().then(async pos => {
+      const a = await fetchWeatherAlert(pos.lat, pos.lng);
       setAlert(a);
-    }, undefined, { enableHighAccuracy: false, timeout: 5000 });
+    });
   }, []);
 
   return (
@@ -49,30 +51,21 @@ export function WeatherAlertBanner() {
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           role="alert"
           aria-live="polite"
-          style={{
-            margin: '0 var(--sp-4)',
-            background: alert.severity === 'danger' ? 'rgba(255,23,68,0.12)' : 'rgba(255,179,0,0.12)',
-            border: `1px solid ${alert.severity === 'danger' ? 'var(--red)' : 'var(--amber)'}40`,
-            borderRadius: 'var(--radius-lg)',
-            padding: '12px 16px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-          }}
+          className={`mx-4 p-3 flex items-center justify-between gap-3 rounded-2xl border ${
+            alert.severity === 'danger' 
+              ? 'bg-red/10 border-red/20' 
+              : 'bg-amber/10 border-amber/20'
+          }`}
         >
-          <p style={{
-            margin: 0, fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500,
-            color: alert.severity === 'danger' ? 'var(--red)' : 'var(--amber)',
-            lineHeight: 1.4,
-          }}>
+          <p className={`m-0 font-medium text-[13px] leading-relaxed flex-1 ${
+            alert.severity === 'danger' ? 'text-red' : 'text-amber'
+          }`}>
             {alert.message}
           </p>
           <button
             onClick={() => setDismissed(true)}
             aria-label="Dismiss weather alert"
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              padding: 4, flexShrink: 0,
-              color: 'var(--text-hint)', fontSize: 18,
-            }}
+            className="bg-transparent border-none cursor-pointer p-1 shrink-0 text-white/40 text-lg hover:text-white/60 transition-colors"
           >
             ×
           </button>

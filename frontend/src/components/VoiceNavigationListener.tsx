@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { announce } from '../lib/accessibilityHelpers';
 
@@ -26,32 +26,51 @@ function matchCommand(transcript: string): typeof COMMANDS[number] | null {
   return null;
 }
 
+let voiceNavStarted = false;  // Module-level guard — only start once ever
+let permissionDenied = false; // Module-level — once denied, stay denied
+
 export function VoiceNavigationListener() {
   const navigate = useNavigate();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const isListeningRef = useRef(false);
-  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const startListeningRef = useRef<() => void>(() => {});
+  function startRecognition(SpeechRec: any) {
+    let errorCount = 0;
+    const rec = new SpeechRec();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = 'en-IN';
 
-  const startListening = useCallback(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return; // Not supported — fail silently
+    rec.onerror = (e: any) => {
+      if (e.error === 'not-allowed') {
+        if (errorCount === 0) {
+          console.info('[VoiceNav] Microphone not allowed — voice commands disabled');
+        }
+        permissionDenied = true;
+        errorCount++;
+        rec.stop();
+        return;
+      }
+      if (e.error === 'no-speech') return; // Normal — ignore completely
+      if (errorCount < 2) console.warn('[VoiceNav] Error:', e.error);
+      errorCount++;
+    };
 
-    if (isListeningRef.current) return;
+    rec.onend = () => {
+      if (!permissionDenied) {
+        // Restart with delay to avoid rapid cycling
+        setTimeout(() => {
+          try {
+            if (!permissionDenied) rec.start();
+          } catch { /* ignore */ }
+        }, 3000);
+      }
+    };
 
-    const recognition: any = new SpeechRecognition();
-    recognition.continuous    = true;
-    recognition.interimResults = false;
-    recognition.lang           = 'en-IN'; // India English, better accent recognition
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const results = event.results;
+    rec.onresult = (e: any) => {
+      const results = e.results;
       const last = results[results.length - 1];
       if (!last.isFinal) return;
 
-      // Check all alternatives for best match
       for (let i = 0; i < last.length; i++) {
         const transcript = last[i].transcript;
         const cmd = matchCommand(transcript);
@@ -63,53 +82,58 @@ export function VoiceNavigationListener() {
       }
     };
 
-    recognition.onend = () => {
-      isListeningRef.current = false;
-      // Auto-restart after 500ms so it stays always-on
-      restartTimerRef.current = setTimeout(() => {
-        startListeningRef.current();
-      }, 500);
-    };
-
-    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
-      // 'no-speech' and 'aborted' are normal — don't spam console
-      if (e.error !== 'no-speech' && e.error !== 'aborted') {
-        console.warn('[VoiceNav] Error:', e.error);
-      }
-      isListeningRef.current = false;
-    };
-
     try {
-      recognition.start();
-      isListeningRef.current = true;
-      recognitionRef.current = recognition;
+      rec.start();
+      recognitionRef.current = rec;
     } catch {
-      isListeningRef.current = false;
+      console.info('[VoiceNav] Could not start recognition');
     }
-  }, [navigate]);
+  }
 
   useEffect(() => {
-    startListeningRef.current = startListening;
-  }, [startListening]);
+    // Already started or permanently denied — do nothing
+    if (voiceNavStarted || permissionDenied) return;
+    voiceNavStarted = true;
 
-  useEffect(() => {
-    // Only start if browser supports it
-    const supported = !!(
-      window.SpeechRecognition || window.webkitSpeechRecognition
-    );
-    if (!supported) return;
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    // Delay first start — let app finish mounting
-    const init = setTimeout(() => startListening(), 1500);
+    if (!SpeechRec) {
+      console.info('[VoiceNav] Speech recognition not available in this browser');
+      return;
+    }
+
+    // Check permission state before attempting to start
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions
+        .query({ name: 'microphone' as PermissionName })
+        .then(result => {
+          if (result.state === 'denied') {
+            permissionDenied = true;
+            console.info('[VoiceNav] Microphone permission denied — voice commands disabled');
+            return;
+          }
+          startRecognition(SpeechRec);
+          
+          result.onchange = () => {
+            if (result.state === 'denied') {
+              permissionDenied = true;
+              recognitionRef.current?.stop();
+            }
+          };
+        })
+        .catch(() => {
+          // permissions API not supported — try starting anyway, handle error once
+          startRecognition(SpeechRec);
+        });
+    } else {
+      // Basic fallback if permissions API is missing
+      startRecognition(SpeechRec);
+    }
 
     return () => {
-      clearTimeout(init);
-      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
-      try { recognitionRef.current?.stop(); } catch { /* ignore */ }
-      isListeningRef.current = false;
+      recognitionRef.current?.stop();
     };
-  }, [startListening]);
+  }, [navigate]);
 
-  // Renders nothing — pure behaviour component
   return null;
 }

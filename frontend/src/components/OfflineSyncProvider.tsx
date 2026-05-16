@@ -1,20 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUserStore } from '../store';
 import { saveServicesForArea, saveEmergencyNumbers } from '../lib/offlineDB';
-import emergencyData from '../data/emergency-numbers.json';
 import { Database, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { haversine } from '../utils/geo';
 import { logger } from '../lib/logger';
-
-interface OfflineSyncContextType {
-  isCaching: boolean;
-  progress: number;
-  total: number;
-  isReady: boolean;
-}
-
-const OfflineSyncContext = createContext<OfflineSyncContextType | undefined>(undefined);
+import { watchPosition } from '../utils/geolocation';
+import { OfflineSyncContext } from '../context/OfflineSyncContext';
+import { emergencyNumbers } from '../utils/syncUtils';
 
 export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isCaching, setIsCaching] = useState(false);
@@ -24,13 +17,13 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [lastCacheLoc, setLastCacheLoc] = useState<{ lat: number, lng: number } | null>(null);
   const { countryCode } = useUserStore();
 
-  const cacheServices = async (lat: number, lng: number) => {
+  const cacheServices = useCallback(async (lat: number, lng: number) => {
     try {
       setIsCaching(true);
       setProgress(0);
       
       // 1. Cache Emergency Numbers for the detected area (mock detect IN for demo)
-      await saveEmergencyNumbers(countryCode, (emergencyData as any)[countryCode] || emergencyData.IN);
+      await saveEmergencyNumbers(countryCode, emergencyNumbers[countryCode] || emergencyNumbers.IN);
       
       // 2. Fetch Nearby Services (Mock fetch for demo pre-cache)
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -55,13 +48,11 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
       logger.error('Pre-cache failed:', err);
       setIsCaching(false);
     }
-  };
+  }, [countryCode]);
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
-
-    const watchId = navigator.geolocation.watchPosition((pos) => {
-      const { latitude: lat, longitude: lng } = pos.coords;
+    const unwatch = watchPosition((pos) => {
+      const { lat, lng } = pos;
       
       if (!lastCacheLoc) {
         cacheServices(lat, lng);
@@ -74,8 +65,8 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     });
 
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, [lastCacheLoc]);
+    return () => unwatch();
+  }, [lastCacheLoc, cacheServices]);
 
   return (
     <OfflineSyncContext.Provider value={{ isCaching, progress, total, isReady }}>
@@ -87,6 +78,9 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
+            role="status"
+            aria-live="polite"
+            aria-label="Caching offline data progress"
             className="fixed bottom-24 right-6 z-50 bg-(--nx-bg-surface) border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-4 min-w-[240px]"
           >
             <div className="relative">
@@ -127,10 +121,4 @@ export const OfflineSyncProvider: React.FC<{ children: React.ReactNode }> = ({ c
       </AnimatePresence>
     </OfflineSyncContext.Provider>
   );
-};
-
-export const useOfflineSync = () => {
-  const context = useContext(OfflineSyncContext);
-  if (!context) throw new Error('useOfflineSync must be used within OfflineSyncProvider');
-  return context;
 };

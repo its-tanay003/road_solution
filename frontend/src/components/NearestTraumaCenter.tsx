@@ -4,6 +4,7 @@ import { Hospital, Navigation, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getSocket } from '../lib/socket';
 import { logger } from '../lib/logger';
+import { getCurrentPosition } from '../utils/geolocation';
 
 interface TraumaCenter {
   id: string;
@@ -27,17 +28,9 @@ export const NearestTraumaCenter: React.FC = () => {
         let lat = 13.0617; // Default Chennai
         let lng = 80.2520;
         
-        if ("geolocation" in navigator) {
-          try {
-            const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject);
-            });
-            lat = pos.coords.latitude;
-            lng = pos.coords.longitude;
-          } catch {
-            logger.warn("Using default location for trauma center");
-          }
-        }
+        const pos = await getCurrentPosition();
+        lat = pos.lat;
+        lng = pos.lng;
 
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/hospitals/nearby`, {
           params: { lat, lng }
