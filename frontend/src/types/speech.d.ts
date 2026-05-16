@@ -28,7 +28,7 @@ declare global {
   }
 
   interface SpeechRecognitionErrorEvent extends Event {
-    readonly error: string;
+    readonly error: 'no-speech' | 'aborted' | 'audio-capture' | 'network' | 'not-allowed' | 'service-not-allowed' | 'bad-grammar' | 'language-not-supported';
     readonly message: string;
   }
 
@@ -37,17 +37,30 @@ declare global {
     interimResults: boolean;
     lang: string;
     maxAlternatives: number;
+    onaudiostart: ((event: Event) => void) | null;
+    onaudioend: ((event: Event) => void) | null;
+    onend: ((event: Event) => void) | null;
+    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+    onnomatch: ((event: SpeechRecognitionEvent) => void) | null;
+    onresult: ((event: SpeechRecognitionEvent) => void) | null;
+    onsoundstart: ((event: Event) => void) | null;
+    onsoundend: ((event: Event) => void) | null;
+    onspeechstart: ((event: Event) => void) | null;
+    onspeechend: ((event: Event) => void) | null;
+    onstart: ((event: Event) => void) | null;
     start(): void;
     stop(): void;
     abort(): void;
-    onresult: ((event: SpeechRecognitionEvent) => void) | null;
-    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-    onend: (() => void) | null;
-    onstart: (() => void) | null;
   }
 
   interface SpeechRecognitionConstructor {
     new (): SpeechRecognition;
+  }
+
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    deferredPrompt?: BeforeInstallPromptEvent;
   }
 
   // iOS Safari 13+ DeviceMotionEvent permission API
@@ -65,19 +78,11 @@ declare global {
     prompt(): Promise<void>;
   }
 
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionConstructor;
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-    deferredPrompt?: BeforeInstallPromptEvent;
-  }
-
   // Network Information API
   interface NetworkInformation extends EventTarget {
     readonly effectiveType?: 'slow-2g' | '2g' | '3g' | '4g';
     readonly saveData?: boolean;
     onchange?: (event: Event) => void;
-    addEventListener(type: 'change', listener: (this: NetworkInformation, ev: Event) => void, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener(type: 'change', listener: (this: NetworkInformation, ev: Event) => void, options?: boolean | EventListenerOptions): void;
   }
 
   interface Navigator {
@@ -85,29 +90,8 @@ declare global {
     mozConnection?: NetworkInformation;
     webkitConnection?: NetworkInformation;
   }
-
-  interface jsPDFInstance {
-    setFillColor(r: number, g: number, b: number): void;
-    rect(x: number, y: number, w: number, h: number, style?: string): void;
-    setTextColor(r: number, g: number, b: number): void;
-    setFontSize(size: number): void;
-    text(text: string, x: number, y: number): void;
-    save(filename: string): void;
-    lastAutoTable: {
-      finalY: number;
-    };
-    autoTable(options: object): void;
-  }
-
-  interface Window {
-    jspdf?: {
-      jsPDF: {
-        new (): jsPDFInstance;
-      };
-    };
-  }
 }
 
-// Ensure this is treated as a module
 export {};
+
 

@@ -29,31 +29,13 @@ interface VaahanData {
   queriedAt: string;
 }
 
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => ISpeechRecognition;
-    webkitSpeechRecognition?: new () => ISpeechRecognition;
-  }
-}
-
-interface ISpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: (event: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => void;
-  onerror: (event: unknown) => void;
-  onend: (event: unknown) => void;
-  start: () => void;
-  stop: () => void;
-}
-
 export const VaahanLookup: React.FC = () => {
   const [regNumber, setRegNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VaahanData | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<ISpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -63,7 +45,7 @@ export const VaahanLookup: React.FC = () => {
       recognition.interimResults = false;
       recognition.lang = 'en-IN';
 
-      recognition.onresult = (event) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript.toUpperCase().replace(/[\s-]/g, '');
         setRegNumber(transcript);
         setIsListening(false);

@@ -24,11 +24,7 @@ function ParticleNetwork({ sosActive }: { sosActive: boolean }) {
   const CONNECT_DIST = 3;
 
   // Stable positions state to satisfy purity rules
-  const [networkData, setNetworkData] = useState<{ positions: number[], linePositions: number[] } | null>(null);
-
-  useEffect(() => {
-    if (networkData) return;
-
+  const [networkData] = useState(() => {
     const positions: number[] = [];
     for (let i = 0; i < COUNT; i++) {
       positions.push(
@@ -55,27 +51,24 @@ function ParticleNetwork({ sosActive }: { sosActive: boolean }) {
       }
     }
     
-    setNetworkData({ positions, linePositions });
-  }, [COUNT, networkData]); // CONNECT_DIST is a constant in this scope, but better to just use COUNT and networkData check
+    return { positions, linePositions };
+  });
 
-  const initialized = !!networkData;
-  const positions = useMemo(() => networkData?.positions || [], [networkData]);
-  const linePositions = useMemo(() => networkData?.linePositions || [], [networkData]);
+  const positions = networkData.positions;
+  const linePositions = networkData.linePositions;
 
   // Geometry buffers
   const pointGeo  = useMemo(() => {
-    if (!initialized) return new THREE.BufferGeometry();
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     return g;
-  }, [positions, initialized]);
+  }, [positions]);
 
   const lineGeo = useMemo(() => {
-    if (!initialized) return new THREE.BufferGeometry();
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
     return g;
-  }, [linePositions, initialized]);
+  }, [linePositions]);
 
   // Materials
   const pointMat = useMemo(() => new THREE.PointsMaterial({
@@ -120,7 +113,6 @@ function ParticleNetwork({ sosActive }: { sosActive: boolean }) {
     meshRef.current.parent!.position.y = Math.sin(t * 0.2) * 0.1;
   });
 
-  if (!initialized) return null;
 
   return (
     <group>

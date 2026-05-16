@@ -163,9 +163,9 @@ interface IncidentSnapshot {
     // Capture data for feedback before resetting
     if (currentIncidentId) {
       setLastIncidentData({
-        gForce: Number((agentOutputs.triage as any)?.gForce || 4.2),
-        heartRate: Number((agentOutputs.triage as any)?.heartRate || 95),
-        spO2: Number((agentOutputs.triage as any)?.spO2 || 96),
+        gForce: Number((agentOutputs.triage as Record<string, unknown>)?.gForce || 4.2),
+        heartRate: Number((agentOutputs.triage as Record<string, unknown>)?.heartRate || 95),
+        spO2: Number((agentOutputs.triage as Record<string, unknown>)?.spO2 || 96),
         movementScore: 1,
         timeOfDay: new Date().getHours(),
         roadType: 1

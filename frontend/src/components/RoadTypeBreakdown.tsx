@@ -6,6 +6,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import type { TooltipItem } from 'chart.js';
 import { Filter, PieChart } from 'lucide-react';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -53,7 +54,7 @@ export const RoadTypeBreakdown: React.FC = () => {
         padding: 12,
         titleFont: { size: 12, family: 'JetBrains Mono' },
         callbacks: {
-          label: (context: any) => {
+          label: (context: TooltipItem<'doughnut'>) => {
             const label = context.dataset.label || '';
             const value = context.parsed || 0;
             return ` ${label}: ${value}%`;
@@ -76,7 +77,10 @@ export const RoadTypeBreakdown: React.FC = () => {
             Infrastructure & Vehicle Correlation
           </p>
         </div>
-        <button className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors">
+        <button 
+          title="Filter Analysis"
+          className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors"
+        >
           <Filter size={18} />
         </button>
       </div>

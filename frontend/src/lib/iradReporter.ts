@@ -1,5 +1,5 @@
 export interface iRADReport {
-  [key: string]: any;
+  [key: string]: unknown;
   reportId: string;
   schemaVersion: '3.1';
   timestamp: string;

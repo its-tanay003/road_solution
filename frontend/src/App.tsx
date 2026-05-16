@@ -1,5 +1,11 @@
-import * as React from 'react';
-const { lazy, Suspense, useEffect, useState, useRef, useCallback } = React;
+import React, { 
+  lazy, 
+  Suspense, 
+  useEffect, 
+  useState, 
+  useRef, 
+  useCallback 
+} from 'react';
 import {
   Routes,
   Route,
@@ -110,72 +116,92 @@ function Page({ children }: { children: React.ReactNode }) {
 const FULLSCREEN_PATHS = ['/sos-active', '/login', '/dispatched'];
 
 // ══════════════════════════════════════════════════════════════════
-// RootErrorBoundary — prevents black screen on crash
-// ══════════════════════════════════════════════════════════════════
-class RootErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { error: Error | null }
-> {
-  state = { error: null }
-  static getDerivedStateFromError(error: Error) { return { error } }
-  render() {
-    if (this.state.error) {
-      return (
-        <div className="min-h-screen bg-[#080C14] text-[#F0F4FF] flex flex-col items-center justify-center p-6 font-sans gap-4">
-          <div className="text-5xl" aria-hidden="true">🚨</div>
-          <div className="text-xl font-bold">ROADSoS encountered an error</div>
-          <div className="text-[13px] text-[#8892A4] max-w-[500px] text-center">
-            {(this.state.error as Error).message}
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-2 px-6 py-3 bg-[#FF9933] text-[#080C14] border-none rounded-lg text-sm font-semibold cursor-pointer hover:brightness-110 transition-all">
-            Reload App
-          </button>
-        </div>
-      )
-    }
-    return this.props.children
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════
 // AppInitializer — handles core app initialization logic
 // ══════════════════════════════════════════════════════════════════
 function AppInitializer({ children }: { children: React.ReactNode }) {
-  // ✅ ALL hooks FIRST — no exceptions
-  const [isReady, setIsReady] = useState(false);
-  const { init: initVolunteer, isRegistered } = useVolunteerStore();
+  // ━━━ ALL HOOKS MUST BE HERE AT THE TOP — UNCONDITIONALLY ━━━
+  const [isReady, setIsReady] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const { init: initVolunteer, isRegistered } = useVolunteerStore()
+
+  // useCallback at top level — never inside try/catch or conditional
+  const applySettings = useCallback(() => {
+    const fontSizeMap: Record<string, string> = {
+      sm: '14px', md: '16px', lg: '20px', xl: '24px', xxl: '30px'
+    }
+    try {
+      const raw = localStorage.getItem('roadsos-accessibility')
+      if (!raw) return
+      const stored = JSON.parse(raw)
+      const s = stored?.state ?? {}
+      if (s.fontSize) {
+        document.documentElement.style.setProperty(
+          '--app-font-size',
+          fontSizeMap[s.fontSize] ?? '16px'
+        )
+      }
+      if (s.theme) {
+        document.documentElement.classList.remove(
+          'theme-dark', 'theme-light', 'theme-high-contrast', 'theme-saffron'
+        )
+        document.documentElement.classList.add(`theme-${s.theme}`)
+      }
+    } catch {
+      // localStorage read failed — use defaults, never crash
+    }
+  }, []) // ← empty deps, stable reference
 
   const init = useCallback(async () => {
+    // Ensure this runs as a microtask to avoid "synchronous setState in effect" warnings
+    await Promise.resolve();
     try {
-      const raw = localStorage.getItem('roadsos-accessibility');
-      if (raw) {
-        const s = JSON.parse(raw)?.state ?? {};
-        const sizeMap: Record<string, string> = { sm:'14px', md:'16px', lg:'20px', xl:'24px', xxl:'30px' };
-        if (s.fontSize) document.documentElement.style.setProperty('--app-font-size', sizeMap[s.fontSize] ?? '16px');
-        if (s.theme) {
-          document.documentElement.classList.remove('theme-dark','theme-light','theme-high-contrast','theme-saffron');
-          document.documentElement.classList.add(`theme-${s.theme}`);
-        }
+      applySettings();
+      if (isRegistered) {
+        await initVolunteer();
       }
-      if (isRegistered) await initVolunteer();
-    } catch {
-      // Silent fail — never crash the app over settings
+    } catch (err) {
+      console.error('[ROADSoS] Init error:', err);
+      setHasError(true);
     } finally {
       setIsReady(true);
     }
-  }, [isRegistered, initVolunteer]);
+  }, [applySettings, isRegistered, initVolunteer]);
 
-  useEffect(() => { init() }, [init]);
+  // useEffect at top level — never conditional
+  useEffect(() => {
+    void init()
+  }, [init])
 
-  if (!isReady) return (
-    <div className="min-h-screen bg-[#080C14] flex items-center justify-center">
-      <div className="text-[#FF9933] font-mono text-[14px]">Initializing ROADSoS...</div>
-    </div>
-  );
+  // ━━━ CONDITIONAL RENDERING BELOW HOOKS — this is allowed ━━━
+  if (!isReady) {
+    return (
+      <div className="app-boot-container">
+        <div className="app-boot-spinner" />
+        <div className="app-boot-text">
+          Loading ROADSoS...
+        </div>
+      </div>
+    )
+  }
 
-  return <>{children}</>;
+  if (hasError) {
+    return (
+      <div className="app-error-container">
+        <div className="app-error-icon">⚠️</div>
+        <div className="app-error-title">
+          ROADSoS could not initialize
+        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="app-error-button"
+        >
+          Refresh Page
+        </button>
+      </div>
+    )
+  }
+
+  return <>{children}</>
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -374,20 +400,18 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <RootErrorBoundary>
-      <AppInitializer>
-        <ToastContainer>
-          {/* Boot screen — fades out after assets are ready */}
-          {loading && (
-            <AppLoadingScreen onComplete={() => setLoading(false)} />
-          )}
+    <AppInitializer>
+      <ToastContainer>
+        {/* Boot screen — fades out after assets are ready */}
+        {loading && (
+          <AppLoadingScreen onComplete={() => setLoading(false)} />
+        )}
 
-          {/* Main app — always mounted so routes preload */}
-          <div className={loading ? 'invisible' : 'visible'}>
-            <AppContent />
-          </div>
-        </ToastContainer>
-      </AppInitializer>
-    </RootErrorBoundary>
+        {/* Main app — always mounted so routes preload */}
+        <div className={loading ? 'invisible' : 'visible'}>
+          <AppContent />
+        </div>
+      </ToastContainer>
+    </AppInitializer>
   );
 }

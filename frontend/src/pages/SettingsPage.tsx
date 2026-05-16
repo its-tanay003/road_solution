@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Phone, Mail, Globe, 
-  MessageCircle, Users, Bell, MapPin, Shield, Palette, 
-  HelpCircle, Info, LogOut, ChevronRight, CheckCircle2, AlertTriangle,
-  Volume2, Vibrate as Vibration, Download, Trash2, Camera, Mic, Activity
+  Volume2, Vibrate as Vibration, Download, Trash2, Camera, Mic, Activity,
+  ChevronRight, ArrowLeft, Phone, Mail, Globe, MessageCircle, Users, Bell,
+  MapPin, Shield, AlertTriangle, Palette, HelpCircle, Info, LogOut,
+  CheckCircle2, Lock
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useAccessibilityStore } from '../store/accessibilityStore';
 import type { FontSize, Theme, Language } from '../store/accessibilityStore';
 import { PhoneOTPModal } from '../components/PhoneOTPModal';
 import { EmailAuthModal } from '../components/EmailAuthModal';
+import { switchAria } from '../utils/aria-utils';
 
 const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
   <div className="mb-8">
@@ -32,7 +34,7 @@ const Row = ({
   onClick, 
   danger 
 }: { 
-  icon: any, 
+  icon: LucideIcon, 
   label: string, 
   value?: string, 
   right?: React.ReactNode, 
@@ -74,7 +76,7 @@ const Toggle = ({ active, onToggle, label }: { active: boolean, onToggle: () => 
     type="button"
     onClick={(e) => { e.stopPropagation(); onToggle(); }}
     aria-label={label}
-    aria-pressed={active}
+    {...switchAria(active)}
     className={`w-12 h-6 rounded-full transition-all relative ${active ? 'bg-(--clr-blue)' : 'bg-white/10'}`}
   >
     <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'translate-x-6' : 'translate-x-0'}`} />
@@ -399,4 +401,3 @@ export const SettingsPage: React.FC = () => {
   );
 };
 
-const Lock = Shield; // Alias for lucide-react if needed or just use Shield

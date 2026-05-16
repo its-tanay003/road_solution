@@ -51,12 +51,12 @@ export const useVoiceAssistant = () => {
       return;
     }
 
-    const recognition = new (SpeechRecognition as any)();
+    const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = langMap[language] || 'en-IN';
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interimTranscript = '';
       let finalTranscript = '';
 
@@ -94,7 +94,7 @@ export const useVoiceAssistant = () => {
       }
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error', event.error);
       if (event.error === 'not-allowed') {
         setIsListening(false);
@@ -107,7 +107,7 @@ export const useVoiceAssistant = () => {
       }
     };
 
-    recognitionRef.current = recognition as any;
+    recognitionRef.current = recognition;
 
     return () => {
       if (recognitionRef.current) {

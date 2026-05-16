@@ -703,3 +703,126 @@ html[data-font-size="xxl"] { font-size: 30px; }
   color: var(--text-primary);
 }
 
+
+/* ── App Boot Loading Screen ─────────────────────────────────── */
+.app-boot-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-void);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.app-boot-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--saffron);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.app-boot-text {
+  color: var(--saffron);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ── Theme Preview Utilities ─────────────────────────────────── */
+.theme-preview-nexus-dark-0 { background-color: #080C14; }
+.theme-preview-nexus-dark-1 { background-color: #2979FF; }
+.theme-preview-nexus-dark-2 { background-color: #FF1744; }
+.theme-preview-nexus-dark-3 { background-color: #FFB300; }
+
+.theme-preview-midnight-0 { background-color: #050508; }
+.theme-preview-midnight-1 { background-color: #5C6BC0; }
+.theme-preview-midnight-2 { background-color: #E91E63; }
+.theme-preview-midnight-3 { background-color: #FFF176; }
+
+.theme-preview-forest-0 { background-color: #071409; }
+.theme-preview-forest-1 { background-color: #2E7D32; }
+.theme-preview-forest-2 { background-color: #FF6F00; }
+.theme-preview-forest-3 { background-color: #A5D6A7; }
+
+.theme-preview-ocean-0 { background-color: #00050A; }
+.theme-preview-ocean-1 { background-color: #0288D1; }
+.theme-preview-ocean-2 { background-color: #00BFA5; }
+.theme-preview-ocean-3 { background-color: #B3E5FC; }
+
+/* ── Error Screens ───────────────────────────────────────────── */
+.app-error-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-void);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+  text-align: center;
+}
+
+.app-error-icon {
+  font-size: 48px;
+  margin-bottom: var(--sp-2);
+}
+
+.app-error-title {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.app-error-message {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.app-error-button {
+  background: var(--saffron);
+  color: #000;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: var(--sp-4);
+  transition: transform 0.2s;
+}
+
+.app-error-button:active {
+  transform: scale(0.96);
+}
+
+/* ── 3D Component Containers ─────────────────────────────────── */
+.brain-3d-container {
+  width: var(--brain-size, 80px);
+  height: var(--brain-size, 80px);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.globe-3d-container {
+  width: var(--globe-size, 200px);
+  height: var(--globe-size, 200px);
+  position: relative;
+}
+
+.ambulance-3d-wrapper {
+  width: var(--amb-w, 320px);
+  height: var(--amb-h, 180px);
+}
+
+
+

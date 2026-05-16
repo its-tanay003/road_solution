@@ -18,6 +18,7 @@ function AmbulanceModel({ progressRef, timer }: { progressRef: React.MutableRefO
   ), []);
 
   useFrame(() => {
+    timer.update();
     const delta = timer.getDelta();
     progressRef.current = (progressRef.current + delta * 0.06) % 1;
     if (groupRef.current) {
@@ -91,15 +92,11 @@ export const AnimatedAmbulance3D: React.FC<{ width?: number; height?: number }> 
     };
   }, []);
 
-  useFrame(() => {
-    timer.update();
-  });
-
+  // Move timer.update() to a component inside Canvas
   if (!canRender) {
     return (
       <div 
-        className="ambulance-3d-container flex items-center justify-center bg-white/5 rounded-2xl animate-pulse w-(--amb-w) h-(--amb-h)" 
-        style={{ '--amb-w': `${width}px`, '--amb-h': `${height}px` } as React.CSSProperties}
+        className={`ambulance-3d-wrapper flex items-center justify-center bg-white/5 rounded-2xl animate-pulse [--amb-w:${width}px] [--amb-h:${height}px]`}
       >
         <div className="text-white/10 text-[10px] font-mono">MAP OVERLAY STANDBY</div>
       </div>
@@ -108,8 +105,7 @@ export const AnimatedAmbulance3D: React.FC<{ width?: number; height?: number }> 
 
   return (
     <div 
-      className="ambulance-3d-container w-(--amb-w) h-(--amb-h)" 
-      style={{ '--amb-w': `${width}px`, '--amb-h': `${height}px` } as React.CSSProperties}
+      className={`ambulance-3d-wrapper [--amb-w:${width}px] [--amb-h:${height}px]`}
       aria-label="Animated ambulance approaching"
     >
       <Canvas

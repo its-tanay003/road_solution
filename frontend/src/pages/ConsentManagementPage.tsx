@@ -12,14 +12,13 @@ interface RowProps {
 }
 
 const Row = ({ 
-  icon, 
+  icon: Icon, 
   title, 
   desc, 
   active, 
   onToggle,
   critical = false 
 }: RowProps) => {
-  const Icon = icon as any;
   return (
     <div className="p-6 border-b border-white/5 last:border-0">
       <div className="flex items-start gap-4">
