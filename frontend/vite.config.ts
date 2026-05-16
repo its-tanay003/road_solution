@@ -11,14 +11,13 @@ export default defineConfig({
     host: 'localhost',
     hmr: {
       protocol: 'ws',
-      host: 'localhost', 
+      host: 'localhost',
       port: 5173,
       clientPort: 5173,
       overlay: true,
     },
     watch: {
       usePolling: false,
-      interval: 1000,
     },
   },
   plugins: [
