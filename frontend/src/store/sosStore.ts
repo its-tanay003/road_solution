@@ -7,83 +7,72 @@ import { useWearableStore } from './wearableStore';
 import { buildSOSMessage } from '../utils/whatsappNotify';
 import { socket } from '../lib/socket';
 
+import { type iRADReport } from '../lib/iradReporter';
+
 export type SosStatus = 
-  | 'idle' 
-  | 'countdown' 
-  | 'active' 
-  | 'dispatched' 
-  | 'resolved' 
-  | 'cancelled'
-  | 'IDLE'
-  | 'TRIGGERED'
-  | 'DISPATCH'
-  | 'RESOLVED'
-  | 'GOLDEN_HOUR';
+  | 'idle' | 'detecting' | 'confirming' | 'alerting' | 'resolved' | 'cancelled'
+  | 'countdown' | 'active' | 'dispatched' 
+  | 'IDLE' | 'TRIGGERED' | 'DISPATCH' | 'RESOLVED' | 'GOLDEN_HOUR';
 
 export type CrashType = 
-  | 'urban' 
-  | 'rural' 
-  | 'highway' 
-  | 'manual' 
-  | 'gforce' 
-  | 'voice'
+  | 'impact' | 'rollover' | 'sudden_stop' | 'manual'
+  | 'urban' | 'rural' | 'highway' | 'gforce' | 'voice'
   | null;
 
 export interface DistressEvent {
-  id?: string
-  timestamp: number
-  type: CrashType | string
-  lat?: number
-  lng?: number
-  gForce?: number
-  description?: string
-  weight?: number
+  id: string;
+  type: CrashType | string;
+  timestamp: number;
+  location?: { lat: number; lng: number };
+  severity?: number;
+  gForce?: number;
+  description?: string;
+  weight?: number;
 }
 
 export interface AlertData {
-  incidentId: string
-  lat: number
-  lng: number
-  severity: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR' | string
-  timestamp: number | string
-  victimName?: string
-  bloodType?: string
-  message?: string
-  user?: any
-  distance?: number | string
-  type?: string
-  [key: string]: any
+  id: string;
+  status?: SosStatus;
+  contactsNotified?: string[];
+  servicesDispatched?: string[];
+  incidentId?: string;
+  lat?: number;
+  lng?: number;
+  severity?: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR' | string;
+  timestamp?: number | string;
+  victimName?: string;
+  bloodType?: string;
+  message?: string;
+  user?: Record<string, unknown>;
+  distance?: number | string;
+  type?: string;
+  [key: string]: unknown;
 }
 
-export interface IradReport {
-  reportId: string
-  incidentId: string
-  generatedAt: number
-  format: 'JSON' | 'PDF'
-  status: 'pending' | 'submitted' | 'acknowledged'
-  data: Record<string, unknown>
-  ackId?: string
+export interface IradReport extends iRADReport {
+  ackId?: string;
+  status?: 'pending' | 'submitted' | 'acknowledged';
 }
 
 export interface ClosedIncident {
-  id: string
-  closedAt: number
-  openedAt: number
-  severity: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR' | string
-  location: { lat: number; lng: number } | string | any
-  aiTriageSummary?: string
-  responderName?: string
-  hospitalName?: string
-  responseTimeSeconds?: number
-  driverBehaviorScore?: number
-  behaviorScore?: number
-  iradReportId?: string
-  insuranceClaimId?: string
-  timestamp?: string | number
-  weather?: any
-  triageScore?: any
-  timeline?: any
-  [key: string]: any
+  id: string;
+  closedAt: number;
+  openedAt: number;
+  severity: 'CRITICAL' | 'SERIOUS' | 'MODERATE' | 'MINOR' | string;
+  location: { lat: number; lng: number } | string;
+  aiTriageSummary?: string;
+  responderName?: string;
+  hospitalName?: string;
+  responseTimeSeconds?: number;
+  driverBehaviorScore?: number;
+  behaviorScore?: number;
+  iradReportId?: string;
+  insuranceClaimId?: string;
+  timestamp?: string | number;
+  weather?: Record<string, unknown>;
+  triageScore?: number;
+  timeline?: Array<{ time: number; event: string }>;
+  [key: string]: unknown;
 }
 
 
@@ -104,7 +93,7 @@ export interface Dispatch108 {
   currentLng: number;
 }
 
-interface SosState {
+export interface SosState {
   // Core Status
   isActive: boolean;
   sosActive: boolean; // Alias for isActive (backward compatibility)
@@ -447,9 +436,17 @@ export const useSosStore = create<SosState>()(
         const { isDistressEngineActive } = get();
         if (!isDistressEngineActive) return;
 
-        set((state) => ({
-          distressEvents: [...state.distressEvents, { type, weight, timestamp: Date.now() }]
-        }));
+        set((state) => {
+          const newEvent: DistressEvent = { 
+            id: `EV-${Math.random().toString(36).substring(7)}`,
+            type, 
+            weight, 
+            timestamp: Date.now() 
+          };
+          return {
+            distressEvents: [...state.distressEvents, newEvent]
+          };
+        });
         get().recalculateDistress();
       },
 

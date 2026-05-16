@@ -1,0 +1,16 @@
+﻿src/store/userStore.ts(145,18): error TS2339: Property 'bloodType' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'bloodType' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(145,59): error TS2339: Property 'bloodType' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'bloodType' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(159,18): error TS2339: Property 'name' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'name' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(159,44): error TS2339: Property 'name' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'name' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(160,18): error TS2339: Property 'language' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'language' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(160,52): error TS2339: Property 'language' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'language' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(161,18): error TS2339: Property 'contacts' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'contacts' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+src/store/userStore.ts(161,52): error TS2339: Property 'contacts' does not exist on type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.
+  Property 'contacts' does not exist on type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>'.

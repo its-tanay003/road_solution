@@ -138,28 +138,38 @@ export const useUserStore = create<UserState>()(
       setContacts: (contacts) => set({ contacts }),
       setPrimaryEmergencyContact: (phone) => set({ primaryEmergencyContact: phone }),
 
-      updateMedicalInfo: (info: any) => set((state) => {
+      updateMedicalInfo: (info: Partial<MedicalProfile | UserState['medicalInfo']>) => set((state) => {
+        type UpdateInput = Partial<Omit<MedicalProfile, 'conditions'> & Omit<UserState['medicalInfo'], 'conditions'> & { name?: string; language?: string; conditions?: string | string[] }>;
+        const data = info as UpdateInput;
         const medicalInfo = { ...state.medicalInfo };
         
         // Map fields to medicalInfo object
-        if (info.bloodType) medicalInfo.bloodGroup = info.bloodType;
-        if (info.allergies) medicalInfo.allergies = info.allergies;
-        if (info.age) medicalInfo.age = String(info.age);
-        if (info.medications) medicalInfo.medications = info.medications;
-        if (info.profileComplete !== undefined) medicalInfo.profileComplete = info.profileComplete;
+        if (data.bloodType) medicalInfo.bloodGroup = data.bloodType;
+        if (data.bloodGroup) medicalInfo.bloodGroup = data.bloodGroup;
+        if (data.allergies) medicalInfo.allergies = data.allergies;
+        if (data.age) medicalInfo.age = String(data.age);
+        if (data.medications) medicalInfo.medications = data.medications;
+        if (data.profileComplete !== undefined) medicalInfo.profileComplete = data.profileComplete;
         
         // Sync comma-separated conditions to medicalInfo if array is provided
-        if (Array.isArray(info.conditions)) {
-          medicalInfo.conditions = info.conditions.join(', ');
+        if (Array.isArray(data.conditions)) {
+          medicalInfo.conditions = data.conditions.join(', ');
+        } else if (typeof data.conditions === 'string') {
+          medicalInfo.conditions = data.conditions;
         }
 
         const updates: Partial<UserState> = { medicalInfo };
         
         // Handle top-level fields
-        if (info.name) updates.name = info.name;
-        if (info.language) updates.language = info.language;
-        if (info.contacts) updates.contacts = info.contacts;
-        
+        if (data.name) updates.name = data.name;
+        if (data.language) updates.language = data.language;
+        if (data.contacts) updates.contacts = data.contacts;
+        if (data.bloodType) updates.bloodType = data.bloodType;
+        if (data.age) updates.age = String(data.age);
+        if (data.allergies) updates.allergies = data.allergies;
+        if (Array.isArray(data.conditions)) updates.conditions = data.conditions;
+        if (data.medications) updates.medications = data.medications;
+        if (data.profileComplete !== undefined) updates.profileComplete = data.profileComplete;
         // Sync legacy top-level aliases
         updates.bloodType = medicalInfo.bloodGroup;
         updates.age = medicalInfo.age;

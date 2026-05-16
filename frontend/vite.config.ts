@@ -6,11 +6,20 @@ import path from 'path';
 
 export default defineConfig({
   server: {
-    host: true,
     port: 5173,
     strictPort: false,
-    hmr: true,
-
+    host: 'localhost',
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost', 
+      port: 5173,
+      clientPort: 5173,
+      overlay: true,
+    },
+    watch: {
+      usePolling: false,
+      interval: 1000,
+    },
   },
   plugins: [
     react(), 
@@ -55,15 +64,22 @@ export default defineConfig({
     })
   ],
   resolve: {
-    dedupe: ['react', 'react-dom', 'react-router-dom'],
+    dedupe: [
+      'react',
+      'react-dom', 
+      'react-router-dom',
+      'framer-motion',
+      '@react-three/fiber',
+      '@react-three/drei',
+      'three',
+    ],
     alias: {
-      'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-  optimizeDeps: { 
-    include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'framer-motion', 'leaflet'],
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    force: false,
   },
   build: {
     chunkSizeWarningLimit: 600,

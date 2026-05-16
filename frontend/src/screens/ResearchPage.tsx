@@ -7,28 +7,28 @@ const findings = [
     label: 'Average bystander hesitation',
     sub: 'Fear of legal liability cited by 48% of survey respondents',
     insight: 'Good Samaritan awareness feature directly addresses this',
-    color: '#FF9933',
+    color: 'saffron',
   },
   {
     stat: '18–25 min',
     label: '108 dispatch time in rural areas',
     sub: 'ROADSoS can reduce detection-to-dispatch gap by ~4 minutes',
     insight: 'Autonomous G-force detection eliminates victim dial-in delay',
-    color: '#2979FF',
+    color: 'blue',
   },
   {
     stat: '67%',
     label: 'Witnesses had phones but didn\'t act',
     sub: 'Bystander mode directly addresses identified behaviour gap',
     insight: 'Step-by-step guidance removes decision paralysis',
-    color: '#00E676',
+    color: 'green',
   },
   {
     stat: '40%',
     label: '112 calls with unclear location',
     sub: 'GPS auto-location sharing eliminates this friction entirely',
     insight: 'Biggest 112 operator pain point solved by core ROADSoS feature',
-    color: '#F06292',
+    color: 'purple',
   },
 ];
 
@@ -51,21 +51,21 @@ const testimonials = [
 ];
 
 const metrics = [
-  { label: 'Current avg detection-to-dispatch', value: '12 min', color: '#EF5350' },
-  { label: 'With ROADSoS (projected)', value: '3 min', color: '#00E676' },
-  { label: 'Lives saved per 1,000 accidents', value: '47', color: '#FF9933' },
+  { label: 'Current avg detection-to-dispatch', value: '12 min', color: 'accent' },
+  { label: 'With ROADSoS (projected)', value: '3 min', color: 'green' },
+  { label: 'Lives saved per 1,000 accidents', value: '47', color: 'saffron' },
 ];
 
 export default function ResearchPage() {
   const nav = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#080C14] text-[#E8EDF5] font-sans">
+    <div className="min-h-screen bg-base text-text font-sans">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-[#080C14]/90 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center gap-4">
-        <button onClick={() => nav(-1)} className="text-gray-400 hover:text-white transition-colors text-sm">← Back</button>
+      <div className="sticky top-0 z-40 bg-base/90 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center gap-4">
+        <button onClick={() => nav(-1)} className="text-text-secondary hover:text-white transition-colors text-sm">← Back</button>
         <h1 className="text-white font-bold">Field Research & Validation</h1>
-        <span className="ml-auto text-xs text-amber-400 bg-amber-900/30 px-3 py-1 rounded-full">Planned primary research — pilot phase</span>
+        <span className="ml-auto text-xs text-amber bg-amber/10 px-3 py-1 rounded-full">Planned primary research — pilot phase</span>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
@@ -83,7 +83,7 @@ export default function ResearchPage() {
                 key={card.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-[#0D1B2A] rounded-2xl p-6 border border-white/10"
+                className="bg-raised rounded-2xl p-6 border border-white/10"
               >
                 <div className="text-3xl mb-3">{card.icon}</div>
                 <div className="font-bold text-white mb-2">{card.title}</div>
@@ -103,12 +103,12 @@ export default function ResearchPage() {
                 initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-[#0D1B2A] rounded-2xl p-6 border border-white/10"
+                className="bg-raised rounded-2xl p-6 border border-white/10"
               >
-                <div className="text-4xl font-black mb-2" style={{ color: f.color }}>{f.stat}</div>
+                <div className={`text-4xl font-black mb-2 text-(--${f.color})`}>{f.stat}</div>
                 <div className="font-bold text-white mb-1">{f.label}</div>
-                <div className="text-gray-400 text-sm mb-2">{f.sub}</div>
-                <div className="text-xs px-3 py-1.5 rounded-lg" style={{ background: f.color + '15', color: f.color }}>
+                <div className="text-text-secondary text-sm mb-2">{f.sub}</div>
+                <div className={`text-xs px-3 py-1.5 rounded-lg bg-(--${f.color})/15 text-(--${f.color})`}>
                   💡 {f.insight}
                 </div>
               </motion.div>
@@ -124,10 +124,10 @@ export default function ResearchPage() {
           </div>
           <div className="space-y-4">
             {testimonials.map(t => (
-              <div key={t.role} className="bg-[#0D1B2A] rounded-2xl p-6 border-l-4 border-[#FF9933]">
-                <blockquote className="text-gray-200 italic text-base mb-3">"{t.quote}"</blockquote>
-                <div className="text-[#FF9933] font-bold text-sm">— {t.role}</div>
-                <div className="text-gray-600 text-xs mt-1">{t.note}</div>
+              <div key={t.role} className="bg-raised rounded-2xl p-6 border-l-4 border-(--saffron)">
+                <blockquote className="text-white/80 italic mb-3">"{t.quote}"</blockquote>
+                <div className="text-saffron font-bold text-sm">— {t.role}</div>
+                <div className="text-text-hint text-xs mt-1">{t.note}</div>
               </div>
             ))}
           </div>
@@ -138,9 +138,9 @@ export default function ResearchPage() {
           <h2 className="text-2xl font-black text-white mb-6">The Gap ROADSoS Closes</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {metrics.map(m => (
-              <div key={m.label} className="bg-[#0D1B2A] rounded-2xl p-6 text-center border border-white/10">
-                <div className="text-4xl font-black mb-2" style={{ color: m.color }}>{m.value}</div>
-                <div className="text-gray-300 text-sm">{m.label}</div>
+              <div key={m.label} className="bg-raised rounded-2xl p-6 text-center border border-white/10">
+                <div className={`text-4xl font-black mb-2 text-(--${m.color})`}>{m.value}</div>
+                <div className="text-text-secondary text-sm">{m.label}</div>
               </div>
             ))}
           </div>
@@ -150,7 +150,7 @@ export default function ResearchPage() {
         </section>
 
         {/* QR Validation */}
-        <section className="bg-[#0D1B2A] rounded-2xl p-8 border border-[#2979FF]/20 flex flex-col md:flex-row items-center gap-8">
+        <section className="bg-raised rounded-2xl p-8 border border-blue/20 flex flex-col md:flex-row items-center gap-8">
           <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center shrink-0">
             <div className="grid grid-cols-7 gap-0.5 p-2">
               {Array.from({ length: 49 }).map((_, i) => (
@@ -158,14 +158,14 @@ export default function ResearchPage() {
               ))}
             </div>
           </div>
-          <div className="bg-[#0D1B2A] rounded-2xl p-8 border border-white/10 flex flex-col items-center text-center">
+          <div className="bg-raised rounded-2xl p-8 border border-white/10 flex flex-col items-center text-center">
             <h3 className="text-white font-bold text-xl mb-2">Help Us Validate</h3>
-            <p className="text-gray-400 text-sm mb-3">Scan to share your experience with road emergencies — real-time system validation</p>
+            <p className="text-text-secondary text-sm mb-3">Scan to share your experience with road emergencies — real-time system validation</p>
             <a
               href="https://forms.google.com"
               target="_blank"
-              rel="noreferrer"
-              className="text-[#2979FF] text-sm underline hover:text-[#2979FF]/80"
+              rel="noopener noreferrer"
+              className="text-(--blue) text-sm underline hover:text-(--blue)/80"
             >
               forms.google.com/roadsos-validation
             </a>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-const { lazy, Suspense, useEffect, useState, useRef } = React;
+const { lazy, Suspense, useEffect, useState, useRef, useCallback } = React;
 import {
   Routes,
   Route,
@@ -110,17 +110,72 @@ function Page({ children }: { children: React.ReactNode }) {
 const FULLSCREEN_PATHS = ['/sos-active', '/login', '/dispatched'];
 
 // ══════════════════════════════════════════════════════════════════
+// RootErrorBoundary — prevents black screen on crash
+// ══════════════════════════════════════════════════════════════════
+class RootErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null }
+  static getDerivedStateFromError(error: Error) { return { error } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen bg-[#080C14] text-[#F0F4FF] flex flex-col items-center justify-center p-6 font-sans gap-4">
+          <div className="text-5xl" aria-hidden="true">🚨</div>
+          <div className="text-xl font-bold">ROADSoS encountered an error</div>
+          <div className="text-[13px] text-[#8892A4] max-w-[500px] text-center">
+            {(this.state.error as Error).message}
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-6 py-3 bg-[#FF9933] text-[#080C14] border-none rounded-lg text-sm font-semibold cursor-pointer hover:brightness-110 transition-all">
+            Reload App
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
 // AppInitializer — handles core app initialization logic
 // ══════════════════════════════════════════════════════════════════
-function AppInitializer() {
-  const { init, isRegistered } = useVolunteerStore();
+function AppInitializer({ children }: { children: React.ReactNode }) {
+  // ✅ ALL hooks FIRST — no exceptions
+  const [isReady, setIsReady] = useState(false);
+  const { init: initVolunteer, isRegistered } = useVolunteerStore();
 
-  // Initialise volunteer socket when already registered
-  useEffect(() => {
-    if (isRegistered) init();
-  }, [isRegistered, init]);
+  const init = useCallback(async () => {
+    try {
+      const raw = localStorage.getItem('roadsos-accessibility');
+      if (raw) {
+        const s = JSON.parse(raw)?.state ?? {};
+        const sizeMap: Record<string, string> = { sm:'14px', md:'16px', lg:'20px', xl:'24px', xxl:'30px' };
+        if (s.fontSize) document.documentElement.style.setProperty('--app-font-size', sizeMap[s.fontSize] ?? '16px');
+        if (s.theme) {
+          document.documentElement.classList.remove('theme-dark','theme-light','theme-high-contrast','theme-saffron');
+          document.documentElement.classList.add(`theme-${s.theme}`);
+        }
+      }
+      if (isRegistered) await initVolunteer();
+    } catch {
+      // Silent fail — never crash the app over settings
+    } finally {
+      setIsReady(true);
+    }
+  }, [isRegistered, initVolunteer]);
 
-  return null;
+  useEffect(() => { init() }, [init]);
+
+  if (!isReady) return (
+    <div className="min-h-screen bg-[#080C14] flex items-center justify-center">
+      <div className="text-[#FF9933] font-mono text-[14px]">Initializing ROADSoS...</div>
+    </div>
+  );
+
+  return <>{children}</>;
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -128,12 +183,12 @@ function AppInitializer() {
 // ══════════════════════════════════════════════════════════════════
 function AppContent() {
   const location = useLocation();
-  const prevPath = useRef(location.pathname);
+  const prevPathRef = useRef(location.pathname);
 
   // Focus management on route change
   useEffect(() => {
-    if (prevPath.current !== location.pathname) {
-      prevPath.current = location.pathname;
+    if (prevPathRef.current !== location.pathname) {
+      prevPathRef.current = location.pathname;
       focusPageHeading();
     }
   }, [location.pathname]);
@@ -319,19 +374,20 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <>
-      <AppInitializer />
-      <ToastContainer>
-        {/* Boot screen — fades out after assets are ready */}
-        {loading && (
-          <AppLoadingScreen onComplete={() => setLoading(false)} />
-        )}
+    <RootErrorBoundary>
+      <AppInitializer>
+        <ToastContainer>
+          {/* Boot screen — fades out after assets are ready */}
+          {loading && (
+            <AppLoadingScreen onComplete={() => setLoading(false)} />
+          )}
 
-        {/* Main app — always mounted so routes preload */}
-        <div className={loading ? 'invisible' : 'visible'}>
-          <AppContent />
-        </div>
-      </ToastContainer>
-    </>
+          {/* Main app — always mounted so routes preload */}
+          <div className={loading ? 'invisible' : 'visible'}>
+            <AppContent />
+          </div>
+        </ToastContainer>
+      </AppInitializer>
+    </RootErrorBoundary>
   );
 }

@@ -165,9 +165,9 @@ export const LiveMap = () => {
 
   if (loadError) {
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center bg-[#080C14] text-white p-6 text-center">
-        <h2 className="text-xl font-bold text-red-500 mb-2">Map Load Error</h2>
-        <p className="text-sm text-white/70">Please check your Google Maps API Key configuration.</p>
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-base text-white p-6 text-center">
+        <h2 className="text-xl font-bold text-red mb-2">Map Load Error</h2>
+        <p className="text-sm text-text-secondary">Please check your Google Maps API Key configuration.</p>
         <button onClick={() => navigate('/')} className="mt-6 px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
           Return to Home
         </button>
@@ -176,14 +176,15 @@ export const LiveMap = () => {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#080C14]">
+    <div className="relative w-full h-screen overflow-hidden bg-base">
       {/* Tactical Scanline Overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-[5]" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,white_2px,white_3px)] z-5" />
 
       {/* Top Header/Action Bar */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-black/80 to-transparent z-[40] pointer-events-none flex justify-between p-4 items-start">
+      <div className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-black/80 to-transparent z-40 pointer-events-none flex justify-between p-4 items-start">
         <button 
           onClick={() => navigate('/')}
+          aria-label="Go Back"
           className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors pointer-events-auto shadow-lg"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -218,7 +219,7 @@ export const LiveMap = () => {
               <Marker
                 position={{ lat, lng }}
                 icon={{
-                  path: window.google.maps.SymbolPath.CIRCLE,
+                  path: google.maps.SymbolPath.CIRCLE,
                   scale: 8,
                   fillColor: '#3b82f6',
                   fillOpacity: 1,
@@ -251,7 +252,7 @@ export const LiveMap = () => {
                 position={{ lat: place.lat, lng: place.lng }}
                 onClick={() => setSelectedPlace(place)}
                 icon={{
-                  path: window.google.maps.SymbolPath.CIRCLE,
+                  path: google.maps.SymbolPath.CIRCLE,
                   scale: 6,
                   fillColor: color,
                   fillOpacity: 0.9,
@@ -277,7 +278,7 @@ export const LiveMap = () => {
       {/* Feature 2: Road Condition Reporting */}
       <RoadReportSheet />
       
-      <div className="absolute bottom-[240px] right-4 z-[40]">
+      <div className="absolute bottom-[240px] right-4 z-40">
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
