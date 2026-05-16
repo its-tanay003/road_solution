@@ -168,9 +168,11 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   }, [applySettings, isRegistered, initVolunteer]);
 
   // useEffect at top level — never conditional
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     void init()
   }, [init])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // ━━━ CONDITIONAL RENDERING BELOW HOOKS — this is allowed ━━━
   if (!isReady) {
