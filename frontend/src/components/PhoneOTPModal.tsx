@@ -17,6 +17,7 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { updateUser } = useAuthStore();
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!isOpen) {
       setStep('phone');
@@ -25,6 +26,7 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
       setError(null);
     }
   }, [isOpen]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSendOTP = async () => {
     if (!phone || phone.length < 10) {
@@ -41,8 +43,8 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
       });
       if (!res.ok) throw new Error('Failed to send OTP');
       setStep('otp');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -68,8 +70,8 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
       updateUser({ phone: `+91${phone}` });
       setStep('success');
       setTimeout(onClose, 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -106,6 +108,8 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 p-1 hover:bg-white/5 rounded-full text-(--clr-text-2)"
+          title="Close modal"
+          aria-label="Close modal"
         >
           <X size={20} />
         </button>
@@ -135,6 +139,8 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       placeholder="XXXXXXXXXX"
+                      title="Phone number"
+                      aria-label="Phone number"
                       className="w-full pl-14 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-sm focus:border-(--clr-blue) focus:ring-1 focus:ring-(--clr-blue) outline-none transition-all"
                     />
                   </div>
@@ -180,6 +186,8 @@ export const PhoneOTPModal: React.FC<PhoneOTPModalProps> = ({ isOpen, onClose })
                         value={digit}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(i, e)}
+                        title={`Digit ${i + 1} of OTP`}
+                        aria-label={`Digit ${i + 1} of OTP`}
                         className="w-11 h-14 text-center bg-white/5 border border-white/10 rounded-xl text-lg font-bold focus:border-(--clr-blue) focus:ring-1 focus:ring-(--clr-blue) outline-none transition-all"
                       />
                     ))}
