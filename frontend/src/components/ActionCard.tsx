@@ -29,7 +29,7 @@ export function ActionCard({ title, subtitle, route, accent, icon, badge, pulse 
       whileHover={{ scale: 1.02, y: -4 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => { hapticLight(); navigate(route); }}
-      animate={pulse ? { boxShadow: ['0 0 0 0 rgba(255,23,68,0)', '0 0 0 6px rgba(255,23,68,0.12)', '0 0 0 0 rgba(255,23,68,0)'] } : {}}
+      animate={pulse ? { boxShadow: [`0 0 0 0 ${accent}00`, `0 0 0 6px ${accent}20`, `0 0 0 0 ${accent}00`] } : {}}
       transition={pulse ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.15 }}
       aria-label={`${title} — ${subtitle}`}
       style={{ '--accent': accent } as React.CSSProperties}
@@ -52,7 +52,7 @@ export function ActionCard({ title, subtitle, route, accent, icon, badge, pulse 
 
       {/* Bottom: text */}
       <div className="flex flex-col gap-[3px] mt-3">
-        <h3 className="text-lg font-(--font-display) font-semibold text-(--text-primary) tracking-tight mb-1">
+        <h3 className="text-lg font-(--font-display) text-(--text-primary) tracking-tight mb-1">
           {title}
         </h3>
         <p className="text-sm font-(--font-body) text-(--text-secondary) leading-relaxed">

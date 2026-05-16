@@ -36,10 +36,20 @@ export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({
     setError(null);
 
     try {
+      // Handle location being potentially a string in the store
+      const incidentLocation = typeof incident.location === 'string' 
+        ? { lat: 0, lng: 0 } 
+        : (incident.location || { lat: 0, lng: 0 });
+
+      // Handle weather being a Record or missing
+      const weatherString = typeof incident.weather === 'string'
+        ? incident.weather
+        : (incident.weather as any)?.main || (incident.weather as any)?.description || 'Clear';
+
       const claimData: InsuranceClaimData = {
         incidentId: incident.id,
         timestamp: incident.timestamp ? new Date(incident.timestamp).getTime() : Date.now(),
-        location: incident.location || { lat: 0, lng: 0 },
+        location: incidentLocation,
         vaahan: {
           plate: vaahanData.plate,
           model: vaahanData.model,
@@ -51,7 +61,7 @@ export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({
           speed: 74, // Simulated impact speed
           gForce: { x: 4.2, y: 1.8, z: 0.5 },
           impactAngle: 'Front-Left (45 deg)',
-          weather: incident.weather || 'Clear',
+          weather: weatherString,
           roadType: 'National Highway (NH-48)'
         },
         triage: {
@@ -66,11 +76,11 @@ export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({
           photosTaken: 4,
           witnessCount: 2
         },
-          timeline: (incident.timeline || []).map((t: any) => ({
-          time: t.time,
+        timeline: (incident.timeline || []).map((t: any) => ({
+          time: typeof t.time === 'number' ? new Date(t.time).toLocaleTimeString() : String(t.time),
           event: t.event,
           responder: t.responder || 'System',
-          status: t.status
+          status: t.status || 'Completed'
         }))
       };
 

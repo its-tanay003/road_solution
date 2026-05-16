@@ -1,0 +1,9 @@
+﻿src/screens/SettingsScreen.tsx(34,15): error TS2322: Type 'number' is not assignable to type 'never'.
+src/screens/SettingsScreen.tsx(34,25): error TS2322: Type 'string' is not assignable to type 'never'.
+src/store/userStore.ts(141,7): error TS2322: Type '(info: Partial<MedicalProfile & { bloodGroup?: string; bloodType?: string; }>) => unknown' is not assignable to type '(info: Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>) => void'.
+  Types of parameters 'info' and 'info' are incompatible.
+    Type 'Partial<MedicalProfile | { bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>' is not assignable to type 'Partial<MedicalProfile & { bloodGroup?: string | undefined; bloodType?: string | undefined; }>'.
+      Type 'Partial<{ bloodGroup: string; allergies: string; conditions: string; age: string; medications: string; profileComplete: boolean; }>' is not assignable to type 'Partial<MedicalProfile & { bloodGroup?: string | undefined; bloodType?: string | undefined; }>'.
+        Types of property 'conditions' are incompatible.
+          Type 'string | undefined' is not assignable to type 'string[] | undefined'.
+            Type 'string' is not assignable to type 'string[]'.

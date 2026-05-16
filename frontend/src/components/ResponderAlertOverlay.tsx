@@ -36,7 +36,7 @@ export const ResponderAlertOverlay = () => {
               <MapPin size={12} className="mr-1" /> {activeAlert.distance}m Away
             </div>
             <h3 className="text-2xl font-bold text-white">{activeAlert.type}</h3>
-            <p className="text-sm text-muted">User: {activeAlert.user}</p>
+            <p className="text-sm text-muted">User: {(activeAlert.user as any)?.name || 'Unknown'}</p>
           </div>
 
           <div className="bg-black/50 border border-white/10 p-4 rounded-xl text-center text-sm text-muted">

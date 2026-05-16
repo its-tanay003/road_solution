@@ -12,20 +12,33 @@ import { useUserStore } from '../store/userStore';
 function Row({
   icon: Icon, label, value, color = 'text-(--blue)', onClick, danger, right
 }: {
-  icon: any; label: string; value?: string; color?: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value?: string; color?: string;
   onClick?: () => void; danger?: boolean; right?: React.ReactNode;
 }) {
+  const isInteractive = onClick !== undefined;
+
   return (
-    <motion.button whileTap={{ scale: 0.985 }} onClick={onClick}
-      aria-label={`${label}${value ? `: ${value}` : ''}`}
-      className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/4 active:bg-white/6 transition-colors text-left ${danger ? 'text-(--accent)' : ''}`}>
+    <motion.div 
+      whileTap={isInteractive ? { scale: 0.985 } : undefined} 
+      onClick={isInteractive ? onClick : undefined}
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      onKeyDown={isInteractive ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.() }
+      } : undefined}
+      aria-label={isInteractive ? `${label}${value ? `: ${value}` : ''}` : undefined}
+      className={`w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left 
+        ${isInteractive ? 'cursor-pointer hover:bg-white/4 active:bg-white/6' : ''} 
+        ${danger ? 'text-(--accent)' : ''}`}>
       <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${danger ? 'bg-(--accent)/15' : 'bg-white/6'}`}>
         <Icon size={16} className={danger ? 'text-(--accent)' : color} />
       </div>
       <span className={`flex-1 text-[15px] font-medium ${danger ? 'text-(--accent)' : 'text-white'}`}>{label}</span>
       {value && <span className="text-[13px] text-white/35 mr-1">{value}</span>}
-      {right ?? <ChevronRight size={14} className="text-white/20" />}
-    </motion.button>
+      <div onClick={(e) => e.stopPropagation()}>
+        {right ?? <ChevronRight size={14} className="text-white/20" />}
+      </div>
+    </motion.div>
   );
 }
 
@@ -72,7 +85,13 @@ function ThemePicker() {
           aria-label={`Select ${t.label} theme`}
           title={t.label}>
           <div className="h-full grid grid-cols-2 grid-rows-2">
-            {t.colors.map((c, i) => <div key={i} style={{ background: c } as React.CSSProperties} />)}
+            {t.colors.map((c, i) => (
+              <div 
+                key={i} 
+                className="w-full h-full bg-(--theme-color)" 
+                style={{ '--theme-color': c } as React.CSSProperties} 
+              />
+            ))}
           </div>
         </button>
       ))}

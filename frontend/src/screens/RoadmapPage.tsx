@@ -13,8 +13,8 @@ const phases = [
   {
     label: 'Phase 1 — Pilot',
     period: 'Month 1–6',
-    color: 'var(--saffron)',
-    ring: 'ring-saffron',
+    color: 'saffron',
+    ring: 'ring-(--saffron)',
     items: [
       { k: 'Target', v: 'Kancheepuram district, Tamil Nadu (NH-48 corridor)' },
       { k: 'Users', v: '50,000 downloads' },
@@ -26,8 +26,8 @@ const phases = [
   {
     label: 'Phase 2 — State Scale',
     period: 'Month 7–18',
-    color: 'var(--blue)',
-    ring: 'ring-blue',
+    color: 'blue',
+    ring: 'ring-(--blue)',
     items: [
       { k: 'Target', v: 'Tamil Nadu + Karnataka + Maharashtra' },
       { k: 'Users', v: '5 million downloads' },
@@ -39,8 +39,8 @@ const phases = [
   {
     label: 'Phase 3 — National',
     period: 'Month 19–36',
-    color: 'var(--green)',
-    ring: 'ring-green',
+    color: 'green',
+    ring: 'ring-(--green)',
     items: [
       { k: 'Target', v: 'All 28 states · 100M+ potential users' },
       { k: 'Roadmap', v: 'Drone + AR HUD hardware integration · PM Gati Shakti corridors' },
@@ -58,13 +58,13 @@ const costRows = [
 ];
 
 const govNodes = [
-  { id: 'app', label: 'ROADSoS App', ministry: 'Core Platform', status: 'Live', color: 'var(--saffron)' },
-  { id: 'n112', label: '112 India', ministry: 'MHA / NEC', status: 'Operational', color: 'var(--blue)' },
-  { id: 'irad', label: 'iRAD MoRTH', ministry: 'Ministry of Road Transport', status: 'Integrated', color: 'var(--green)' },
-  { id: 'emri', label: '108 GVK EMRI', ministry: 'State Health Departments', status: 'Pending MoU', color: 'var(--amber)' },
-  { id: 'hie', label: 'Hospital HIE', ministry: 'NHA / Ayushman Bharat', status: 'Planned', color: 'var(--purple)' },
-  { id: 'vaahan', label: 'VAHAN RTO', ministry: 'MoRTH NR', status: 'Staging', color: 'var(--purple)' },
-  { id: 'nhai', label: 'NHAI Black Spots', ministry: 'Ministry of Road Transport', status: 'Integrated', color: 'var(--blue)' },
+  { id: 'app', label: 'ROADSoS App', ministry: 'Core Platform', status: 'Live', color: 'saffron' },
+  { id: 'n112', label: '112 India', ministry: 'MHA / NEC', status: 'Operational', color: 'blue' },
+  { id: 'irad', label: 'iRAD MoRTH', ministry: 'Ministry of Road Transport', status: 'Integrated', color: 'green' },
+  { id: 'emri', label: '108 GVK EMRI', ministry: 'State Health Departments', status: 'Pending MoU', color: 'amber' },
+  { id: 'hie', label: 'Hospital HIE', ministry: 'NHA / Ayushman Bharat', status: 'Planned', color: 'purple' },
+  { id: 'vaahan', label: 'VAHAN RTO', ministry: 'MoRTH NR', status: 'Staging', color: 'purple' },
+  { id: 'nhai', label: 'NHAI Black Spots', ministry: 'Ministry of Road Transport', status: 'Integrated', color: 'blue' },
 ];
 
 const statusColor: Record<string, string> = {
@@ -167,16 +167,13 @@ export default function RoadmapPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.15 }}
-                className={`bg-raised rounded-2xl p-6 ring-1 ring-(--saffron)/40`}
+                className={`bg-raised rounded-2xl p-6 ring-1 ring-(--${p.color})/40`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span 
-                    className="text-xs font-mono px-2 py-1 rounded" 
-                    style={{ background: `color-mix(in srgb, ${p.color}, transparent 85%)`, color: p.color } as React.CSSProperties}
-                  >
+                  <span className={`text-xs font-mono px-2 py-1 rounded bg-(--${p.color})/15 text-(--${p.color})`}>
                     {p.period}
                   </span>
-                  <span className="text-2xl font-black" style={{ color: p.color } as React.CSSProperties}>0{i + 1}</span>
+                  <span className={`text-2xl font-black text-(--${p.color})`}>0{i + 1}</span>
                 </div>
                 <h3 className="font-bold text-white mb-4">{p.label}</h3>
                 <div className="space-y-2">
@@ -218,7 +215,7 @@ export default function RoadmapPage() {
             </table>
           </div>
           <p className="text-gray-500 text-sm mt-3 italic">
-            At national scale, Claude API costs represent <span className="text-[#FF9933]">₹0.08 per emergency event</span> — less than an SMS.
+            At national scale, Claude API costs represent <span className="text-amber-500 font-bold">₹0.08 per emergency event</span> — less than an SMS.
             Government CERT-In cloud deployment reduces infra cost by 60%.
           </p>
         </section>
@@ -235,17 +232,12 @@ export default function RoadmapPage() {
                   animate={govInView ? { opacity: 1, scale: 1 } : {}}
                   transition={{ delay: i * 0.1 }}
                   className="bg-base rounded-xl p-4 border border-white/5 flex flex-col gap-2"
+                  style={{ '--sc': statusColor[node.status] } as React.CSSProperties}
                 >
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: node.color } as React.CSSProperties} />
+                  <div className={`w-2 h-2 rounded-full bg-(--${node.color})`} />
                   <div className="font-bold text-white text-sm">{node.label}</div>
                   <div className="text-gray-500 text-xs">{node.ministry}</div>
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full w-fit"
-                    style={{ 
-                      backgroundColor: `color-mix(in srgb, ${statusColor[node.status]}, transparent 85%)`, 
-                      color: statusColor[node.status] 
-                    } as React.CSSProperties}
-                  >
+                  <span className="text-xs px-2 py-0.5 rounded-full w-fit bg-(--sc)/15 text-(--sc)">
                     {node.status}
                   </span>
                 </motion.div>

@@ -84,11 +84,7 @@ function StepCard({ step, total, accent }: { step: Step; total: number; accent: 
       {/* dots */}
       <div className="flex gap-2 justify-center mt-2">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className="h-2 rounded-full transition-all duration-300"
-            style={{ 
-              width: i === step.n - 1 ? 24 : 8, 
-              backgroundColor: i === step.n - 1 ? 'var(--accent)' : 'rgba(255,255,255,0.15)' 
-            } as React.CSSProperties} />
+          <div key={i} className={`h-2 rounded-full transition-all duration-300 ${i === step.n - 1 ? 'w-6 bg-(--accent)' : 'w-2 bg-white/15'}`} />
         ))}
       </div>
       {/* illustration */}
@@ -134,7 +130,7 @@ function GuideScreen({ cat, onBack }: { cat: Category; onBack: () => void }) {
   }, [step, voiceOn, cur]);
 
   if (!cur) return (
-    <div className="min-h-screen bg-base flex flex-col items-center justify-center px-5 gap-6">
+    <div className="min-h-screen bg-base flex flex-col items-center justify-center px-5 gap-6" style={{ '--accent': cat.accent } as React.CSSProperties}>
       <span className="text-7xl">✅</span>
       <h2 className="text-2xl font-black text-white text-center">All steps complete!</h2>
       <p className="text-white/50 text-center">Call 112 if the situation hasn't improved.</p>
@@ -213,5 +209,6 @@ export const FirstAidScreen: React.FC = () => {
     </AnimatePresence>
   );
 };
+
 
 export default FirstAidScreen;

@@ -161,7 +161,7 @@ export const IncidentTimeline: React.FC = () => {
               <Globe size={18} className="text-emerald-500" />
               <h2 className="font-bold text-lg uppercase tracking-tight text-white">Government Compliance Filing</h2>
             </div>
-            <IRADReportCard report={iradReport as any} ackId={iradAckId} />
+            <IRADReportCard report={iradReport} ackId={iradAckId} />
           </motion.div>
         )}
 
