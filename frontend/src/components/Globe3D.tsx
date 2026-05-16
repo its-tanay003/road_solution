@@ -109,8 +109,7 @@ export const Globe3D: React.FC<Globe3DProps> = ({ size = 200, className = '' }) 
   if (!canRender) {
     return (
       <div 
-        className={`${className} flex items-center justify-center bg-white/5 rounded-full animate-pulse w-[--globe-size] h-[--globe-size]`}
-        style={{ '--globe-size': `${size}px` } as React.CSSProperties}
+        className={`${className} globe-3d-container flex items-center justify-center bg-white/5 rounded-full animate-pulse [--globe-size:${size}px]`}
       >
         <div className="w-1/2 h-1/2 bg-white/10 rounded-full" />
       </div>
@@ -119,8 +118,7 @@ export const Globe3D: React.FC<Globe3DProps> = ({ size = 200, className = '' }) 
 
   return (
     <div
-      className={`${className} relative w-(--globe-size) h-(--globe-size) perspective-[1000px]`}
-      style={{ '--globe-size': `${size}px` } as React.CSSProperties}
+      className={`${className} globe-3d-container perspective-[1000px] [--globe-size:${size}px]`}
       role="img"
       aria-label="Rotating India globe with incident markers"
     >

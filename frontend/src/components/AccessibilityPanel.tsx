@@ -9,6 +9,7 @@ import {
   Type
 } from 'lucide-react';
 import { useAccessibilityStore } from '../store';
+import { buttonAria } from '../utils/aria-utils';
 
 export const AccessibilityPanel = () => {
   const { 
@@ -128,10 +129,10 @@ export const AccessibilityPanel = () => {
 
 const ToggleCard = ({ active, onClick, title, description, disabled = false }: { active: boolean, onClick: () => void, title: string, description: string, disabled?: boolean }) => (
   <button 
+    {...buttonAria(title, active)}
     onClick={onClick}
     disabled={disabled}
     className={`w-full text-left p-6 rounded-3xl border transition-all ${active ? 'bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/30' : 'bg-white/5 border-white/5 hover:bg-white/10'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    aria-pressed={active}
   >
     <div className="flex justify-between items-start mb-2">
       <span className="font-black text-white text-sm uppercase tracking-wide">{title}</span>

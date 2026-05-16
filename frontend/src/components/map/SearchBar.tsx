@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMapDataStore } from '../../store/mapDataStore';
 import type { ServiceLayerType } from '../../store/mapDataStore';
 import { useDebounce } from '../../hooks/useDebounce';
+import { buttonAria } from '../../utils/aria-utils';
 
 const QUICK_FILTERS = [
   { id: 'hospitals', label: 'Hospital', icon: Building2 },
@@ -98,9 +99,9 @@ export const SearchBar = ({ onLocationSelect }: SearchBarProps) => {
               setQuery('');
               setResults([]);
             }}
-            className="p-2 text-white/40 hover:text-white transition-colors"
             title="Clear search"
             aria-label="Clear search"
+            className="p-2 text-white/40 hover:text-white transition-colors"
           >
             <X size={18} />
           </button>
@@ -130,6 +131,8 @@ export const SearchBar = ({ onLocationSelect }: SearchBarProps) => {
                 <button
                   key={result.place_id}
                   onClick={() => handleSelect(result)}
+                  title={`Select ${result.display_name}`}
+                  aria-label={`Select ${result.display_name}`}
                   className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left group"
                 >
                   <MapPin className="w-4 h-4 text-white/40 mt-1 group-hover:text-blue-500" />
@@ -149,13 +152,14 @@ export const SearchBar = ({ onLocationSelect }: SearchBarProps) => {
       </AnimatePresence>
 
       {/* Quick Filters */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
         {QUICK_FILTERS.map(filter => {
           const isActive = activeLayers.has(filter.id as ServiceLayerType);
           return (
             <button
               key={filter.id}
               onClick={() => toggleLayer(filter.id as ServiceLayerType)}
+              {...buttonAria(`Toggle ${filter.label} layer`, isActive)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-bold transition-all ${
                 isActive 
                   ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' 

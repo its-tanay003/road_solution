@@ -7,6 +7,7 @@ import {
   User, Phone, Languages, HelpCircle, Code, Star
 } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
+import { switchAria } from '../utils/aria-utils';
 
 function Row({
   icon: Icon, label, value, color = 'text-(--blue)', onClick, danger, right
@@ -45,8 +46,7 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
   return (
     <button 
       type="button"
-      role="switch"
-      aria-checked={value ? "true" : "false"}
+      {...switchAria(value)}
       aria-label={label}
       onClick={(e) => {
         e.stopPropagation();
@@ -92,11 +92,10 @@ function ThemePicker() {
           aria-label={`Select ${t.label} theme`}
           title={t.label}>
           <div className="h-full grid grid-cols-2 grid-rows-2">
-            {t.colors.map((c, i) => (
+            {t.colors.map((_, i) => (
               <div 
                 key={i} 
-                className="w-full h-full bg-[var(--theme-c)]" 
-                style={{ '--theme-c': c } as React.CSSProperties} 
+                className={`w-full h-full theme-preview-${t.id}-${i}`} 
               />
             ))}
           </div>

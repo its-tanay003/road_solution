@@ -6,7 +6,8 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/backend/index.js" },
-    { "source": "/socket.io/(.*)", "destination": "/backend/index.js" }
+    { "source": "/socket.io/(.*)", "destination": "/backend/index.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {

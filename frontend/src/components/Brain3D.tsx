@@ -79,16 +79,14 @@ export const Brain3D: React.FC<Brain3DProps> = ({ aiState = 'idle', size = 80 })
   if (!canRender) {
     return (
       <div 
-        className="animate-pulse bg-white/5 rounded-full w-(--brain-size) h-(--brain-size)"
-        style={{ '--brain-size': `${size}px` } as React.CSSProperties} 
+        className={`brain-3d-container animate-pulse bg-white/5 rounded-full [--brain-size:${size}px]`}
       />
     );
   }
 
   return (
     <div
-      className="relative shrink-0 w-(--brain-size) h-(--brain-size)"
-      style={{ '--brain-size': `${size}px` } as React.CSSProperties}
+      className={`brain-3d-container [--brain-size:${size}px]`}
       role="img"
       aria-label={`AI brain — ${aiState}`}
     >

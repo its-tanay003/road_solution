@@ -33,14 +33,14 @@ export function VoiceNavigationListener() {
   const navigate = useNavigate();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  function startRecognition(SpeechRec: any) {
+  function startRecognition(SpeechRec: SpeechRecognitionConstructor) {
     let errorCount = 0;
     const rec = new SpeechRec();
     rec.continuous = true;
     rec.interimResults = false;
     rec.lang = 'en-IN';
 
-    rec.onerror = (e: any) => {
+    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
       if (e.error === 'not-allowed') {
         if (errorCount === 0) {
           console.info('[VoiceNav] Microphone not allowed — voice commands disabled');
@@ -66,7 +66,7 @@ export function VoiceNavigationListener() {
       }
     };
 
-    rec.onresult = (e: any) => {
+    rec.onresult = (e: SpeechRecognitionEvent) => {
       const results = e.results;
       const last = results[results.length - 1];
       if (!last.isFinal) return;
@@ -95,7 +95,7 @@ export function VoiceNavigationListener() {
     if (voiceNavStarted || permissionDenied) return;
     voiceNavStarted = true;
 
-    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRec) {
       console.info('[VoiceNav] Speech recognition not available in this browser');
