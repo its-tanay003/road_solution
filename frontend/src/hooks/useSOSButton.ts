@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSosStore } from '../store';
 import { socket } from '../lib/socket';
+import { getCurrentPosition } from '../utils/geolocation';
 
 export const useSOSButton = () => {
   const [holdProgress, setHoldProgress] = useState(0);
@@ -13,14 +14,15 @@ export const useSOSButton = () => {
 
   const animateRef = useRef<() => void>(null);
 
-  const handleTrigger = useCallback(() => {
+  const handleTrigger = useCallback(async () => {
     // Generate incident ID if not provided
     const incidentId = `INC-${Math.random().toString(36).substring(7).toUpperCase()}`;
     triggerSOS(incidentId);
     
-    // Mock location for demo (In production, use navigator.geolocation)
-    const lat = 28.6139;
-    const lng = 77.2090;
+    // Get location from utility (provides fallback/simulation)
+    const pos = await getCurrentPosition();
+    const lat = pos.lat;
+    const lng = pos.lng;
     const userId = 'demo_user_001';
     
     socket.emit('sos:triggered', {

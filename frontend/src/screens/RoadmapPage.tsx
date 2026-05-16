@@ -1,9 +1,8 @@
 import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Code, Star, ExternalLink 
-} from 'lucide-react';
+import { ArrowLeft, Code, Star, ExternalLink } from 'lucide-react';
+import { getAriaExpanded } from '../utils/aria-utils';
 
 /* ── Helpers ────────────────────────────────────────────── */
 
@@ -322,7 +321,7 @@ export default function RoadmapPage() {
         <section>
           <button
             onClick={() => setChecklistOpen(o => !o)}
-            aria-expanded={checklistOpen ? "true" : "false"}
+            {...getAriaExpanded(checklistOpen)}
             aria-label="Toggle Phase 1 Launch Checklist"
             className="w-full flex items-center justify-between bg-raised rounded-2xl p-5 border border-white/10 hover:border-saffron/40 transition-colors"
           >

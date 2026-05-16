@@ -1,21 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Grid, RoundedBox } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
+import { Timer } from 'three';
 import { useEmergencyStore } from '../store';
+import { threeCanvasRegistry } from '../utils/threeCanvasRegistry';
 
-const Vehicle = () => {
+const Vehicle = ({ timer }: { timer: Timer }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { crashTriggered, gForceData } = useEmergencyStore();
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!meshRef.current) return;
+    const elapsed = timer.getElapsed();
 
     if (!crashTriggered) {
       // Subtle idle bob animation
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.05 + 0.5;
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.02;
+      meshRef.current.position.y = Math.sin(elapsed * 2) * 0.05 + 0.5;
+      meshRef.current.rotation.z = Math.sin(elapsed * 0.5) * 0.02;
     } else {
       // Crash spin and settle
       meshRef.current.rotation.x += (gForceData.x * 0.1 - meshRef.current.rotation.x) * 0.1;
@@ -23,7 +26,7 @@ const Vehicle = () => {
       meshRef.current.rotation.z += (gForceData.z * 0.1 - meshRef.current.rotation.z) * 0.1;
       
       // Impact bounce
-      const impactY = 0.5 + Math.abs(Math.sin(state.clock.elapsedTime * 10)) * 0.2 * Math.exp(-(state.clock.elapsedTime % 1) * 5);
+      const impactY = 0.5 + Math.abs(Math.sin(elapsed * 10)) * 0.2 * Math.exp(-(elapsed % 1) * 5);
       meshRef.current.position.y = Math.max(0.5, impactY);
     }
   });
@@ -48,6 +51,28 @@ const Vehicle = () => {
 
 export const CrashReconstruction3D: React.FC = () => {
   const { crashTriggered, gForceData } = useEmergencyStore();
+  const [canRender, setCanRender] = useState(false);
+  const timer = useMemo(() => new Timer(), []);
+
+  useEffect(() => {
+    const registered = threeCanvasRegistry.register();
+    requestAnimationFrame(() => setCanRender(registered));
+    return () => {
+      if (registered) threeCanvasRegistry.unregister();
+    };
+  }, []);
+
+  useFrame(() => {
+    timer.update();
+  });
+
+  if (!canRender) {
+    return (
+      <div className="w-full h-[280px] bg-[#080C14] rounded-2xl border border-white/5 flex items-center justify-center">
+        <div className="text-white/20 text-[10px] font-mono animate-pulse">RECONSTRUCTION ENGINE STANDBY</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-[280px] bg-[#080C14] rounded-2xl overflow-hidden border border-white/5">
@@ -58,7 +83,17 @@ export const CrashReconstruction3D: React.FC = () => {
         } : {}}
         className="w-full h-full"
       >
-        <Canvas shadows>
+        <Canvas 
+          shadows
+          dpr={[1, 1.5]}
+          gl={{ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: 'low-power',
+            failIfMajorPerformanceCaveat: false,
+          }}
+          frameloop="demand"
+        >
           <PerspectiveCamera makeDefault position={[5, 3, 5]} fov={40} />
           <OrbitControls 
             enablePan={false} 
@@ -71,7 +106,7 @@ export const CrashReconstruction3D: React.FC = () => {
           <pointLight position={[10, 10, 10]} intensity={1} castShadow />
           <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
 
-          <Vehicle />
+          <Vehicle timer={timer} />
           
           <Grid
             renderOrder={-1}
@@ -131,3 +166,4 @@ export const CrashReconstruction3D: React.FC = () => {
     </div>
   );
 };
+

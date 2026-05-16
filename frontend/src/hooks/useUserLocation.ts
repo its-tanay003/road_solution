@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { getCurrentPosition, watchPosition } from '../utils/geolocation';
+import type { GeoPosition } from '../utils/geolocation';
 
 interface LocationState {
   lat: number | null;
@@ -8,68 +10,39 @@ interface LocationState {
   loading: boolean;
 }
 
-const CHENNAI_DEFAULT = {
-  lat: 13.0827,
-  lng: 80.2707,
-  accuracy: null,
-};
-
 export const useUserLocation = () => {
-  const [location, setLocation] = useState<LocationState>(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      return {
-        ...CHENNAI_DEFAULT,
-        error: typeof navigator === 'undefined' ? null : 'Geolocation is not supported by your browser',
-        loading: false,
-      };
-    }
-    return {
-      lat: null,
-      lng: null,
-      accuracy: null,
-      error: null,
-      loading: true,
-    };
+  const [location, setLocation] = useState<LocationState>({
+    lat: null,
+    lng: null,
+    accuracy: null,
+    error: null,
+    loading: true,
   });
 
   useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-
-    const handleSuccess = (position: GeolocationPosition) => {
+    const handleUpdate = (pos: GeoPosition) => {
       setLocation({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        accuracy: position.coords.accuracy,
+        lat: pos.lat,
+        lng: pos.lng,
+        accuracy: pos.accuracy,
         error: null,
         loading: false,
       });
     };
 
-    const handleError = (error: GeolocationPositionError) => {
-      setLocation({
-        ...CHENNAI_DEFAULT,
-        error: error.message,
-        loading: false,
-      });
+    const handleError = (error: Error) => {
+      console.warn('[useUserLocation] Geolocation warning:', error.message);
+      // Utility handles fallback, so we don't necessarily set error: error.message 
+      // unless we want the UI to show a warning.
     };
 
-    // Get initial position quickly
-    navigator.geolocation.getCurrentPosition(handleSuccess, handleError, {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0,
-    });
+    // Initial fetch
+    getCurrentPosition().then(handleUpdate);
 
-    // Then watch for changes
-    const watchId = navigator.geolocation.watchPosition(handleSuccess, handleError, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0,
-    });
+    // Watch for changes
+    const unwatch = watchPosition(handleUpdate, handleError);
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
+    return () => unwatch();
   }, []);
 
   return location;

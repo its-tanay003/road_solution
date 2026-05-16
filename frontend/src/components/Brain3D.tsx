@@ -1,7 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Icosahedron } from '@react-three/drei';
 import * as THREE from 'three';
+import { Timer } from 'three';
+import { threeCanvasRegistry } from '../utils/threeCanvasRegistry';
 
 type AIState = 'idle' | 'processing' | 'done';
 
@@ -16,22 +18,26 @@ function BrainMesh({ aiState }: { aiState: AIState }) {
   const matRef  = useRef<THREE.MeshStandardMaterial>(null);
   const targetScale = useRef(1);
   const currentScale = useRef(1);
+  const timer = useMemo(() => new Timer(), []);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
+    timer.update();
+    const t = timer.getElapsed();
+
     if (!meshRef.current || !matRef.current) return;
 
     // Pulsing scale when processing
     if (aiState === 'processing') {
-      targetScale.current = 1 + 0.12 * Math.sin(clock.elapsedTime * 4);
+      targetScale.current = 1 + 0.12 * Math.sin(t * 4);
     } else {
-      targetScale.current = 1 + 0.03 * Math.sin(clock.elapsedTime * 1.5);
+      targetScale.current = 1 + 0.03 * Math.sin(t * 1.5);
     }
     currentScale.current += (targetScale.current - currentScale.current) * 0.1;
     meshRef.current.scale.setScalar(currentScale.current);
 
     // Slow rotation
     meshRef.current.rotation.y += 0.008;
-    meshRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.3) * 0.2;
+    meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.2;
 
     // Color lerp
     const target = new THREE.Color(STATE_COLORS[aiState]);
@@ -59,20 +65,48 @@ interface Brain3DProps {
   size?: number;
 }
 
-export const Brain3D: React.FC<Brain3DProps> = ({ aiState = 'idle', size = 80 }) => (
-  <div
-    style={{ width: size, height: size }}
-    role="img"
-    aria-label={`AI brain — ${aiState}`}
-  >
-    <Canvas
-      camera={{ position: [0, 0, 3], fov: 40 }}
-      dpr={[1, 1.5]}
-      gl={{ antialias: true, alpha: true }}
+export const Brain3D: React.FC<Brain3DProps> = ({ aiState = 'idle', size = 80 }) => {
+  const [canRender, setCanRender] = useState(false);
+
+  useEffect(() => {
+    const registered = threeCanvasRegistry.register();
+    requestAnimationFrame(() => setCanRender(registered));
+    return () => {
+      if (registered) threeCanvasRegistry.unregister();
+    };
+  }, []);
+
+  if (!canRender) {
+    return (
+      <div 
+        className="animate-pulse bg-white/5 rounded-full w-(--brain-size) h-(--brain-size)"
+        style={{ '--brain-size': `${size}px` } as React.CSSProperties} 
+      />
+    );
+  }
+
+  return (
+    <div
+      className="relative shrink-0 w-(--brain-size) h-(--brain-size)"
+      style={{ '--brain-size': `${size}px` } as React.CSSProperties}
+      role="img"
+      aria-label={`AI brain — ${aiState}`}
     >
-      <ambientLight intensity={0.2} />
-      <pointLight position={[2, 2, 2]} intensity={1.5} color={STATE_COLORS[aiState]} />
-      <BrainMesh aiState={aiState} />
-    </Canvas>
-  </div>
-);
+      <Canvas
+        camera={{ position: [0, 0, 3], fov: 40 }}
+        dpr={[1, 1.5]}
+        gl={{ 
+          antialias: true, 
+          powerPreference: 'low-power',
+          alpha: true,
+          failIfMajorPerformanceCaveat: false,
+        }}
+        frameloop="demand"
+      >
+        <ambientLight intensity={0.2} />
+        <pointLight position={[2, 2, 2]} intensity={1.5} color={STATE_COLORS[aiState]} />
+        <BrainMesh aiState={aiState} />
+      </Canvas>
+    </div>
+  );
+};

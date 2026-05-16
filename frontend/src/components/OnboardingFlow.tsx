@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Camera, MapPin, Mic, CheckCircle2, ChevronRight, Heart, Phone } from 'lucide-react';
 import { useUserStore, type EmergencyContact } from '../store';
 import { sanitizeInput } from '../utils/inputSanitizer';
+import { getCurrentPosition } from '../utils/geolocation';
 
 const DEATH_INTERVAL_SEC = 204;
 
@@ -342,11 +343,10 @@ const Step4 = ({ onFinish, onBack }: { onFinish: () => void, onBack: () => void 
     if (key === 'notify' && 'Notification' in window) {
       const status = await Notification.requestPermission();
       setPerms(prev => ({ ...prev, notify: status === 'granted' }));
-    } else if (key === 'gps' && 'geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        () => setPerms(prev => ({ ...prev, gps: true })),
-        () => setPerms(prev => ({ ...prev, gps: false }))
-      );
+    } else if (key === 'gps') {
+      getCurrentPosition()
+        .then(() => setPerms(prev => ({ ...prev, gps: true })))
+        .catch(() => setPerms(prev => ({ ...prev, gps: false })));
     } else {
       setTimeout(() => {
         setPerms(prev => ({ ...prev, [key]: true }));

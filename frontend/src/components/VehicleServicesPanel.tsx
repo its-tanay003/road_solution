@@ -17,6 +17,8 @@ import axios from '../lib/axios';
 import { db } from '../lib/db';
 import { logger } from '../lib/logger';
 
+import { getCurrentPosition } from '../utils/geolocation';
+
 interface VehicleService {
   id: string;
   name: string;
@@ -123,20 +125,16 @@ export const VehicleServicesPanel: React.FC = () => {
   };
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setUserLocation(loc);
-          fetchServices(loc.lat, loc.lng, radius);
-        },
-        () => {
-          const loc = { lat: 28.6139, lng: 77.2090 };
-          setUserLocation(loc);
-          fetchServices(loc.lat, loc.lng, radius);
-        }
-      );
-    }
+    getCurrentPosition().then((pos) => {
+      const loc = { lat: pos.lat, lng: pos.lng };
+      setUserLocation(loc);
+      fetchServices(loc.lat, loc.lng, radius);
+    }).catch(() => {
+      // Fallback to Delhi if even utility fails (unlikely given its internal fallback)
+      const loc = { lat: 28.6139, lng: 77.2090 };
+      setUserLocation(loc);
+      fetchServices(loc.lat, loc.lng, radius);
+    });
   }, [radius]);
 
   const handleSaveArea = async () => {
