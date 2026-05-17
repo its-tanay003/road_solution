@@ -10,7 +10,7 @@ import {
   Activity, 
   ShieldCheck
 } from 'lucide-react';
-import { useDroneRegistryStore, useJudgeStore } from '../store';
+import { useDroneRegistryStore, useSosStore } from '../store';
 
 // Custom Drone Icon with Animated Propeller
 const createDroneIcon = (status: string) => {
@@ -41,7 +41,7 @@ const createDroneIcon = (status: string) => {
 
 export const DroneDispatchLayer = () => {
   const { drones, updateDronePos, dispatchDrone, toggleCamera } = useDroneRegistryStore();
-  const { activeIncidents } = useJudgeStore();
+  const { isActive: isSosActive, location: sosLocation } = useSosStore();
   const [selectedDroneId, setSelectedDroneId] = useState<string | null>(null);
   const [isThermal, setIsThermal] = useState(false);
 
@@ -49,8 +49,8 @@ export const DroneDispatchLayer = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       drones.forEach(drone => {
-        if (drone.status === 'DISPATCHED' && activeIncidents.length > 0) {
-          const target = activeIncidents[0].location; // Aim for the first incident
+        if (drone.status === 'DISPATCHED' && isSosActive && sosLocation) {
+          const target = [sosLocation.lat, sosLocation.lng]; // Aim for the SOS incident
           const dx = target[0] - drone.currentLat;
           const dy = target[1] - drone.currentLng;
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -66,7 +66,7 @@ export const DroneDispatchLayer = () => {
       });
     }, 500);
     return () => clearInterval(interval);
-  }, [drones, activeIncidents, updateDronePos]);
+  }, [drones, isSosActive, sosLocation, updateDronePos]);
 
   const selectedDrone = drones.find(d => d.droneId === selectedDroneId);
 
@@ -97,12 +97,12 @@ export const DroneDispatchLayer = () => {
             </Popup>
           </Marker>
 
-          {drone.status === 'DISPATCHED' && activeIncidents.length > 0 && (
+          {drone.status === 'DISPATCHED' && isSosActive && sosLocation && (
             <Polyline 
               positions={[
                 [drone.baseLat, drone.baseLng],
                 [drone.currentLat, drone.currentLng],
-                activeIncidents[0].location
+                [sosLocation.lat, sosLocation.lng]
               ]}
               pathOptions={{ color: '#3b82f6', weight: 2, dashArray: '5, 10', opacity: 0.6 }}
             />
@@ -170,8 +170,8 @@ export const DroneDispatchLayer = () => {
             >
               <div className="flex gap-2">
                 <button 
-                  onClick={() => activeIncidents.length > 0 && dispatchDrone(selectedDrone.droneId, activeIncidents[0].location[0], activeIncidents[0].location[1])}
-                  disabled={selectedDrone.status !== 'STANDBY' || activeIncidents.length === 0}
+                  onClick={() => isSosActive && sosLocation && dispatchDrone(selectedDrone.droneId, sosLocation.lat, sosLocation.lng)}
+                  disabled={selectedDrone.status !== 'STANDBY' || !isSosActive || !sosLocation}
                   className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors shadow-lg shadow-blue-900/20"
                 >
                   Dispatch Drone

@@ -159,7 +159,7 @@ export const AgentWarRoom = () => {
               <div className="flex -space-x-2">
                 {roomUsers.map((u, i) => {
                   return (
-                    /* eslint-disable-next-line */
+
                     <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white shadow-md relative group bg-(--u-color)" style={{ '--u-color': u.color } as React.CSSProperties}>
                       {u.name.charAt(0)}
                       <div className="absolute top-full mt-1 hidden group-hover:block bg-black text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-50">

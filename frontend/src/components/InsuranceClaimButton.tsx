@@ -3,7 +3,7 @@ import { Button } from './ui/Button';
 import { FileText, Download, CheckCircle, AlertCircle } from 'lucide-react';
 import type { InsuranceClaimData } from '../utils/generateClaimPDF';
 import { generateClaimPDF } from '../utils/generateClaimPDF';
-import { useSosStore, useDemoStore } from '../store';
+import { useSosStore } from '../store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logger } from '../lib/logger';
 
@@ -24,7 +24,14 @@ export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({
     state.closedIncidents.find(inc => inc.id === incidentId)
   );
   
-  const { vaahanData } = useDemoStore();
+  // Localized VAAHAN vehicle analytics fallback data for export capability
+  const vaahanData = {
+    plate: 'TN 09 AZ 4521',
+    model: 'Maruti Suzuki Swift VXI (2019)',
+    owner: 'RAJESH KUMAR (NAME_WITHHELD)',
+    insurance: 'VALID (MAR 2026)',
+    puc: 'VALID (NOV 2025)'
+  };
 
   const handleGenerate = async () => {
     if (!incident) {
