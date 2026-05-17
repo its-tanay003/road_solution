@@ -31,7 +31,7 @@ test.describe('ROADSoS Auto-Crash & AI Triage Flows', () => {
     await expect(overlay).not.toBeVisible();
   });
 
-  test('should submit AI triage payload correctly', async ({ page, request }) => {
+  test('should submit AI triage payload correctly', async ({ page }) => {
     // Navigate to triage chat
     await page.goto('/chat');
     

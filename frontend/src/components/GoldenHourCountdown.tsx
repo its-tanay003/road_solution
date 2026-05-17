@@ -1,11 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEmergencyStore, useDemoStore } from '../store';
+import { useEmergencyStore } from '../store';
 import { ShieldCheck, Activity, Timer } from 'lucide-react';
 
 export const GoldenHourCountdown = () => {
   const { goldenHourActive, dispatchConfirmed, setGoldenHourActive } = useEmergencyStore();
-  const { incrementStats } = useDemoStore();
   
   const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes in seconds
   const [survivalProb, setSurvivalProb] = useState(96.0);
@@ -39,11 +38,10 @@ export const GoldenHourCountdown = () => {
     if (dispatchConfirmed && !prevDispatchConfirmed.current) {
       setHasFlashed(true);
       setSurvivalProb((prev) => Math.min(99.9, prev + 5.3));
-      incrementStats();
       setTimeout(() => setHasFlashed(false), 1000);
     }
     prevDispatchConfirmed.current = dispatchConfirmed;
-  }, [dispatchConfirmed, incrementStats]);
+  }, [dispatchConfirmed]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

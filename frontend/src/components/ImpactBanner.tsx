@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, ArrowRight, X } from 'lucide-react';
-import { useDemoStore } from '../store';
+import { useNavigate } from 'react-router-dom';
 
 export const ImpactBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const triggerScenario = useDemoStore(state => state.triggerScenario);
+  const navigate = useNavigate();
 
   return (
     <AnimatePresence>
@@ -42,12 +42,12 @@ export const ImpactBanner: React.FC = () => {
 
                 <button 
                   onClick={() => {
-                    triggerScenario(1);
+                    navigate('/impact-data');
                     setIsVisible(false);
                   }}
                   className="flex items-center gap-2 text-cyan font-bold text-xs hover:gap-3 transition-all group/btn"
                 >
-                  Watch Live Demo <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                  View Impact Data <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
