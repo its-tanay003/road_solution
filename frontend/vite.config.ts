@@ -87,28 +87,53 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            const normalizedPath = id.replace(/\\/g, '/');
+            const parts = normalizedPath.split('node_modules/');
+            const pathAfterNodeModules = parts[parts.length - 1];
+            
+            let pkgName = '';
+            if (pathAfterNodeModules.startsWith('@')) {
+              const segments = pathAfterNodeModules.split('/');
+              if (segments.length >= 2) {
+                pkgName = `${segments[0]}/${segments[1]}`;
+              }
+            } else {
+              pkgName = pathAfterNodeModules.split('/')[0];
+            }
+
+            if (
+              pkgName === 'react' ||
+              pkgName === 'react-dom' ||
+              pkgName === 'react-router-dom' ||
+              pkgName === 'react-router' ||
+              pkgName === '@remix-run/router' ||
+              pkgName === 'scheduler' ||
+              pkgName === 'react-is'
+            ) {
               return 'react-vendor';
             }
-            if (id.includes('framer-motion')) {
+            if (pkgName === 'framer-motion') {
               return 'animation';
             }
-            if (id.includes('leaflet') || id.includes('react-leaflet')) {
+            if (pkgName === 'leaflet' || pkgName === 'react-leaflet') {
               return 'map';
             }
-            if (id.includes('three') || id.includes('@react-three')) {
+            if (pkgName === 'three') {
               return 'three';
             }
-            if (id.includes('chart.js') || id.includes('react-chartjs-2')) {
+            if (pkgName.startsWith('@react-three/')) {
+              return 'react-three';
+            }
+            if (pkgName === 'chart.js' || pkgName === 'react-chartjs-2') {
               return 'charts';
             }
-            if (id.includes('jspdf') || id.includes('html2canvas')) {
+            if (pkgName === 'jspdf' || pkgName === 'jspdf-autotable' || pkgName === 'html2canvas') {
               return 'pdf';
             }
-            if (id.includes('i18next') || id.includes('react-i18next')) {
+            if (pkgName === 'i18next' || pkgName === 'react-i18next') {
               return 'i18n';
             }
-            if (id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
+            if (pkgName === 'lucide-react' || pkgName === 'clsx' || pkgName === 'tailwind-merge') {
               return 'ui-utils';
             }
           }
