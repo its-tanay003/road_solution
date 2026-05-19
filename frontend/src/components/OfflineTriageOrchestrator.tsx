@@ -39,7 +39,7 @@ export const OfflineTriageOrchestrator: React.FC = () => {
           clearTimeout(timeoutId);
           if (!res.ok) setIsOffline(true);
           else setIsOffline(false);
-        } catch (e) {
+        } catch {
           setIsOffline(true);
         }
       }

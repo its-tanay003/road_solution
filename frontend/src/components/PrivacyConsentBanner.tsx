@@ -11,7 +11,7 @@ const ConsentChip = ({
   required, 
   onClick 
 }: { 
-  icon: any; 
+  icon: React.ComponentType<{ size?: number }>; 
   label: string; 
   active: boolean; 
   required?: boolean;

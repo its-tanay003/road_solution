@@ -109,11 +109,10 @@ export const OfflineReadinessScore: React.FC = () => {
   );
 };
 
-const ScoreItem = ({ label, value, max, icon: Icon }: { label: string, value: number, max: number, icon: React.ElementType }) => (
+const ScoreItem = ({ label, value, max, icon: Icon }: { label: string, value: number, max: number, icon: React.ComponentType<{ size?: number }> }) => (
   <div className="flex items-center justify-between group">
     <div className="flex items-center gap-3">
       <div className={`p-2 rounded-lg bg-white/5 group-hover:bg-white/10 transition-all ${value === max ? 'text-emerald-500' : 'text-nx-text-dim'}`}>
-        {/* @ts-ignore */}
         <Icon size={14} />
       </div>
       <span className="text-[10px] font-black uppercase tracking-widest text-nx-text-dim group-hover:text-white transition-all">{label}</span>
