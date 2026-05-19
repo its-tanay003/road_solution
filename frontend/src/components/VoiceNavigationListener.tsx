@@ -33,64 +33,64 @@ export function VoiceNavigationListener() {
   const navigate = useNavigate();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  function startRecognition(SpeechRec: SpeechRecognitionConstructor) {
-    let errorCount = 0;
-    const rec = new SpeechRec();
-    rec.continuous = true;
-    rec.interimResults = false;
-    rec.lang = 'en-IN';
+  useEffect(() => {
+    function startRecognition(SpeechRec: SpeechRecognitionConstructor) {
+      let errorCount = 0;
+      const rec = new SpeechRec();
+      rec.continuous = true;
+      rec.interimResults = false;
+      rec.lang = 'en-IN';
 
-    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
-      if (e.error === 'not-allowed') {
-        if (errorCount === 0) {
-          console.info('[VoiceNav] Microphone not allowed — voice commands disabled');
-        }
-        permissionDenied = true;
-        errorCount++;
-        rec.stop();
-        return;
-      }
-      if (e.error === 'no-speech') return; // Normal — ignore completely
-      if (errorCount < 2) console.warn('[VoiceNav] Error:', e.error);
-      errorCount++;
-    };
-
-    rec.onend = () => {
-      if (!permissionDenied) {
-        // Restart with delay to avoid rapid cycling
-        setTimeout(() => {
-          try {
-            if (!permissionDenied) rec.start();
-          } catch { /* ignore */ }
-        }, 3000);
-      }
-    };
-
-    rec.onresult = (e: SpeechRecognitionEvent) => {
-      const results = e.results;
-      const last = results[results.length - 1];
-      if (!last.isFinal) return;
-
-      for (let i = 0; i < last.length; i++) {
-        const transcript = last[i].transcript;
-        const cmd = matchCommand(transcript);
-        if (cmd) {
-          announce(`Voice command: ${cmd.label}`, 'assertive');
-          cmd.action(navigate);
+      rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+        if (e.error === 'not-allowed') {
+          if (errorCount === 0) {
+            console.info('[VoiceNav] Microphone not allowed — voice commands disabled');
+          }
+          permissionDenied = true;
+          errorCount++;
+          rec.stop();
           return;
         }
+        if (e.error === 'no-speech') return; // Normal — ignore completely
+        if (errorCount < 2) console.warn('[VoiceNav] Error:', e.error);
+        errorCount++;
+      };
+
+      rec.onend = () => {
+        if (!permissionDenied) {
+          // Restart with delay to avoid rapid cycling
+          setTimeout(() => {
+            try {
+              if (!permissionDenied) rec.start();
+            } catch { /* ignore */ }
+          }, 3000);
+        }
+      };
+
+      rec.onresult = (e: SpeechRecognitionEvent) => {
+        const results = e.results;
+        const last = results[results.length - 1];
+        if (!last.isFinal) return;
+
+        for (let i = 0; i < last.length; i++) {
+          const transcript = last[i].transcript;
+          const cmd = matchCommand(transcript);
+          if (cmd) {
+            announce(`Voice command: ${cmd.label}`, 'assertive');
+            cmd.action(navigate);
+            return;
+          }
+        }
+      };
+
+      try {
+        rec.start();
+        recognitionRef.current = rec;
+      } catch {
+        console.info('[VoiceNav] Could not start recognition');
       }
-    };
-
-    try {
-      rec.start();
-      recognitionRef.current = rec;
-    } catch {
-      console.info('[VoiceNav] Could not start recognition');
     }
-  }
 
-  useEffect(() => {
     // Already started or permanently denied — do nothing
     if (voiceNavStarted || permissionDenied) return;
     voiceNavStarted = true;

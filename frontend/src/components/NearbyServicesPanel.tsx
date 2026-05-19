@@ -79,7 +79,7 @@ export const NearbyServicesPanel: React.FC = () => {
           params: { lat, lng }
         });
         if (hospRes.data.services) {
-          fetchedServices = hospRes.data.services.map((s: any) => ({
+          fetchedServices = hospRes.data.services.map((s: Service) => ({
             ...s,
             distance: haversine(lat, lng, s.lat, s.lng)
           }));
@@ -93,7 +93,7 @@ export const NearbyServicesPanel: React.FC = () => {
             params: { lat, lng, radius: 10000 }
           });
           if (osmRes.data.services) {
-            fetchedServices = osmRes.data.services.map((s: any) => ({
+            fetchedServices = osmRes.data.services.map((s: Service) => ({
               ...s,
               distance: haversine(lat, lng, s.lat, s.lng)
             }));
@@ -125,7 +125,7 @@ export const NearbyServicesPanel: React.FC = () => {
     });
 
     const socket = getSocket();
-    socket.on('hospital_updates', (updates: any[]) => {
+    socket.on('hospital_updates', (updates: Partial<Service>[]) => {
       setServices(prev => prev.map(s => {
         const u = updates.find(update => update.id === s.id);
         return u ? { ...s, ...u } : s;

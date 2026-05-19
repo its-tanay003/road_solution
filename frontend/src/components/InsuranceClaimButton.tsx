@@ -48,10 +48,15 @@ export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({
         ? { lat: 0, lng: 0 } 
         : (incident.location || { lat: 0, lng: 0 });
 
+      interface WeatherData {
+        main?: string;
+        description?: string;
+      }
+
       // Handle weather being a Record or missing
       const weatherString = typeof incident.weather === 'string'
         ? incident.weather
-        : (incident.weather as any)?.main || (incident.weather as any)?.description || 'Clear';
+        : (incident.weather as WeatherData)?.main || (incident.weather as WeatherData)?.description || 'Clear';
 
       const claimData: InsuranceClaimData = {
         incidentId: incident.id,
@@ -83,7 +88,7 @@ export const InsuranceClaimButton: FC<InsuranceClaimButtonProps> = ({
           photosTaken: 4,
           witnessCount: 2
         },
-        timeline: (incident.timeline || []).map((t: any) => ({
+        timeline: (incident.timeline || []).map((t: { time: number | string; event: string; responder?: string; status?: string }) => ({
           time: typeof t.time === 'number' ? new Date(t.time).toLocaleTimeString() : String(t.time),
           event: t.event,
           responder: t.responder || 'System',

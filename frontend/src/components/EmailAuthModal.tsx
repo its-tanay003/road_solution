@@ -37,8 +37,8 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose 
       updateUser({ email });
       setSuccess(true);
       setTimeout(onClose, 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -55,6 +55,7 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose 
       >
         <button 
           onClick={onClose}
+          title="Close"
           className="absolute top-4 right-4 p-1 hover:bg-white/5 rounded-full text-(--clr-text-2)"
         >
           <X size={20} />

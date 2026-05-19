@@ -23,7 +23,7 @@ import { CountrySelector } from './CountrySelector';
 interface EmergencyButtonProps {
   label: string;
   number: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   variant: 'critical' | 'vehicle' | 'support';
   lastCalled?: number;
   currentTime: number;
@@ -71,7 +71,6 @@ const EmergencyButton: React.FC<EmergencyButtonProps> = ({
         title={`Call ${label}: ${number}`}
         className={`w-full min-h-[72px] p-3 rounded-2xl border flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${bgColor}`}
       >
-        {/* @ts-ignore */}
         <Icon size={24} className="group-hover:scale-110 transition-transform" />
         <div className="flex flex-col items-center">
           <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>

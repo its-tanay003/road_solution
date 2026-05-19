@@ -24,11 +24,11 @@ export const PanicModeOverlay: React.FC = () => {
 
   // Prevent sleep
   useEffect(() => {
-    let wakeLock: any = null;
+    let wakeLock: { release: () => unknown } | null = null;
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator) {
-          wakeLock = await (navigator as any).wakeLock.request('screen');
+          wakeLock = await (navigator as Navigator & { wakeLock: { request: (type: string) => Promise<{ release: () => unknown }> } }).wakeLock.request('screen');
         }
       } catch (err) {
         logger.error('Wake Lock error:', err);
@@ -36,7 +36,12 @@ export const PanicModeOverlay: React.FC = () => {
     };
     requestWakeLock();
     return () => {
-      if (wakeLock) wakeLock.release();
+      if (wakeLock) {
+        const promise = wakeLock.release();
+        if (promise instanceof Promise) {
+          promise.catch((err) => logger.error('Wake Lock release error:', err));
+        }
+      }
     };
   }, []);
 
@@ -152,15 +157,17 @@ export const PanicModeOverlay: React.FC = () => {
 
       {/* Panic Mode Bottom Navigation */}
       <div className={`h-28 border-t-4 ${isCrackedScreen ? 'border-white/20' : 'border-slate-100'} flex items-center justify-around px-2`}>
-        {[
-          { id: 'CALL', icon: Phone, label: 'CALL' },
-          { id: 'MAP', icon: MapIcon, label: 'MAP' },
-          { id: 'HELP', icon: Heart, label: 'HELP' },
-          { id: 'CONTACTS', icon: Users, label: 'CONTACTS' }
-        ].map((tab) => (
+        {(
+          [
+            { id: 'CALL', icon: Phone, label: 'CALL' },
+            { id: 'MAP', icon: MapIcon, label: 'MAP' },
+            { id: 'HELP', icon: Heart, label: 'HELP' },
+            { id: 'CONTACTS', icon: Users, label: 'CONTACTS' }
+          ] as const
+        ).map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`
               flex flex-col items-center justify-center w-24 h-20 rounded-2xl transition-colors
               ${activeTab === tab.id ? 'bg-red-600 text-white' : isCrackedScreen ? 'text-slate-500' : 'text-slate-400'}

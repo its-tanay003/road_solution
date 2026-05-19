@@ -42,7 +42,7 @@ export const PushNotificationSetup: React.FC = () => {
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
           });
-          setSubscribed(true, subscription as any);
+          setSubscribed(true, subscription as unknown as PushSubscription);
         } else {
           // Fallback for demo without VAPID key
           setSubscribed(true, null);
@@ -53,8 +53,8 @@ export const PushNotificationSetup: React.FC = () => {
       }
 
       setResponderId(responderId);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
