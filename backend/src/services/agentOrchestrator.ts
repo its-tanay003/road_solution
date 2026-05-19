@@ -1,21 +1,16 @@
-import { runTriageAgent } from '../agents/agentTriage';
-import { runVisionAgent } from '../agents/agentVision';
-import { runVitalsAgent } from '../agents/agentVitals';
-import { runIdentityAgent } from '../agents/agentIdentity';
-import { runOrchestratorAgent } from '../agents/agentOrchestrator';
-import { runFirstAidAgent } from '../agents/agentFirstAid';
+import { triage, vision, vitals, identity, orchestrate, firstAid } from './hybridAI';
 
 interface OrchestratorInput {
   textMessage?: string;
   imageBase64?: string;
   videoFrames?: string[];
-  vitalsData?: any;
-  userProfile?: any;
+  vitalsData?: Record<string, unknown>;
+  userProfile?: Record<string, unknown>;
   language?: string;
   incidentId: string;
 }
 
-export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
+export async function runEmergencyAnalysis(input: OrchestratorInput, io: import('socket.io').Server | null) {
   const {
     textMessage,
     imageBase64,
@@ -32,14 +27,14 @@ export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
     }
   };
 
-  const promises: Promise<any>[] = [];
-  const results: any = {};
+  const promises: Promise<void>[] = [];
+  const results: Record<string, unknown> = {};
 
   // 1. Run TriageAgent
   if (textMessage || vitalsData || imageBase64) {
     promises.push(
-      runTriageAgent({ textMessage, vitalsData, userProfile }, (text) => emitStream('triage', text))
-        .then(res => {
+      triage({ textMessage, vitalsData, userProfile }, (text: string) => emitStream('triage', text))
+        .then((res: unknown) => {
           results.triage = res;
           if (io) io.emit('agent:update', { incidentId, agentName: 'triage', data: res });
         })
@@ -49,8 +44,8 @@ export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
   // 2. Run MedicalVisionAgent
   if (imageBase64 || (videoFrames && videoFrames.length > 0)) {
     promises.push(
-      runVisionAgent(imageBase64!, textMessage || videoFrames, (text) => emitStream('vision', text), userProfile)
-        .then(res => {
+      vision(imageBase64!, textMessage || videoFrames, (text: string) => emitStream('vision', text), userProfile)
+        .then((res: unknown) => {
           results.vision = res;
           if (io) io.emit('agent:update', { incidentId, agentName: 'vision', data: res });
         })
@@ -60,8 +55,8 @@ export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
   // 3. Run VitalSignsAgent
   if (vitalsData) {
     promises.push(
-      runVitalsAgent(vitalsData, userProfile, (text) => emitStream('vitals', text))
-        .then(res => {
+      vitals(vitalsData, userProfile, (text: string) => emitStream('vitals', text))
+        .then((res: unknown) => {
           results.vitals = res;
           if (io) io.emit('agent:update', { incidentId, agentName: 'vitals', data: res });
         })
@@ -71,8 +66,8 @@ export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
   // Identity Agent (if needed based on context)
   if (userProfile || imageBase64) {
     promises.push(
-      runIdentityAgent(imageBase64 ? { imageBase64 } : null, userProfile, (text) => emitStream('identity', text))
-        .then(res => {
+      identity(imageBase64 ? { imageBase64 } : null, userProfile, (text: string) => emitStream('identity', text))
+        .then((res: unknown) => {
           results.identity = res;
           if (io) io.emit('agent:update', { incidentId, agentName: 'identity', data: res });
         })
@@ -83,12 +78,12 @@ export async function runEmergencyAnalysis(input: OrchestratorInput, io: any) {
   await Promise.all(promises);
 
   // 5. Feed into OrchestratorAgent
-  const orchestratorResult = await runOrchestratorAgent(results, (text) => emitStream('orchestrator', text));
+  const orchestratorResult = await orchestrate(results, (text: string) => emitStream('orchestrator', text));
   if (io) io.emit('agent:update', { incidentId, agentName: 'orchestrator', data: orchestratorResult });
   results.orchestrator = orchestratorResult;
 
   // 6. Run FirstAidAgent
-  const firstAidResult = await runFirstAidAgent(orchestratorResult, language, (text) => emitStream('firstAid', text));
+  const firstAidResult = await firstAid(orchestratorResult, language, (text: string) => emitStream('firstAid', text));
   if (io) io.emit('agent:update', { incidentId, agentName: 'firstAid', data: firstAidResult });
   results.firstAid = firstAidResult;
 
