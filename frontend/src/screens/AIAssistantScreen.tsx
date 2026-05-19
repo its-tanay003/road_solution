@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Mic, Send, Camera, Upload, MessageSquare, ChevronRight, ArrowLeft, type LucideIcon } from 'lucide-react';
+import { Mic, Send, Camera, Upload, MessageSquare, ChevronRight, ArrowLeft, Globe, Activity, type LucideIcon } from 'lucide-react';
 import { Brain3D } from '../components/Brain3D';
 
 type AIState = 'idle' | 'processing' | 'done';
@@ -66,7 +66,16 @@ export const AIAssistantScreen: React.FC = () => {
   const [input, setInput] = useState('');
   const [aiState, setAiState] = useState<AIState>('idle');
   const [mode, setMode] = useState<Mode>('chat');
+  const [activeProvider, setActiveProvider] = useState<'claude' | 'gemini'>('claude');
+  const [systemStatus, setSystemStatus] = useState<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch('/api/ai/ai-status')
+      .then(res => res.json())
+      .then(data => setSystemStatus(data))
+      .catch(err => console.error('Failed to load AI status:', err));
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,6 +98,31 @@ export const AIAssistantScreen: React.FC = () => {
     }, 1800);
   };
 
+  const performLiveSearch = async () => {
+    if (!input.trim()) return;
+    setStarted(true);
+    const userMsg: Message = { role: 'user', text: input, time: timeStr() };
+    setMessages(m => [...m, userMsg]);
+    const query = input;
+    setInput('');
+    setAiState('processing');
+
+    try {
+      const res = await fetch('/api/ai/grounded-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      const data = await res.json();
+      setMessages(m => [...m, { role: 'ai', text: data.text || 'No results found.', time: timeStr() }]);
+    } catch (error) {
+      setMessages(m => [...m, { role: 'ai', text: 'Live search failed.', time: timeStr() }]);
+    } finally {
+      setAiState('done');
+      setTimeout(() => setAiState('idle'), 1500);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-background flex flex-col overflow-hidden">
       {/* header */}
@@ -101,8 +135,33 @@ export const AIAssistantScreen: React.FC = () => {
           <ArrowLeft size={18} className="text-white" />
         </button>
         <div className="flex-1">
-          <h1 className="text-[17px] font-black text-white">AI Assistant</h1>
-          <p className="text-[11px] text-neutral-500">Powered by NEXUS Intelligence</p>
+          <h1 className="text-[17px] font-black text-white flex items-center gap-2">
+            AI Assistant
+            {systemStatus && (
+              <span className="flex items-center gap-1 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded border border-green-500/30 font-semibold uppercase tracking-wider">
+                <Activity size={10} /> Online
+              </span>
+            )}
+          </h1>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-[11px] text-neutral-500">Powered by NEXUS</p>
+            
+            {/* Provider Toggle */}
+            <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-800">
+              <button
+                onClick={() => setActiveProvider('claude')}
+                className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-colors ${activeProvider === 'claude' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-neutral-500'}`}
+              >
+                CLAUDE
+              </button>
+              <button
+                onClick={() => setActiveProvider('gemini')}
+                className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-colors ${activeProvider === 'gemini' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'text-neutral-500'}`}
+              >
+                GEMINI
+              </button>
+            </div>
+          </div>
         </div>
         {/* Brain 3D */}
         <Brain3D aiState={aiState} size={52} />
@@ -125,6 +184,20 @@ export const AIAssistantScreen: React.FC = () => {
           </button>
         ))}
       </nav>
+
+      {/* Status Badges */}
+      {systemStatus && (
+        <div className="px-4 py-2 border-b border-neutral-800 flex flex-wrap gap-1.5">
+          {Object.entries(systemStatus.providers).map(([agent, provider]) => (
+            <div key={agent} className="flex items-center gap-1 text-[10px] bg-neutral-900 px-2 py-1 rounded border border-neutral-800">
+              <span className="text-neutral-400 capitalize">{agent}:</span>
+              <span className={`font-bold capitalize ${provider === 'gemini' ? 'text-orange-400' : 'text-blue-400'}`}>
+                {provider as string}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ENTRY or CHAT */}
       <main className="flex-1 overflow-y-auto" aria-live="polite">
@@ -206,19 +279,35 @@ export const AIAssistantScreen: React.FC = () => {
                 className="flex-1 bg-transparent text-white text-[14px] placeholder:text-white/30 outline-none"
               />
             </div>
-            <motion.button 
-              whileTap={{ scale: 0.9 }} 
-              onClick={() => sendMessage(input)}
-              disabled={!input.trim()}
-              className={`p-3 rounded-xl shrink-0 transition-all border ${
-                input.trim() 
-                  ? 'bg-saffron text-void border-(--saffron)' 
-                  : 'bg-base text-white/30 border-white/5'
-              }`}
-              aria-label="Send message"
-            >
-              <Send size={18} />
-            </motion.button>
+            <div className="flex gap-1 shrink-0">
+              <motion.button 
+                whileTap={{ scale: 0.9 }} 
+                onClick={performLiveSearch}
+                disabled={!input.trim()}
+                className={`p-3 rounded-xl transition-all border ${
+                  input.trim() 
+                    ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20' 
+                    : 'bg-base text-white/30 border-white/5'
+                }`}
+                aria-label="Live Search"
+                title="Google Grounded Search"
+              >
+                <Globe size={18} />
+              </motion.button>
+              <motion.button 
+                whileTap={{ scale: 0.9 }} 
+                onClick={() => sendMessage(input)}
+                disabled={!input.trim()}
+                className={`p-3 rounded-xl transition-all border ${
+                  input.trim() 
+                    ? 'bg-saffron text-void border-(--saffron)' 
+                    : 'bg-base text-white/30 border-white/5'
+                }`}
+                aria-label="Send message"
+              >
+                <Send size={18} />
+              </motion.button>
+            </div>
           </div>
         )}
       </footer>
