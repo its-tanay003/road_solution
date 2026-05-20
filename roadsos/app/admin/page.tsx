@@ -1,463 +1,283 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+export const dynamic = 'force-dynamic';
+
+
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRealtimeIncidents } from '@/lib/supabase/realtime';
+import type { DBIncident } from '@/lib/supabase/types';
 import {
-  Shield, AlertTriangle, CheckCircle2, Clock, MapPin,
-  Phone, Radio, RefreshCw, Wifi, WifiOff, Users, Activity,
-  Navigation, Zap, ChevronRight, X, MessageSquare,
+  AlertTriangle, CheckCircle2, Clock, Radio, RefreshCw,
+  Wifi, WifiOff, MapPin, Phone, X, ChevronRight,
+  Activity, Users, ShieldCheck, Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type IncidentStatus = 'active' | 'acknowledged' | 'resolved' | 'false_alarm';
-
-interface Incident {
-  id: string;
-  lat: number;
-  lng: number;
-  address: string;
-  status: IncidentStatus;
-  trigger: 'manual' | 'triple-press' | 'voice' | 'sensor';
-  createdAt: Date;
-  updatedAt: Date;
-  responderEta?: number;
-  responderName?: string;
-  userId?: string;
-  notes?: string;
+// ── helpers ────────────────────────────────────────────────────
+function timeAgo(iso: string) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return `${Math.floor(diff)}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  return `${Math.floor(diff / 3600)}h ago`;
 }
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+const STATUS_CONFIG: Record<DBIncident['status'], { label: string; color: string; dot: string; icon: React.ElementType }> = {
+  active:       { label: 'Active',       color: 'text-red-400',    dot: 'bg-red-500',    icon: AlertTriangle },
+  acknowledged: { label: 'Acknowledged', color: 'text-yellow-400', dot: 'bg-yellow-400', icon: Clock },
+  resolved:     { label: 'Resolved',     color: 'text-green-400',  dot: 'bg-green-500',  icon: CheckCircle2 },
+  false_alarm:  { label: 'False Alarm',  color: 'text-gray-400',   dot: 'bg-gray-600',   icon: X },
+};
 
-const MOCK_INCIDENTS: Incident[] = [
-  {
-    id: 'INC-001',
-    lat: 28.6139, lng: 77.2090,
-    address: 'Connaught Place, New Delhi, India',
-    status: 'active',
-    trigger: 'manual',
-    createdAt: new Date(Date.now() - 3 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 1 * 60 * 1000),
-    responderEta: 4,
-    responderName: 'Unit Alpha-7',
-  },
-  {
-    id: 'INC-002',
-    lat: 19.0760, lng: 72.8777,
-    address: 'Bandra West, Mumbai, Maharashtra',
-    status: 'acknowledged',
-    trigger: 'sensor',
-    createdAt: new Date(Date.now() - 12 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 5 * 60 * 1000),
-    responderEta: 2,
-    responderName: 'Unit Bravo-3',
-  },
-  {
-    id: 'INC-003',
-    lat: 12.9716, lng: 77.5946,
-    address: 'Koramangala, Bangalore, Karnataka',
-    status: 'resolved',
-    trigger: 'triple-press',
-    createdAt: new Date(Date.now() - 45 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 20 * 60 * 1000),
-    responderName: 'Unit Charlie-1',
-    notes: 'Minor road accident — occupants safe',
-  },
-  {
-    id: 'INC-004',
-    lat: 22.5726, lng: 88.3639,
-    address: 'Park Street, Kolkata, West Bengal',
-    status: 'false_alarm',
-    trigger: 'voice',
-    createdAt: new Date(Date.now() - 90 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 60 * 60 * 1000),
-    notes: 'Accidental activation — confirmed by user',
-  },
+const TYPE_EMOJI: Record<string, string> = {
+  road_crash: '🚗', medical: '🏥', fire: '🔥', flood: '🌊', assault: '🚨', other: '⚠️',
+};
+
+// Mock stats for demo (replace with real Supabase aggregates)
+const MOCK_STATS = [
+  { label: 'Active',     value: '—', icon: Zap,        color: 'text-red-400',    bg: 'bg-red-500/10' },
+  { label: 'Today',      value: '—', icon: Activity,   color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  { label: 'Responders', value: '4', icon: Users,       color: 'text-blue-400',   bg: 'bg-blue-500/10' },
+  { label: 'Resolved',   value: '—', icon: ShieldCheck, color: 'text-green-400',  bg: 'bg-green-500/10' },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ── Component ──────────────────────────────────────────────────
+export default function AdminPage() {
+  const { incidents, connectionStatus, error, updateIncidentStatus, refresh } = useRealtimeIncidents({ limit: 100 });
+  const [selected, setSelected] = useState<DBIncident | null>(null);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [filter, setFilter] = useState<DBIncident['status'] | 'all'>('all');
 
-const STATUS_CONFIG: Record<IncidentStatus, { label: string; color: string; bg: string; border: string }> = {
-  active: { label: 'ACTIVE', color: 'text-red-400', bg: 'bg-red-950/50', border: 'border-red-700' },
-  acknowledged: { label: 'ACKNOWLEDGED', color: 'text-orange-400', bg: 'bg-orange-950/50', border: 'border-orange-700' },
-  resolved: { label: 'RESOLVED', color: 'text-green-400', bg: 'bg-green-950/50', border: 'border-green-700' },
-  false_alarm: { label: 'FALSE ALARM', color: 'text-gray-400', bg: 'bg-gray-900/50', border: 'border-gray-700' },
-};
+  const activeCount  = incidents.filter(i => i.status === 'active').length;
+  const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
+  const todayCount   = incidents.filter(i => new Date(i.created_at).toDateString() === new Date().toDateString()).length;
 
-const TRIGGER_ICONS: Record<Incident['trigger'], string> = {
-  manual: '👆',
-  'triple-press': '3️⃣',
-  voice: '🎙️',
-  sensor: '📡',
-};
+  const stats = MOCK_STATS.map(s => ({
+    ...s,
+    value: s.label === 'Active' ? String(activeCount) : s.label === 'Today' ? String(todayCount) : s.label === 'Resolved' ? String(resolvedCount) : s.value,
+  }));
 
-function elapsed(date: Date): string {
-  const s = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  return `${Math.floor(s / 3600)}h ago`;
-}
+  const filtered = filter === 'all' ? incidents : incidents.filter(i => i.status === filter);
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+  async function handleStatusChange(incident: DBIncident, newStatus: DBIncident['status']) {
+    setUpdating(incident.id);
+    try {
+      await updateIncidentStatus(incident.id, newStatus);
+      if (selected?.id === incident.id) setSelected({ ...incident, status: newStatus });
+    } catch (e) { console.error(e); }
+    finally { setUpdating(null); }
+  }
 
-function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ElementType; color: string }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon size={18} />
-      </div>
-      <div>
-        <p className="text-2xl font-black text-white leading-none">{value}</p>
-        <p className="text-gray-500 text-xs mt-0.5">{label}</p>
+    <div className="min-h-screen bg-gray-950 text-white">
+      {/* Top bar */}
+      <header className="sticky top-0 z-20 bg-gray-950/90 backdrop-blur border-b border-gray-800 px-5 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center">
+            <Radio size={15} className="text-white" />
+          </div>
+          <div>
+            <h1 className="font-black text-base text-white leading-none">Control Room</h1>
+            <p className="text-gray-500 text-[10px]">ROADSoS Admin</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Live indicator */}
+          <div className={cn('flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border',
+            connectionStatus === 'connected' ? 'bg-green-500/10 border-green-500/30 text-green-400' :
+            connectionStatus === 'error'     ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+            'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
+          )}>
+            {connectionStatus === 'connected'
+              ? <><Wifi size={11} /> Live</>
+              : connectionStatus === 'error'
+              ? <><WifiOff size={11} /> Error</>
+              : <><WifiOff size={11} /> Connecting</>
+            }
+          </div>
+          <button onClick={refresh} aria-label="Refresh incidents"
+            className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
+            <RefreshCw size={14} className="text-gray-400" />
+          </button>
+        </div>
+      </header>
+
+      <div className="px-4 py-4 space-y-4 pb-10">
+        {/* Error banner */}
+        {error && (
+          <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl px-4 py-2 text-yellow-300 text-sm flex items-center gap-2">
+            <AlertTriangle size={14} />
+            {error} — showing cached data
+          </div>
+        )}
+
+        {/* Stats grid */}
+        <div className="grid grid-cols-4 gap-2">
+          {stats.map(s => {
+            const Icon = s.icon;
+            return (
+              <div key={s.label} className={cn('rounded-2xl p-3 border border-gray-800', s.bg)}>
+                <Icon size={16} className={cn('mb-1', s.color)} />
+                <p className={cn('text-xl font-black', s.color)}>{s.value}</p>
+                <p className="text-gray-500 text-[10px]">{s.label}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Filter tabs */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {(['all', 'active', 'acknowledged', 'resolved', 'false_alarm'] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={cn('shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+                filter === f ? 'bg-white text-gray-900 border-white' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
+              )}>
+              {f === 'all' ? 'All' : f === 'false_alarm' ? 'False Alarm' : STATUS_CONFIG[f].label}
+              {f === 'active' && activeCount > 0 && (
+                <span className="ml-1.5 bg-red-500 text-white rounded-full text-[9px] px-1.5 py-0.5">{activeCount}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Incident list + detail panel */}
+        <div className="flex gap-3">
+          {/* List */}
+          <div className="flex-1 space-y-2 min-w-0">
+            {filtered.length === 0 && (
+              <div className="text-center py-16 text-gray-600">
+                <CheckCircle2 size={32} className="mx-auto mb-3 opacity-50" />
+                <p className="text-sm">No {filter !== 'all' ? filter : ''} incidents</p>
+                <p className="text-xs mt-1">
+                  {process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('your-project')
+                    ? 'Configure Supabase in .env.local to see real incidents'
+                    : 'All clear'}
+                </p>
+              </div>
+            )}
+            <AnimatePresence initial={false}>
+              {filtered.map((inc) => {
+                const cfg = STATUS_CONFIG[inc.status];
+                const Icon = cfg.icon;
+                const isSelected = selected?.id === inc.id;
+                return (
+                  <motion.button
+                    key={inc.id}
+                    layout
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    onClick={() => setSelected(isSelected ? null : inc)}
+                    className={cn(
+                      'w-full text-left bg-gray-900 border rounded-2xl p-4 transition-all',
+                      isSelected ? 'border-red-500/50 bg-gray-800' : 'border-gray-800 hover:border-gray-700'
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="relative mt-0.5">
+                        <span className="text-xl">{TYPE_EMOJI[inc.incident_type] ?? '⚠️'}</span>
+                        {inc.status === 'active' && (
+                          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 border border-gray-900 animate-pulse" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-white capitalize">{inc.incident_type.replace('_', ' ')}</span>
+                          <span className={cn('flex items-center gap-1 text-xs font-semibold', cfg.color)}>
+                            <Icon size={11} />{cfg.label}
+                          </span>
+                        </div>
+                        <p className="text-gray-400 text-xs truncate mt-0.5">{inc.address ?? `${inc.lat?.toFixed(4)}, ${inc.lng?.toFixed(4)}`}</p>
+                        <p className="text-gray-600 text-[10px] mt-1">{timeAgo(inc.created_at)} · ID {inc.id.slice(0, 8)}</p>
+                      </div>
+                      <ChevronRight size={14} className={cn('text-gray-600 shrink-0 transition-transform mt-1', isSelected && 'rotate-90')} />
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+
+          {/* Detail panel */}
+          <AnimatePresence>
+            {selected && (
+              <motion.aside
+                initial={{ opacity: 0, x: 20, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 280 }}
+                exit={{ opacity: 0, x: 20, width: 0 }}
+                className="shrink-0 bg-gray-900 border border-gray-800 rounded-2xl p-4 overflow-hidden"
+                style={{ minWidth: 240, maxWidth: 300 }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <p className="font-bold text-sm text-white">Incident Detail</p>
+                  <button onClick={() => setSelected(null)} aria-label="Close detail panel"
+                    className="w-7 h-7 rounded-xl bg-gray-800 flex items-center justify-center hover:bg-gray-700">
+                    <X size={13} className="text-gray-400" />
+                  </button>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <Row label="ID" value={selected.id.slice(0, 12) + '…'} />
+                  <Row label="Type" value={selected.incident_type.replace('_', ' ')} />
+                  <Row label="Status" value={STATUS_CONFIG[selected.status].label} valueClass={STATUS_CONFIG[selected.status].color} />
+                  {selected.address && <Row label="Address" value={selected.address} />}
+                  {selected.lat && <Row label="Coords" value={`${selected.lat.toFixed(5)}, ${selected.lng?.toFixed(5)}`} />}
+                  {selected.battery_level != null && <Row label="Battery" value={`${selected.battery_level}%`} />}
+                  {selected.responder_eta_minutes != null && <Row label="ETA" value={`${selected.responder_eta_minutes} min`} />}
+                  <Row label="Created" value={new Date(selected.created_at).toLocaleTimeString()} />
+                </div>
+
+                {/* Quick actions */}
+                <div className="mt-4 space-y-2">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Update Status</p>
+                  {(['acknowledged', 'resolved', 'false_alarm'] as const)
+                    .filter(s => s !== selected.status)
+                    .map(s => {
+                      const cfg = STATUS_CONFIG[s];
+                      const Icon = cfg.icon;
+                      return (
+                        <button key={s}
+                          disabled={updating === selected.id}
+                          onClick={() => void handleStatusChange(selected, s)}
+                          className={cn(
+                            'w-full flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all',
+                            'bg-gray-800 border-gray-700 hover:border-gray-500 text-white',
+                            updating === selected.id && 'opacity-50 cursor-wait'
+                          )}
+                        >
+                          <Icon size={12} className={cfg.color} /> Mark {cfg.label}
+                        </button>
+                      );
+                    })}
+                  {/* Call & Navigate */}
+                  <div className="flex gap-2 mt-3">
+                    <a href="tel:112" aria-label="Call 112 emergency"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-600 text-white text-xs font-bold">
+                      <Phone size={12} /> 112
+                    </a>
+                    {selected.lat && (
+                      <a href={`https://maps.google.com/?q=${selected.lat},${selected.lng}`}
+                        target="_blank" rel="noreferrer" aria-label="Open location in Google Maps"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold">
+                        <MapPin size={12} /> Map
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </motion.aside>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── Incident Card ────────────────────────────────────────────────────────────
-
-function IncidentCard({
-  incident,
-  onSelect,
-  selected,
-}: {
-  incident: Incident;
-  onSelect: (i: Incident) => void;
-  selected: boolean;
-}) {
-  const cfg = STATUS_CONFIG[incident.status];
+function Row({ label, value, valueClass = 'text-white' }: { label: string; value: string; valueClass?: string }) {
   return (
-    <motion.button
-      layout
-      onClick={() => onSelect(incident)}
-      whileTap={{ scale: 0.98 }}
-      className={cn(
-        'w-full text-left rounded-2xl border p-4 transition-all',
-        cfg.bg, cfg.border,
-        selected ? 'ring-2 ring-white/20' : 'hover:brightness-110',
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={`text-[10px] font-black tracking-widest ${cfg.color}`}>{cfg.label}</span>
-            <span className="text-gray-600 text-[10px]">{incident.id}</span>
-            <span className="text-gray-600 text-[10px]">{TRIGGER_ICONS[incident.trigger]} {incident.trigger}</span>
-          </div>
-          <p className="text-white text-sm font-medium leading-tight truncate">{incident.address}</p>
-          <p className="text-gray-500 text-xs mt-1">{elapsed(incident.createdAt)}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          {incident.responderEta !== undefined && incident.status !== 'resolved' && (
-            <span className="text-orange-400 text-xs font-bold">{incident.responderEta}m ETA</span>
-          )}
-          {incident.responderName && (
-            <span className="text-gray-500 text-[10px]">{incident.responderName}</span>
-          )}
-          <ChevronRight size={14} className="text-gray-600 mt-1" />
-        </div>
-      </div>
-    </motion.button>
-  );
-}
-
-// ─── Detail Panel ─────────────────────────────────────────────────────────────
-
-function DetailPanel({ incident, onClose, onStatusChange }: {
-  incident: Incident;
-  onClose: () => void;
-  onStatusChange: (id: string, status: IncidentStatus) => void;
-}) {
-  const cfg = STATUS_CONFIG[incident.status];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="bg-gray-900 border border-gray-800 rounded-3xl p-5 sticky top-5"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-bold text-sm">Incident Details</h3>
-        <button
-          onClick={onClose}
-          aria-label="Close incident detail panel"
-          className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 transition-colors"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      {/* Status badge */}
-      <div className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full border mb-4 text-xs font-bold tracking-widest', cfg.bg, cfg.border, cfg.color)}>
-        {incident.status === 'active' && (
-          <motion.div className="w-2 h-2 rounded-full bg-red-500" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 0.8, repeat: Infinity }} />
-        )}
-        {cfg.label}
-      </div>
-
-      {/* Info rows */}
-      <div className="space-y-3 text-sm">
-        <div className="flex items-start gap-2">
-          <MapPin size={14} className="text-gray-500 mt-0.5 shrink-0" />
-          <p className="text-gray-300">{incident.address}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock size={14} className="text-gray-500 shrink-0" />
-          <p className="text-gray-400">{incident.createdAt.toLocaleTimeString()} · {elapsed(incident.createdAt)}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Zap size={14} className="text-gray-500 shrink-0" />
-          <p className="text-gray-400">Trigger: {TRIGGER_ICONS[incident.trigger]} {incident.trigger}</p>
-        </div>
-        {incident.responderName && (
-          <div className="flex items-center gap-2">
-            <Radio size={14} className="text-gray-500 shrink-0" />
-            <p className="text-gray-400">{incident.responderName}
-              {incident.responderEta !== undefined && incident.status !== 'resolved' && (
-                <span className="ml-2 text-orange-400 font-bold">{incident.responderEta}min ETA</span>
-              )}
-            </p>
-          </div>
-        )}
-        {incident.notes && (
-          <div className="flex items-start gap-2">
-            <MessageSquare size={14} className="text-gray-500 mt-0.5 shrink-0" />
-            <p className="text-gray-400 italic">{incident.notes}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Maps link */}
-      <a
-        href={`https://maps.google.com/?q=${incident.lat},${incident.lng}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 flex items-center gap-2 w-full bg-blue-900/30 border border-blue-800 text-blue-300 rounded-xl px-3 py-2 text-xs hover:bg-blue-900/50 transition-colors"
-      >
-        <Navigation size={13} />
-        Open in Google Maps
-      </a>
-
-      {/* Action buttons */}
-      {incident.status !== 'resolved' && incident.status !== 'false_alarm' && (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {incident.status === 'active' && (
-            <button
-              onClick={() => onStatusChange(incident.id, 'acknowledged')}
-              className="col-span-2 bg-orange-900/40 border border-orange-700 text-orange-300 rounded-xl py-2 text-xs font-bold hover:bg-orange-900/60 transition-colors"
-            >
-              ✅ Acknowledge
-            </button>
-          )}
-          <button
-            onClick={() => onStatusChange(incident.id, 'resolved')}
-            className="bg-green-900/40 border border-green-700 text-green-300 rounded-xl py-2 text-xs font-bold hover:bg-green-900/60 transition-colors"
-          >
-            ✓ Resolve
-          </button>
-          <button
-            onClick={() => onStatusChange(incident.id, 'false_alarm')}
-            className="bg-gray-800 border border-gray-700 text-gray-300 rounded-xl py-2 text-xs font-bold hover:bg-gray-700 transition-colors"
-          >
-            False Alarm
-          </button>
-        </div>
-      )}
-
-      {/* Quick dial */}
-      <div className="mt-4 flex gap-2">
-        <a href="tel:100" className="flex-1 flex items-center justify-center gap-1.5 bg-blue-900/30 border border-blue-800 text-blue-300 rounded-xl py-2 text-xs hover:bg-blue-900/50 transition-colors">
-          <Phone size={12} /> Police
-        </a>
-        <a href="tel:108" className="flex-1 flex items-center justify-center gap-1.5 bg-red-900/30 border border-red-800 text-red-300 rounded-xl py-2 text-xs hover:bg-red-900/50 transition-colors">
-          <Phone size={12} /> Ambulance
-        </a>
-        <a href="tel:101" className="flex-1 flex items-center justify-center gap-1.5 bg-orange-900/30 border border-orange-800 text-orange-300 rounded-xl py-2 text-xs hover:bg-orange-900/50 transition-colors">
-          <Phone size={12} /> Fire
-        </a>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
-export default function AdminPage() {
-  const [incidents, setIncidents] = useState<Incident[]>(MOCK_INCIDENTS);
-  const [selected, setSelected] = useState<Incident | null>(null);
-  const [filter, setFilter] = useState<IncidentStatus | 'all'>('all');
-  const [online, setOnline] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState(new Date());
-
-  useEffect(() => {
-    setOnline(navigator.onLine);
-    const up = () => setOnline(true);
-    const down = () => setOnline(false);
-    window.addEventListener('online', up);
-    window.addEventListener('offline', down);
-    return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
-  }, []);
-
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLastRefresh(new Date());
-      // Simulate ETA countdown
-      setIncidents(prev => prev.map(inc =>
-        inc.responderEta !== undefined && inc.responderEta > 0
-          ? { ...inc, responderEta: inc.responderEta - 1, updatedAt: new Date() }
-          : inc
-      ));
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleStatusChange = useCallback((id: string, status: IncidentStatus) => {
-    setIncidents(prev => prev.map(inc => inc.id === id ? { ...inc, status, updatedAt: new Date() } : inc));
-    setSelected(prev => prev?.id === id ? { ...prev, status } : prev);
-  }, []);
-
-  const filtered = filter === 'all' ? incidents : incidents.filter(i => i.status === filter);
-  const activeCount = incidents.filter(i => i.status === 'active').length;
-  const ackCount = incidents.filter(i => i.status === 'acknowledged').length;
-  const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
-
-  const FILTER_TABS: { key: IncidentStatus | 'all'; label: string }[] = [
-    { key: 'all', label: `All (${incidents.length})` },
-    { key: 'active', label: `🔴 Active (${activeCount})` },
-    { key: 'acknowledged', label: `🟠 Acknowledged (${ackCount})` },
-    { key: 'resolved', label: `🟢 Resolved (${resolvedCount})` },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur-sm sticky top-0 z-10 px-5 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center">
-            <Shield size={16} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-white font-black text-sm tracking-tight">ROADSoS Control Room</h1>
-            <p className="text-gray-500 text-[10px]">Admin Dashboard — Live Incident Feed</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className={`flex items-center gap-1.5 text-xs ${online ? 'text-green-400' : 'text-red-400'}`}>
-            {online ? <Wifi size={12} /> : <WifiOff size={12} />}
-            {online ? 'Live' : 'Offline'}
-          </span>
-          <button
-            onClick={() => setLastRefresh(new Date())}
-            aria-label="Refresh incident feed"
-            className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-gray-400"
-          >
-            <RefreshCw size={14} />
-          </button>
-          <a href="/" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-            ← Back to App
-          </a>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <StatCard label="Active Incidents" value={activeCount} icon={AlertTriangle} color="bg-red-900/50 text-red-400" />
-          <StatCard label="Acknowledged" value={ackCount} icon={Radio} color="bg-orange-900/50 text-orange-400" />
-          <StatCard label="Resolved Today" value={resolvedCount} icon={CheckCircle2} color="bg-green-900/50 text-green-400" />
-          <StatCard label="Total Incidents" value={incidents.length} icon={Activity} color="bg-blue-900/50 text-blue-400" />
-        </div>
-
-        {/* Last refresh */}
-        <p className="text-gray-600 text-xs mb-4 flex items-center gap-1.5">
-          <Clock size={11} /> Last updated: {lastRefresh.toLocaleTimeString()}
-        </p>
-
-        {/* Active alert banner */}
-        {activeCount > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3 bg-red-950/60 border border-red-700 rounded-2xl px-4 py-3 mb-5"
-          >
-            <motion.div
-              className="w-3 h-3 rounded-full bg-red-500 shrink-0"
-              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-              transition={{ duration: 0.8, repeat: Infinity }}
-            />
-            <p className="text-red-200 text-sm font-bold">
-              {activeCount} active emergency{activeCount > 1 ? 's' : ''} — immediate attention required
-            </p>
-          </motion.div>
-        )}
-
-        <div className="flex flex-col lg:flex-row gap-5">
-          {/* Incident list */}
-          <div className="flex-1 min-w-0">
-            {/* Filter tabs */}
-            <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 mb-4 overflow-x-auto no-scrollbar">
-              {FILTER_TABS.map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setFilter(key)}
-                  className={cn(
-                    'shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap',
-                    filter === key ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-gray-300',
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Cards */}
-            <div className="space-y-2">
-              <AnimatePresence mode="popLayout">
-                {filtered.map(inc => (
-                  <IncidentCard
-                    key={inc.id}
-                    incident={inc}
-                    onSelect={setSelected}
-                    selected={selected?.id === inc.id}
-                  />
-                ))}
-              </AnimatePresence>
-              {filtered.length === 0 && (
-                <div className="text-center py-12 text-gray-600">
-                  <CheckCircle2 size={32} className="mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">No incidents in this category</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Detail panel */}
-          <div className="lg:w-80 shrink-0">
-            <AnimatePresence mode="wait">
-              {selected ? (
-                <DetailPanel
-                  key={selected.id}
-                  incident={selected}
-                  onClose={() => setSelected(null)}
-                  onStatusChange={handleStatusChange}
-                />
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-gray-900 border border-gray-800 border-dashed rounded-3xl p-8 text-center sticky top-20"
-                >
-                  <Users size={28} className="mx-auto mb-3 text-gray-700" />
-                  <p className="text-gray-600 text-sm">Select an incident to view details and take action</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </main>
+    <div className="flex justify-between gap-2">
+      <span className="text-gray-500 shrink-0">{label}</span>
+      <span className={cn('text-right break-all', valueClass)}>{value}</span>
     </div>
   );
 }

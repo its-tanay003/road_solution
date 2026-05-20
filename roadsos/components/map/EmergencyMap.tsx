@@ -143,24 +143,30 @@ export function EmergencyMap() {
       <div className="absolute top-3 left-3 z-10 flex flex-wrap gap-1.5">
         {(Object.entries(LAYER_CONFIG) as [LayerType, typeof LAYER_CONFIG[LayerType]][]).map(([type, cfg]) => {
           const Icon = cfg.icon;
-          const active = activeLayers.has(type);
-          return (
-            <button
-              key={type}
-              onClick={() => toggleLayer(type)}
-              aria-label={`${active ? 'Hide' : 'Show'} ${cfg.label}`}
-              className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm transition-all border',
-                active
-                  ? 'text-white border-(--layer-color) [background:var(--layer-color)]'
-                  : 'bg-gray-900/80 text-gray-400 border-gray-700 hover:border-gray-500'
-              )}
-              style={active ? { '--layer-color': cfg.color + 'cc' } as React.CSSProperties : undefined}
-            >
-              <Icon size={11} />
-              {cfg.label}
-            </button>
-          );
+            const active = activeLayers.has(type);
+            const activeClass = {
+              hospitals: 'text-white border-red-500 bg-red-500/80',
+              police: 'text-white border-blue-500 bg-blue-500/80',
+              fire: 'text-white border-orange-500 bg-orange-500/80',
+              pharmacy: 'text-white border-emerald-500 bg-emerald-500/80',
+              accidents: 'text-white border-amber-500 bg-amber-500/80',
+            }[type];
+            return (
+              <button
+                key={type}
+                onClick={() => toggleLayer(type)}
+                aria-label={`${active ? 'Hide' : 'Show'} ${cfg.label}`}
+                className={cn(
+                  'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm transition-all border',
+                  active
+                    ? activeClass
+                    : 'bg-gray-900/80 text-gray-400 border-gray-700 hover:border-gray-500'
+                )}
+              >
+                <Icon size={11} />
+                {cfg.label}
+              </button>
+            );
         })}
       </div>
 

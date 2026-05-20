@@ -1,123 +1,340 @@
-import type { Metadata } from 'next';
-import { Settings, User, Bell, Shield, Globe, Palette, Smartphone, Trash2 } from 'lucide-react';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Settings — ROADSoS',
-  description: 'Manage your profile, emergency contacts, and app preferences.',
+import { useState } from 'react';
+import {
+  Settings, User, Bell, Shield, Globe, Palette,
+  ChevronRight, Smartphone, Trash2, Phone,
+  Activity, Eye, EyeOff, Volume2,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+
+// ── Types ──────────────────────────────────────────────────────
+type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-' | 'Unknown';
+
+interface EmergencyContact { name: string; phone: string; relation: string; }
+
+interface UserPrefs {
+  name: string;
+  phone: string;
+  bloodGroup: BloodGroup;
+  shareLocation: boolean;
+  shareMedical: boolean;
+  shareCamera: boolean;
+  sosHoldMs: number;
+  shakeThreshold: number;
+  language: string;
+  theme: 'dark' | 'light' | 'auto';
+  notifications: boolean;
+  contacts: EmergencyContact[];
+}
+
+const DEFAULT_PREFS: UserPrefs = {
+  name: '', phone: '', bloodGroup: 'Unknown',
+  shareLocation: true, shareMedical: true, shareCamera: false,
+  sosHoldMs: 3000, shakeThreshold: 4,
+  language: 'en', theme: 'auto', notifications: true,
+  contacts: [],
 };
 
-const SETTINGS_SECTIONS = [
-  {
-    title: 'Profile',
-    icon: User,
-    items: [
-      { label: 'Personal Information', desc: 'Name, phone, address', href: '/settings/profile' },
-      { label: 'Medical Profile', desc: 'Blood group, conditions, allergies', href: '/settings/medical' },
-      { label: 'Emergency Contacts', desc: 'Add or edit emergency contacts', href: '/settings/contacts' },
-    ],
-  },
-  {
-    title: 'SOS Settings',
-    icon: Shield,
-    items: [
-      { label: 'SOS Sensitivity', desc: 'Hold duration, shake threshold', href: '/settings/sos' },
-      { label: 'Privacy Controls', desc: 'What to share during SOS', href: '/settings/privacy' },
-      { label: 'Connected Devices', desc: 'CarPlay, Android Auto, wearables', href: '/settings/devices' },
-    ],
-  },
-  {
-    title: 'Notifications',
-    icon: Bell,
-    items: [
-      { label: 'Push Notifications', desc: 'SOS alerts, nearby incidents', href: '/settings/notifications' },
-      { label: 'Alert Sounds', desc: 'Alarm volume and ringtone', href: '/settings/sounds' },
-    ],
-  },
-  {
-    title: 'App Preferences',
-    icon: Palette,
-    items: [
-      { label: 'Language', desc: 'English, Hindi, Gujarati, and 7 more', href: '/settings/language' },
-      { label: 'Theme', desc: 'Light, Dark, or Auto', href: '/settings/theme' },
-      { label: 'Voice Commands', desc: 'Wake word and language', href: '/settings/voice' },
-    ],
-  },
-  {
-    title: 'Data & Privacy',
-    icon: Globe,
-    items: [
-      { label: 'Export My Data', desc: 'Download all your data', href: '/settings/export' },
-      { label: 'Delete Account', desc: 'Permanently remove your account', href: '/settings/delete', danger: true },
-    ],
-  },
-];
-
-export default function SettingsPage() {
+// ── Toggle component ───────────────────────────────────────────
+function Toggle({ checked, onChange, id, label }: { checked: boolean; onChange: (v: boolean) => void; id: string; label: string }) {
   return (
-    <div className="min-h-screen bg-gray-950 text-white pb-24">
+    <button id={id} role="switch" aria-checked={checked ? 'true' : 'false'} aria-label={label} onClick={() => onChange(!checked)}
+      className={cn('relative w-11 h-6 rounded-full transition-colors shrink-0',
+        checked ? 'bg-red-600' : 'bg-gray-700'
+      )}>
+      <span className={cn('absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all',
+        checked ? 'left-6' : 'left-1'
+      )} />
+    </button>
+  );
+}
+
+// ── Slider component ───────────────────────────────────────────
+function Slider({ value, min, max, step, onChange, format, label }: {
+  value: number; min: number; max: number; step: number;
+  onChange: (v: number) => void; format?: (v: number) => string; label: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <input type="range" min={min} max={max} step={step} value={value}
+        aria-label={label}
+        onChange={e => onChange(Number(e.target.value))}
+        className="flex-1 accent-red-500 h-1.5"
+      />
+      <span className="text-white text-xs font-bold w-14 text-right shrink-0">
+        {format ? format(value) : value}
+      </span>
+    </div>
+  );
+}
+
+// ── Section wrapper ─────────────────────────────────────────────
+function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Icon size={13} className="text-gray-500" />
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">{title}</h2>
+      </div>
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden divide-y divide-gray-800">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function Row({ label, desc, children, danger }: { label: string; desc?: string; children?: React.ReactNode; danger?: boolean }) {
+  return (
+    <div className="flex items-center gap-4 px-4 py-3.5">
+      <div className="flex-1 min-w-0">
+        <p className={cn('text-sm font-medium', danger ? 'text-red-400' : 'text-white')}>{label}</p>
+        {desc && <p className="text-gray-500 text-xs mt-0.5">{desc}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────────────
+export default function SettingsPage() {
+  const [prefs, setPrefs] = useState<UserPrefs>(DEFAULT_PREFS);
+  const [saved, setSaved] = useState(false);
+  const [newContact, setNewContact] = useState<EmergencyContact>({ name: '', phone: '', relation: '' });
+  const [showAddContact, setShowAddContact] = useState(false);
+
+  const update = <K extends keyof UserPrefs>(key: K, value: UserPrefs[K]) => {
+    setPrefs(p => ({ ...p, [key]: value }));
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    // In production: persist to Supabase via PATCH /api/profile
+    console.log('[Settings] Saving prefs:', prefs);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const addContact = () => {
+    if (!newContact.name || !newContact.phone) return;
+    update('contacts', [...prefs.contacts, newContact]);
+    setNewContact({ name: '', phone: '', relation: '' });
+    setShowAddContact(false);
+  };
+
+  const removeContact = (i: number) => {
+    update('contacts', prefs.contacts.filter((_, idx) => idx !== i));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white pb-28">
       {/* Header */}
-      <header className="px-5 pt-14 pb-5 border-b border-gray-800">
+      <header className="px-5 pt-14 pb-5 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gray-700 flex items-center justify-center">
             <Settings size={18} className="text-gray-300" />
           </div>
           <h1 className="font-black text-white text-xl">Settings</h1>
         </div>
+        <button onClick={handleSave}
+          aria-label="Save settings"
+          className={cn('px-4 py-1.5 rounded-xl text-sm font-bold transition-all',
+            saved ? 'bg-green-600 text-white' : 'bg-red-600 text-white hover:bg-red-500'
+          )}>
+          {saved ? '✓ Saved' : 'Save'}
+        </button>
       </header>
 
-      {/* Profile quick card */}
-      <div className="px-5 pt-5">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gray-700 flex items-center justify-center text-2xl">
+      <div className="px-5 pt-5 space-y-6">
+        {/* Profile quick card */}
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-gray-700 flex items-center justify-center text-2xl shrink-0">
             <User size={24} className="text-gray-400" />
           </div>
-          <div className="flex-1">
-            <p className="font-bold text-white">Guest User</p>
-            <p className="text-gray-500 text-xs">Complete your profile to enable SOS features</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-white">{prefs.name || 'Set your name'}</p>
+            <p className="text-gray-500 text-xs truncate">{prefs.phone || 'Add phone for SOS alerts'}</p>
           </div>
-          <button className="px-3 py-1.5 rounded-xl bg-red-600 text-white text-xs font-bold">Edit</button>
+          <span className="text-xs bg-red-600/20 border border-red-600/40 text-red-300 rounded-xl px-2 py-1 font-semibold">{prefs.bloodGroup}</span>
         </div>
 
-        {/* Sections */}
-        <div className="space-y-6">
-          {SETTINGS_SECTIONS.map((section) => {
-            const Icon = section.icon;
-            return (
-              <section key={section.title}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Icon size={13} className="text-gray-500" />
-                  <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">{section.title}</h2>
-                </div>
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-                  {section.items.map((item, idx) => (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      className={`flex items-center gap-4 px-4 py-4 hover:bg-gray-800 transition-colors ${
-                        idx < section.items.length - 1 ? 'border-b border-gray-800' : ''
-                      }`}
-                    >
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium ${(item as { danger?: boolean }).danger ? 'text-red-400' : 'text-white'}`}>
-                          {item.label}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-0.5">{item.desc}</p>
-                      </div>
-                      <Smartphone size={14} className="text-gray-600 shrink-0" />
-                    </a>
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+        {/* ── Profile ────────────────────────────────────────── */}
+        <Section title="Profile" icon={User}>
+          <Row label="Full Name" desc="Used in SOS alerts">
+            <input
+              value={prefs.name}
+              onChange={e => update('name', e.target.value)}
+              placeholder="Your name"
+              aria-label="Full name"
+              className="bg-transparent text-white text-sm text-right outline-none placeholder:text-gray-600 w-32"
+            />
+          </Row>
+          <Row label="Phone" desc="For emergency callback">
+            <input
+              value={prefs.phone}
+              onChange={e => update('phone', e.target.value)}
+              placeholder="+91 …"
+              type="tel"
+              aria-label="Phone number"
+              className="bg-transparent text-white text-sm text-right outline-none placeholder:text-gray-600 w-32"
+            />
+          </Row>
+          <Row label="Blood Group">
+            <select
+              value={prefs.bloodGroup}
+              onChange={e => update('bloodGroup', e.target.value as BloodGroup)}
+              aria-label="Blood group"
+              className="bg-gray-800 text-white text-sm rounded-xl px-2 py-1 border border-gray-700 outline-none"
+            >
+              {(['A+','A-','B+','B-','O+','O-','AB+','AB-','Unknown'] as BloodGroup[]).map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </Row>
+        </Section>
+
+        {/* ── Emergency Contacts ────────────────────────────── */}
+        <Section title="Emergency Contacts" icon={Phone}>
+          {prefs.contacts.length === 0 && (
+            <Row label="No contacts added" desc="Add contacts to receive SOS alerts" />
+          )}
+          {prefs.contacts.map((c, i) => (
+            <div key={i} className="flex items-center gap-3 px-4 py-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium">{c.name}</p>
+                <p className="text-gray-500 text-xs">{c.phone} · {c.relation || 'Contact'}</p>
+              </div>
+              <button onClick={() => removeContact(i)} aria-label={`Remove ${c.name}`}
+                className="w-7 h-7 rounded-xl bg-gray-800 flex items-center justify-center hover:bg-red-900/40 transition-colors">
+                <Trash2 size={12} className="text-gray-400" />
+              </button>
+            </div>
+          ))}
+          {showAddContact ? (
+            <div className="px-4 py-3 space-y-2">
+              <input value={newContact.name} onChange={e => setNewContact(p => ({ ...p, name: e.target.value }))}
+                placeholder="Name" aria-label="Contact name"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none placeholder:text-gray-600" />
+              <input value={newContact.phone} onChange={e => setNewContact(p => ({ ...p, phone: e.target.value }))}
+                placeholder="+91 phone" type="tel" aria-label="Contact phone"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none placeholder:text-gray-600" />
+              <input value={newContact.relation} onChange={e => setNewContact(p => ({ ...p, relation: e.target.value }))}
+                placeholder="Relationship (e.g. Sister)" aria-label="Contact relationship"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none placeholder:text-gray-600" />
+              <div className="flex gap-2">
+                <button onClick={addContact} className="flex-1 py-2 rounded-xl bg-red-600 text-white text-sm font-bold">Add</button>
+                <button onClick={() => setShowAddContact(false)} className="flex-1 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setShowAddContact(true)}
+              className="flex items-center gap-2 px-4 py-3 text-red-400 text-sm font-semibold hover:bg-gray-800 transition-colors w-full text-left">
+              + Add Contact
+            </button>
+          )}
+        </Section>
+
+        {/* ── SOS Settings ──────────────────────────────────── */}
+        <Section title="SOS Settings" icon={Shield}>
+          <Row label="Hold Duration" desc={`${prefs.sosHoldMs / 1000}s to trigger`}>
+            <div className="w-40">
+              <Slider value={prefs.sosHoldMs} min={1000} max={5000} step={500}
+                label="SOS hold duration in milliseconds"
+                onChange={v => update('sosHoldMs', v)}
+                format={v => `${v / 1000}s`} />
+            </div>
+          </Row>
+          <Row label="Shake Sensitivity" desc="Shakes needed to trigger">
+            <div className="w-40">
+              <Slider value={prefs.shakeThreshold} min={2} max={8} step={1}
+                label="Shake sensitivity threshold"
+                onChange={v => update('shakeThreshold', v)} />
+            </div>
+          </Row>
+        </Section>
+
+        {/* ── Privacy ────────────────────────────────────────── */}
+        <Section title="Privacy Controls" icon={Eye}>
+          <Row label="Share Location" desc="GPS coordinates during SOS">
+            <Toggle id="share-location" label="Share location during SOS" checked={prefs.shareLocation} onChange={v => update('shareLocation', v)} />
+          </Row>
+          <Row label="Share Medical Info" desc="Blood group, conditions">
+            <Toggle id="share-medical" label="Share medical info during SOS" checked={prefs.shareMedical} onChange={v => update('shareMedical', v)} />
+          </Row>
+          <Row label="Share Camera" desc="Live video to responders">
+            <Toggle id="share-camera" label="Share camera during SOS" checked={prefs.shareCamera} onChange={v => update('shareCamera', v)} />
+          </Row>
+        </Section>
+
+        {/* ── Notifications ─────────────────────────────────── */}
+        <Section title="Notifications" icon={Bell}>
+          <Row label="Push Notifications" desc="SOS alerts, nearby incidents">
+            <Toggle id="notifications" label="Enable push notifications" checked={prefs.notifications} onChange={v => update('notifications', v)} />
+          </Row>
+        </Section>
+
+        {/* ── Preferences ───────────────────────────────────── */}
+        <Section title="App Preferences" icon={Palette}>
+          <Row label="Language">
+            <select value={prefs.language} onChange={e => update('language', e.target.value)}
+              aria-label="Language preference"
+              className="bg-gray-800 text-white text-sm rounded-xl px-2 py-1 border border-gray-700 outline-none">
+              {[['en','English'],['hi','हिंदी'],['gu','ગુજરાતી'],['mr','मराठी'],['ta','தமிழ்'],['te','తెలుగు']].map(([v,l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+          </Row>
+          <Row label="Theme">
+            <select value={prefs.theme} onChange={e => update('theme', e.target.value as UserPrefs['theme'])}
+              aria-label="Theme preference"
+              className="bg-gray-800 text-white text-sm rounded-xl px-2 py-1 border border-gray-700 outline-none">
+              <option value="auto">Auto</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </Row>
+        </Section>
+
+        {/* ── Danger Zone ───────────────────────────────────── */}
+        <Section title="Data & Privacy" icon={Globe}>
+          <a href="/settings/export"
+            className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-800 transition-colors">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white">Export My Data</p>
+              <p className="text-gray-500 text-xs">Download all your data</p>
+            </div>
+            <ChevronRight size={14} className="text-gray-600" />
+          </a>
+          <button className="flex items-center gap-4 px-4 py-3.5 hover:bg-red-950/20 transition-colors w-full text-left"
+            aria-label="Delete account">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-400">Delete Account</p>
+              <p className="text-gray-500 text-xs">Permanently remove your account</p>
+            </div>
+            <Trash2 size={14} className="text-red-600" />
+          </button>
+        </Section>
 
         {/* App info */}
-        <div className="text-center mt-8 text-gray-600 text-xs space-y-1">
-          <p>ROADSoS v1.0.0</p>
-          <p>Built for emergencies. Stay safe.</p>
+        <div className="text-center text-gray-600 text-xs space-y-1 pt-2">
+          <p>ROADSoS v1.0.0 · Built for emergencies. Stay safe.</p>
+          <p>© 2025 ROADSoS — All rights reserved</p>
         </div>
       </div>
+
+      {/* Sticky save bar */}
+      {!saved && prefs.name && (
+        <motion.div
+          initial={{ y: 80 }} animate={{ y: 0 }}
+          className="fixed bottom-20 left-4 right-4 bg-gray-900 border border-gray-700 rounded-2xl p-3 flex items-center justify-between shadow-xl z-30">
+          <p className="text-gray-300 text-sm">Unsaved changes</p>
+          <button onClick={handleSave}
+            className="px-4 py-1.5 rounded-xl bg-red-600 text-white text-sm font-bold">
+            Save Now
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }
