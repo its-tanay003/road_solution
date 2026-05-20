@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
+import { useWebRTC } from '@/lib/webrtc';
 import {
   X,
   MapPin,
@@ -27,7 +28,9 @@ export function PanicMode() {
     responder,
     cancel,
     tickCountdown,
-    resolve
+    resolve,
+    autoDialed,
+    setAutoDialed,
   } = useSOSStore();
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -147,6 +150,30 @@ export function PanicMode() {
       setStreamError(null);
     }
   }, [status, addLog]);
+
+  // Hook up simple-peer WebRTC via Supabase Broadcast
+  const { connected: webrtcConnected } = useWebRTC(
+    useSOSStore.getState().incidentId,
+    'victim',
+    stream
+  );
+
+  useEffect(() => {
+    if (webrtcConnected) {
+      addLog('WebRTC: Connected to dispatch control room.');
+    }
+  }, [webrtcConnected, addLog]);
+
+  // Auto-dialer logic
+  useEffect(() => {
+    if (status === 'active' && !autoDialed) {
+      addLog('Dialer: Auto-dialing emergency services (112)...');
+      setAutoDialed(true);
+      if (typeof window !== 'undefined') {
+        window.location.href = 'tel:112';
+      }
+    }
+  }, [status, autoDialed, setAutoDialed, addLog]);
 
   // Multi-frequency Bluetooth and Serial attempts
   const triggerRadioBroadcasts = useCallback(async () => {
@@ -293,14 +320,26 @@ export function PanicMode() {
                     </div>
                   )}
                   {/* Stream Badge */}
-                  <div className="absolute top-3 left-3 bg-red-600 px-2.5 py-1 rounded-full text-[9px] font-black tracking-widest text-white flex items-center gap-1.5 shadow-lg border border-red-500">
+                  <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black tracking-widest text-white flex items-center gap-1.5 shadow-lg border ${webrtcConnected ? 'bg-green-600 border-green-500' : 'bg-red-600 border-red-500'}`}>
                     <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                    LIVE TELEMETRY
+                    {webrtcConnected ? 'DISPATCH CONNECTED' : 'LIVE TELEMETRY'}
+                  </div>
+
+                  {/* WebRTC Metadata Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8 flex flex-col gap-0.5 pointer-events-none">
+                    <p className="text-white font-mono text-[9px] uppercase font-bold tracking-wider opacity-90 drop-shadow-md">
+                      ID: {useSOSStore.getState().incidentId?.substring(0, 8) || 'UNKNOWN'}
+                    </p>
+                    {location && (
+                      <p className="text-white font-mono text-[9px] uppercase font-bold tracking-wider opacity-90 drop-shadow-md truncate">
+                        GPS: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+                      </p>
+                    )}
                   </div>
 
                   {/* Mic / Camera Quick Controls */}
                   {stream && (
-                    <div className="absolute bottom-3 right-3 flex gap-2">
+                    <div className="absolute top-3 right-3 flex gap-2">
                       <button
                         onClick={toggleCamera}
                         className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors shadow ${
@@ -339,28 +378,34 @@ export function PanicMode() {
 
           {/* Broadcast logs & Channels */}
           <div className="w-full max-w-sm space-y-4 shrink-0">
-            {/* Real Broadcast status grid */}
+            {/* Real Broadcast status grid with frequency sweep animation */}
             {broadcastStatus && (
-              <div className="space-y-1.5">
-                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+              <div className="space-y-1.5 relative overflow-hidden rounded-xl border border-gray-800 bg-black/40 p-2">
+                {/* Sweep Animation */}
+                <motion.div
+                  className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-red-500/20 to-transparent pointer-events-none skew-x-[-20deg]"
+                  animate={{ left: ['-100%', '200%'] }}
+                  transition={{ duration: 2, ease: "linear", repeat: Infinity }}
+                />
+                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 mb-2 relative z-10">
                   <Radio size={10} /> Transmission Status
                 </p>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-4 gap-1.5 relative z-10">
                   {Object.entries(broadcastStatus).map(([ch, stat]) => (
                     <div
                       key={ch}
-                      className={`rounded-xl px-2 py-2 text-center border text-[10px] font-bold uppercase tracking-tight ${
-                        stat === 'sent' || stat === 'broadcast' || stat === 'link_generated'
-                          ? 'bg-green-950/40 border-green-700/60 text-green-400'
+                      className={`rounded-lg px-1 py-1.5 text-center border text-[9px] font-bold uppercase tracking-tight shadow-inner ${
+                        stat === 'sent' || stat === 'broadcast' || stat === 'link_generated' || stat === 'published' || stat === 'connected'
+                          ? 'bg-green-950/80 border-green-700 text-green-400 shadow-[inset_0_0_10px_rgba(74,222,128,0.2)]'
                           : stat === 'pending'
-                          ? 'bg-yellow-950/40 border-yellow-700/60 text-yellow-400'
-                          : stat === 'stub'
-                          ? 'bg-gray-900 border-gray-800 text-gray-400'
-                          : 'bg-red-950/40 border-red-800/60 text-red-400'
+                          ? 'bg-yellow-950/80 border-yellow-700 text-yellow-400 animate-pulse'
+                          : stat === 'stub' || stat === 'attempted'
+                          ? 'bg-gray-900/80 border-gray-700 text-gray-400'
+                          : 'bg-red-950/80 border-red-800 text-red-400'
                       }`}
                     >
                       {ch}
-                      <div className="text-[8px] mt-0.5 opacity-70 lowercase">{stat}</div>
+                      <div className="text-[7px] mt-0.5 opacity-70 lowercase">{stat}</div>
                     </div>
                   ))}
                 </div>

@@ -3,16 +3,17 @@
 export const dynamic = 'force-dynamic';
 
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRealtimeIncidents } from '@/lib/supabase/realtime';
 import type { DBIncident } from '@/lib/supabase/types';
 import {
   AlertTriangle, CheckCircle2, Clock, Radio, RefreshCw,
   Wifi, WifiOff, MapPin, Phone, X, ChevronRight,
-  Activity, Users, ShieldCheck, Zap,
+  Activity, Users, ShieldCheck, Zap, Video as VideoIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWebRTC } from '@/lib/webrtc';
 
 // ── helpers ────────────────────────────────────────────────────
 function timeAgo(iso: string) {
@@ -47,6 +48,29 @@ export default function AdminPage() {
   const [selected, setSelected] = useState<DBIncident | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [filter, setFilter] = useState<DBIncident['status'] | 'all'>('all');
+
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const adminVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Admin WebRTC Hook for selected incident
+  const { connected: webrtcConnected } = useWebRTC(
+    selected?.id ?? null,
+    'admin',
+    null,
+    (stream) => {
+      setRemoteStream(stream);
+      if (adminVideoRef.current) {
+        adminVideoRef.current.srcObject = stream;
+      }
+    }
+  );
+
+  // Clear stream if selection changes or status is no longer active
+  useEffect(() => {
+    if (!selected || (selected.status !== 'active' && selected.status !== 'acknowledged')) {
+      setRemoteStream(null);
+    }
+  }, [selected]);
 
   const activeCount  = incidents.filter(i => i.status === 'active').length;
   const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
@@ -229,31 +253,41 @@ export default function AdminPage() {
 
                 {/* Live WebRTC distress stream */}
                 {(selected.status === 'active' || selected.status === 'acknowledged') && (
-                  <div className="mt-4 border border-red-500/30 rounded-2xl overflow-hidden bg-gray-950 aspect-video relative flex flex-col items-center justify-center">
-                    {/* Dark filter overlay */}
-                    <div className="absolute inset-0 bg-cover bg-center opacity-40 filter blur-[2px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518386394876-0f8623b3f27a?w=400&q=80')" }} />
+                  <div className="mt-4 border border-red-500/30 rounded-2xl overflow-hidden bg-gray-950 aspect-video relative flex flex-col items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.15)]">
                     
-                    {/* Dynamic decibel waves to show active feed telemetry */}
-                    <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between h-4 px-2 opacity-80 gap-0.5 z-10">
-                      {[4, 10, 6, 8, 2, 9, 5, 7, 3, 11, 4, 8, 5, 10, 6, 2, 7, 3, 9, 5, 8].map((h, i) => (
-                        <motion.span
-                          key={i}
-                          className="bg-red-500 w-full rounded-sm"
-                          animate={{ height: [`${h * 1.5}px`, `${h * 0.4}px`, `${h * 1.5}px`] }}
-                          transition={{ duration: 0.5 + i * 0.05, repeat: Infinity, ease: 'easeInOut' }}
-                        />
-                      ))}
-                    </div>
+                    {remoteStream ? (
+                      <video
+                        ref={adminVideoRef}
+                        autoPlay
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-cover bg-center opacity-40 filter blur-[2px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518386394876-0f8623b3f27a?w=400&q=80')" }} />
+                        
+                        <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between h-4 px-2 opacity-80 gap-0.5 z-10">
+                          {[4, 10, 6, 8, 2, 9, 5, 7, 3, 11, 4, 8, 5, 10, 6, 2, 7, 3, 9, 5, 8].map((h, i) => (
+                            <motion.span
+                              key={i}
+                              className="bg-red-500 w-full rounded-sm"
+                              animate={{ height: [`${h * 1.5}px`, `${h * 0.4}px`, `${h * 1.5}px`] }}
+                              transition={{ duration: 0.5 + i * 0.05, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                          ))}
+                        </div>
+                        <div className="z-10 flex flex-col items-center justify-center text-center p-3 space-y-1">
+                          <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin mb-1" />
+                          <p className="text-[10px] font-black text-white tracking-tight uppercase">
+                            {webrtcConnected ? 'Waiting for video track...' : 'Connecting to distress feed...'}
+                          </p>
+                        </div>
+                      </>
+                    )}
 
-                    <div className="z-10 flex flex-col items-center justify-center text-center p-3 space-y-1">
-                      <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin mb-1" />
-                      <p className="text-[10px] font-black text-white tracking-tight uppercase">webrtc distress audio/video active</p>
-                      <p className="text-[8px] text-gray-400">Stream encrypted, recording to Supabase Storage</p>
-                    </div>
-
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded flex items-center gap-1.5">
+                    <div className={cn("absolute top-2 left-2 text-white text-[9px] font-black px-2 py-0.5 rounded flex items-center gap-1.5 shadow", remoteStream ? 'bg-green-600' : 'bg-red-600')}>
                       <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                      LIVE STREAM
+                      {remoteStream ? 'LIVE STREAM' : 'CONNECTING'}
                     </div>
                   </div>
                 )}

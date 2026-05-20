@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 
 export type SOSStatus = 'idle' | 'countdown' | 'active' | 'acknowledged' | 'resolved';
-export type TriggerType = 'manual' | 'crash' | 'shake' | 'triple-press' | 'voice' | 'scheduled';
+export type TriggerType = 'manual' | 'crash' | 'shake' | 'triple-press' | 'voice' | 'scheduled' | 'rollover';
 
 export interface SOSLocation {
   lat: number;
@@ -20,6 +20,8 @@ export interface BroadcastStatus {
   websocket: 'pending' | 'broadcast' | 'failed';
   bluetooth: 'pending' | 'attempted' | 'failed';
   email: 'pending' | 'sent' | 'failed';
+  mqtt: 'pending' | 'published' | 'failed';
+  webrtc_data: 'pending' | 'connected' | 'failed';
 }
 
 export interface Responder {
@@ -27,6 +29,8 @@ export interface Responder {
   lat: number;
   lng: number;
   etaMinutes: number;
+  id?: string;
+  assignedAt?: number;
 }
 
 interface SOSState {
@@ -37,39 +41,44 @@ interface SOSState {
   trigger: TriggerType | null;
   broadcastStatus: BroadcastStatus | null;
   responder: Responder | null;
+  autoDialed: boolean;
 
   // Actions
-  arm: (trigger?: TriggerType) => void;
+  arm: (trigger?: TriggerType, customCountdown?: number) => void;
   cancel: () => void;
   broadcast: () => Promise<void>;
   resolve: () => void;
   setLocation: (location: SOSLocation) => void;
   tickCountdown: () => void;
+  setAutoDialed: (val: boolean) => void;
 }
 
 const DEFAULT_BROADCAST: BroadcastStatus = {
   sms: 'pending', whatsapp: 'pending', push: 'pending',
   websocket: 'pending', bluetooth: 'pending', email: 'pending',
+  mqtt: 'pending', webrtc_data: 'pending'
 };
 
 export const useSOSStore = create<SOSState>()(
   persist(
     (set, get) => ({
       status: 'idle',
-      countdownSeconds: 10,
+      countdownSeconds: 30,
       incidentId: null,
       location: null,
       trigger: null,
       broadcastStatus: null,
       responder: null,
+      autoDialed: false,
 
-      arm: (trigger = 'manual') => {
+      arm: (trigger = 'manual', customCountdown = 30) => {
         set({
           status: 'countdown',
-          countdownSeconds: 10,
+          countdownSeconds: customCountdown,
           trigger,
           incidentId: nanoid(),
           broadcastStatus: { ...DEFAULT_BROADCAST },
+          autoDialed: false,
         });
 
         // Grab location
@@ -101,7 +110,7 @@ export const useSOSStore = create<SOSState>()(
         );
       },
 
-      cancel: () => set({ status: 'idle', countdownSeconds: 10, incidentId: null, broadcastStatus: null }),
+      cancel: () => set({ status: 'idle', countdownSeconds: 30, incidentId: null, broadcastStatus: null, autoDialed: false }),
 
       broadcast: async () => {
         const { incidentId, location } = get();
@@ -127,6 +136,8 @@ export const useSOSStore = create<SOSState>()(
       resolve: () => set({ status: 'resolved' }),
 
       setLocation: (location) => set({ location }),
+      
+      setAutoDialed: (val) => set({ autoDialed: val }),
 
       tickCountdown: () => {
         const { countdownSeconds, status, broadcast } = get();

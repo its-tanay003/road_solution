@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { BookOpen, Heart } from 'lucide-react';
+import { TriageChat } from '@/components/first-aid/TriageChat';
 
 export const metadata: Metadata = {
   title: 'First Aid — ROADSoS',
@@ -174,8 +175,13 @@ export default function FirstAidPage() {
         </div>
       </header>
 
+      {/* AI Triage Chat */}
+      <div className="px-5 py-4">
+        <TriageChat />
+      </div>
+
       {/* Cards */}
-      <div className="px-5 py-5 space-y-3">
+      <div className="px-5 py-2 space-y-3">
         {FIRST_AID_CARDS.map((card) => (
           <details
             key={card.id}
