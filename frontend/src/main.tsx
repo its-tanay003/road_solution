@@ -63,7 +63,6 @@ window.addEventListener('error', (e) => {
 // Capture install prompt for custom HUD button
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
-  // @ts-expect-error - window.deferredPrompt is a custom property for PWA install flow
   window.deferredPrompt = e;
 });
 

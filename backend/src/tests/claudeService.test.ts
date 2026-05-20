@@ -1,10 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
 import { evaluateTriage } from '../services/claudeService';
+import { claudeChat } from '../lib/claude';
+
+// Mock the Claude module
+vi.mock('../lib/claude', () => ({
+  anthropic: {},
+  claudeChat: vi.fn(),
+  claudeStream: vi.fn(),
+}));
 
 describe('evaluateTriage', () => {
   it('should evaluate "blood" as CRITICAL severity', async () => {
-    // Override env variable to trigger mock path
-    process.env.ANTHROPIC_API_KEY = 'mock_key';
+    vi.mocked(claudeChat).mockResolvedValue(JSON.stringify({
+      severity: 'CRITICAL',
+      injuryType: 'Trauma/Bleeding',
+      recommendedActions: ['Apply pressure to wound', 'Keep victim warm'],
+      requiredServices: ['ambulance', 'police'],
+      confidenceScore: 0.95
+    }));
     
     const result = await evaluateTriage({
       description: 'The victim is unconscious and there is a lot of blood.',
@@ -18,7 +31,13 @@ describe('evaluateTriage', () => {
   });
 
   it('should evaluate "scratch" as LOW severity', async () => {
-    process.env.ANTHROPIC_API_KEY = 'mock_key';
+    vi.mocked(claudeChat).mockResolvedValue(JSON.stringify({
+      severity: 'LOW',
+      injuryType: 'Minor scratch',
+      recommendedActions: ['No immediate action required'],
+      requiredServices: [],
+      confidenceScore: 0.95
+    }));
     
     const result = await evaluateTriage({
       description: 'It is just a minor scratch on the bumper.',
@@ -32,7 +51,13 @@ describe('evaluateTriage', () => {
   });
 
   it('should lower confidence if description is too short and no image', async () => {
-    process.env.ANTHROPIC_API_KEY = 'mock_key';
+    vi.mocked(claudeChat).mockResolvedValue(JSON.stringify({
+      severity: 'MODERATE',
+      injuryType: 'Unspecified emergency',
+      recommendedActions: ['Wait for professional help'],
+      requiredServices: ['ambulance'],
+      confidenceScore: 0.5
+    }));
     
     const result = await evaluateTriage({
       description: 'help',

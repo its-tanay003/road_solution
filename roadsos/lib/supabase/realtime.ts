@@ -35,7 +35,10 @@ export function useRealtimeIncidents(options: UseRealtimeIncidentsOptions = {}) 
   }, [statuses, limit]);
 
   useEffect(() => {
-    void fetchInitial();
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) void fetchInitial();
+    });
 
     const sb = getBrowserClient();
     if (!sb) return;
@@ -56,13 +59,17 @@ export function useRealtimeIncidents(options: UseRealtimeIncidentsOptions = {}) 
         );
       })
       .subscribe((status) => {
+        if (!active) return;
         if (status === 'SUBSCRIBED') setConnectionStatus('connected');
         else if (status === 'CHANNEL_ERROR') { setConnectionStatus('error'); setError('Realtime channel error'); }
         else if (status === 'CLOSED') setConnectionStatus('disconnected');
       });
 
     channelRef.current = channel;
-    return () => { void sb.removeChannel(channel); };
+    return () => {
+      active = false;
+      void sb.removeChannel(channel);
+    };
   }, [fetchInitial, statuses, limit]);
 
   const updateIncidentStatus = useCallback(async (id: string, status: DBIncident['status']) => {
@@ -82,21 +89,36 @@ export function useIncident(id: string | null) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) { setLoading(false); return; }
+    let active = true;
+    if (!id) {
+      Promise.resolve().then(() => { if (active) setLoading(false); });
+      return;
+    }
     const sb = getBrowserClient();
-    if (!sb) { setLoading(false); return; }
+    if (!sb) {
+      Promise.resolve().then(() => { if (active) setLoading(false); });
+      return;
+    }
 
     sb.from('incidents').select('*').eq('id', id).single()
-      .then(({ data }) => { setIncident(data as DBIncident | null); setLoading(false); });
+      .then(({ data }) => {
+        if (!active) return;
+        setIncident(data as DBIncident | null);
+        setLoading(false);
+      });
 
     const channel = sb
       .channel(`incident-${id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'incidents', filter: `id=eq.${id}` }, (payload) => {
+        if (!active) return;
         setIncident(payload.new as DBIncident);
       })
       .subscribe();
 
-    return () => { void sb.removeChannel(channel); };
+    return () => {
+      active = false;
+      void sb.removeChannel(channel);
+    };
   }, [id]);
 
   return { incident, loading };

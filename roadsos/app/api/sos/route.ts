@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
   const { incidentId, lat, lng, address, batteryLevel, networkType, userId, emergencyType = 'road_crash', triggerType = 'manual' } = body;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
   const supabaseConfigured = supabaseUrl.length > 0 && !supabaseUrl.includes('your-project');
 
   // 1. Persist to Supabase
