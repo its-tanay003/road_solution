@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useCallback, useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { cn } from '@/lib/utils';
 
@@ -66,7 +66,7 @@ export function SOSButton() {
   const strokeDashoffset = circumference - (pressPercent / 100) * circumference;
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+    <div className="relative flex items-center justify-center w-[140px] h-[140px]">
       {/* Pulse rings when active */}
       {!idle && (
         <>

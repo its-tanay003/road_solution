@@ -26,9 +26,20 @@ export default function HomePage() {
   const [online, setOnline] = useState(true);
 
   useEffect(() => {
-    setOnline(navigator.onLine);
-    window.addEventListener('online', () => setOnline(true));
-    window.addEventListener('offline', () => setOnline(false));
+    const checkOnline = () => {
+      setOnline(navigator.onLine);
+    };
+    
+    const timer = setTimeout(checkOnline, 0);
+
+    window.addEventListener('online', checkOnline);
+    window.addEventListener('offline', checkOnline);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('online', checkOnline);
+      window.removeEventListener('offline', checkOnline);
+    };
   }, []);
 
   return (

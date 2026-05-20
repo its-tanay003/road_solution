@@ -9,6 +9,11 @@ type Mode = 'chat' | 'voice' | 'camera' | 'upload';
 
 interface Message { role: 'user' | 'ai'; text: string; time: string; }
 
+interface SystemStatus {
+  status: string;
+  providers: Record<string, string>;
+}
+
 /* ── scenario buttons (entry state) ─────────────────────────── */
 const SCENARIOS = [
   { emoji: '🚨', text: "There's been an accident near me", textColor: 'text-red', bg: 'bg-red/10', border: 'border-red/25' },
@@ -67,7 +72,7 @@ export const AIAssistantScreen: React.FC = () => {
   const [aiState, setAiState] = useState<AIState>('idle');
   const [mode, setMode] = useState<Mode>('chat');
   const [activeProvider, setActiveProvider] = useState<'claude' | 'gemini'>('claude');
-  const [systemStatus, setSystemStatus] = useState<any>(null);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,6 +121,7 @@ export const AIAssistantScreen: React.FC = () => {
       const data = await res.json();
       setMessages(m => [...m, { role: 'ai', text: data.text || 'No results found.', time: timeStr() }]);
     } catch (error) {
+      console.error('Live search error:', error);
       setMessages(m => [...m, { role: 'ai', text: 'Live search failed.', time: timeStr() }]);
     } finally {
       setAiState('done');
@@ -173,7 +179,7 @@ export const AIAssistantScreen: React.FC = () => {
           <button 
             key={id} 
             onClick={() => setMode(id)}
-            aria-pressed={mode === id ? "true" : "false"}
+            aria-pressed={mode === id}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold shrink-0 transition-all border ${
               mode === id 
                 ? 'bg-accent text-neutral-950 border-accent' 

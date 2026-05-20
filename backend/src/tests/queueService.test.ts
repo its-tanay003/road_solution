@@ -14,6 +14,12 @@ vi.mock('../services/socketService', () => ({
   broadcastToResponders: vi.fn(),
 }));
 
+vi.mock('../services/responderService', () => ({
+  ResponderService: {
+    findResponders: vi.fn().mockResolvedValue([]),
+  }
+}));
+
 describe('queueService', () => {
   let mockClient: any;
 

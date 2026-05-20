@@ -55,7 +55,7 @@ export function EmergencyMap() {
     libraries: LIBRARIES,
   });
 
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [, setMap] = useState<google.maps.Map | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [accuracy, setAccuracy] = useState(0);
   const [activeLayers, setActiveLayers] = useState<Set<LayerType>>(new Set(['hospitals', 'police']));
@@ -117,7 +117,11 @@ export function EmergencyMap() {
   const toggleLayer = (layer: LayerType) => {
     setActiveLayers((prev) => {
       const next = new Set(prev);
-      next.has(layer) ? next.delete(layer) : next.add(layer);
+      if (next.has(layer)) {
+        next.delete(layer);
+      } else {
+        next.add(layer);
+      }
       return next;
     });
   };

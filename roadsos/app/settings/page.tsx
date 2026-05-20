@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import {
   Settings, User, Bell, Shield, Globe, Palette,
-  ChevronRight, Smartphone, Trash2, Phone,
-  Activity, Eye, EyeOff, Volume2,
+  ChevronRight, Trash2, Phone, Eye,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -40,7 +39,7 @@ const DEFAULT_PREFS: UserPrefs = {
 // ── Toggle component ───────────────────────────────────────────
 function Toggle({ checked, onChange, id, label }: { checked: boolean; onChange: (v: boolean) => void; id: string; label: string }) {
   return (
-    <button id={id} role="switch" aria-checked={checked ? 'true' : 'false'} aria-label={label} onClick={() => onChange(!checked)}
+    <button id={id} role="switch" aria-checked={checked} aria-label={label} onClick={() => onChange(!checked)}
       className={cn('relative w-11 h-6 rounded-full transition-colors shrink-0',
         checked ? 'bg-red-600' : 'bg-gray-700'
       )}>

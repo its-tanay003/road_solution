@@ -3,6 +3,14 @@ import { motion } from 'framer-motion';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { Calculator, TrendingDown, Users, DollarSign, Share2, Info, Activity } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -67,6 +75,7 @@ export const ImpactCalculator: React.FC = () => {
         bodyFont: { family: 'JetBrains Mono' },
         borderColor: 'rgba(255,255,255,0.1)',
         borderWidth: 1,
+        borderRadius: 8,
       }
     },
     scales: {
@@ -82,13 +91,7 @@ export const ImpactCalculator: React.FC = () => {
   };
 
   const generatePDF = () => {
-    const { jsPDF } = window.jspdf || {};
-    if (!jsPDF) {
-      alert("PDF generation engine loading... please try again in a moment.");
-      return;
-    }
-
-    const doc = new jsPDF();
+    const doc = new jsPDF() as jsPDFWithAutoTable;
     const timestamp = new Date().toLocaleString();
 
     // Header
@@ -117,7 +120,7 @@ export const ImpactCalculator: React.FC = () => {
       ["Total Implementation", `₹${results.totalCost.toLocaleString()}`, "CAPEX"]
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 65,
       head: [tableData[0]],
       body: tableData.slice(1),

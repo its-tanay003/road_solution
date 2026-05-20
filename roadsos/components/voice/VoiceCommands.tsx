@@ -86,7 +86,6 @@ export function VoiceCommands() {
     recognition.onerror = () => setListening(false);
     recognition.onend = () => { if (listening) recognition.start(); };
     recognitionRef.current = recognition;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [processCommand, listening]);
 
   const toggleListening = () => {
@@ -137,7 +136,7 @@ export function VoiceCommands() {
                 <motion.div
                   key={i}
                   className="w-1 bg-red-500 rounded-full"
-                  animate={{ height: [4, Math.random() * 20 + 4, 4] }}
+                  animate={{ height: [4, ((i * 7) % 20) + 4, 4] }}
                   transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.05 }}
                 />
               ))}

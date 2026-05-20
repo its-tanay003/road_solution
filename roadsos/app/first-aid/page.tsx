@@ -11,7 +11,7 @@ const FIRST_AID_CARDS = [
     id: 'cpr',
     title: 'CPR',
     emoji: '🫀',
-    color: '#ef4444',
+    colorClass: 'bg-red-500',
     summary: 'Cardiopulmonary resuscitation for unresponsive adults',
     steps: [
       'Call 112 immediately',
@@ -25,7 +25,7 @@ const FIRST_AID_CARDS = [
     id: 'burns',
     title: 'Burns',
     emoji: '🔥',
-    color: '#f97316',
+    colorClass: 'bg-orange-500',
     summary: 'Treatment for thermal and chemical burns',
     steps: [
       'Remove from heat source immediately',
@@ -39,7 +39,7 @@ const FIRST_AID_CARDS = [
     id: 'bleeding',
     title: 'Severe Bleeding',
     emoji: '🩸',
-    color: '#dc2626',
+    colorClass: 'bg-red-600',
     summary: 'Control heavy bleeding from wounds',
     steps: [
       'Call 112 for severe bleeding',
@@ -54,7 +54,7 @@ const FIRST_AID_CARDS = [
     id: 'choking',
     title: 'Choking',
     emoji: '🫁',
-    color: '#7c3aed',
+    colorClass: 'bg-violet-600',
     summary: 'Airway obstruction in adults and children',
     steps: [
       'Ask: "Are you choking?" — If they can cough, let them',
@@ -68,7 +68,7 @@ const FIRST_AID_CARDS = [
     id: 'stroke',
     title: 'Stroke',
     emoji: '🧠',
-    color: '#2563eb',
+    colorClass: 'bg-blue-600',
     summary: 'Recognise and respond to stroke — FAST',
     steps: [
       'F — Face: Ask to smile. Does face droop on one side?',
@@ -83,7 +83,7 @@ const FIRST_AID_CARDS = [
     id: 'heart-attack',
     title: 'Heart Attack',
     emoji: '❤️',
-    color: '#ef4444',
+    colorClass: 'bg-red-500',
     summary: 'Signs and immediate response',
     steps: [
       'Call 112 immediately — do not drive yourself',
@@ -98,7 +98,7 @@ const FIRST_AID_CARDS = [
     id: 'fracture',
     title: 'Fractures',
     emoji: '🦴',
-    color: '#6b7280',
+    colorClass: 'bg-gray-500',
     summary: 'Suspected broken bones treatment',
     steps: [
       'Do not try to straighten the bone',
@@ -113,7 +113,7 @@ const FIRST_AID_CARDS = [
     id: 'drowning',
     title: 'Drowning',
     emoji: '🌊',
-    color: '#0ea5e9',
+    colorClass: 'bg-sky-500',
     summary: 'Water rescue and resuscitation',
     steps: [
       'Call 112 — do not jump in unless trained',
@@ -128,7 +128,7 @@ const FIRST_AID_CARDS = [
     id: 'snake-bite',
     title: 'Snake Bite',
     emoji: '🐍',
-    color: '#16a34a',
+    colorClass: 'bg-green-600',
     summary: 'Venomous snake bite first response',
     steps: [
       'Call 112 immediately',
@@ -143,7 +143,7 @@ const FIRST_AID_CARDS = [
     id: 'seizure',
     title: 'Seizure',
     emoji: '⚡',
-    color: '#8b5cf6',
+    colorClass: 'bg-violet-500',
     summary: 'Epileptic seizure management',
     steps: [
       'Stay calm and time the seizure',
@@ -187,19 +187,13 @@ export default function FirstAidPage() {
                 <p className="font-bold text-white text-base">{card.title}</p>
                 <p className="text-gray-500 text-xs mt-0.5">{card.summary}</p>
               </div>
-              <div
-                className="w-2 h-2 rounded-full shrink-0 [background:var(--card-color)]"
-                style={{ '--card-color': card.color } as React.CSSProperties}
-              />
+              <div className={`w-2 h-2 rounded-full shrink-0 ${card.colorClass}`} />
             </summary>
             <div className="px-4 pb-4 border-t border-gray-800 pt-3">
               <ol className="space-y-2">
                 {card.steps.map((step, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <span
-                      className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5 [background:var(--card-color)]"
-                      style={{ '--card-color': card.color } as React.CSSProperties}
-                    >
+                    <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5 ${card.colorClass}`}>
                       {i + 1}
                     </span>
                     <p className="text-gray-200 text-sm leading-relaxed">{step}</p>

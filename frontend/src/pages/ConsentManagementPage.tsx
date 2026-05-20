@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Shield, Lock, Eye, Share2, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface RowProps {
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   desc: string;
   active: boolean;
