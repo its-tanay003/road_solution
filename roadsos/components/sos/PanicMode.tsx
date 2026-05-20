@@ -154,7 +154,7 @@ export function PanicMode() {
     if (typeof navigator !== 'undefined' && 'bluetooth' in navigator) {
       addLog('Bluetooth: Scanning/advertising BLE SOS beacons...');
       try {
-        await navigator.bluetooth.requestDevice({
+        await (navigator as any).bluetooth.requestDevice({
           acceptAllDevices: true,
           optionalServices: ['generic_access']
         });
@@ -170,7 +170,7 @@ export function PanicMode() {
     if (typeof navigator !== 'undefined' && 'serial' in navigator) {
       addLog('Serial: Sweeping connected radio devices...');
       try {
-        const ports = await navigator.serial.getPorts();
+        const ports = await (navigator as any).serial.getPorts();
         if (ports.length > 0) {
           const port = ports[0];
           await port.open({ baudRate: 9600 });

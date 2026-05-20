@@ -139,18 +139,30 @@ export const useUserStore = create<UserState>()(
       setPrimaryEmergencyContact: (phone) => set({ primaryEmergencyContact: phone }),
 
       updateMedicalInfo: (info: Partial<MedicalProfile | UserState['medicalInfo']>) => set((state) => {
-        type UpdateInput = Partial<Omit<MedicalProfile, 'conditions'> & Omit<UserState['medicalInfo'], 'conditions'> & { name?: string; language?: string; conditions?: string | string[] }>;
+        // Merge both possible shapes into a single, explicit record type
+        type UpdateInput = {
+          bloodType?:      string;
+          bloodGroup?:     string;
+          allergies?:      string;
+          age?:            string | number;
+          medications?:    string;
+          profileComplete?: boolean;
+          conditions?:     string | string[];
+          name?:           string;
+          language?:       string;
+          contacts?:       EmergencyContact[];
+        };
         const data = info as UpdateInput;
         const medicalInfo = { ...state.medicalInfo };
-        
+
         // Map fields to medicalInfo object
-        if (data.bloodType) medicalInfo.bloodGroup = data.bloodType;
+        if (data.bloodType)  medicalInfo.bloodGroup = data.bloodType;
         if (data.bloodGroup) medicalInfo.bloodGroup = data.bloodGroup;
-        if (data.allergies) medicalInfo.allergies = data.allergies;
-        if (data.age) medicalInfo.age = String(data.age);
+        if (data.allergies)  medicalInfo.allergies  = data.allergies;
+        if (data.age)        medicalInfo.age        = String(data.age);
         if (data.medications) medicalInfo.medications = data.medications;
         if (data.profileComplete !== undefined) medicalInfo.profileComplete = data.profileComplete;
-        
+
         // Sync comma-separated conditions to medicalInfo if array is provided
         if (Array.isArray(data.conditions)) {
           medicalInfo.conditions = data.conditions.join(', ');
@@ -159,26 +171,26 @@ export const useUserStore = create<UserState>()(
         }
 
         const updates: Partial<UserState> = { medicalInfo };
-        
+
         // Handle top-level fields
-        if (data.name) updates.name = data.name;
+        if (data.name)     updates.name     = data.name;
         if (data.language) updates.language = data.language;
         if (data.contacts) updates.contacts = data.contacts;
         if (data.bloodType) updates.bloodType = data.bloodType;
-        if (data.age) updates.age = String(data.age);
+        if (data.age)       updates.age       = String(data.age);
         if (data.allergies) updates.allergies = data.allergies;
         if (Array.isArray(data.conditions)) updates.conditions = data.conditions;
         if (data.medications) updates.medications = data.medications;
         if (data.profileComplete !== undefined) updates.profileComplete = data.profileComplete;
         // Sync legacy top-level aliases
-        updates.bloodType = medicalInfo.bloodGroup;
-        updates.age = medicalInfo.age;
-        updates.allergies = medicalInfo.allergies;
-        updates.medications = medicalInfo.medications;
+        updates.bloodType    = medicalInfo.bloodGroup;
+        updates.age          = medicalInfo.age;
+        updates.allergies    = medicalInfo.allergies;
+        updates.medications  = medicalInfo.medications;
         updates.profileComplete = medicalInfo.profileComplete;
-        
+
         if (Array.isArray(info.conditions)) {
-          updates.conditions = info.conditions;
+          updates.conditions = info.conditions as string[];
         }
 
         return updates;

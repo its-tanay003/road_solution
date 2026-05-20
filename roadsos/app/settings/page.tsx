@@ -28,6 +28,8 @@ interface UserPrefs {
   theme: 'dark' | 'light' | 'auto';
   notifications: boolean;
   contacts: EmergencyContact[];
+  conditions?: string;
+  address?: string;
 }
 
 const DEFAULT_PREFS: UserPrefs = {
@@ -36,6 +38,8 @@ const DEFAULT_PREFS: UserPrefs = {
   sosHoldMs: 3000, shakeThreshold: 4,
   language: 'en', theme: 'auto', notifications: true,
   contacts: [],
+  conditions: '',
+  address: '',
 };
 
 // ── Toggle component ───────────────────────────────────────────
@@ -105,29 +109,70 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [prefs, setPrefs] = useState<UserPrefs>(DEFAULT_PREFS);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newContact, setNewContact] = useState<EmergencyContact>({ name: '', phone: '', relation: '' });
   const [showAddContact, setShowAddContact] = useState(false);
 
-  // Load active translations & theme into state on mount
+  // Load active profile from /api/profile
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedProfile = localStorage.getItem('roadsos-profile');
-      let parsed: Partial<UserPrefs> = {};
-      if (savedProfile) {
-        try {
-          parsed = JSON.parse(savedProfile);
-        } catch (e) {
-          console.error('[Settings] Error parsing saved profile:', e);
+    const loadProfile = async () => {
+      try {
+        const res = await fetch('/api/profile');
+        if (res.ok) {
+          const data = await res.json();
+          const { profile, contacts } = data;
+          
+          if (profile) {
+            setPrefs({
+              name: profile.full_name || '',
+              phone: profile.phone || '',
+              bloodGroup: (profile.blood_group as BloodGroup) || 'Unknown',
+              shareLocation: profile.share_location_in_sos ?? true,
+              shareMedical: profile.share_medical_in_sos ?? true,
+              shareCamera: profile.share_camera_in_sos ?? false,
+              sosHoldMs: profile.sos_hold_duration ?? 3000,
+              shakeThreshold: profile.sos_shake_threshold ?? 4,
+              language: profile.language_preference || i18n.language || 'en',
+              theme: (profile.theme_preference as UserPrefs['theme']) || (theme as UserPrefs['theme']) || 'auto',
+              notifications: true,
+              conditions: profile.medical_conditions?.join(', ') || '',
+              address: profile.home_address || '',
+              contacts: contacts.map((c: any) => ({
+                name: c.name,
+                phone: c.phone,
+                relation: c.relationship || ''
+              }))
+            });
+
+            if (profile.language_preference) {
+              void i18n.changeLanguage(profile.language_preference);
+            }
+            if (profile.theme_preference) {
+              setTheme(profile.theme_preference);
+            }
+          }
         }
+      } catch (err) {
+        console.error('[Settings] Error loading profile:', err);
+        // Fallback to local storage
+        const savedProfile = localStorage.getItem('roadsos-profile');
+        if (savedProfile) {
+          try {
+            const parsed = JSON.parse(savedProfile);
+            setPrefs(p => ({
+              ...p,
+              ...parsed,
+              language: i18n.language || 'en',
+              theme: (theme as UserPrefs['theme']) || 'auto',
+            }));
+          } catch {}
+        }
+      } finally {
+        setLoading(false);
       }
-      setPrefs(p => ({
-        ...p,
-        ...parsed,
-        language: i18n.language || 'en',
-        theme: (theme as UserPrefs['theme']) || 'auto',
-      }));
-    }
-  }, [i18n.language, theme]);
+    };
+    loadProfile();
+  }, [i18n.language, theme, setTheme]);
 
   const update = <K extends keyof UserPrefs>(key: K, value: UserPrefs[K]) => {
     setPrefs(p => ({ ...p, [key]: value }));
@@ -141,16 +186,37 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSave = () => {
-    // In production: persist to Supabase via PATCH /api/profile
+  const handleSave = async () => {
     console.log('[Settings] Saving prefs:', prefs);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('roadsos-profile', JSON.stringify(prefs));
-    }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  };
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: prefs.name,
+          phone: prefs.phone,
+          bloodGroup: prefs.bloodGroup,
+          conditions: prefs.conditions || '',
+          address: prefs.address || '',
+          contacts: prefs.contacts
+        }),
+      });
 
+      if (!res.ok) {
+        throw new Error('Failed to save profile to database');
+      }
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('roadsos-profile', JSON.stringify(prefs));
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      window.dispatchEvent(new Event('roadsos-profile-updated'));
+    } catch (err) {
+      console.error('[Settings] Error saving profile:', err);
+      alert('Failed to save profile. Please check your connection and try again.');
+    }
+  };
 
   const addContact = () => {
     if (!newContact.name || !newContact.phone) return;
@@ -162,6 +228,17 @@ export default function SettingsPage() {
   const removeContact = (i: number) => {
     update('contacts', prefs.contacts.filter((_, idx) => idx !== i));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-full border-4 border-red-600 border-t-transparent animate-spin" />
+          <p className="text-sm font-black text-gray-400 tracking-tight animate-pulse">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-28">
@@ -227,6 +304,24 @@ export default function SettingsPage() {
                 <option key={g} value={g}>{g}</option>
               ))}
             </select>
+          </Row>
+          <Row label="Medical Conditions" desc="Allergies, chronic conditions">
+            <input
+              value={prefs.conditions || ''}
+              onChange={e => update('conditions', e.target.value)}
+              placeholder="e.g. Asthma, Penicillin"
+              aria-label="Medical conditions"
+              className="bg-transparent text-white text-sm text-right outline-none placeholder:text-gray-600 w-44 animate-pulse-subtle"
+            />
+          </Row>
+          <Row label="Home Address" desc="For SOS reference">
+            <input
+              value={prefs.address || ''}
+              onChange={e => update('address', e.target.value)}
+              placeholder="123 Main St..."
+              aria-label="Home address"
+              className="bg-transparent text-white text-sm text-right outline-none placeholder:text-gray-600 w-44"
+            />
           </Row>
         </Section>
 

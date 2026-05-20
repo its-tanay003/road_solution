@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { EmergencyMap } from '@/components/map/EmergencyMap';
 import { MapPin, Layers } from 'lucide-react';
 
@@ -27,7 +28,16 @@ export default function MapPage() {
 
       {/* Map fills remaining space */}
       <div className="flex-1 p-3">
-        <EmergencyMap />
+        <Suspense fallback={
+          <div className="flex-1 flex items-center justify-center bg-gray-950 rounded-2xl border border-gray-800">
+            <div className="text-center space-y-3">
+              <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-gray-400 text-sm font-semibold">Loading Map Container...</p>
+            </div>
+          </div>
+        }>
+          <EmergencyMap />
+        </Suspense>
       </div>
     </div>
   );

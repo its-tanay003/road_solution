@@ -34,8 +34,23 @@
       "url": "/map",
       "description": "View nearby medical facilities",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Chatbot",
+      "url": "/chat",
+      "description": "Consult AI medical companion",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
+  "share_target": {
+    "action": "/map",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "display_override": ["window-controls-overlay"],
   "prefer_related_applications": false
 }

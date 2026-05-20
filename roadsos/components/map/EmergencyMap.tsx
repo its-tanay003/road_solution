@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, HeatmapLayer, Circle } from '@react-google-maps/api';
 import { useSOSStore } from '@/lib/store/sosStore';
+import { useSearchParams } from 'next/navigation';
 import { Shield, Flame, Cross, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,6 +50,61 @@ const MOCK_ACCIDENT_POINTS = [
   { lat: 17.3850, lng: 78.4867, weight: 6 },  // Hyderabad
 ];
 
+// Helper to fetch OpenStreetMap features as a fallback when Google Places fails/is offline
+async function fetchOSMPlaces(lat: number, lng: number, layers: Set<LayerType>): Promise<PlaceResult[]> {
+  const overpassTypes: string[] = [];
+  if (layers.has('hospitals')) overpassTypes.push('hospital');
+  if (layers.has('police')) overpassTypes.push('police');
+  if (layers.has('fire')) overpassTypes.push('fire_station');
+  if (layers.has('pharmacy')) overpassTypes.push('pharmacy');
+
+  if (overpassTypes.length === 0) return [];
+
+  const aroundRadius = 5000;
+  const queries = overpassTypes.map(type => `
+    node["amenity"="${type}"](around:${aroundRadius}, ${lat}, ${lng});
+    way["amenity"="${type}"](around:${aroundRadius}, ${lat}, ${lng});
+  `).join('\n');
+
+  const query = `[out:json][timeout:15];
+(
+${queries}
+);
+out center;`;
+
+  try {
+    const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error('Overpass API returned non-200');
+    const data = await response.json();
+    
+    return (data.elements || []).map((el: any) => {
+      let type: LayerType = 'hospitals';
+      if (el.tags?.amenity === 'police') type = 'police';
+      if (el.tags?.amenity === 'fire_station') type = 'fire';
+      if (el.tags?.amenity === 'pharmacy') type = 'pharmacy';
+
+      const elementLat = el.lat ?? el.center?.lat ?? lat;
+      const elementLng = el.lon ?? el.center?.lon ?? lng;
+
+      return {
+        id: `osm-${el.type}-${el.id}`,
+        name: el.tags?.name || el.tags?.operator || `${LAYER_CONFIG[type].label} (OSM)`,
+        lat: elementLat,
+        lng: elementLng,
+        type: type,
+        address: el.tags?.['addr:street'] 
+          ? `${el.tags?.['addr:housenumber'] || ''} ${el.tags?.['addr:street']}, ${el.tags?.['addr:city'] || ''}`
+          : 'OpenStreetMap Data',
+        phone: el.tags?.phone || el.tags?.['contact:phone'],
+        rating: undefined,
+      };
+    });
+  } catch (error) {
+    console.error('[OSM Fallback] Error querying Overpass:', error);
+    return [];
+  }
+}
+
 export function EmergencyMap() {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
@@ -61,8 +117,59 @@ export function EmergencyMap() {
   const [activeLayers, setActiveLayers] = useState<Set<LayerType>>(new Set(['hospitals', 'police']));
   const [places, setPlaces] = useState<PlaceResult[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
+  const [sharedPin, setSharedPin] = useState<{ lat: number; lng: number; label: string } | null>(null);
+  
   const serviceRef = useRef<google.maps.places.PlacesService | null>(null);
   const { location: sosLocation } = useSOSStore();
+  const searchParams = useSearchParams();
+
+  // Handle ?find= query param from voice commands (e.g. "Find nearest hospital")
+  useEffect(() => {
+    if (!searchParams) return;
+    const find = searchParams.get('find');
+    if (!find) return;
+    const layerMap: Record<string, LayerType> = {
+      hospital: 'hospitals',
+      hospitals: 'hospitals',
+      police: 'police',
+      fire: 'fire',
+      pharmacy: 'pharmacy',
+    };
+    const layer = layerMap[find.toLowerCase()];
+    if (layer) {
+      setActiveLayers(new Set([layer]));
+    }
+  }, [searchParams]);
+
+  // Parse share target parameters
+  useEffect(() => {
+    if (searchParams) {
+      const title = searchParams.get('title');
+      const text = searchParams.get('text');
+      const url = searchParams.get('url');
+      const queryLat = searchParams.get('lat');
+      const queryLng = searchParams.get('lng');
+
+      if (queryLat && queryLng) {
+        const lat = parseFloat(queryLat);
+        const lng = parseFloat(queryLng);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setSharedPin({ lat, lng, label: 'Shared Pin' });
+          return;
+        }
+      }
+
+      const combined = `${title || ''} ${text || ''} ${url || ''}`;
+      const coordMatch = combined.match(/(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/);
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]);
+        const lng = parseFloat(coordMatch[2]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setSharedPin({ lat, lng, label: title || 'Shared Emergency Location' });
+        }
+      }
+    }
+  }, [searchParams]);
 
   // Watch user location
   useEffect(() => {
@@ -82,18 +189,34 @@ export function EmergencyMap() {
     serviceRef.current = new google.maps.places.PlacesService(m);
   }, []);
 
-  // Search nearby places for active layers
+  // Search nearby places for active layers (Google Places with OSM Fallback)
   useEffect(() => {
-    if (!serviceRef.current || !userPos) return;
+    const centerPos = userPos || (sharedPin ? { lat: sharedPin.lat, lng: sharedPin.lng } : null);
+    if (!centerPos) return;
+
+    const layersToFetch = Array.from(activeLayers).filter((l) => l !== 'accidents');
+    if (layersToFetch.length === 0) {
+      setPlaces([]);
+      return;
+    }
+
+    if (!serviceRef.current) {
+      // If Google Places service is not loaded yet (or fails/offline), immediately query OSM fallback!
+      fetchOSMPlaces(centerPos.lat, centerPos.lng, activeLayers).then((osmResults) => {
+        if (osmResults.length > 0) setPlaces(osmResults);
+      });
+      return;
+    }
 
     const newPlaces: PlaceResult[] = [];
-    const layersToFetch = Array.from(activeLayers).filter((l) => l !== 'accidents');
+    let completedRequests = 0;
 
     layersToFetch.forEach((layerType) => {
       const cfg = LAYER_CONFIG[layerType];
       serviceRef.current!.nearbySearch(
-        { location: userPos, radius: 5000, type: cfg.placeType },
-        (results, status) => {
+        { location: centerPos, radius: 5000, type: cfg.placeType },
+        async (results, status) => {
+          completedRequests++;
           if (status === google.maps.places.PlacesServiceStatus.OK && results) {
             results.slice(0, 8).forEach((r) => {
               newPlaces.push({
@@ -107,12 +230,22 @@ export function EmergencyMap() {
                 rating: r.rating,
               });
             });
-            setPlaces([...newPlaces]);
+          }
+
+          // Once all requests return, check if empty. If so, query OSM Overpass fallback.
+          if (completedRequests === layersToFetch.length) {
+            if (newPlaces.length === 0) {
+              console.log('[Map] Google Places returned empty. Requesting OSM Overpass fallback...');
+              const osmResults = await fetchOSMPlaces(centerPos.lat, centerPos.lng, activeLayers);
+              setPlaces(osmResults);
+            } else {
+              setPlaces(newPlaces);
+            }
           }
         }
       );
     });
-  }, [activeLayers, userPos]);
+  }, [activeLayers, userPos, sharedPin]);
 
   const toggleLayer = (layer: LayerType) => {
     setActiveLayers((prev) => {
@@ -183,7 +316,13 @@ export function EmergencyMap() {
 
       <GoogleMap
         mapContainerStyle={{ width: '100%', height: '100%' }}
-        center={sosLocation ? { lat: sosLocation.lat, lng: sosLocation.lng } : (userPos ?? { lat: 28.6139, lng: 77.2090 })}
+        center={
+          sosLocation
+            ? { lat: sosLocation.lat, lng: sosLocation.lng }
+            : sharedPin
+            ? { lat: sharedPin.lat, lng: sharedPin.lng }
+            : userPos ?? { lat: 28.6139, lng: 77.2090 }
+        }
         zoom={14}
         onLoad={onMapLoad}
         options={{
@@ -209,6 +348,25 @@ export function EmergencyMap() {
               options={{ fillColor: '#3b82f6', fillOpacity: 0.08, strokeColor: '#3b82f6', strokeOpacity: 0.3, strokeWeight: 1 }}
             />
           </>
+        )}
+
+        {/* Shared Pin from PWA Share Target / Custom Coords */}
+        {sharedPin && (
+          <Marker
+            position={{ lat: sharedPin.lat, lng: sharedPin.lng }}
+            onClick={() => setSelectedPlace({
+              id: 'shared-pin',
+              name: sharedPin.label,
+              lat: sharedPin.lat,
+              lng: sharedPin.lng,
+              type: 'hospitals',
+              address: 'Shared location pin'
+            })}
+            icon={{
+              url: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23a855f7" stroke="white" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+              scaledSize: new google.maps.Size(36, 36),
+            }}
+          />
         )}
 
         {/* SOS Location pin */}

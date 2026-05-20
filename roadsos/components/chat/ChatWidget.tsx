@@ -97,6 +97,32 @@ export function ChatWidget() {
     let attempts = 0;
     const maxAttempts = MODEL_CHAIN.length;
 
+    // Prepare messages payload
+    const baseMessages = messages.map(m => ({ role: m.role, content: m.content }));
+    
+    // Inject active profile + location if SOS is active
+    let finalUserContent = text;
+    if (sosStatus === 'active' || sosStatus === 'acknowledged') {
+      let extraInfo = '';
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('roadsos-profile');
+        if (saved) {
+          try {
+            const profile = JSON.parse(saved);
+            extraInfo += `[ACTIVE EMERGENCY - Blood Group: ${profile.bloodGroup || 'Unknown'}, Conditions: ${profile.conditions || 'None'}, Contacts: ${profile.emergencyContacts?.map((c: any) => `${c.name} (${c.phone})`).join(', ') || 'None'}] `;
+          } catch {}
+        }
+      }
+      if (location) {
+        extraInfo += `[User Location: Lat ${location.lat}, Lng ${location.lng}, Address: ${location.address || 'Unknown'}] `;
+      }
+      if (extraInfo) {
+        finalUserContent = `${extraInfo}\nUser Query: ${text}`;
+      }
+    }
+
+    const messagesPayload = [...baseMessages, { role: 'user', content: finalUserContent }];
+
     while (!success && attempts < maxAttempts) {
       const activeModel = MODEL_CHAIN[(currentModelIndex + attempts) % MODEL_CHAIN.length];
       
@@ -113,7 +139,7 @@ export function ChatWidget() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: 'user', content: text }],
+            messages: messagesPayload,
             systemContext: buildSystemContext()
           }),
         });
@@ -205,13 +231,34 @@ export function ChatWidget() {
   const dispatchLivePrompt = useCallback(async (text: string) => {
     if (!text.trim()) return;
     setLiveStatus('thinking');
+
+    // Inject location & profile context into Gemini Live query if SOS is active
+    let finalLivePrompt = text;
+    if (sosStatus === 'active' || sosStatus === 'acknowledged') {
+      let extraInfo = '';
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('roadsos-profile');
+        if (saved) {
+          try {
+            const profile = JSON.parse(saved);
+            extraInfo += `[ACTIVE EMERGENCY - Blood Group: ${profile.bloodGroup || 'Unknown'}, Conditions: ${profile.conditions || 'None'}] `;
+          } catch {}
+        }
+      }
+      if (location) {
+        extraInfo += `[User GPS Coordinates: lat ${location.lat}, lng ${location.lng}] `;
+      }
+      if (extraInfo) {
+        finalLivePrompt = `${extraInfo}\nUser voice query: ${text}`;
+      }
+    }
     
     try {
       const response = await fetch('/api/ai/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: text }],
+          messages: [{ role: 'user', content: finalLivePrompt }],
           systemContext: buildSystemContext() + " Answer in ONE or TWO short sentences maximum for live voice response."
         }),
       });

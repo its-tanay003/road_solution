@@ -45,12 +45,29 @@ export default function ChatPage() {
     setStreaming(true);
     addMessage({ role: 'assistant', content: '', model });
 
+    // Inject profile + location context when SOS is active
+    let finalContent = text;
+    if (sosStatus === 'active' || sosStatus === 'acknowledged') {
+      let ctx = '';
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('roadsos-profile');
+        if (saved) {
+          try {
+            const p = JSON.parse(saved);
+            ctx += `[ACTIVE EMERGENCY — Blood Group: ${p.bloodGroup || 'Unknown'}, Conditions: ${p.conditions || 'None'}] `;
+          } catch {}
+        }
+      }
+      if (location) ctx += `[GPS: ${location.lat}, ${location.lng} — ${location.address || 'Unknown'}] `;
+      if (ctx) finalContent = `${ctx}\nUser Query: ${text}`;
+    }
+
     try {
       const endpoint = `/api/ai/${model}`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, { role: 'user', content: text }], systemContext: buildContext() }),
+        body: JSON.stringify({ messages: [...messages, { role: 'user', content: finalContent }], systemContext: buildContext() }),
       });
 
       if (!res.body) throw new Error('No response body');

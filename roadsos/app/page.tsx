@@ -113,7 +113,7 @@ export default function HomePage() {
                 <span className="text-base font-black tracking-wider uppercase">Call 112 Help</span>
               </div>
               <ChevronRight size={18} className="text-gray-600" />
-            </Link>
+            </a>
 
             <Link href="/chat" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
               <div className="flex items-center gap-4">
