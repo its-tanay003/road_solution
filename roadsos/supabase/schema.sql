@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS public.users (
   share_medical_in_sos BOOLEAN DEFAULT TRUE,
   share_camera_in_sos BOOLEAN DEFAULT FALSE,
   is_guest BOOLEAN DEFAULT FALSE,
+  email TEXT,
+  provider TEXT,
+  date_of_birth DATE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
