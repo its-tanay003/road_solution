@@ -16,7 +16,7 @@ export function SensorWatcher() {
       const acc = e.accelerationIncludingGravity;
       if (!acc?.x) return;
 
-      const { x = 0, y = 0, z = 0 } = acc;
+      const { x = 0, y = 0, z = 0 } = { x: acc.x ?? 0, y: acc.y ?? 0, z: acc.z ?? 0 };
       const prev = lastAccelRef.current;
       const delta = Math.sqrt(
         Math.pow(x - prev.x, 2) + Math.pow(y - prev.y, 2) + Math.pow(z - prev.z, 2)
