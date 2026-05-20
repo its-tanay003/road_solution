@@ -12,7 +12,8 @@ export function VoiceCommands() {
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [feedback, setFeedback] = useState('');
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
   const router = useRouter();
   const { arm } = useSOSStore();
 
@@ -61,15 +62,18 @@ export function VoiceCommands() {
   }, [router, arm, speak]);
 
   useEffect(() => {
-    if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    if (!w.SpeechRecognition && !w.webkitSpeechRecognition) return;
+    const SpeechRecognitionClass = w.SpeechRecognition || w.webkitSpeechRecognition;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recognition: any = new SpeechRecognitionClass();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-IN';
 
-    recognition.onresult = (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
       const latest = e.results[e.results.length - 1];
       const text = latest[0].transcript;
       setTranscript(text);

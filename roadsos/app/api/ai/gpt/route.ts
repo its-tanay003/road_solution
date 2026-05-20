@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     model: openai('gpt-4o'),
     system: GPT_EMERGENCY_PROMPT + (systemContext ? `\n\nContext: ${systemContext}` : ''),
     messages,
-    maxTokens: 1024,
+    maxOutputTokens: 1024,
     temperature: 0.3,
   });
 
-  return result.toDataStreamResponse();
+  return result.toTextStreamResponse();
 }
