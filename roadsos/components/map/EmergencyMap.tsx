@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow, HeatmapLayer, Circle } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow, HeatmapLayer, Circle, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useSearchParams } from 'next/navigation';
 import { Shield, Flame, Cross, AlertTriangle } from 'lucide-react';
@@ -118,9 +118,10 @@ export function EmergencyMap() {
   const [places, setPlaces] = useState<PlaceResult[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
   const [sharedPin, setSharedPin] = useState<{ lat: number; lng: number; label: string } | null>(null);
+  const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
   
   const serviceRef = useRef<google.maps.places.PlacesService | null>(null);
-  const { location: sosLocation } = useSOSStore();
+  const { location: sosLocation, responder } = useSOSStore();
   const searchParams = useSearchParams();
 
   // Handle ?find= query param from voice commands (e.g. "Find nearest hospital")
@@ -425,6 +426,47 @@ export function EmergencyMap() {
           <HeatmapLayer
             data={heatmapData}
             options={{ radius: 40, opacity: 0.7, gradient: ['rgba(0,0,0,0)', 'rgba(255,165,0,0.8)', 'rgba(255,0,0,1)'] }}
+          />
+        )}
+
+        {/* Responder Route */}
+        {responder && sosLocation && !directionsResponse && (
+          <DirectionsService
+            options={{
+              origin: { lat: responder.lat, lng: responder.lng },
+              destination: { lat: sosLocation.lat, lng: sosLocation.lng },
+              travelMode: google.maps.TravelMode.DRIVING,
+            }}
+            callback={(res) => {
+              if (res !== null && res.status === google.maps.DirectionsStatus.OK) {
+                setDirectionsResponse(res);
+              }
+            }}
+          />
+        )}
+
+        {directionsResponse && (
+          <DirectionsRenderer
+            options={{
+              directions: directionsResponse,
+              suppressMarkers: true,
+              polylineOptions: {
+                strokeColor: '#3b82f6',
+                strokeWeight: 5,
+                strokeOpacity: 0.8,
+              }
+            }}
+          />
+        )}
+
+        {responder && (
+          <Marker
+            position={{ lat: responder.lat, lng: responder.lng }}
+            icon={{
+              url: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23f97316" stroke="white" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+              scaledSize: new google.maps.Size(36, 36),
+            }}
+            label={{ text: '🚑', fontSize: '16px' }}
           />
         )}
       </GoogleMap>

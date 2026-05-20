@@ -7,6 +7,7 @@ import { PanicMode } from '@/components/sos/PanicMode';
 import { ChatWidget } from '@/components/chat/ChatWidget';
 import { VoiceCommands } from '@/components/voice/VoiceCommands';
 import { SensorWatcher } from '@/components/sensors/SensorWatcher';
+import { CrashDetection } from '@/components/sensors/CrashDetection';
 import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PanicMode />
           <VoiceCommands />
           <SensorWatcher />
+          <CrashDetection />
           <ChatWidget />
           <Toaster position="top-center" richColors />
 
