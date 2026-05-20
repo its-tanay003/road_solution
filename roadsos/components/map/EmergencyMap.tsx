@@ -437,8 +437,8 @@ export function EmergencyMap() {
               destination: { lat: sosLocation.lat, lng: sosLocation.lng },
               travelMode: google.maps.TravelMode.DRIVING,
             }}
-            callback={(res) => {
-              if (res !== null && res.status === google.maps.DirectionsStatus.OK) {
+            callback={(res, status) => {
+              if (res !== null && status === google.maps.DirectionsStatus.OK) {
                 setDirectionsResponse(res);
               }
             }}

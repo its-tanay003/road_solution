@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
   const userId = session.user.id;
   const body = await req.json();
-  const { name, phone, bloodGroup, conditions, address, contacts } = body;
+  const { name, phone, bloodGroup, conditions, allergies, address, contacts, dob } = body;
 
   const adminDb = createAdminClient();
   if (!adminDb) {
@@ -90,6 +90,12 @@ export async function POST(req: NextRequest) {
         ? conditions.split(',').map(s => s.trim()).filter(Boolean)
         : [];
 
+    const parsedAllergies = Array.isArray(allergies)
+      ? allergies
+      : typeof allergies === 'string'
+        ? allergies.split(',').map(s => s.trim()).filter(Boolean)
+        : [];
+
     const { error: userError } = await adminDb
       .from('users')
       .upsert({
@@ -98,6 +104,8 @@ export async function POST(req: NextRequest) {
         phone: phone || null,
         blood_group: bloodGroup || 'Unknown',
         medical_conditions: parsedConditions,
+        allergies: parsedAllergies,
+        date_of_birth: dob || null,
         home_address: address || null,
         updated_at: new Date().toISOString()
       });

@@ -1,11 +1,15 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
-import type { CoreMessage } from 'ai';
+
+interface TriageMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json() as {
-      messages: CoreMessage[];
+      messages: TriageMessage[];
       medicalProfile?: Record<string, unknown>;
     };
 
