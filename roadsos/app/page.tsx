@@ -6,13 +6,7 @@ import { Shield, Map, MessageSquare, BookOpen, Phone, Wifi, WifiOff, ChevronRigh
 import { SOSButton } from '@/components/sos/SOSButton';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useEffect, useState } from 'react';
-
-const QUICK_LINKS = [
-  { href: '/map',       icon: Map,           label: 'Emergency Map',  desc: 'Nearby hospitals & services', iconCls: 'text-blue-400',    bgCls: 'bg-blue-500/10'    },
-  { href: '/chat',      icon: MessageSquare, label: 'AI Assistant',   desc: 'Claude · Gemini · ChatGPT',  iconCls: 'text-amber-400',   bgCls: 'bg-amber-500/10'   },
-  { href: '/first-aid', icon: BookOpen,      label: 'First Aid',      desc: 'Step-by-step guides',        iconCls: 'text-emerald-400', bgCls: 'bg-emerald-500/10' },
-  { href: '/directory', icon: Phone,         label: 'Directory',      desc: 'Emergency numbers',          iconCls: 'text-violet-400',  bgCls: 'bg-violet-500/10'  },
-];
+import { useTranslation } from 'react-i18next';
 
 const EMERGENCY_NUMBERS = [
   { number: '112', label: 'Universal Emergency', cls: 'text-red-500' },
@@ -22,8 +16,41 @@ const EMERGENCY_NUMBERS = [
 ];
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { status, location } = useSOSStore();
   const [online, setOnline] = useState(true);
+  const [isCarMode, setIsCarMode] = useState(false);
+
+  const quickLinksTranslated = [
+    { href: '/map',       icon: Map,           label: t('emergencyMap'),  desc: t('nearbyHospitals'), iconCls: 'text-blue-400',    bgCls: 'bg-blue-500/10'    },
+    { href: '/chat',      icon: MessageSquare, label: t('aiAssistant'),   desc: t('tripleAiDesc'),  iconCls: 'text-amber-400',   bgCls: 'bg-amber-500/10'   },
+    { href: '/first-aid', icon: BookOpen,      label: t('firstAid'),      desc: t('firstAidDesc'),        iconCls: 'text-emerald-400', bgCls: 'bg-emerald-500/10' },
+    { href: '/directory', icon: Phone,         label: t('services'),      desc: t('servicesDesc'),          iconCls: 'text-violet-400',  bgCls: 'bg-violet-500/10'  },
+  ];
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkCarMode = () => {
+        const ua = navigator.userAgent.toLowerCase();
+        const hasCarAgent =
+          ua.includes('carplay') ||
+          ua.includes('androidauto') ||
+          ua.includes('android auto') ||
+          ua.includes('car-mode');
+        const searchParams = new URLSearchParams(window.location.search);
+        const hasCarQuery = searchParams.get('mode') === 'car';
+        
+        // landscape wide screen and small height: typical console dimension
+        const isCarSizing = window.innerWidth > 600 && window.innerHeight < 550;
+        
+        setIsCarMode(hasCarAgent || hasCarQuery || isCarSizing);
+      };
+      
+      checkCarMode();
+      window.addEventListener('resize', checkCarMode);
+      return () => window.removeEventListener('resize', checkCarMode);
+    }
+  }, []);
 
   useEffect(() => {
     const checkOnline = () => {
@@ -42,6 +69,70 @@ export default function HomePage() {
     };
   }, []);
 
+  if (isCarMode) {
+    return (
+      <div className="min-h-screen bg-black text-white p-6 flex flex-col justify-between">
+        {/* Top car status */}
+        <div className="flex items-center justify-between border-b border-gray-900 pb-3 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
+            <h1 className="text-sm font-black tracking-widest text-white uppercase">Automotive Deck Connected</h1>
+          </div>
+          <button 
+            onClick={() => setIsCarMode(false)}
+            className="text-[10px] bg-gray-900 border border-gray-800 text-gray-400 px-3 py-1.5 rounded-xl font-bold hover:text-white transition-colors"
+          >
+            Switch to Mobile View
+          </button>
+        </div>
+
+        {/* Big screen grid layout */}
+        <div className="grid grid-cols-2 gap-6 flex-1 items-center py-4 min-h-0">
+          {/* Big SOS button block */}
+          <div className="flex flex-col items-center justify-center bg-red-950/15 border-2 border-red-900/40 rounded-3xl p-6 h-full space-y-4 shadow-2xl">
+            <SOSButton />
+            <div className="text-center">
+              <p className="text-red-400 font-black text-lg tracking-tight uppercase">HOLD FOR SOS</p>
+              <p className="text-gray-500 text-[10px] leading-relaxed">Triple press volume keys or shake to trigger crash alert</p>
+            </div>
+          </div>
+
+          {/* Large touch targets */}
+          <div className="grid grid-rows-3 gap-3 h-full">
+            <Link href="/map" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
+              <div className="flex items-center gap-4">
+                <Map size={28} className="text-blue-400" />
+                <span className="text-base font-black tracking-wider uppercase">Emergency Map</span>
+              </div>
+              <ChevronRight size={18} className="text-gray-600" />
+            </Link>
+
+            <a href="tel:112" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
+              <div className="flex items-center gap-4">
+                <Phone size={28} className="text-emerald-400" />
+                <span className="text-base font-black tracking-wider uppercase">Call 112 Help</span>
+              </div>
+              <ChevronRight size={18} className="text-gray-600" />
+            </Link>
+
+            <Link href="/chat" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
+              <div className="flex items-center gap-4">
+                <MessageSquare size={28} className="text-amber-400" />
+                <span className="text-base font-black tracking-wider uppercase">Voice Chatbot</span>
+              </div>
+              <ChevronRight size={18} className="text-gray-600" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Footer warning bar */}
+        <div className="bg-yellow-950/15 border border-yellow-900/30 rounded-2xl px-4 py-2.5 text-center text-[10px] text-yellow-500 font-bold uppercase tracking-tight shrink-0">
+          ⚠️ Say &quot;Hey Emergency&quot; anytime for hand-free safety. Focus on driving.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-20">
       {/* Offline banner */}
@@ -57,9 +148,9 @@ export default function HomePage() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Shield size={20} className="text-red-500" />
-            <h1 className="text-xl font-black tracking-tight text-white">ROADSoS</h1>
+            <h1 className="text-xl font-black tracking-tight text-white">{t('appName')}</h1>
           </div>
-          <p className="text-gray-500 text-xs">Emergency Response Platform</p>
+          <p className="text-gray-500 text-xs">{t('appSubtitle')}</p>
         </div>
         <div className="flex items-center gap-1.5">
           {online ? (
@@ -90,10 +181,10 @@ export default function HomePage() {
               }`}
             >
               <p className="font-bold text-sm">
-                {status === 'countdown' ? '🚨 SOS Activating…' :
-                 status === 'active' ? '🔴 SOS ACTIVE — Help notified' :
-                 status === 'acknowledged' ? '🚑 Help is on the way' :
-                 status === 'resolved' ? '✅ All clear — You are safe' : ''}
+                {status === 'countdown' ? t('sosActivating') :
+                 status === 'active' ? t('sosActive') :
+                 status === 'acknowledged' ? t('helpOnWay') :
+                 status === 'resolved' ? t('allClear') : ''}
               </p>
               {location && <p className="text-xs mt-1 opacity-80 truncate">{location.address}</p>}
             </motion.div>
@@ -102,15 +193,15 @@ export default function HomePage() {
           <SOSButton />
 
           <div className="text-center">
-            <p className="text-gray-400 text-sm font-medium">Hold 3 seconds or triple-press</p>
-            <p className="text-gray-600 text-xs mt-0.5">Or say &quot;Hey Emergency, send SOS&quot;</p>
+            <p className="text-gray-400 text-sm font-medium">{t('holdToActivate')}</p>
+            <p className="text-gray-600 text-xs mt-0.5">{t('orVoiceCommand')}</p>
           </div>
         </motion.div>
       </section>
 
       {/* Emergency Numbers */}
       <section className="px-5 mb-6">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Quick Dial</h2>
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('quickDial')}</h2>
         <div className="grid grid-cols-4 gap-2">
           {EMERGENCY_NUMBERS.map((num) => (
             <a
@@ -127,9 +218,9 @@ export default function HomePage() {
 
       {/* Quick Links */}
       <section className="px-5">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Features</h2>
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('features')}</h2>
         <div className="space-y-2">
-          {QUICK_LINKS.map(({ href, icon: Icon, label, desc, iconCls, bgCls }) => (
+          {quickLinksTranslated.map(({ href, icon: Icon, label, desc, iconCls, bgCls }) => (
             <Link key={href} href={href}>
               <motion.div
                 whileTap={{ scale: 0.98 }}

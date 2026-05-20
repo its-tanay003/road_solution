@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Settings, User, Bell, Shield, Globe, Palette,
   ChevronRight, Trash2, Phone, Eye,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from 'next-themes';
 
 // ── Types ──────────────────────────────────────────────────────
 type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-' | 'Unknown';
@@ -84,6 +86,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: React.E
   );
 }
 
+// ── Row helper ──────────────────────────────────────────────────
 function Row({ label, desc, children, danger }: { label: string; desc?: string; children?: React.ReactNode; danger?: boolean }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3.5">
@@ -98,22 +101,56 @@ function Row({ label, desc, children, danger }: { label: string; desc?: string; 
 
 // ── Main ─────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  const { i18n, t } = useTranslation();
+  const { theme, setTheme } = useTheme();
   const [prefs, setPrefs] = useState<UserPrefs>(DEFAULT_PREFS);
   const [saved, setSaved] = useState(false);
   const [newContact, setNewContact] = useState<EmergencyContact>({ name: '', phone: '', relation: '' });
   const [showAddContact, setShowAddContact] = useState(false);
 
+  // Load active translations & theme into state on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedProfile = localStorage.getItem('roadsos-profile');
+      let parsed: Partial<UserPrefs> = {};
+      if (savedProfile) {
+        try {
+          parsed = JSON.parse(savedProfile);
+        } catch (e) {
+          console.error('[Settings] Error parsing saved profile:', e);
+        }
+      }
+      setPrefs(p => ({
+        ...p,
+        ...parsed,
+        language: i18n.language || 'en',
+        theme: (theme as UserPrefs['theme']) || 'auto',
+      }));
+    }
+  }, [i18n.language, theme]);
+
   const update = <K extends keyof UserPrefs>(key: K, value: UserPrefs[K]) => {
     setPrefs(p => ({ ...p, [key]: value }));
     setSaved(false);
+
+    // Apply immediately for locale and theme
+    if (key === 'language') {
+      void i18n.changeLanguage(value as string);
+    } else if (key === 'theme') {
+      setTheme(value as string);
+    }
   };
 
   const handleSave = () => {
     // In production: persist to Supabase via PATCH /api/profile
     console.log('[Settings] Saving prefs:', prefs);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('roadsos-profile', JSON.stringify(prefs));
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
+
 
   const addContact = () => {
     if (!newContact.name || !newContact.phone) return;
@@ -279,7 +316,18 @@ export default function SettingsPage() {
             <select value={prefs.language} onChange={e => update('language', e.target.value)}
               aria-label="Language preference"
               className="bg-gray-800 text-white text-sm rounded-xl px-2 py-1 border border-gray-700 outline-none">
-              {[['en','English'],['hi','हिंदी'],['gu','ગુજરાતી'],['mr','मराठी'],['ta','தமிழ்'],['te','తెలుగు']].map(([v,l]) => (
+              {[
+                ['en', 'English'],
+                ['hi', 'हिंदी'],
+                ['gu', 'ગુજરાતી'],
+                ['es', 'Español'],
+                ['fr', 'Français'],
+                ['ar', 'العربية (RTL)'],
+                ['pt', 'Português'],
+                ['zh', '简体中文'],
+                ['bn', 'বাংলা'],
+                ['ru', 'Русский']
+              ].map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>
               ))}
             </select>
