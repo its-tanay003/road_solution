@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef, useCallback, useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
+import { cn } from '@/lib/utils';
 
 const HOLD_DURATION = 3000; // 3 seconds
 const TRIPLE_PRESS_WINDOW = 800; // ms
@@ -114,15 +115,10 @@ export function SOSButton() {
         onPointerLeave={cancelPress}
         onClick={handleClick}
         whileTap={{ scale: 0.94 }}
-        className="relative w-28 h-28 rounded-full flex flex-col items-center justify-center select-none touch-none"
-        style={{
-          background: idle
-            ? 'radial-gradient(circle at 40% 35%, #f87171, #b91c1c)'
-            : 'radial-gradient(circle at 40% 35%, #dc2626, #7f1d1d)',
-          boxShadow: idle
-            ? '0 0 0 4px rgba(239,68,68,0.3), 0 8px 32px rgba(239,68,68,0.5)'
-            : '0 0 0 4px rgba(239,68,68,0.6), 0 8px 48px rgba(239,68,68,0.8)',
-        }}
+        className={cn(
+          'relative w-28 h-28 rounded-full flex flex-col items-center justify-center select-none touch-none',
+          idle ? 'sos-button-idle' : 'sos-button-active',
+        )}
         aria-label="SOS emergency button — hold 3 seconds or triple-press"
         aria-pressed={!idle}
       >

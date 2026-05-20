@@ -3,10 +3,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, HeatmapLayer, Circle } from '@react-google-maps/api';
 import { useSOSStore } from '@/lib/store/sosStore';
-import { Hospital, Shield, Flame, Cross, AlertTriangle } from 'lucide-react';
+import { Shield, Flame, Cross, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const MAP_ID = 'roadsos-emergency-map';
+
 const LIBRARIES: ('places' | 'visualization' | 'geometry')[] = ['places', 'visualization', 'geometry'];
 
 type LayerType = 'hospitals' | 'police' | 'fire' | 'pharmacy' | 'accidents';
@@ -112,7 +112,6 @@ export function EmergencyMap() {
         }
       );
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLayers, userPos]);
 
   const toggleLayer = (layer: LayerType) => {
@@ -149,13 +148,14 @@ export function EmergencyMap() {
             <button
               key={type}
               onClick={() => toggleLayer(type)}
+              aria-label={`${active ? 'Hide' : 'Show'} ${cfg.label}`}
               className={cn(
                 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm transition-all border',
                 active
-                  ? 'text-white border-transparent'
+                  ? 'text-white border-(--layer-color) [background:var(--layer-color)]'
                   : 'bg-gray-900/80 text-gray-400 border-gray-700 hover:border-gray-500'
               )}
-              style={active ? { background: cfg.color + 'cc', borderColor: cfg.color } : undefined}
+              style={active ? { '--layer-color': cfg.color + 'cc' } as React.CSSProperties : undefined}
             >
               <Icon size={11} />
               {cfg.label}

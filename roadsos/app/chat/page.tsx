@@ -8,10 +8,10 @@ import ReactMarkdown from 'react-markdown';
 import { Send, Trash2, Brain, Zap, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const MODEL_CONFIG: Record<AIModel, { label: string; icon: React.ElementType; color: string }> = {
-  claude: { label: 'Claude', icon: Brain, color: '#d97706' },
-  gemini: { label: 'Gemini', icon: Zap, color: '#4285f4' },
-  gpt: { label: 'ChatGPT', icon: Bot, color: '#10a37f' },
+const MODEL_CONFIG: Record<AIModel, { label: string; icon: React.ElementType; activeCls: string; btnCls: string }> = {
+  claude: { label: 'Claude',  icon: Brain, activeCls: 'text-amber-500 border-amber-500', btnCls: 'bg-amber-600 hover:bg-amber-700' },
+  gemini: { label: 'Gemini',  icon: Zap,   activeCls: 'text-blue-400  border-blue-400',  btnCls: 'bg-blue-500  hover:bg-blue-600'  },
+  gpt:    { label: 'ChatGPT', icon: Bot,    activeCls: 'text-emerald-400 border-emerald-400', btnCls: 'bg-emerald-500 hover:bg-emerald-600' },
 };
 
 const SUGGESTIONS = [
@@ -104,11 +104,11 @@ export default function ChatPage() {
             <button
               key={key}
               onClick={() => setModel(key)}
+              aria-label={`Switch to ${cfg.label}`}
               className={cn(
                 'flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold transition-colors border-b-2',
-                model === key ? 'border-current' : 'border-transparent text-gray-500 hover:text-gray-300'
+                model === key ? cfg.activeCls : 'border-transparent text-gray-500 hover:text-gray-300'
               )}
-              style={model === key ? { color: cfg.color, borderColor: cfg.color } : undefined}
             >
               <Icon size={13} />
               {cfg.label}
@@ -178,14 +178,16 @@ export default function ChatPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask about emergency response…"
-            className="flex-1 bg-gray-900 border border-gray-700 text-white text-sm rounded-2xl px-4 py-3 outline-none focus:border-gray-500 placeholder:text-gray-500 resize-none"
-            style={{ maxHeight: '120px' }}
+            className="flex-1 bg-gray-900 border border-gray-700 text-white text-sm rounded-2xl px-4 py-3 outline-none focus:border-gray-500 placeholder:text-gray-500 resize-none max-h-[120px]"
           />
           <button
             onClick={() => send(input)}
             disabled={!input.trim() || isStreaming}
-            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white disabled:opacity-30 shrink-0"
-            style={{ background: MODEL_CONFIG[model].color }}
+            aria-label="Send message"
+            className={cn(
+              'w-11 h-11 rounded-2xl flex items-center justify-center text-white disabled:opacity-30 shrink-0 transition-colors',
+              MODEL_CONFIG[model].btnCls,
+            )}
           >
             <Send size={16} />
           </button>

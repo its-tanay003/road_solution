@@ -128,3 +128,17 @@
     @apply font-sans;
   }
 }
+
+/* ── SOS Button ─────────────────────────────────────────────────── */
+@layer utilities {
+  .sos-button-idle {
+    background: radial-gradient(circle at 40% 35%, #f87171, #b91c1c);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 8px 32px rgba(239, 68, 68, 0.5);
+  }
+  .sos-button-active {
+    background: radial-gradient(circle at 40% 35%, #dc2626, #7f1d1d);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.6), 0 8px 48px rgba(239, 68, 68, 0.8);
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}

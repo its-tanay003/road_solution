@@ -188,8 +188,8 @@ export default function FirstAidPage() {
                 <p className="text-gray-500 text-xs mt-0.5">{card.summary}</p>
               </div>
               <div
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ background: card.color }}
+                className="w-2 h-2 rounded-full shrink-0 [background:var(--card-color)]"
+                style={{ '--card-color': card.color } as React.CSSProperties}
               />
             </summary>
             <div className="px-4 pb-4 border-t border-gray-800 pt-3">
@@ -197,8 +197,8 @@ export default function FirstAidPage() {
                 {card.steps.map((step, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span
-                      className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
-                      style={{ background: card.color }}
+                      className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5 [background:var(--card-color)]"
+                      style={{ '--card-color': card.color } as React.CSSProperties}
                     >
                       {i + 1}
                     </span>

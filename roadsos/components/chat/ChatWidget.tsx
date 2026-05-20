@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useChatStore, type AIModel } from '@/lib/store/chatStore';
 import ReactMarkdown from 'react-markdown';
-import { MessageSquare, X, Send, Bot, Zap, Brain, ChevronDown } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Zap, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const MODEL_CONFIG: Record<AIModel, { label: string; icon: React.ElementType; color: string; description: string }> = {
@@ -103,9 +103,13 @@ export function ChatWidget() {
         onClick={toggle}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white"
-        style={{ background: `linear-gradient(135deg, ${cfg.color}, ${cfg.color}cc)` }}
-        aria-label="Open AI Chat Assistant"
+        className={cn(
+          'fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white',
+          model === 'claude' && 'bg-linear-to-br from-amber-600 to-amber-800',
+          model === 'gemini' && 'bg-linear-to-br from-blue-500 to-blue-700',
+          model === 'gpt'    && 'bg-linear-to-br from-emerald-500 to-emerald-700',
+        )}
+        aria-label={isOpen ? 'Close AI Chat Assistant' : 'Open AI Chat Assistant'}
       >
         {isOpen ? <X size={22} /> : <MessageSquare size={22} />}
         {!isOpen && messages.length > 0 && (
@@ -126,15 +130,25 @@ export function ChatWidget() {
             className="fixed bottom-44 right-4 z-50 w-[360px] max-h-[520px] flex flex-col rounded-3xl overflow-hidden border border-gray-700 shadow-2xl bg-gray-950"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-800" style={{ background: `${cfg.color}22` }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: cfg.color }}>
+            <div className={cn(
+              'flex items-center gap-3 px-4 py-3 border-b border-gray-800',
+              model === 'claude' && 'bg-amber-950/30',
+              model === 'gemini' && 'bg-blue-950/30',
+              model === 'gpt'    && 'bg-emerald-950/30',
+            )}>
+              <div className={cn(
+                'w-9 h-9 rounded-xl flex items-center justify-center',
+                model === 'claude' && 'bg-amber-600',
+                model === 'gemini' && 'bg-blue-500',
+                model === 'gpt'    && 'bg-emerald-500',
+              )}>
                 <Icon size={18} className="text-white" />
               </div>
               <div className="flex-1">
                 <p className="font-bold text-white text-sm">Emergency AI</p>
                 <p className="text-[11px] text-gray-400">{cfg.description}</p>
               </div>
-              <button onClick={close} className="p-1 rounded-lg hover:bg-gray-800">
+              <button onClick={close} aria-label="Close chat" className="p-1 rounded-lg hover:bg-gray-800">
                 <X size={16} className="text-gray-400" />
               </button>
             </div>
@@ -149,7 +163,9 @@ export function ChatWidget() {
                     'flex-1 py-2 text-xs font-semibold transition-colors',
                     model === key ? 'text-white border-b-2' : 'text-gray-500 hover:text-gray-300'
                   )}
-                  style={model === key ? { borderBottomColor: c.color, color: c.color } : undefined}
+                  style={undefined}
+                  aria-label={`Switch to ${c.label}`}
+                  data-active={model === key}
                 >
                   {c.label}
                 </button>
@@ -160,8 +176,17 @@ export function ChatWidget() {
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
               {messages.length === 0 && (
                 <div className="text-center py-6 space-y-4">
-                  <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center" style={{ background: `${cfg.color}33` }}>
-                    <Icon size={26} style={{ color: cfg.color }} />
+                  <div className={cn(
+                    'w-14 h-14 rounded-2xl mx-auto flex items-center justify-center',
+                    model === 'claude' && 'bg-amber-900/30',
+                    model === 'gemini' && 'bg-blue-900/30',
+                    model === 'gpt'    && 'bg-emerald-900/30',
+                  )}>
+                    <Icon size={26} className={cn(
+                      model === 'claude' && 'text-amber-500',
+                      model === 'gemini' && 'text-blue-400',
+                      model === 'gpt'    && 'text-emerald-400',
+                    )} />
                   </div>
                   <p className="text-gray-400 text-sm">Ask me anything about emergency response, first aid, or safety.</p>
                   <div className="flex flex-wrap gap-1.5 justify-center">
@@ -244,8 +269,13 @@ export function ChatWidget() {
               <button
                 onClick={() => sendMessage(input)}
                 disabled={!input.trim() || isStreaming}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-white disabled:opacity-40 transition-opacity"
-                style={{ background: cfg.color }}
+                aria-label="Send message"
+                className={cn(
+                  'w-9 h-9 rounded-xl flex items-center justify-center text-white disabled:opacity-40 transition-opacity',
+                  model === 'claude' && 'bg-amber-600',
+                  model === 'gemini' && 'bg-blue-500',
+                  model === 'gpt'    && 'bg-emerald-500',
+                )}
               >
                 <Send size={15} />
               </button>

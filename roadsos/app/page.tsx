@@ -8,17 +8,17 @@ import { useSOSStore } from '@/lib/store/sosStore';
 import { useEffect, useState } from 'react';
 
 const QUICK_LINKS = [
-  { href: '/map', icon: Map, label: 'Emergency Map', desc: 'Nearby hospitals & services', color: '#3b82f6' },
-  { href: '/chat', icon: MessageSquare, label: 'AI Assistant', desc: 'Claude · Gemini · ChatGPT', color: '#d97706' },
-  { href: '/first-aid', icon: BookOpen, label: 'First Aid', desc: 'Step-by-step guides', color: '#10b981' },
-  { href: '/directory', icon: Phone, label: 'Directory', desc: 'Emergency numbers', color: '#8b5cf6' },
+  { href: '/map',       icon: Map,           label: 'Emergency Map',  desc: 'Nearby hospitals & services', iconCls: 'text-blue-400',    bgCls: 'bg-blue-500/10'    },
+  { href: '/chat',      icon: MessageSquare, label: 'AI Assistant',   desc: 'Claude · Gemini · ChatGPT',  iconCls: 'text-amber-400',   bgCls: 'bg-amber-500/10'   },
+  { href: '/first-aid', icon: BookOpen,      label: 'First Aid',      desc: 'Step-by-step guides',        iconCls: 'text-emerald-400', bgCls: 'bg-emerald-500/10' },
+  { href: '/directory', icon: Phone,         label: 'Directory',      desc: 'Emergency numbers',          iconCls: 'text-violet-400',  bgCls: 'bg-violet-500/10'  },
 ];
 
 const EMERGENCY_NUMBERS = [
-  { number: '112', label: 'Universal Emergency', color: '#ef4444' },
-  { number: '108', label: 'Ambulance', color: '#f97316' },
-  { number: '100', label: 'Police', color: '#3b82f6' },
-  { number: '101', label: 'Fire', color: '#ef4444' },
+  { number: '112', label: 'Universal Emergency', cls: 'text-red-500' },
+  { number: '108', label: 'Ambulance',           cls: 'text-orange-500' },
+  { number: '100', label: 'Police',              cls: 'text-blue-500' },
+  { number: '101', label: 'Fire',                cls: 'text-red-500' },
 ];
 
 export default function HomePage() {
@@ -107,7 +107,7 @@ export default function HomePage() {
               href={`tel:${num.number}`}
               className="flex flex-col items-center gap-1 bg-gray-900 border border-gray-800 rounded-2xl py-3 hover:border-gray-600 transition-colors active:scale-95"
             >
-              <span className="font-black text-2xl" style={{ color: num.color }}>{num.number}</span>
+              <span className={`font-black text-2xl ${num.cls}`}>{num.number}</span>
               <span className="text-[9px] text-gray-500 text-center leading-tight">{num.label}</span>
             </a>
           ))}
@@ -118,14 +118,14 @@ export default function HomePage() {
       <section className="px-5">
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Features</h2>
         <div className="space-y-2">
-          {QUICK_LINKS.map(({ href, icon: Icon, label, desc, color }) => (
+          {QUICK_LINKS.map(({ href, icon: Icon, label, desc, iconCls, bgCls }) => (
             <Link key={href} href={href}>
               <motion.div
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-2xl p-4 hover:border-gray-700 transition-colors"
               >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}22` }}>
-                  <Icon size={20} style={{ color }} />
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${bgCls}`}>
+                  <Icon size={20} className={iconCls} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm">{label}</p>
