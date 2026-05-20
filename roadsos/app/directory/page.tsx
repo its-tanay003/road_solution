@@ -92,15 +92,15 @@ export default function DirectoryPage() {
                       <p className="text-gray-500 text-xs truncate">{entry.note}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-bold text-sm" style={{ color }}>{entry.number}</span>
+                      <span className="font-bold text-sm text-(--entry-color)" style={{ '--entry-color': color } as React.CSSProperties}>{entry.number}</span>
                       {isDialable ? (
                         <a
                           href={`tel:${entry.number}`}
-                          className="w-8 h-8 rounded-xl flex items-center justify-center"
-                          style={{ background: `${color}22` }}
+                          className="w-8 h-8 rounded-xl flex items-center justify-center [background:var(--entry-bg)]"
+                          style={{ '--entry-bg': `${color}22`, '--entry-color': color } as React.CSSProperties}
                           aria-label={`Call ${entry.name}`}
                         >
-                          <Phone size={14} style={{ color }} />
+                          <Phone size={14} className="text-(--entry-color)" />
                         </a>
                       ) : (
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-800">
