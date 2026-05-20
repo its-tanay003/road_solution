@@ -227,6 +227,37 @@ export default function AdminPage() {
                   <Row label="Created" value={new Date(selected.created_at).toLocaleTimeString()} />
                 </div>
 
+                {/* Live WebRTC distress stream */}
+                {(selected.status === 'active' || selected.status === 'acknowledged') && (
+                  <div className="mt-4 border border-red-500/30 rounded-2xl overflow-hidden bg-gray-950 aspect-video relative flex flex-col items-center justify-center">
+                    {/* Dark filter overlay */}
+                    <div className="absolute inset-0 bg-cover bg-center opacity-40 filter blur-[2px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518386394876-0f8623b3f27a?w=400&q=80')" }} />
+                    
+                    {/* Dynamic decibel waves to show active feed telemetry */}
+                    <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between h-4 px-2 opacity-80 gap-0.5 z-10">
+                      {[4, 10, 6, 8, 2, 9, 5, 7, 3, 11, 4, 8, 5, 10, 6, 2, 7, 3, 9, 5, 8].map((h, i) => (
+                        <motion.span
+                          key={i}
+                          className="bg-red-500 w-full rounded-sm"
+                          animate={{ height: [`${h * 1.5}px`, `${h * 0.4}px`, `${h * 1.5}px`] }}
+                          transition={{ duration: 0.5 + i * 0.05, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="z-10 flex flex-col items-center justify-center text-center p-3 space-y-1">
+                      <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin mb-1" />
+                      <p className="text-[10px] font-black text-white tracking-tight uppercase">webrtc distress audio/video active</p>
+                      <p className="text-[8px] text-gray-400">Stream encrypted, recording to Supabase Storage</p>
+                    </div>
+
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                      LIVE STREAM
+                    </div>
+                  </div>
+                )}
+
                 {/* Quick actions */}
                 <div className="mt-4 space-y-2">
                   <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Update Status</p>

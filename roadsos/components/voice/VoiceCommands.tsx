@@ -5,10 +5,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useRouter } from 'next/navigation';
 import { Mic, MicOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type CommandAction = () => void;
 
+const LANGUAGE_LOCALE_MAP: Record<string, string> = {
+  en: 'en-US',
+  hi: 'hi-IN',
+  gu: 'gu-IN',
+  es: 'es-ES',
+  fr: 'fr-FR',
+  ar: 'ar-SA',
+  pt: 'pt-BR',
+  zh: 'zh-CN',
+  bn: 'bn-IN',
+  ru: 'ru-RU',
+};
+
 export function VoiceCommands() {
+  const { i18n } = useTranslation();
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -23,10 +38,12 @@ export function VoiceCommands() {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
       utter.rate = 1.1;
+      // Map TTS locale to active language if possible
+      utter.lang = LANGUAGE_LOCALE_MAP[i18n.language] || 'en-US';
       window.speechSynthesis.speak(utter);
     }
     setTimeout(() => setFeedback(''), 3000);
-  }, []);
+  }, [i18n.language]);
 
   const COMMANDS: Record<string, CommandAction> = {
     'open map': () => { router.push('/map'); speak('Opening map'); },
@@ -70,7 +87,10 @@ export function VoiceCommands() {
     const recognition: any = new SpeechRecognitionClass();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-IN';
+    
+    // Set matching recognition language
+    const activeLocale = LANGUAGE_LOCALE_MAP[i18n.language] || 'en-US';
+    recognition.lang = activeLocale;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (e: any) => {
@@ -86,7 +106,7 @@ export function VoiceCommands() {
     recognition.onerror = () => setListening(false);
     recognition.onend = () => { if (listening) recognition.start(); };
     recognitionRef.current = recognition;
-  }, [processCommand, listening]);
+  }, [processCommand, listening, i18n.language]);
 
   const toggleListening = () => {
     if (!recognitionRef.current) {

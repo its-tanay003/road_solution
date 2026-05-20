@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { Providers } from '@/components/Providers';
 import { BottomNav } from '@/components/nav/BottomNav';
 import { PanicMode } from '@/components/sos/PanicMode';
 import { ChatWidget } from '@/components/chat/ChatWidget';
@@ -34,25 +35,28 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${inter.variable} font-sans bg-gray-950 text-white antialiased`}>
-        {/* Global overlays */}
-        <PanicMode />
-        <VoiceCommands />
-        <SensorWatcher />
-        <ChatWidget />
-        <Toaster position="top-center" richColors />
+      <body className={`${inter.variable} font-sans bg-gray-950 text-white antialiased transition-colors duration-300`}>
+        <Providers>
+          {/* Global overlays */}
+          <PanicMode />
+          <VoiceCommands />
+          <SensorWatcher />
+          <ChatWidget />
+          <Toaster position="top-center" richColors />
 
-        {/* Page content */}
-        <main className="min-h-screen">{children}</main>
+          {/* Page content */}
+          <main className="min-h-screen">{children}</main>
 
-        {/* Persistent bottom nav */}
-        <BottomNav />
+          {/* Persistent bottom nav */}
+          <BottomNav />
+        </Providers>
       </body>
     </html>
   );
 }
+
