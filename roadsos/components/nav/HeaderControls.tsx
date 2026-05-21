@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Sun, Moon, Laptop, Check } from 'lucide-react';
+import { Globe, Sun, Moon, Laptop, Check, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Language {
@@ -69,6 +69,19 @@ export function HeaderControls() {
 
   return (
     <div className="flex items-center gap-1.5 relative z-50">
+      {/* Notifications Button */}
+      <button
+        onClick={() => {
+          if ('Notification' in window) {
+            Notification.requestPermission();
+          }
+        }}
+        aria-label="Push Notifications"
+        className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm"
+      >
+        <Bell size={16} className="text-blue-400" />
+      </button>
+
       {/* Quick Theme Toggle Button */}
       <button
         onClick={toggleTheme}

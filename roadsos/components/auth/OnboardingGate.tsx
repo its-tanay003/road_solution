@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
-import { Shield, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Shield, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -15,6 +15,7 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loadingCredentials, setLoadingCredentials] = useState(false);
 
   const checkProfile = async () => {
@@ -152,9 +153,16 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
           </div>
 
           <h1 className="text-3xl font-black text-white tracking-tight mb-2">ROADSoS</h1>
-          <p className="text-gray-400 text-sm max-w-xs mb-8">
-            Your instant emergency response lifeline. Track assets, broadcast beacons, and stream real-time distress signals.
+          <p className="text-gray-400 text-sm max-w-xs mb-6">
+            Emergency Intelligence. Everywhere.
           </p>
+
+          <div className="relative w-full mb-6 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-800" />
+            </div>
+            <span className="relative px-3 bg-gray-900/90 text-xs font-bold text-gray-500 uppercase tracking-widest">Sign in to continue</span>
+          </div>
 
           <div className="w-full space-y-3.5">
             {/* Google Provider Button */}
@@ -167,6 +175,14 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
               </svg>
               Continue with Google
             </button>
+
+            {/* Divider */}
+            <div className="relative w-full flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-800" />
+              </div>
+              <span className="relative px-3 bg-gray-900/90 text-xs font-bold text-gray-500 uppercase tracking-widest">or</span>
+            </div>
 
             {/* Apple Provider Button */}
             <button
@@ -201,7 +217,7 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full bg-gray-950/80 border border-gray-800/80 rounded-2xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-500/50 transition-colors"
+                  className="w-full bg-gray-950/80 border border-gray-800/80 rounded-[10px] pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors"
                 />
               </div>
             </div>
@@ -213,33 +229,37 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
                   <Lock size={16} />
                 </span>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-gray-950/80 border border-gray-800/80 rounded-2xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-500/50 transition-colors"
+                  className="w-full bg-gray-950/80 border border-gray-800/80 rounded-[10px] pl-11 pr-11 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loadingCredentials}
-              className="w-full flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/20 font-bold px-4 py-3.5 rounded-2xl shadow-lg transition-all"
+              className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-bold px-4 py-3.5 rounded-2xl shadow-lg transition-all"
             >
               {loadingCredentials ? (
-                <div className="w-5 h-5 rounded-full border-2 border-red-500 border-t-transparent animate-spin" />
+                <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
               ) : (
-                <>
-                  Continue with Email
-                  <ArrowRight size={16} />
-                </>
+                "Sign In"
               )}
             </button>
           </form>
 
-          <div className="mt-8 text-xs text-gray-500 max-w-[280px]">
-            By continuing, you agree to allow ROADSoS to access your public profile for secure onboarding.
+          <div className="mt-6 text-sm text-gray-400">
+            Don't have an account? <button className="text-orange-500 font-bold hover:underline">Create account</button>
           </div>
         </motion.div>
       </div>
