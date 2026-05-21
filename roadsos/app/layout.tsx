@@ -11,6 +11,7 @@ import { CrashDetection } from '@/components/sensors/CrashDetection';
 import { Toaster } from '@/components/ui/sonner';
 import { AutomotiveLayout } from '@/components/AutomotiveLayout';
 import { VoiceNavigator } from '@/components/VoiceNavigator';
+import { LiveStreamPanel } from '@/components/LiveStreamPanel';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CrashDetection />
             <ChatWidget />
             <VoiceNavigator />
+            <LiveStreamPanel />
             <Toaster position="top-center" richColors />
 
             {/* Page content */}

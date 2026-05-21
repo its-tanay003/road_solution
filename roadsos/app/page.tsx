@@ -21,6 +21,7 @@ export default function HomePage() {
   const { status, location } = useSOSStore();
   const [online, setOnline] = useState(true);
   const [isCarMode, setIsCarMode] = useState(false);
+  const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
 
   const quickLinksTranslated = [
     { href: '/map',       icon: Map,           label: t('map.title', 'Emergency Map'),  desc: t('map.nearbyHospitals', 'Nearby hospitals & services'), iconCls: 'text-blue-400',    bgCls: 'bg-blue-500/10'    },
@@ -63,6 +64,16 @@ export default function HomePage() {
     window.addEventListener('online', checkOnline);
     window.addEventListener('offline', checkOnline);
     
+    // Battery check
+    if ('getBattery' in navigator) {
+      (navigator as any).getBattery().then((battery: any) => {
+        setBatteryLevel(Math.round(battery.level * 100));
+        battery.addEventListener('levelchange', () => {
+          setBatteryLevel(Math.round(battery.level * 100));
+        });
+      });
+    }
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener('online', checkOnline);
@@ -218,29 +229,81 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick Links */}
-      <section className="px-5">
+      {/* Quick Links 2x2 Grid */}
+      <section className="px-5 mb-8">
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('features', 'Features')}</h2>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-3">
           {quickLinksTranslated.map(({ href, icon: Icon, label, desc, iconCls, bgCls }) => (
             <Link key={href} href={href}>
               <motion.div
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-2xl p-4 hover:border-gray-700 transition-colors"
+                whileTap={{ scale: 0.96 }}
+                className="flex flex-col gap-3 bg-gray-900 border border-gray-800 rounded-[20px] p-4 hover:border-gray-700 transition-colors h-full"
               >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${bgCls}`}>
-                  <Icon size={20} className={iconCls} />
+                <div className="flex justify-between items-start">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${bgCls}`}>
+                    <Icon size={18} className={iconCls} />
+                  </div>
+                  <ChevronRight size={16} className="text-gray-600 shrink-0 mt-1" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white text-sm">{label}</p>
-                  <p className="text-gray-500 text-xs">{desc}</p>
+                <div className="mt-1">
+                  <p className="font-bold text-white text-sm tracking-tight">{label}</p>
+                  <p className="text-gray-500 text-[10px] leading-tight mt-0.5">{desc}</p>
                 </div>
-                <ChevronRight size={16} className="text-gray-600 shrink-0" />
               </motion.div>
             </Link>
           ))}
         </div>
       </section>
+
+      {/* Live Status Bar */}
+      <div className="px-5 mt-auto pb-4">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">GPS</span>
+            <div className="flex items-center gap-1.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${location ? 'bg-emerald-500' : 'bg-gray-600'}`} />
+              <span className={`text-xs font-bold ${location ? 'text-emerald-400' : 'text-gray-500'}`}>
+                {location ? 'SYNCED' : 'OFF'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="w-px h-6 bg-gray-800" />
+          
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Battery</span>
+            <div className="flex items-center gap-1.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${!batteryLevel ? 'bg-gray-600' : batteryLevel > 50 ? 'bg-emerald-500' : batteryLevel > 20 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+              <span className={`text-xs font-bold ${!batteryLevel ? 'text-gray-500' : batteryLevel > 50 ? 'text-emerald-400' : batteryLevel > 20 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {batteryLevel ? `${batteryLevel}%` : '---'}
+              </span>
+            </div>
+          </div>
+
+          <div className="w-px h-6 bg-gray-800" />
+          
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Network</span>
+            <div className="flex items-center gap-1.5">
+              <Wifi size={10} className={online ? 'text-blue-400' : 'text-gray-500'} />
+              <span className={`text-xs font-bold ${online ? 'text-blue-400' : 'text-gray-500'}`}>
+                {online ? 'LIVE' : 'OFF'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="w-px h-6 bg-gray-800" />
+          
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Speed</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-white">
+                {location?.speed ? Math.round(location.speed * 3.6) : '0'} <span className="text-[9px] text-gray-500">km/h</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

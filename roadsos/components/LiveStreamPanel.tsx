@@ -19,6 +19,7 @@ export function LiveStreamPanel({ stream, peers, onStop }: LiveStreamPanelProps)
   const isRtl = i18n.language === 'ar';
   
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -224,12 +225,43 @@ export function LiveStreamPanel({ stream, peers, onStop }: LiveStreamPanelProps)
 
     return () => {
       if (recordIntervalRef.current) clearInterval(recordIntervalRef.current);
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
       }
       setIsRecording(false);
     };
   }, [stream, incidentId, hasVideo]);
+
+  // 5. Telemetry Canvas Overlay
+  useEffect(() => {
+    if (!canvasRef.current || !hasVideo || !expanded) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animId: number;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.9)'; // Red text
+      ctx.font = 'bold 12px monospace';
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 4;
+      
+      const time = new Date().toISOString();
+      const coords = location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : 'GPS ACQUIRING...';
+      const speed = location?.speed ? `${Math.round(location.speed * 3.6)} km/h` : '0 km/h';
+      
+      ctx.fillText(`ROADSoS SECURE TRANSMISSION`, 10, 20);
+      ctx.fillText(`T: ${time}`, 10, 35);
+      ctx.fillText(`LOC: ${coords}`, 10, 50);
+      ctx.fillText(`SPD: ${speed}`, 10, 65);
+      
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(animId);
+  }, [hasVideo, expanded, location]);
+
+  const toggleExpand = () => setExpanded(prev => !prev);
 
   return (
     <div
@@ -245,13 +277,23 @@ export function LiveStreamPanel({ stream, peers, onStop }: LiveStreamPanelProps)
         className="w-full h-[120px] bg-black relative cursor-pointer group flex items-center justify-center select-none shrink-0"
       >
         {hasVideo ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          />
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+            {expanded && (
+              <canvas
+                ref={canvasRef}
+                width={320}
+                height={240}
+                className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
+              />
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center gap-1.5 text-red-500">
             {hasAudio ? (

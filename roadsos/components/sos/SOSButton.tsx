@@ -62,13 +62,13 @@ export function SOSButton() {
   }, []);
 
   const idle = status === 'idle';
-  const size = 140;
-  const radius = 60;
+  const size = 160;
+  const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (pressPercent / 100) * circumference;
 
   return (
-    <div className="relative flex items-center justify-center w-[140px] h-[140px]">
+    <div className="relative flex items-center justify-center w-[160px] h-[160px]">
       {/* Pulse rings when active */}
       {!idle && (
         <>
@@ -77,7 +77,7 @@ export function SOSButton() {
               key={i}
               className="absolute inset-0 rounded-full border-2 border-red-500"
               animate={{ scale: [1, 1 + i * 0.3], opacity: [0.6, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3 }}
+              transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
             />
           ))}
         </>
@@ -118,7 +118,7 @@ export function SOSButton() {
         onClick={handleClick}
         whileTap={{ scale: 0.94 }}
         className={cn(
-          'relative w-28 h-28 rounded-full flex flex-col items-center justify-center select-none touch-none',
+          'relative w-32 h-32 rounded-full flex flex-col items-center justify-center select-none touch-none',
           idle ? 'sos-button-idle' : 'sos-button-active',
         )}
         aria-label={t('sos.holdToActivate', 'SOS emergency button — hold 3 seconds or triple-press')}
