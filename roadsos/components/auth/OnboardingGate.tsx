@@ -217,6 +217,7 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
+                  autoComplete="username"
                   className="w-full bg-gray-950/80 border border-gray-800/80 rounded-[10px] pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors"
                 />
               </div>
@@ -233,6 +234,7 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   className="w-full bg-gray-950/80 border border-gray-800/80 rounded-[10px] pl-11 pr-11 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors"
                 />
                 <button
