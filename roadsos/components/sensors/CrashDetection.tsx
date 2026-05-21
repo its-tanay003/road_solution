@@ -1,6 +1,11 @@
 'use client';
 
-// Consolidated into SensorWatcher.tsx to avoid duplicate event listener conflicts
+import { useCrashDetection } from '@/hooks/useCrashDetection';
+import { CrashAlertOverlay } from '../CrashAlertOverlay';
+
 export function CrashDetection() {
-  return null;
+  // Call the hook to setup motion/orientation event listeners
+  useCrashDetection();
+
+  return <CrashAlertOverlay />;
 }
