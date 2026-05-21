@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 const HOLD_DURATION = 3000; // 3 seconds
-const TRIPLE_PRESS_WINDOW = 800; // ms
+const TRIPLE_PRESS_WINDOW = 1500; // ms
 
 export function SOSButton() {
   const { status, arm } = useSOSStore();
