@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow, HeatmapLayer, Circle, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Circle, DirectionsRenderer } from '@react-google-maps/api';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -171,7 +171,7 @@ async function fetchWHOWorldData(lat: number, lng: number): Promise<PlaceResult[
 // Fetch accident hotspots from NHTSA CRSS API with a dynamic viewport shift
 async function fetchNHTSAHotspots(centerLat: number, centerLng: number): Promise<{ lat: number; lng: number; weight: number }[]> {
   try {
-    const response = await fetch('https://crashviewer.nhtsa.dot.gov/CrashAPI/crashes/GetCaseList?states=1&fromYear=2022&toYear=2023&minSeverity=1&format=json');
+    const response = await fetch('/api/nhtsa');
     if (!response.ok) throw new Error('NHTSA API non-200');
     const data = await response.json();
     const cases = data.Results?.[0] || [];
@@ -633,9 +633,7 @@ export function EmergencyMap() {
     }
   };
 
-  const heatmapData = activeLayers.has('accidents') && isLoaded
-    ? accidentPoints.map((p) => ({ location: new google.maps.LatLng(p.lat, p.lng), weight: p.weight }))
-    : [];
+  const showAccidents = activeLayers.has('accidents') && isLoaded;
 
   if (!isLoaded) {
     return (
@@ -1080,13 +1078,23 @@ export function EmergencyMap() {
             </InfoWindow>
           )}
 
-          {/* Accident Hotspots Heatmap layer */}
-          {heatmapData.length > 0 && (
-            <HeatmapLayer
-              data={heatmapData}
-              options={{ radius: 40, opacity: 0.7, gradient: ['rgba(0,0,0,0)', 'rgba(255,165,0,0.8)', 'rgba(255,0,0,1)'] }}
+          {/* Accident Hotspots Simulated Heatmap (Circles) */}
+          {showAccidents && accidentPoints.map((point, i) => (
+            <Circle
+              key={`hotspot-${i}`}
+              center={{ lat: point.lat, lng: point.lng }}
+              radius={point.weight * 300} // Dynamic radius based on weight
+              options={{
+                fillColor: '#ef4444', // red-500
+                fillOpacity: Math.min(point.weight * 0.1, 0.6), // dynamic opacity
+                strokeColor: '#b91c1c', // red-700
+                strokeOpacity: Math.min(point.weight * 0.15, 0.8),
+                strokeWeight: 1,
+                clickable: false,
+                zIndex: 1
+              }}
             />
-          )}
+          ))}
 
           {/* Google Directions Route Polyline */}
           {userRouteResponse && (
