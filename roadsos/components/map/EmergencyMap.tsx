@@ -209,7 +209,7 @@ async function fetchNHTSAHotspots(centerLat: number, centerLng: number): Promise
 export function EmergencyMap() {
   const { t } = useTranslation();
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
     libraries: LIBRARIES,
   });
 
