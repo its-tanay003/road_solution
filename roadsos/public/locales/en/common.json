@@ -18,6 +18,18 @@
     "imSafe": "✅ I'm Safe — Cancel"
   },
   "map": {
+    "sharedPin": "Shared Pin",
+    "sharedEmergencyLocation": "Shared Emergency Location",
+    "sharedLocation": "Shared location pin",
+    "navigate": "Navigate",
+    "call": "Call",
+    "loading": "Loading Map…",
+    "accidentDisclaimer": "Simulated accident data",
+    "hospitals": "Hospitals",
+    "police": "Police",
+    "fire": "Fire",
+    "pharmacy": "Pharmacy",
+    "accidents": "Accidents",
     "title": "Emergency Map",
     "nearbyHospitals": "Nearby hospitals & services",
     "searchPlaceholder": "Search nearest help..."
@@ -43,6 +55,13 @@
     "onboardingStatus": "Onboarding Status"
   },
   "emergency": {
+    "subtitle": "Step-by-step emergency instructions • Offline available",
+    "warningText": "Always call 112 for life-threatening emergencies. These are guides, not substitutes for professional care.",
+    "triageTitle": "AI Triage Assistant",
+    "profileActive": "Profile Active",
+    "triageWelcome": "I am your **AI First-Aid Triage Assistant**. Describe the symptoms or injury and I'll give you immediate steps tailored to your medical profile *(Asthma, Diabetes, O− blood group)*.",
+    "chatError": "Sorry, I encountered an error. Please try again.",
+    "placeholder": "Describe the emergency (e.g. severe bleeding)…",
     "title": "Emergency Guides",
     "firstAid": "First Aid",
     "firstAidDesc": "Step-by-step guides",
@@ -50,16 +69,45 @@
     "servicesDesc": "Direct emergency lines"
   },
   "errors": {
+    "offlineBanner": "Offline — Limited features available",
     "generic": "Something went wrong. Please try again.",
     "fieldRequired": "This field is required",
     "invalidPhone": "Invalid phone number",
     "permissionDenied": "Permission was denied."
   },
   "buttons": {
+    "call112": "📞 Call 112 Emergency",
+    "show": "Show",
+    "hide": "Hide",
     "continue": "Continue",
     "save": "Save Changes",
     "cancel": "Cancel",
     "skip": "Skip",
     "allow": "Allow Access"
+  },
+  "appName": "ROADSoS",
+  "appSubtitle": "AI Emergency Response & SOS",
+  "quickDial": "Quick Dial",
+  "features": "Features",
+  "status": {
+    "live": "Live",
+    "offline": "Offline"
+  },
+  "carMode": {
+    "connected": "Automotive Deck Connected",
+    "switchToMobile": "Switch to Mobile View",
+    "holdForSos": "HOLD FOR SOS",
+    "triggerTip": "Triple press volume keys or shake to trigger crash alert",
+    "callHelp": "Call 112 Help",
+    "voiceChatbot": "Voice Chatbot",
+    "safetyWarning": "⚠️ Say \"Hey Emergency\" anytime for hand-free safety. Focus on driving."
+  },
+  "directory": {
+    "title": "Emergency Directory",
+    "subtitle": "Pan-India + International helplines",
+    "nationalHelplines": "National Helplines",
+    "international": "International",
+    "suggestTitle": "Know a local helpline we're missing?",
+    "suggestDesc": "Crowd-sourced updates coming soon"
   }
 }

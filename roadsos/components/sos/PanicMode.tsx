@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useWebRTC } from '@/lib/webrtc';
+import { useTranslation } from 'react-i18next';
 import {
   X,
   MapPin,
@@ -32,6 +33,7 @@ export function PanicMode() {
     autoDialed,
     setAutoDialed,
   } = useSOSStore();
+  const { t } = useTranslation();
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -270,7 +272,7 @@ export function PanicMode() {
                 onClick={cancel}
                 className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2 text-xs font-bold text-gray-300 hover:bg-gray-800 transition-colors"
               >
-                <X size={13} /> Cancel SOS
+                <X size={13} /> {t('sos.cancelSos', 'Cancel SOS')}
               </button>
             )}
             {(status === 'active' || status === 'acknowledged') && (
@@ -278,7 +280,7 @@ export function PanicMode() {
                 onClick={resolve}
                 className="flex items-center gap-1.5 bg-green-950/65 border border-green-700/80 rounded-2xl px-4 py-2 text-xs font-bold text-green-300 hover:bg-green-900/50 transition-colors"
               >
-                ✅ I&apos;m Safe — Clear SOS
+                ✅ {t('sos.imSafe', "I'm Safe — Clear SOS")}
               </button>
             )}
           </div>
@@ -295,8 +297,8 @@ export function PanicMode() {
                   <span className="text-7xl font-black text-red-500 font-mono tracking-tight">{countdownSeconds}</span>
                 </motion.div>
                 <div className="text-center">
-                  <h2 className="text-white font-black text-2xl tracking-tight">SOS Initiating</h2>
-                  <p className="text-gray-400 text-xs mt-1">Full alert will trigger in {countdownSeconds}s</p>
+                  <h2 className="text-white font-black text-2xl tracking-tight">{t('sos.sosActivating', 'SOS Initiating')}</h2>
+                  <p className="text-gray-400 text-xs mt-1">{t('sos.countdownTimer', 'Full alert will trigger in {{seconds}}s', { seconds: countdownSeconds })}</p>
                 </div>
               </div>
             )}
@@ -316,13 +318,13 @@ export function PanicMode() {
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-950 p-4 text-center">
                       <CameraOff size={28} className="text-red-500 mb-2 animate-bounce" />
-                      <p className="text-gray-400 text-xs font-bold">{streamError || 'Distress stream active'}</p>
+                      <p className="text-gray-400 text-xs font-bold">{streamError || t('sos.distressStreamActive', 'Distress stream active')}</p>
                     </div>
                   )}
                   {/* Stream Badge */}
                   <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black tracking-widest text-white flex items-center gap-1.5 shadow-lg border ${webrtcConnected ? 'bg-green-600 border-green-500' : 'bg-red-600 border-red-500'}`}>
                     <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                    {webrtcConnected ? 'DISPATCH CONNECTED' : 'LIVE TELEMETRY'}
+                    {webrtcConnected ? t('sos.dispatchConnected', 'DISPATCH CONNECTED') : t('sos.liveTelemetry', 'LIVE TELEMETRY')}
                   </div>
 
                   {/* WebRTC Metadata Overlay */}
@@ -363,7 +365,7 @@ export function PanicMode() {
                 <div className="text-center">
                   <h2 className="text-red-500 font-black text-2xl tracking-tight animate-pulse flex items-center justify-center gap-2">
                     <Volume2 size={20} />
-                    {status === 'acknowledged' ? 'HELP EN ROUTE' : 'SOS SIGNAL EMITTED'}
+                    {status === 'acknowledged' ? t('sos.helpEnRoute', 'HELP EN ROUTE') : t('sos.sosActive', 'SOS SIGNAL EMITTED')}
                   </h2>
                   {location && (
                     <div className="flex items-center justify-center gap-1.5 mt-2 text-gray-400 text-xs max-w-[320px] mx-auto bg-gray-900/60 border border-gray-800 rounded-full px-4 py-1.5">
@@ -388,7 +390,7 @@ export function PanicMode() {
                   transition={{ duration: 2, ease: "linear", repeat: Infinity }}
                 />
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 mb-2 relative z-10">
-                  <Radio size={10} /> Transmission Status
+                  <Radio size={10} /> {t('sos.transmissionStatus', 'Transmission Status')}
                 </p>
                 <div className="grid grid-cols-4 gap-1.5 relative z-10">
                   {Object.entries(broadcastStatus).map(([ch, stat]) => (
@@ -415,12 +417,12 @@ export function PanicMode() {
             {/* Sweep console terminal */}
             <div className="bg-gray-950 border border-gray-900 rounded-2xl p-3 font-mono text-[9px] text-red-400/90 shadow-inner flex flex-col space-y-1">
               <div className="flex items-center justify-between border-b border-gray-900 pb-1.5 mb-1.5 shrink-0">
-                <span className="flex items-center gap-1.5 text-gray-500 font-bold uppercase text-[8px]"><TerminalIcon size={10} /> Radio Sweeper Console</span>
+                <span className="flex items-center gap-1.5 text-gray-500 font-bold uppercase text-[8px]"><TerminalIcon size={10} /> {t('sos.radioSweeperConsole', 'Radio Sweeper Console')}</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               </div>
               <div className="flex-1 space-y-1">
                 {terminalLogs.length === 0 ? (
-                  <p className="text-gray-600">No output logs.</p>
+                  <p className="text-gray-600">{t('sos.noOutputLogs', 'No output logs.')}</p>
                 ) : (
                   terminalLogs.map((log, idx) => (
                     <p key={idx} className="truncate leading-none">{log}</p>
@@ -436,7 +438,7 @@ export function PanicMode() {
                   <Clock size={20} className="text-orange-400 shrink-0" />
                   <div>
                     <p className="text-white font-black text-sm">{responder.name}</p>
-                    <p className="text-orange-300 text-xs mt-0.5">ETA: ~{responder.etaMinutes} minutes away</p>
+                    <p className="text-orange-300 text-xs mt-0.5">{t('sos.etaMinutes', 'ETA: ~{{minutes}} minutes away', { minutes: responder.etaMinutes })}</p>
                   </div>
                 </div>
               </div>

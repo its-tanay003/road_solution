@@ -4,12 +4,14 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const HOLD_DURATION = 3000; // 3 seconds
 const TRIPLE_PRESS_WINDOW = 800; // ms
 
 export function SOSButton() {
   const { status, arm } = useSOSStore();
+  const { t } = useTranslation();
   const [pressing, setPressing] = useState(false);
   const [pressPercent, setPressPercent] = useState(0);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -119,12 +121,12 @@ export function SOSButton() {
           'relative w-28 h-28 rounded-full flex flex-col items-center justify-center select-none touch-none',
           idle ? 'sos-button-idle' : 'sos-button-active',
         )}
-        aria-label="SOS emergency button — hold 3 seconds or triple-press"
+        aria-label={t('sos.holdToActivate', 'SOS emergency button — hold 3 seconds or triple-press')}
         aria-pressed={!idle}
       >
         <span className="text-white font-black text-3xl tracking-wider leading-none">SOS</span>
         <span className="text-red-200 text-[10px] mt-1 font-medium">
-          {pressing ? `${Math.round(pressPercent)}%` : idle ? 'Hold 3s' : '●'}
+          {pressing ? `${Math.round(pressPercent)}%` : idle ? t('sos.hold3s', 'Hold 3s') : '●'}
         </span>
       </motion.button>
     </div>

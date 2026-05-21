@@ -18,6 +18,18 @@
     "imSafe": "✅ 我很安全 — 取消警报"
   },
   "map": {
+    "sharedPin": "共享图钉",
+    "sharedEmergencyLocation": "共享紧急位置",
+    "sharedLocation": "位置共享图钉",
+    "navigate": "导航",
+    "call": "呼叫",
+    "loading": "地图加载中…",
+    "accidentDisclaimer": "模拟事故数据",
+    "hospitals": "医院",
+    "police": "警察",
+    "fire": "消防",
+    "pharmacy": "药房",
+    "accidents": "事故",
     "title": "应急地图",
     "nearbyHospitals": "附近的医院和应急机构",
     "searchPlaceholder": "搜索最近的帮助..."
@@ -43,6 +55,13 @@
     "onboardingStatus": "初始化进度"
   },
   "emergency": {
+    "subtitle": "分步紧急指南 • 支持离线查看",
+    "warningText": "发生危及生命的紧急情况时，请立即拨打 112。本指南仅供参考，不能替代专业医疗护理。",
+    "triageTitle": "AI 分诊助手",
+    "profileActive": "健康档案已启用",
+    "triageWelcome": "我是您的 **AI 急救分诊助手**。请描述症状或伤情，我将根据您的医疗档案 *(哮喘、糖尿病、O- 血型)* 为您提供量身定制的即时应对步骤。",
+    "chatError": "抱歉，遇到了一些错误。请重试。",
+    "placeholder": "描述紧急情况 (例如: 严重出血)…",
     "title": "应急自救指南",
     "firstAid": "急救常识",
     "firstAidDesc": "详细的分步应急步骤",
@@ -50,16 +69,45 @@
     "servicesDesc": "直拨应急救援电话"
   },
   "errors": {
+    "offlineBanner": "离线 — 仅部分功能可用",
     "generic": "出错了，请稍后重试。",
     "fieldRequired": "此项为必填项",
     "invalidPhone": "无效的电话号码",
     "permissionDenied": "权限请求被拒绝。"
   },
   "buttons": {
+    "call112": "📞 拨打 112 紧急热线",
+    "show": "显示",
+    "hide": "隐藏",
     "continue": "继续",
     "save": "保存修改",
     "cancel": "取消",
     "skip": "跳过",
     "allow": "允许访问"
+  },
+  "appName": "ROADSoS",
+  "appSubtitle": "AI 紧急响应和 SOS",
+  "quickDial": "快速拨号",
+  "features": "功能",
+  "status": {
+    "live": "在线",
+    "offline": "离线"
+  },
+  "carMode": {
+    "connected": "车载终端已连接",
+    "switchToMobile": "切换到移动视图",
+    "holdForSos": "按住以触发 SOS",
+    "triggerTip": "连按三次音量键或摇晃以触发碰撞警报",
+    "callHelp": "拨打 112 求助",
+    "voiceChatbot": "语音助手",
+    "safetyWarning": "⚠️ 随时说 \"Hey Emergency\" 以开启免提安全模式。请专心驾驶。"
+  },
+  "directory": {
+    "title": "紧急电话目录",
+    "subtitle": "全国及国际紧急求助热线",
+    "nationalHelplines": "国家紧急热线",
+    "international": "国际紧急热线",
+    "suggestTitle": "您知道我们遗漏的其他本地求助电话吗？",
+    "suggestDesc": "众包更新即将推出"
   }
 }
