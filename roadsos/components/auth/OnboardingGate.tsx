@@ -33,7 +33,8 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
         const contacts = data.contacts;
 
         // Check completeness (blood group set and at least 2 emergency contacts)
-        const hasBloodGroup = profile?.blood_group && profile.blood_group !== 'Unknown';
+        const bloodGroup = profile?.medical_data?.blood_group || profile?.blood_group;
+        const hasBloodGroup = bloodGroup && bloodGroup !== 'Unknown';
         const hasContacts = Array.isArray(contacts) && contacts.length >= 2;
 
         if (!hasBloodGroup || !hasContacts) {
@@ -44,13 +45,13 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
         } else {
           // If complete, save to localStorage cache and redirect to home if on /onboarding
           localStorage.setItem('roadsos-profile', JSON.stringify({
-            name: profile.full_name,
+            name: profile.name || profile.full_name,
             phone: profile.phone,
-            bloodGroup: profile.blood_group,
-            conditions: profile.medical_conditions?.join(', ') || '',
-            allergies: profile.allergies?.join(', ') || '',
-            dob: profile.date_of_birth || '',
-            address: profile.home_address || '',
+            bloodGroup: profile.medical_data?.blood_group || profile.blood_group,
+            conditions: profile.medical_data?.medical_conditions?.join(', ') || profile.medical_conditions?.join(', ') || '',
+            allergies: profile.medical_data?.allergies?.join(', ') || profile.allergies?.join(', ') || '',
+            dob: profile.medical_data?.date_of_birth || profile.date_of_birth || '',
+            address: profile.medical_data?.home_address || profile.home_address || '',
             contacts: contacts.map((c: any) => ({
               name: c.name,
               phone: c.phone,
