@@ -10,6 +10,7 @@ export interface SOSLocation {
   lng: number;
   address: string;
   accuracy?: number;
+  speed?: number;
   timestamp: number;
 }
 

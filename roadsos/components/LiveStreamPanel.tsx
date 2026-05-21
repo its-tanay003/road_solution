@@ -8,12 +8,12 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface LiveStreamPanelProps {
-  stream: MediaStream | null;
-  peers: Record<string, any>;
+  stream?: MediaStream | null;
+  peers?: Record<string, any>;
   onStop?: () => void;
 }
 
-export function LiveStreamPanel({ stream, peers, onStop }: LiveStreamPanelProps) {
+export function LiveStreamPanel({ stream = null, peers = {}, onStop }: LiveStreamPanelProps) {
   const { incidentId, location, telemetryData } = useSOSStore();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
@@ -247,8 +247,8 @@ export function LiveStreamPanel({ stream, peers, onStop }: LiveStreamPanelProps)
       ctx.shadowBlur = 4;
       
       const time = new Date().toISOString();
-      const coords = location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : 'GPS ACQUIRING...';
-      const speed = location?.speed ? `${Math.round(location.speed * 3.6)} km/h` : '0 km/h';
+      const coords = location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'GPS ACQUIRING...';
+      const speed = (location as any)?.speed ? `${Math.round((location as any).speed * 3.6)} km/h` : '0 km/h';
       
       ctx.fillText(`ROADSoS SECURE TRANSMISSION`, 10, 20);
       ctx.fillText(`T: ${time}`, 10, 35);
