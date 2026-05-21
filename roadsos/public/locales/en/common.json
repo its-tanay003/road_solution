@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "Home",
+    "map": "Emergency Map",
+    "chat": "AI Assistant",
+    "settings": "Settings",
+    "emergency": "First Aid Guide"
+  },
+  "sos": {
+    "holdToActivate": "Hold 3 seconds or triple-press",
+    "orVoiceCommand": "Or say \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 SOS Activating…",
+    "sosActive": "🔴 SOS ACTIVE — Help notified",
+    "helpOnWay": "🚑 Help is on the way",
+    "allClear": "✅ All clear — You are safe",
+    "cancelSos": "Cancel SOS",
+    "responderEta": "Responder ETA",
+    "imSafe": "✅ I'm Safe — Cancel"
+  },
+  "map": {
+    "title": "Emergency Map",
+    "nearbyHospitals": "Nearby hospitals & services",
+    "searchPlaceholder": "Search nearest help..."
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "Ask for emergency guidance...",
+    "voiceFeedbackActive": "Voice commands active. Say \"Hey Emergency\" followed by command.",
+    "listening": "Listening…"
+  },
+  "settings": {
+    "title": "Settings",
+    "desc": "Profile & preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "personalInfo": "Personal Information",
+    "medicalProfile": "Medical Profile",
+    "emergencyContacts": "Emergency Contacts",
+    "onboardingStatus": "Onboarding Status"
+  },
+  "emergency": {
+    "title": "Emergency Guides",
+    "firstAid": "First Aid",
+    "firstAidDesc": "Step-by-step guides",
+    "services": "Emergency Numbers",
+    "servicesDesc": "Direct emergency lines"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "fieldRequired": "This field is required",
+    "invalidPhone": "Invalid phone number",
+    "permissionDenied": "Permission was denied."
+  },
+  "buttons": {
+    "continue": "Continue",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "skip": "Skip",
+    "allow": "Allow Access"
+  }
+}

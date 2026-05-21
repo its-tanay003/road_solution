@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Shield, Map, MessageSquare, BookOpen, Phone, Wifi, WifiOff, ChevronRight } from 'lucide-react';
 import { SOSButton } from '@/components/sos/SOSButton';
+import { HeaderControls } from '@/components/nav/HeaderControls';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -152,12 +153,13 @@ export default function HomePage() {
           </div>
           <p className="text-gray-500 text-xs">{t('appSubtitle')}</p>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2.5">
           {online ? (
             <span className="flex items-center gap-1 text-green-400 text-xs"><Wifi size={12} /> Live</span>
           ) : (
             <span className="flex items-center gap-1 text-yellow-400 text-xs"><WifiOff size={12} /> Offline</span>
           )}
+          <HeaderControls />
         </div>
       </header>
 

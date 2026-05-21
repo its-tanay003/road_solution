@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "map": "Mapa de Emergencia",
+    "chat": "Asistente IA",
+    "settings": "Ajustes",
+    "emergency": "Primeros Auxilios"
+  },
+  "sos": {
+    "holdToActivate": "Mantén pulsado 3 segundos o presiona 3 veces",
+    "orVoiceCommand": "O di \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 SOS Activándose…",
+    "sosActive": "🔴 SOS ACTIVO — Ayuda notificada",
+    "helpOnWay": "🚑 La ayuda está en camino",
+    "allClear": "✅ Todo despejado — Estás a salvo",
+    "cancelSos": "Cancelar SOS",
+    "responderEta": "Tiempo estimado de llegada",
+    "imSafe": "✅ Estoy a salvo — Cancelar"
+  },
+  "map": {
+    "title": "Mapa de Emergencia",
+    "nearbyHospitals": "Hospitales y servicios cercanos",
+    "searchPlaceholder": "Buscar ayuda cercana..."
+  },
+  "chat": {
+    "title": "Asistente de IA",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "Pregunta por ayuda en emergencias...",
+    "voiceFeedbackActive": "Comandos de voz activos. Di \"Hey Emergency\" seguido del comando.",
+    "listening": "Escuchando…"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "desc": "Perfil y preferencias",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeSystem": "Sistema",
+    "personalInfo": "Información Personal",
+    "medicalProfile": "Perfil Médico",
+    "emergencyContacts": "Contactos de Emergencia",
+    "onboardingStatus": "Estado de Registro"
+  },
+  "emergency": {
+    "title": "Guías de Emergencia",
+    "firstAid": "Primeros Auxilios",
+    "firstAidDesc": "Guías paso a paso",
+    "services": "Números de Emergencia",
+    "servicesDesc": "Líneas de emergencia directas"
+  },
+  "errors": {
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "fieldRequired": "Este campo es requerido",
+    "invalidPhone": "Número de teléfono inválido",
+    "permissionDenied": "Permiso denegado."
+  },
+  "buttons": {
+    "continue": "Continuar",
+    "save": "Guardar Cambios",
+    "cancel": "Cancelar",
+    "skip": "Omitir",
+    "allow": "Permitir Acceso"
+  }
+}

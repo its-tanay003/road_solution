@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "Главная",
+    "map": "Карта экстренных служб",
+    "chat": "ИИ Помощник",
+    "settings": "Настройки",
+    "emergency": "Первая помощь"
+  },
+  "sos": {
+    "holdToActivate": "Удерживайте 3 секунды или нажмите 3 раза",
+    "orVoiceCommand": "Или скажите \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 Активация SOS…",
+    "sosActive": "🔴 SOS АКТИВЕН — Службы оповещены",
+    "helpOnWay": "🚑 Помощь уже в пути",
+    "allClear": "✅ Все чисто — Вы в безопасности",
+    "cancelSos": "Отменить SOS",
+    "responderEta": "Время прибытия помощи",
+    "imSafe": "✅ Я в безопасности — Отмена"
+  },
+  "map": {
+    "title": "Карта экстренных служб",
+    "nearbyHospitals": "Ближайшие больницы и службы",
+    "searchPlaceholder": "Поиск экстренной помощи..."
+  },
+  "chat": {
+    "title": "ИИ Помощник",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "Задайте вопрос по экстренной помощи...",
+    "voiceFeedbackActive": "Голосовые команды активны. Скажите \"Hey Emergency\" и произнесите команду.",
+    "listening": "Прослушивание…"
+  },
+  "settings": {
+    "title": "Настройки",
+    "desc": "Профиль и предпочтения",
+    "language": "Язык",
+    "theme": "Тема",
+    "themeLight": "Светлая",
+    "themeDark": "Темная",
+    "themeSystem": "Системная",
+    "personalInfo": "Личная информация",
+    "medicalProfile": "Медицинский профиль",
+    "emergencyContacts": "Контакты для экстренных случаев",
+    "onboardingStatus": "Статус регистрации"
+  },
+  "emergency": {
+    "title": "Руководства по экстренным ситуациям",
+    "firstAid": "Первая помощь",
+    "firstAidDesc": "Пошаговые инструкции",
+    "services": "Телефоны экстренных служб",
+    "servicesDesc": "Прямые экстренные номера"
+  },
+  "errors": {
+    "generic": "Что-то пошло не так. Пожалуйста, попробуйте еще раз.",
+    "fieldRequired": "Это поле обязательно для заполнения",
+    "invalidPhone": "Некорректный номер телефона",
+    "permissionDenied": "В доступе отказано."
+  },
+  "buttons": {
+    "continue": "Продолжить",
+    "save": "Сохранить изменения",
+    "cancel": "Отмена",
+    "skip": "Пропустить",
+    "allow": "Разрешить доступ"
+  }
+}
