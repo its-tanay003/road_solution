@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, HeatmapLayer, Circle, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { useSOSStore } from '@/lib/store/sosStore';
 import { useSearchParams } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { Shield, Flame, Cross, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +52,7 @@ const MOCK_ACCIDENT_POINTS = [
 ];
 
 // Helper to fetch OpenStreetMap features as a fallback when Google Places fails/is offline
-async function fetchOSMPlaces(lat: number, lng: number, layers: Set<LayerType>): Promise<PlaceResult[]> {
+async function fetchOSMPlaces(lat: number, lng: number, layers: Set<LayerType>, t: (key: string, fallback: string) => string): Promise<PlaceResult[]> {
   const overpassTypes: string[] = [];
   if (layers.has('hospitals')) overpassTypes.push('hospital');
   if (layers.has('police')) overpassTypes.push('police');
@@ -88,7 +89,7 @@ out center;`;
 
       return {
         id: `osm-${el.type}-${el.id}`,
-        name: el.tags?.name || el.tags?.operator || `${LAYER_CONFIG[type].label} (OSM)`,
+        name: el.tags?.name || el.tags?.operator || `${t(`map.${type}`, LAYER_CONFIG[type].label)} (OSM)`,
         lat: elementLat,
         lng: elementLng,
         type: type,
@@ -106,6 +107,7 @@ out center;`;
 }
 
 export function EmergencyMap() {
+  const { t } = useTranslation();
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
     libraries: LIBRARIES,
@@ -155,7 +157,7 @@ export function EmergencyMap() {
         const lat = parseFloat(queryLat);
         const lng = parseFloat(queryLng);
         if (!isNaN(lat) && !isNaN(lng)) {
-          setSharedPin({ lat, lng, label: 'Shared Pin' });
+          setSharedPin({ lat, lng, label: t('map.sharedPin', 'Shared Pin') });
           return;
         }
       }
@@ -166,7 +168,7 @@ export function EmergencyMap() {
         const lat = parseFloat(coordMatch[1]);
         const lng = parseFloat(coordMatch[2]);
         if (!isNaN(lat) && !isNaN(lng)) {
-          setSharedPin({ lat, lng, label: title || 'Shared Emergency Location' });
+          setSharedPin({ lat, lng, label: title || t('map.sharedEmergencyLocation', 'Shared Emergency Location') });
         }
       }
     }
@@ -203,7 +205,7 @@ export function EmergencyMap() {
 
     if (!serviceRef.current) {
       // If Google Places service is not loaded yet (or fails/offline), immediately query OSM fallback!
-      fetchOSMPlaces(centerPos.lat, centerPos.lng, activeLayers).then((osmResults) => {
+      fetchOSMPlaces(centerPos.lat, centerPos.lng, activeLayers, t).then((osmResults) => {
         if (osmResults.length > 0) setPlaces(osmResults);
       });
       return;
@@ -237,7 +239,7 @@ export function EmergencyMap() {
           if (completedRequests === layersToFetch.length) {
             if (newPlaces.length === 0) {
               console.log('[Map] Google Places returned empty. Requesting OSM Overpass fallback...');
-              const osmResults = await fetchOSMPlaces(centerPos.lat, centerPos.lng, activeLayers);
+              const osmResults = await fetchOSMPlaces(centerPos.lat, centerPos.lng, activeLayers, t);
               setPlaces(osmResults);
             } else {
               setPlaces(newPlaces);
@@ -269,7 +271,7 @@ export function EmergencyMap() {
       <div className="flex-1 flex items-center justify-center bg-gray-950 rounded-2xl">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-400">Loading Map…</p>
+          <p className="text-gray-400">{t('map.loading', 'Loading Map…')}</p>
         </div>
       </div>
     );
@@ -293,7 +295,7 @@ export function EmergencyMap() {
               <button
                 key={type}
                 onClick={() => toggleLayer(type)}
-                aria-label={`${active ? 'Hide' : 'Show'} ${cfg.label}`}
+                aria-label={`${active ? t('buttons.hide', 'Hide') : t('buttons.show', 'Show')} ${t(`map.${type}`, cfg.label)}`}
                 className={cn(
                   'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm transition-all border',
                   active
@@ -302,7 +304,7 @@ export function EmergencyMap() {
                 )}
               >
                 <Icon size={11} />
-                {cfg.label}
+                {t(`map.${type}`, cfg.label)}
               </button>
             );
         })}
@@ -311,7 +313,7 @@ export function EmergencyMap() {
       {/* Accident disclaimer */}
       {activeLayers.has('accidents') && (
         <div className="absolute top-16 left-3 z-10 bg-yellow-900/80 text-yellow-200 text-[10px] px-2 py-1 rounded-lg border border-yellow-700 backdrop-blur-sm">
-          ⚠ Simulated accident data
+          ⚠ {t('map.accidentDisclaimer', 'Simulated accident data')}
         </div>
       )}
 
@@ -361,7 +363,7 @@ export function EmergencyMap() {
               lat: sharedPin.lat,
               lng: sharedPin.lng,
               type: 'hospitals',
-              address: 'Shared location pin'
+              address: t('map.sharedLocation', 'Shared location pin')
             })}
             icon={{
               url: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23a855f7" stroke="white" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
@@ -409,11 +411,11 @@ export function EmergencyMap() {
                   rel="noreferrer"
                   className="text-xs bg-blue-600 text-white px-2 py-1 rounded"
                 >
-                  Navigate
+                  {t('map.navigate', 'Navigate')}
                 </a>
                 {selectedPlace.phone && (
                   <a href={`tel:${selectedPlace.phone}`} className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-                    Call
+                    {t('map.call', 'Call')}
                   </a>
                 )}
               </div>

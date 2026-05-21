@@ -18,6 +18,18 @@
     "imSafe": "✅ Estou seguro — Cancelar"
   },
   "map": {
+    "sharedPin": "Pino compartilhado",
+    "sharedEmergencyLocation": "Local de emergência compartilhado",
+    "sharedLocation": "Pino de localização compartilhada",
+    "navigate": "Navegar",
+    "call": "Ligar",
+    "loading": "Carregando mapa…",
+    "accidentDisclaimer": "Dados simulados de acidentes",
+    "hospitals": "Hospitais",
+    "police": "Polícia",
+    "fire": "Bombeiros",
+    "pharmacy": "Farmácia",
+    "accidents": "Acidentes",
     "title": "Mapa de Emergência",
     "nearbyHospitals": "Hospitais e serviços próximos",
     "searchPlaceholder": "Buscar ajuda próxima..."
@@ -43,6 +55,13 @@
     "onboardingStatus": "Status do Registro"
   },
   "emergency": {
+    "subtitle": "Instruções passo a passo de emergência • Disponível offline",
+    "warningText": "Sempre ligue para 112 em emergências graves. Estes são guias, não substitutos para atendimento profissional.",
+    "triageTitle": "Assistente de triagem de IA",
+    "profileActive": "Perfil ativo",
+    "triageWelcome": "Sou seu **Assistente de triagem de primeiros socorros de IA**. Descreva os sintomas e darei passos imediatos adaptados ao seu perfil médico *(Asma, Diabetes, sangue O-)*.",
+    "chatError": "Desculpe, ocorreu um erro. Por favor, tente novamente.",
+    "placeholder": "Descreva a emergência (ex: sangramento grave)…",
     "title": "Guias de Emergência",
     "firstAid": "Primeiros Socorros",
     "firstAidDesc": "Guias passo a passo",
@@ -50,16 +69,45 @@
     "servicesDesc": "Linhas de emergência diretas"
   },
   "errors": {
+    "offlineBanner": "Sem conexão — Recursos limitados disponíveis",
     "generic": "Ocorreu um erro. Tente novamente.",
     "fieldRequired": "Este campo é obrigatório",
     "invalidPhone": "Número de telefone inválido",
     "permissionDenied": "Permissão negada."
   },
   "buttons": {
+    "call112": "📞 Ligar Emergência 112",
+    "show": "Mostrar",
+    "hide": "Ocultar",
     "continue": "Continuar",
     "save": "Salvar Alterações",
     "cancel": "Cancelar",
     "skip": "Pular",
     "allow": "Permitir Acesso"
+  },
+  "appName": "ROADSoS",
+  "appSubtitle": "Resposta de emergência IA & SOS",
+  "quickDial": "Discagem rápida",
+  "features": "Recursos",
+  "status": {
+    "live": "Ao vivo",
+    "offline": "Offline"
+  },
+  "carMode": {
+    "connected": "Console automotivo conectado",
+    "switchToMobile": "Mudar para visualização móvel",
+    "holdForSos": "SEGURE PARA SOS",
+    "triggerTip": "Pressione três vezes o volume ou balance para alerta de acidente",
+    "callHelp": "Ligar para 112",
+    "voiceChatbot": "Chatbot de voz",
+    "safetyWarning": "⚠️ Diga \"Hey Emergency\" para segurança mãos livres. Foque no trânsito."
+  },
+  "directory": {
+    "title": "Diretório de emergência",
+    "subtitle": "Linhas de apoio nacionais + internacionais",
+    "nationalHelplines": "Linhas de ajuda nacionais",
+    "international": "Internacional",
+    "suggestTitle": "Conhece alguma linha de apoio local que não está aqui?",
+    "suggestDesc": "Atualizações colaborativas em breve"
   }
 }

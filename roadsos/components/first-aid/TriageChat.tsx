@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, FormEvent } from 'react';
 import { Send, Bot, User, ActivitySquare, AlertTriangle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id: string;
@@ -32,11 +33,28 @@ function uid() {
 }
 
 export function TriageChat() {
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const { t } = useTranslation();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Initialize or translate first message when t changes
+  useEffect(() => {
+    setMessages((prev) => {
+      const welcomeContent = t(
+        'emergency.triageWelcome',
+        "I am your **AI First-Aid Triage Assistant**. Describe the symptoms or injury and I'll give you immediate steps tailored to your medical profile *(Asthma, Diabetes, O− blood group)*."
+      );
+      if (prev.length === 0) {
+        return [{ id: 'init', role: 'assistant', content: welcomeContent }];
+      }
+      return prev.map((m) =>
+        m.id === 'init' ? { ...m, content: welcomeContent } : m
+      );
+    });
+  }, [t]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -94,7 +112,7 @@ export function TriageChat() {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId
-            ? { ...m, content: '_Sorry, I encountered an error. Please try again._' }
+            ? { ...m, content: `_${t('emergency.chatError', 'Sorry, I encountered an error. Please try again.')}_` }
             : m
         )
       );
@@ -109,11 +127,11 @@ export function TriageChat() {
       <div className="bg-red-950/40 border-b border-red-500/20 px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <ActivitySquare size={16} className="text-red-400" />
-          <h2 className="font-bold text-white text-sm tracking-wide">AI Triage Assistant</h2>
+          <h2 className="font-bold text-white text-sm tracking-wide">{t('emergency.triageTitle', 'AI Triage Assistant')}</h2>
         </div>
         <div className="flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-full border border-red-500/20">
           <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
-          <span className="text-[9px] text-red-300 font-bold uppercase tracking-widest">Profile Active</span>
+          <span className="text-[9px] text-red-300 font-bold uppercase tracking-widest">{t('emergency.profileActive', 'Profile Active')}</span>
         </div>
       </div>
 
@@ -179,7 +197,7 @@ export function TriageChat() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Describe the emergency (e.g. severe bleeding)…"
+            placeholder={t('emergency.placeholder', 'Describe the emergency (e.g. severe bleeding)…')}
             disabled={isLoading}
             className="w-full bg-gray-900 border border-gray-800 rounded-full pl-4 pr-12 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-red-500/50 transition-colors disabled:opacity-60"
           />

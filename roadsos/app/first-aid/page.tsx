@@ -1,11 +1,9 @@
-import type { Metadata } from 'next';
+'use client';
+
 import { BookOpen, Heart } from 'lucide-react';
 import { TriageChat } from '@/components/first-aid/TriageChat';
-
-export const metadata: Metadata = {
-  title: 'First Aid — ROADSoS',
-  description: 'Step-by-step first aid guides for CPR, burns, bleeding, fractures, and more.',
-};
+import { HeaderControls } from '@/components/nav/HeaderControls';
+import { useTranslation } from 'react-i18next';
 
 const FIRST_AID_CARDS = [
   {
@@ -158,20 +156,25 @@ const FIRST_AID_CARDS = [
 ];
 
 export default function FirstAidPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-24">
       {/* Header */}
       <header className="px-5 pt-14 pb-5 border-b border-gray-800">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-green-500/20 flex items-center justify-center">
-            <BookOpen size={18} className="text-green-400" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-green-500/20 flex items-center justify-center">
+              <BookOpen size={18} className="text-green-400" />
+            </div>
+            <h1 className="font-black text-white text-xl">{t('emergency.firstAid', 'First Aid Guide')}</h1>
           </div>
-          <h1 className="font-black text-white text-xl">First Aid Guide</h1>
+          <HeaderControls />
         </div>
-        <p className="text-gray-500 text-sm">Step-by-step emergency instructions • Offline available</p>
+        <p className="text-gray-500 text-sm">{t('emergency.subtitle', 'Step-by-step emergency instructions • Offline available')}</p>
         <div className="mt-3 flex items-center gap-2 bg-yellow-900/30 border border-yellow-700/50 rounded-xl px-3 py-2">
           <Heart size={13} className="text-yellow-400 shrink-0" />
-          <p className="text-yellow-200 text-xs">Always call 112 for life-threatening emergencies. These are guides, not substitutes for professional care.</p>
+          <p className="text-yellow-200 text-xs">{t('emergency.warningText', 'Always call 112 for life-threatening emergencies. These are guides, not substitutes for professional care.')}</p>
         </div>
       </header>
 
@@ -190,8 +193,8 @@ export default function FirstAidPage() {
             <summary className="flex items-center gap-4 px-4 py-4 cursor-pointer list-none select-none">
               <span className="text-3xl">{card.emoji}</span>
               <div className="flex-1">
-                <p className="font-bold text-white text-base">{card.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{card.summary}</p>
+                <p className="font-bold text-white text-base">{t(`firstaid.${card.id}.title`, card.title)}</p>
+                <p className="text-gray-500 text-xs mt-0.5">{t(`firstaid.${card.id}.summary`, card.summary)}</p>
               </div>
               <div className={`w-2 h-2 rounded-full shrink-0 ${card.colorClass}`} />
             </summary>
@@ -202,7 +205,7 @@ export default function FirstAidPage() {
                     <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5 ${card.colorClass}`}>
                       {i + 1}
                     </span>
-                    <p className="text-gray-200 text-sm leading-relaxed">{step}</p>
+                    <p className="text-gray-200 text-sm leading-relaxed">{t(`firstaid.${card.id}.step${i}`, step)}</p>
                   </li>
                 ))}
               </ol>
@@ -210,7 +213,7 @@ export default function FirstAidPage() {
                 href="tel:112"
                 className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-600/20 border border-red-600/50 text-red-300 font-semibold text-sm"
               >
-                📞 Call 112 Emergency
+                {t('buttons.call112', '📞 Call 112 Emergency')}
               </a>
             </div>
           </details>

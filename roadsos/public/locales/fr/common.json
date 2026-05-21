@@ -18,6 +18,18 @@
     "imSafe": "✅ Je suis en sécurité — Annuler"
   },
   "map": {
+    "sharedPin": "Épingle partagée",
+    "sharedEmergencyLocation": "Lieu d'urgence partagé",
+    "sharedLocation": "Épingle de position partagée",
+    "navigate": "Naviguer",
+    "call": "Appeler",
+    "loading": "Chargement du carte…",
+    "accidentDisclaimer": "Données d'accidents simulées",
+    "hospitals": "Hôpitaux",
+    "police": "Police",
+    "fire": "Pompiers",
+    "pharmacy": "Pharmacie",
+    "accidents": "Accidents",
     "title": "Carte d'Urgence",
     "nearbyHospitals": "Hôpitaux et services à proximité",
     "searchPlaceholder": "Rechercher des secours..."
@@ -43,6 +55,13 @@
     "onboardingStatus": "Statut de l'inscription"
   },
   "emergency": {
+    "subtitle": "Instructions d'urgence étape par étape • Disponible hors ligne",
+    "warningText": "Appelez toujours le 112 pour les urgences vitales. Ce sont des guides, non des substituts aux soins professionnels.",
+    "triageTitle": "Assistant de tri IA",
+    "profileActive": "Profil actif",
+    "triageWelcome": "Je suis votre **Assistant de tri de premiers secours IA**. Décrivez les symptômes et je vous donnerai des étapes immédiates adaptées à votre profil *(Asthme, Diabète, sang O-)*.",
+    "chatError": "Désolé, une erreur est survenue. Veuillez réessayer.",
+    "placeholder": "Décrivez l'urgence (ex: saignement sévère)…",
     "title": "Guides d'Urgence",
     "firstAid": "Premiers Secours",
     "firstAidDesc": "Guides étape par étape",
@@ -50,16 +69,45 @@
     "servicesDesc": "Lignes d'urgence directes"
   },
   "errors": {
+    "offlineBanner": "Hors ligne — Fonctionnalités limitées",
     "generic": "Une erreur est survenue. Veuillez réessayer.",
     "fieldRequired": "Ce champ est requis",
     "invalidPhone": "Numéro de téléphone invalide",
     "permissionDenied": "L'autorisation a été refusée."
   },
   "buttons": {
+    "call112": "📞 Appeler Urgence 112",
+    "show": "Afficher",
+    "hide": "Masquer",
     "continue": "Continuer",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "skip": "Passer",
     "allow": "Autoriser l'accès"
+  },
+  "appName": "ROADSoS",
+  "appSubtitle": "Réponse d'urgence IA & SOS",
+  "quickDial": "Appel rapide",
+  "features": "Fonctionnalités",
+  "status": {
+    "live": "En direct",
+    "offline": "Hors ligne"
+  },
+  "carMode": {
+    "connected": "Console automobile connectée",
+    "switchToMobile": "Passer à la vue mobile",
+    "holdForSos": "MAINTENIR POUR SOS",
+    "triggerTip": "Appuyez trois fois sur le volume ou secouez pour alerter",
+    "callHelp": "Appeler le 112",
+    "voiceChatbot": "Chatbot vocal",
+    "safetyWarning": "⚠️ Dites \"Hey Emergency\" pour garder les mains libres. Concentrez-vous sur la route."
+  },
+  "directory": {
+    "title": "Annuaire des urgences",
+    "subtitle": "Lignes d'assistance nationales + internationales",
+    "nationalHelplines": "Lignes d'assistance nationales",
+    "international": "International",
+    "suggestTitle": "Connaissez-vous une ligne d'assistance manquante ?",
+    "suggestDesc": "Mises à jour collaboratives bientôt disponibles"
   }
 }

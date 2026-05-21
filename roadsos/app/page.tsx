@@ -23,10 +23,10 @@ export default function HomePage() {
   const [isCarMode, setIsCarMode] = useState(false);
 
   const quickLinksTranslated = [
-    { href: '/map',       icon: Map,           label: t('emergencyMap'),  desc: t('nearbyHospitals'), iconCls: 'text-blue-400',    bgCls: 'bg-blue-500/10'    },
-    { href: '/chat',      icon: MessageSquare, label: t('aiAssistant'),   desc: t('tripleAiDesc'),  iconCls: 'text-amber-400',   bgCls: 'bg-amber-500/10'   },
-    { href: '/first-aid', icon: BookOpen,      label: t('firstAid'),      desc: t('firstAidDesc'),        iconCls: 'text-emerald-400', bgCls: 'bg-emerald-500/10' },
-    { href: '/directory', icon: Phone,         label: t('services'),      desc: t('servicesDesc'),          iconCls: 'text-violet-400',  bgCls: 'bg-violet-500/10'  },
+    { href: '/map',       icon: Map,           label: t('map.title', 'Emergency Map'),  desc: t('map.nearbyHospitals', 'Nearby hospitals & services'), iconCls: 'text-blue-400',    bgCls: 'bg-blue-500/10'    },
+    { href: '/chat',      icon: MessageSquare, label: t('chat.title', 'AI Assistant'),   desc: t('chat.desc', 'Claude · Gemini · ChatGPT'),  iconCls: 'text-amber-400',   bgCls: 'bg-amber-500/10'   },
+    { href: '/first-aid', icon: BookOpen,      label: t('emergency.firstAid', 'First Aid'),      desc: t('emergency.firstAidDesc', 'Step-by-step guides'),        iconCls: 'text-emerald-400', bgCls: 'bg-emerald-500/10' },
+    { href: '/directory', icon: Phone,         label: t('emergency.services', 'Emergency Numbers'),      desc: t('emergency.servicesDesc', 'Direct emergency lines'),          iconCls: 'text-violet-400',  bgCls: 'bg-violet-500/10'  },
   ];
 
   useEffect(() => {
@@ -77,13 +77,13 @@ export default function HomePage() {
         <div className="flex items-center justify-between border-b border-gray-900 pb-3 shrink-0">
           <div className="flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
-            <h1 className="text-sm font-black tracking-widest text-white uppercase">Automotive Deck Connected</h1>
+            <h1 className="text-sm font-black tracking-widest text-white uppercase">{t('carMode.connected', 'Automotive Deck Connected')}</h1>
           </div>
           <button 
             onClick={() => setIsCarMode(false)}
             className="text-[10px] bg-gray-900 border border-gray-800 text-gray-400 px-3 py-1.5 rounded-xl font-bold hover:text-white transition-colors"
           >
-            Switch to Mobile View
+            {t('carMode.switchToMobile', 'Switch to Mobile View')}
           </button>
         </div>
 
@@ -93,8 +93,8 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center bg-red-950/15 border-2 border-red-900/40 rounded-3xl p-6 h-full space-y-4 shadow-2xl">
             <SOSButton />
             <div className="text-center">
-              <p className="text-red-400 font-black text-lg tracking-tight uppercase">HOLD FOR SOS</p>
-              <p className="text-gray-500 text-[10px] leading-relaxed">Triple press volume keys or shake to trigger crash alert</p>
+              <p className="text-red-400 font-black text-lg tracking-tight uppercase">{t('carMode.holdForSos', 'HOLD FOR SOS')}</p>
+              <p className="text-gray-500 text-[10px] leading-relaxed">{t('carMode.triggerTip', 'Triple press volume keys or shake to trigger crash alert')}</p>
             </div>
           </div>
 
@@ -103,7 +103,7 @@ export default function HomePage() {
             <Link href="/map" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
               <div className="flex items-center gap-4">
                 <Map size={28} className="text-blue-400" />
-                <span className="text-base font-black tracking-wider uppercase">Emergency Map</span>
+                <span className="text-base font-black tracking-wider uppercase">{t('map.title', 'Emergency Map')}</span>
               </div>
               <ChevronRight size={18} className="text-gray-600" />
             </Link>
@@ -111,7 +111,7 @@ export default function HomePage() {
             <a href="tel:112" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
               <div className="flex items-center gap-4">
                 <Phone size={28} className="text-emerald-400" />
-                <span className="text-base font-black tracking-wider uppercase">Call 112 Help</span>
+                <span className="text-base font-black tracking-wider uppercase">{t('carMode.callHelp', 'Call 112 Help')}</span>
               </div>
               <ChevronRight size={18} className="text-gray-600" />
             </a>
@@ -119,7 +119,7 @@ export default function HomePage() {
             <Link href="/chat" className="flex items-center justify-between bg-gray-900 border border-gray-850 rounded-2xl px-6 py-4 hover:border-gray-650 transition-colors active:scale-98 shadow">
               <div className="flex items-center gap-4">
                 <MessageSquare size={28} className="text-amber-400" />
-                <span className="text-base font-black tracking-wider uppercase">Voice Chatbot</span>
+                <span className="text-base font-black tracking-wider uppercase">{t('carMode.voiceChatbot', 'Voice Chatbot')}</span>
               </div>
               <ChevronRight size={18} className="text-gray-600" />
             </Link>
@@ -128,7 +128,7 @@ export default function HomePage() {
 
         {/* Footer warning bar */}
         <div className="bg-yellow-950/15 border border-yellow-900/30 rounded-2xl px-4 py-2.5 text-center text-[10px] text-yellow-500 font-bold uppercase tracking-tight shrink-0">
-          ⚠️ Say &quot;Hey Emergency&quot; anytime for hand-free safety. Focus on driving.
+          {t('carMode.safetyWarning', '⚠️ Say "Hey Emergency" anytime for hand-free safety. Focus on driving.')}
         </div>
       </div>
     );
@@ -140,7 +140,7 @@ export default function HomePage() {
       {!online && (
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 bg-yellow-800 text-yellow-100 py-2 text-sm font-medium">
           <WifiOff size={14} />
-          Offline — Limited features available
+          {t('errors.offlineBanner', 'Offline — Limited features available')}
         </div>
       )}
 
@@ -149,15 +149,15 @@ export default function HomePage() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Shield size={20} className="text-red-500" />
-            <h1 className="text-xl font-black tracking-tight text-white">{t('appName')}</h1>
+            <h1 className="text-xl font-black tracking-tight text-white">{t('appName', 'ROADSoS')}</h1>
           </div>
-          <p className="text-gray-500 text-xs">{t('appSubtitle')}</p>
+          <p className="text-gray-500 text-xs">{t('appSubtitle', 'AI Emergency Response & SOS')}</p>
         </div>
         <div className="flex items-center gap-2.5">
           {online ? (
-            <span className="flex items-center gap-1 text-green-400 text-xs"><Wifi size={12} /> Live</span>
+            <span className="flex items-center gap-1 text-green-400 text-xs"><Wifi size={12} /> {t('status.live', 'Live')}</span>
           ) : (
-            <span className="flex items-center gap-1 text-yellow-400 text-xs"><WifiOff size={12} /> Offline</span>
+            <span className="flex items-center gap-1 text-yellow-400 text-xs"><WifiOff size={12} /> {t('status.offline', 'Offline')}</span>
           )}
           <HeaderControls />
         </div>
@@ -183,10 +183,10 @@ export default function HomePage() {
               }`}
             >
               <p className="font-bold text-sm">
-                {status === 'countdown' ? t('sosActivating') :
-                 status === 'active' ? t('sosActive') :
-                 status === 'acknowledged' ? t('helpOnWay') :
-                 status === 'resolved' ? t('allClear') : ''}
+                {status === 'countdown' ? t('sos.sosActivating') :
+                 status === 'active' ? t('sos.sosActive') :
+                 status === 'acknowledged' ? t('sos.helpOnWay') :
+                 status === 'resolved' ? t('sos.allClear') : ''}
               </p>
               {location && <p className="text-xs mt-1 opacity-80 truncate">{location.address}</p>}
             </motion.div>
@@ -195,15 +195,15 @@ export default function HomePage() {
           <SOSButton />
 
           <div className="text-center">
-            <p className="text-gray-400 text-sm font-medium">{t('holdToActivate')}</p>
-            <p className="text-gray-600 text-xs mt-0.5">{t('orVoiceCommand')}</p>
+            <p className="text-gray-400 text-sm font-medium">{t('sos.holdToActivate', 'Hold 3 seconds or triple-press')}</p>
+            <p className="text-gray-600 text-xs mt-0.5">{t('sos.orVoiceCommand', 'Or say "Hey Emergency, send SOS"')}</p>
           </div>
         </motion.div>
       </section>
 
       {/* Emergency Numbers */}
       <section className="px-5 mb-6">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('quickDial')}</h2>
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('quickDial', 'Quick Dial')}</h2>
         <div className="grid grid-cols-4 gap-2">
           {EMERGENCY_NUMBERS.map((num) => (
             <a
@@ -212,7 +212,7 @@ export default function HomePage() {
               className="flex flex-col items-center gap-1 bg-gray-900 border border-gray-800 rounded-2xl py-3 hover:border-gray-600 transition-colors active:scale-95"
             >
               <span className={`font-black text-2xl ${num.cls}`}>{num.number}</span>
-              <span className="text-[9px] text-gray-500 text-center leading-tight">{num.label}</span>
+              <span className="text-[9px] text-gray-500 text-center leading-tight">{t(`emergency.numbers.${num.number}`, num.label)}</span>
             </a>
           ))}
         </div>
@@ -220,7 +220,7 @@ export default function HomePage() {
 
       {/* Quick Links */}
       <section className="px-5">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('features')}</h2>
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('features', 'Features')}</h2>
         <div className="space-y-2">
           {quickLinksTranslated.map(({ href, icon: Icon, label, desc, iconCls, bgCls }) => (
             <Link key={href} href={href}>
