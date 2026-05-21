@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Apple from 'next-auth/providers/apple';
+import Credentials from 'next-auth/providers/credentials';
 import { createAdminClient } from '@/lib/supabase/client';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -12,6 +13,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Apple({
       clientId: process.env.APPLE_ID || 'mock-apple-client-id',
       clientSecret: process.env.APPLE_SECRET || 'mock-apple-client-secret',
+    }),
+    Credentials({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email) return null;
+        return {
+          id: `dev-user-${Date.now()}`,
+          name: 'Developer User',
+          email: credentials.email as string,
+          image: 'https://ui-avatars.com/api/?name=Developer+User&background=random',
+        };
+      },
     }),
   ],
   callbacks: {

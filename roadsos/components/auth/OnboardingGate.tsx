@@ -106,18 +106,32 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
     }
   }, [status, pathname]);
 
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error('Please enter both email and password');
       return;
     }
     setLoadingCredentials(true);
-    // Credentials provider is not configured in auth.ts, so this acts as a beautiful premium mock signup/login flow
-    setTimeout(() => {
+    
+    try {
+      const res = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+      
+      if (res?.error) {
+        toast.error('Invalid credentials');
+        setLoadingCredentials(false);
+      } else {
+        toast.success('Logged in successfully');
+        window.location.reload();
+      }
+    } catch (err) {
+      toast.error('An error occurred during sign in');
       setLoadingCredentials(false);
-      toast.info('Credential sign-in is mocked. Please use Google or Apple to sign in securely.');
-    }, 1200);
+    }
   };
 
   // 1. Loading state
@@ -261,7 +275,7 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
           </form>
 
           <div className="mt-6 text-sm text-gray-400">
-            Don't have an account? <button className="text-orange-500 font-bold hover:underline">Create account</button>
+            Don't have an account? <button type="button" onClick={() => toast.info('For development, just type any email/password and click Sign In!')} className="text-orange-500 font-bold hover:underline">Create account</button>
           </div>
         </motion.div>
       </div>
