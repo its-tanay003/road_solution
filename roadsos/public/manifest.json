@@ -3,7 +3,7 @@
   "short_name": "ROADSoS",
   "description": "AI-Powered Emergency Response & SOS Lifeline",
   "start_url": "/?utm_source=pwa",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#09090b",
   "theme_color": "#dc2626",
   "orientation": "any",
@@ -39,6 +39,12 @@
       "name": "AI Chatbot",
       "url": "/chat",
       "description": "Consult AI medical companion",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Automotive Mode",
+      "url": "/?automotive=1",
+      "description": "Launch CarPlay / Android Auto interface",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],

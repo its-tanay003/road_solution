@@ -9,6 +9,8 @@ import { VoiceCommands } from '@/components/voice/VoiceCommands';
 import { SensorWatcher } from '@/components/sensors/SensorWatcher';
 import { CrashDetection } from '@/components/sensors/CrashDetection';
 import { Toaster } from '@/components/ui/sonner';
+import { AutomotiveLayout } from '@/components/AutomotiveLayout';
+import { VoiceNavigator } from '@/components/VoiceNavigator';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -43,22 +45,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.variable} font-sans bg-gray-950 text-white antialiased transition-colors duration-300`}>
         <Providers>
-          {/* Global overlays */}
-          <PanicMode />
-          <VoiceCommands />
-          <SensorWatcher />
-          <CrashDetection />
-          <ChatWidget />
-          <Toaster position="top-center" richColors />
+          <AutomotiveLayout>
+            {/* Global overlays */}
+            <PanicMode />
+            <VoiceCommands />
+            <SensorWatcher />
+            <CrashDetection />
+            <ChatWidget />
+            <VoiceNavigator />
+            <Toaster position="top-center" richColors />
 
-          {/* Page content */}
-          <main className="min-h-screen">{children}</main>
+            {/* Page content */}
+            <main className="min-h-screen">{children}</main>
 
-          {/* Persistent bottom nav */}
-          <BottomNav />
+            {/* Persistent bottom nav */}
+            <BottomNav />
+          </AutomotiveLayout>
         </Providers>
       </body>
     </html>
   );
 }
+
 
