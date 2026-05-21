@@ -2,10 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  // @ts-ignore
+  allowedDevOrigins: ['192.168.137.1'],
   serverExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000'],
+      allowedOrigins: ['localhost:3000', '192.168.137.1:3000'],
     },
   },
   typescript: {
