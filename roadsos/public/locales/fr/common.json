@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "map": "Carte d'Urgence",
+    "chat": "Assistant IA",
+    "settings": "Paramètres",
+    "emergency": "Premiers Secours"
+  },
+  "sos": {
+    "holdToActivate": "Maintenir 3 secondes ou appuyer 3 fois",
+    "orVoiceCommand": "Ou dites \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 SOS en cours d’activation…",
+    "sosActive": "🔴 SOS ACTIF — Secours alertés",
+    "helpOnWay": "🚑 Les secours arrivent",
+    "allClear": "✅ Signal levé — Vous êtes en sécurité",
+    "cancelSos": "Annuler le SOS",
+    "responderEta": "Heure d'arrivée prévue",
+    "imSafe": "✅ Je suis en sécurité — Annuler"
+  },
+  "map": {
+    "title": "Carte d'Urgence",
+    "nearbyHospitals": "Hôpitaux et services à proximité",
+    "searchPlaceholder": "Rechercher des secours..."
+  },
+  "chat": {
+    "title": "Assistant IA",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "Demander des conseils d'urgence...",
+    "voiceFeedbackActive": "Commandes vocales actives. Dites \"Hey Emergency\" puis la commande.",
+    "listening": "Écoute en cours…"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "desc": "Profil & préférences",
+    "language": "Langue",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "themeSystem": "Système",
+    "personalInfo": "Informations Personnelles",
+    "medicalProfile": "Profil Médical",
+    "emergencyContacts": "Contacts d'Urgence",
+    "onboardingStatus": "Statut de l'inscription"
+  },
+  "emergency": {
+    "title": "Guides d'Urgence",
+    "firstAid": "Premiers Secours",
+    "firstAidDesc": "Guides étape par étape",
+    "services": "Numéros d'Urgence",
+    "servicesDesc": "Lignes d'urgence directes"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "fieldRequired": "Ce champ est requis",
+    "invalidPhone": "Numéro de téléphone invalide",
+    "permissionDenied": "L'autorisation a été refusée."
+  },
+  "buttons": {
+    "continue": "Continuer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "skip": "Passer",
+    "allow": "Autoriser l'accès"
+  }
+}

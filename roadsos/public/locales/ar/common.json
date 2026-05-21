@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "map": "خريطة الطوارئ",
+    "chat": "مساعد ذكاء اصطناعي",
+    "settings": "الإعدادات",
+    "emergency": "دليل الإسعافات"
+  },
+  "sos": {
+    "holdToActivate": "اضغط لمدة 3 ثوانٍ أو 3 ضغطات متتالية",
+    "orVoiceCommand": "أو قل \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 جاري تفعيل استغاثة SOS…",
+    "sosActive": "🔴 استغاثة SOS نشطة — تم إخطار المساعدة",
+    "helpOnWay": "🚑 المساعدة في الطريق إليك",
+    "allClear": "✅ انتهى الخطر — أنت في أمان",
+    "cancelSos": "إلغاء استغاثة SOS",
+    "responderEta": "وقت الوصول المتوقع",
+    "imSafe": "✅ أنا في أمان — إلغاء"
+  },
+  "map": {
+    "title": "خريطة الطوارئ",
+    "nearbyHospitals": "المستشفيات والخدمات المجاورة",
+    "searchPlaceholder": "البحث عن أقرب مساعدة..."
+  },
+  "chat": {
+    "title": "المساعد الذكي",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "طلب إرشادات الطوارئ...",
+    "voiceFeedbackActive": "الأوامر الصوتية نشطة. قل \"Hey Emergency\" متبوعًا بالأمر.",
+    "listening": "جاري الاستماع…"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "desc": "الملف الشخصي والتفضيلات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "themeLight": "فاتح",
+    "themeDark": "داكن",
+    "themeSystem": "تلقائي",
+    "personalInfo": "المعلومات الشخصية",
+    "medicalProfile": "الملف الطبي",
+    "emergencyContacts": "جهات اتصال الطوارئ",
+    "onboardingStatus": "حالة الإعداد"
+  },
+  "emergency": {
+    "title": "أدلة الطوارئ",
+    "firstAid": "الإسعافات الأولية",
+    "firstAidDesc": "دلائل خطوة بخطوة",
+    "services": "أرقام الطوارئ",
+    "servicesDesc": "خطوط الطوارئ المباشرة"
+  },
+  "errors": {
+    "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "fieldRequired": "هذا الحقل مطلوب",
+    "invalidPhone": "رقم الهاتف غير صالح",
+    "permissionDenied": "تم رفض الإذن."
+  },
+  "buttons": {
+    "continue": "متابعة",
+    "save": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "skip": "تخطي",
+    "allow": "سماح بالوصول"
+  }
+}

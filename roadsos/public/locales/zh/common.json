@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "首页",
+    "map": "救援地图",
+    "chat": "AI助手",
+    "settings": "设置",
+    "emergency": "急救指南"
+  },
+  "sos": {
+    "holdToActivate": "长按 3 秒或连按三次启动 SOS",
+    "orVoiceCommand": "或说 \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 SOS 正在启动…",
+    "sosActive": "🔴 SOS 已启动 — 已通知救援人员",
+    "helpOnWay": "🚑 救援人员正在路上",
+    "allClear": "✅ 解除警报 — 您已安全",
+    "cancelSos": "取消 SOS",
+    "responderEta": "救援预计到达时间",
+    "imSafe": "✅ 我很安全 — 取消警报"
+  },
+  "map": {
+    "title": "应急地图",
+    "nearbyHospitals": "附近的医院和应急机构",
+    "searchPlaceholder": "搜索最近的帮助..."
+  },
+  "chat": {
+    "title": "AI 紧急助手",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "请咨询紧急指南或急救知识...",
+    "voiceFeedbackActive": "语音指令已激活。请说 \"Hey Emergency\" 并下达指令。",
+    "listening": "正在聆听…"
+  },
+  "settings": {
+    "title": "设置",
+    "desc": "个人资料与偏好",
+    "language": "语言",
+    "theme": "主题",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "themeSystem": "跟随系统",
+    "personalInfo": "个人资料",
+    "medicalProfile": "医疗健康档案",
+    "emergencyContacts": "紧急联系人",
+    "onboardingStatus": "初始化进度"
+  },
+  "emergency": {
+    "title": "应急自救指南",
+    "firstAid": "急救常识",
+    "firstAidDesc": "详细的分步应急步骤",
+    "services": "应急求助电话",
+    "servicesDesc": "直拨应急救援电话"
+  },
+  "errors": {
+    "generic": "出错了，请稍后重试。",
+    "fieldRequired": "此项为必填项",
+    "invalidPhone": "无效的电话号码",
+    "permissionDenied": "权限请求被拒绝。"
+  },
+  "buttons": {
+    "continue": "继续",
+    "save": "保存修改",
+    "cancel": "取消",
+    "skip": "跳过",
+    "allow": "允许访问"
+  }
+}

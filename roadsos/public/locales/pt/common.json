@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "home": "Início",
+    "map": "Mapa de Emergência",
+    "chat": "Assistente de IA",
+    "settings": "Configurações",
+    "emergency": "Primeiros Socorros"
+  },
+  "sos": {
+    "holdToActivate": "Pressione por 3 segundos ou toque 3 vezes",
+    "orVoiceCommand": "Ou diga \"Hey Emergency, send SOS\"",
+    "sosActivating": "🚨 SOS Ativando…",
+    "sosActive": "🔴 SOS ATIVO — Socorro notificado",
+    "helpOnWay": "🚑 O socorro está a caminho",
+    "allClear": "✅ Tudo limpo — Você está seguro",
+    "cancelSos": "Cancelar SOS",
+    "responderEta": "Tempo de chegada do socorro",
+    "imSafe": "✅ Estou seguro — Cancelar"
+  },
+  "map": {
+    "title": "Mapa de Emergência",
+    "nearbyHospitals": "Hospitais e serviços próximos",
+    "searchPlaceholder": "Buscar ajuda próxima..."
+  },
+  "chat": {
+    "title": "Assistente de IA",
+    "desc": "Claude · Gemini · ChatGPT",
+    "placeholder": "Peça orientações de emergência...",
+    "voiceFeedbackActive": "Comandos de voz ativos. Diga \"Hey Emergency\" seguido do comando.",
+    "listening": "Ouvindo…"
+  },
+  "settings": {
+    "title": "Configurações",
+    "desc": "Perfil & preferências",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "themeSystem": "Sistema",
+    "personalInfo": "Informações Pessoais",
+    "medicalProfile": "Perfil Médico",
+    "emergencyContacts": "Contatos de Emergência",
+    "onboardingStatus": "Status do Registro"
+  },
+  "emergency": {
+    "title": "Guias de Emergência",
+    "firstAid": "Primeiros Socorros",
+    "firstAidDesc": "Guias passo a passo",
+    "services": "Números de Emergência",
+    "servicesDesc": "Linhas de emergência diretas"
+  },
+  "errors": {
+    "generic": "Ocorreu um erro. Tente novamente.",
+    "fieldRequired": "Este campo é obrigatório",
+    "invalidPhone": "Número de telefone inválido",
+    "permissionDenied": "Permissão negada."
+  },
+  "buttons": {
+    "continue": "Continuar",
+    "save": "Salvar Alterações",
+    "cancel": "Cancelar",
+    "skip": "Pular",
+    "allow": "Permitir Acesso"
+  }
+}
