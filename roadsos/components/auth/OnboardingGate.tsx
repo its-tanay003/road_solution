@@ -18,8 +18,8 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
   const [loadingCredentials, setLoadingCredentials] = useState(false);
 
   const checkProfile = async () => {
-    // Skip checks for admin routes
-    if (pathname && pathname.startsWith('/admin')) {
+    // Skip checks for admin and control room routes
+    if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/control-room'))) {
       setCheckingProfile(false);
       return;
     }
@@ -132,7 +132,7 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
   }
 
   // 2. Unauthenticated state - Premium Gateway Page
-  if (status === 'unauthenticated' && !(pathname && pathname.startsWith('/admin'))) {
+  if (status === 'unauthenticated' && !(pathname && (pathname.startsWith('/admin') || pathname.startsWith('/control-room')))) {
     return (
       <div className="min-h-screen w-full bg-gray-950 flex flex-col justify-center items-center p-4 relative overflow-y-auto">
         {/* Decorative ambient light */}

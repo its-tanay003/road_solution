@@ -224,6 +224,67 @@ export function VoiceCommands() {
     };
   }, [listening, i18n.language, isWhisperRecording, processTranscript]);
 
+  // Background SpeechRecognition Listener for passive "send sos" detection
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const w = window as any;
+    if (!w.SpeechRecognition && !w.webkitSpeechRecognition) return;
+
+    const SpeechRecognitionClass = w.SpeechRecognition || w.webkitSpeechRecognition;
+    const bgRecognition = new SpeechRecognitionClass();
+    bgRecognition.continuous = true;
+    bgRecognition.interimResults = true;
+    bgRecognition.lang = 'en-US';
+
+    let active = true;
+
+    bgRecognition.onresult = (e: any) => {
+      if (!active) return;
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const result = e.results[i];
+        const text = result[0].transcript.toLowerCase();
+        if (
+          text.includes('send sos') ||
+          text.includes('activate sos') ||
+          text.includes('activate panic mode') ||
+          text.includes('panic mode')
+        ) {
+          console.warn('[Voice] Background voice command SOS detected:', text);
+          arm('voice');
+          speak(t('SOS activated by voice command'));
+          break;
+        }
+      }
+    };
+
+    bgRecognition.onerror = (err: any) => {
+      // Ignore normal silent speech timeouts
+    };
+
+    bgRecognition.onend = () => {
+      if (active && !listening && !isWhisperRecording) {
+        try {
+          bgRecognition.start();
+        } catch {}
+      }
+    };
+
+    if (!listening && !isWhisperRecording) {
+      try {
+        bgRecognition.start();
+      } catch (e) {
+        console.debug('[Voice] Could not start background listener:', e);
+      }
+    }
+
+    return () => {
+      active = false;
+      try {
+        bgRecognition.stop();
+      } catch {}
+    };
+  }, [listening, isWhisperRecording, arm, speak, t]);
+
   const toggleListening = () => {
     if (listening) {
       if (recognitionRef.current) {
