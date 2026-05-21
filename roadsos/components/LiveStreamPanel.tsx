@@ -13,7 +13,9 @@ interface LiveStreamPanelProps {
   onStop?: () => void;
 }
 
-export function LiveStreamPanel({ stream = null, peers = {}, onStop }: LiveStreamPanelProps) {
+const EMPTY_PEERS = {};
+
+export function LiveStreamPanel({ stream = null, peers = EMPTY_PEERS, onStop }: LiveStreamPanelProps) {
   const { incidentId, location, telemetryData } = useSOSStore();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';

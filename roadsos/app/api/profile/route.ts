@@ -2,22 +2,38 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { createAdminClient } from '@/lib/supabase/client';
 
+function generateUUID(input: string) {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash << 5) - hash + input.charCodeAt(i);
+    hash = hash & hash;
+  }
+  const hex = Math.abs(hash).toString(16).padStart(8, '0');
+  return `${hex}-0000-4000-a000-000000000000`;
+}
+
+function ensureUUID(id: string, fallbackInput?: string | null) {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(id)) return id;
+  return generateUUID(fallbackInput || id);
+}
+
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const userId = ensureUUID(session.user.id, session.user.email);
   const adminDb = createAdminClient();
   if (!adminDb) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }
 
   try {
-    // 1. Get profile from public.users
+    // 1. Get profile from public.profiles
     const { data: profile, error: profileError } = await adminDb
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -31,7 +47,7 @@ export async function GET(req: NextRequest) {
       .from('emergency_contacts')
       .select('*')
       .eq('user_id', userId)
-      .order('sort_order', { ascending: true });
+      .order('created_at', { ascending: true });
 
     if (contactsError) {
       return NextResponse.json({ error: contactsError.message }, { status: 500 });
@@ -52,7 +68,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const userId = ensureUUID(session.user.id, session.user.email);
   const body = await req.json();
   const { name, phone, bloodGroup, conditions, allergies, address, contacts, dob } = body;
 
@@ -83,7 +99,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Upsert user profile in public.users
+    // 2. Upsert user profile in public.profiles
     const parsedConditions = Array.isArray(conditions)
       ? conditions
       : typeof conditions === 'string'
@@ -97,16 +113,18 @@ export async function POST(req: NextRequest) {
         : [];
 
     const { error: userError } = await adminDb
-      .from('users')
+      .from('profiles')
       .upsert({
         id: userId,
-        full_name: name || session.user.name || 'User',
+        name: name || session.user.name || 'User',
         phone: phone || null,
-        blood_group: bloodGroup || 'Unknown',
-        medical_conditions: parsedConditions,
-        allergies: parsedAllergies,
-        date_of_birth: dob || null,
-        home_address: address || null,
+        medical_data: {
+          blood_group: bloodGroup || 'Unknown',
+          medical_conditions: parsedConditions,
+          allergies: parsedAllergies,
+          date_of_birth: dob || null,
+          home_address: address || null,
+        },
         updated_at: new Date().toISOString()
       });
 
@@ -133,10 +151,7 @@ export async function POST(req: NextRequest) {
           name: c.name,
           phone: c.phone,
           relationship: c.relationship || c.relation || 'Emergency Contact',
-          sort_order: index,
-          notify_via_sms: true,
-          notify_via_whatsapp: true,
-          notify_via_email: false
+          is_primary: index === 0
         }));
 
         const { error: contactsError } = await adminDb

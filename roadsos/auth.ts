@@ -4,6 +4,16 @@ import Apple from 'next-auth/providers/apple';
 import Credentials from 'next-auth/providers/credentials';
 import { createAdminClient } from '@/lib/supabase/client';
 
+function generateUUID(input: string) {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash << 5) - hash + input.charCodeAt(i);
+    hash = hash & hash;
+  }
+  const hex = Math.abs(hash).toString(16).padStart(8, '0');
+  return `${hex}-0000-4000-a000-000000000000`;
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
@@ -23,7 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email) return null;
         return {
-          id: `dev-user-${Date.now()}`,
+          id: generateUUID(credentials.email as string),
           name: 'Developer User',
           email: credentials.email as string,
           image: 'https://ui-avatars.com/api/?name=Developer+User&background=random',
@@ -34,6 +44,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (!user.id) return true;
+      const uuid = generateUUID(user.email || user.id);
+      user.id = uuid;
+      
       const adminDb = createAdminClient();
       if (!adminDb) {
         console.warn('[NextAuth] Supabase admin client not configured during signIn callback');
@@ -41,13 +54,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       try {
         const { error } = await adminDb
-          .from('users')
+          .from('profiles')
           .upsert({
             id: user.id,
-            full_name: user.name || 'User',
+            name: user.name || 'User',
             email: user.email || null,
-            profile_photo_url: user.image || null,
-            provider: account?.provider || 'oauth',
+            avatar_url: user.image || null,
             updated_at: new Date().toISOString()
           });
 
@@ -67,7 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub || (token.id as string);
+        session.user.id = (token.id as string) || (token.sub as string);
       }
       return session;
     },
