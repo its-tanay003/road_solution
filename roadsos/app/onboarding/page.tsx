@@ -171,7 +171,12 @@ export default function OnboardingPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to save onboarding details to server');
+        let errorMessage = 'Failed to save onboarding details to server';
+        try {
+          const errorData = await res.json();
+          if (errorData.error) errorMessage = errorData.error;
+        } catch (e) {}
+        throw new Error(errorMessage);
       }
 
       toast.success('Onboarding complete! Your profile is secured.');
