@@ -1,12 +1,14 @@
 {
-  "name": "roadsos",
+  "name": "roadsos-monorepo",
   "version": "1.0.0",
-  "description": "ROADSoS Emergency Intelligence Platform",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
-    "build": "npm run build --prefix frontend",
-    "install-all": "npm install && npm install --prefix frontend --legacy-peer-deps && npm install --prefix backend"
+    "dev": "npm run dev --prefix roadsos",
+    "dev:all": "concurrently \"npm run dev --prefix roadsos\" \"npm run dev --prefix backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix roadsos",
+    "start": "npm run start --prefix roadsos",
+    "install:all": "npm install && npm install --prefix roadsos && npm install --prefix backend"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
