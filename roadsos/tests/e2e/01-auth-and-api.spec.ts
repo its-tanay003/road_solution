@@ -9,8 +9,8 @@ test.describe('Authentication', () => {
     await expect(page.locator('text=ROADSoS')).toBeVisible();
     await expect(page.locator('button:has-text("Continue with Google")')).toBeVisible();
     await expect(page.locator('button:has-text("Continue with Apple")')).toBeVisible();
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('input[type="email"]')).toHaveCount(0);
+    await expect(page.locator('input[type="password"]')).toHaveCount(0);
   });
 
   test('protected route /control-room redirects to login', async ({ page }) => {

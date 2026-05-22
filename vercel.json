@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "npm run build --prefix roadsos",
+  "outputDirectory": "roadsos/.next",
+  "installCommand": "npm ci --prefix roadsos",
+  "devCommand": "npm run dev --prefix roadsos"
+}

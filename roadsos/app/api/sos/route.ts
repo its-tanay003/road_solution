@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { createAdminClient } from '@/lib/supabase/client';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 interface SOSBody {
   incidentId: string;
@@ -15,6 +16,9 @@ interface SOSBody {
 }
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'sos:create', limit: 5, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   // Auth guard
   const session = await auth();
   if (!session?.user?.id) {
@@ -24,6 +28,10 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json() as SOSBody;
   const { incidentId, lat, lng, address, batteryLevel, networkType, emergencyType = 'road_crash', triggerType = 'manual', emergencyContacts = [] } = body;
+
+  if (!incidentId || typeof lat !== 'number' || typeof lng !== 'number' || !address) {
+    return NextResponse.json({ error: 'incidentId, lat, lng, and address are required' }, { status: 400 });
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
   const supabaseConfigured = supabaseUrl.length > 0 && !supabaseUrl.includes('your-project');
@@ -55,7 +63,7 @@ export async function POST(req: NextRequest) {
   const twilioSid = process.env.TWILIO_ACCOUNT_SID ?? '';
   const twilioToken = process.env.TWILIO_AUTH_TOKEN ?? '';
   const twilioFrom = process.env.TWILIO_PHONE_NUMBER ?? '';
-  let smsStatus: 'sent' | 'stub' | 'failed' = 'stub';
+  let smsStatus: 'sent' | 'not_configured' | 'failed' = 'not_configured';
 
   // Fetch contacts from DB if not provided in body
   let contactsToNotify = emergencyContacts;

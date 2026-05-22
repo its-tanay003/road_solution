@@ -1,5 +1,6 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 interface TriageMessage {
   role: 'user' | 'assistant' | 'system';
@@ -7,6 +8,9 @@ interface TriageMessage {
 }
 
 export async function POST(req: Request) {
+  const limit = checkRateLimit(req, { keyPrefix: 'ai:triage', limit: 30, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   try {
     const body = await req.json() as {
       messages: TriageMessage[];

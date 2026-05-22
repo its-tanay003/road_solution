@@ -1,17 +1,8 @@
 import type { NextConfig } from "next";
-import withPWAInit from '@ducanh2912/next-pwa';
-
-const withPWA = withPWAInit({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-  buildExcludes: [/middleware-manifest\.json$/],
-});
+import path from 'node:path';
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: require('path').resolve(__dirname, '..'),
-  // @ts-ignore
+  outputFileTracingRoot: path.resolve(process.cwd(), '..'),
   allowedDevOrigins: ['192.168.137.1'],
   serverExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
   experimental: {
@@ -37,4 +28,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;

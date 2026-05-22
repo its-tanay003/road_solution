@@ -13,17 +13,25 @@ function generateUUID(input: string) {
   return `${hex}-0000-4000-a000-000000000000`;
 }
 
+const providers = [];
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  providers.push(Google({
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  }));
+}
+
+if (process.env.APPLE_ID && process.env.APPLE_SECRET) {
+  providers.push(Apple({
+    clientId: process.env.APPLE_ID,
+    clientSecret: process.env.APPLE_SECRET,
+  }));
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID || 'mock-google-client-id',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'mock-google-client-secret',
-    }),
-    Apple({
-      clientId: process.env.APPLE_ID || 'mock-apple-client-id',
-      clientSecret: process.env.APPLE_SECRET || 'mock-apple-client-secret',
-    }),
-  ],
+  providers,
+  trustHost: true,
   callbacks: {
     async signIn({ user, account }) {
       if (!user.id) return true;
@@ -67,5 +75,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-dev-only-change-this-in-production-12345678',
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 });

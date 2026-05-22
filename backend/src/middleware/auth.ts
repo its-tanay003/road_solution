@@ -6,8 +6,6 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET ?? 'roadsos_dev_secret_change_in_production';
-
 /**
  * Middleware: Require a valid Bearer JWT to access a route.
  */

@@ -101,37 +101,27 @@ app.use('/auth', authRateLimiter, authRouter);
 app.post('/api/auth/send-otp', async (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: 'Phone number required' });
-  
-  // In demo mode, we just return success
-  console.log(`[DEMO] Sending OTP to ${phone}`);
-  res.json({ success: true, message: 'OTP sent successfully' });
+
+  res.status(501).json({
+    error: 'Phone OTP is not configured on the legacy backend. Use the ROADSoS NextAuth/Supabase auth flow.',
+  });
 });
 
 app.post('/api/auth/verify-otp', async (req, res) => {
   const { phone, otp } = req.body;
   if (!phone || !otp) return res.status(400).json({ error: 'Phone and OTP required' });
-  
-  // In demo mode, any 6-digit OTP works
-  if (otp.length === 6) {
-    res.json({ 
-      success: true, 
-      token: 'demo-token-' + Date.now(),
-      user: { phone, name: 'Verified User', provider: 'phone' } 
-    });
-  } else {
-    res.status(400).json({ error: 'Invalid OTP' });
-  }
+
+  res.status(501).json({
+    error: 'Phone OTP verification is not configured on the legacy backend. Use the ROADSoS NextAuth/Supabase auth flow.',
+  });
 });
 
 app.post('/api/auth/email', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-  
-  // Mock login/registration
-  res.json({ 
-    success: true, 
-    token: 'demo-email-token-' + Date.now(),
-    user: { email, name: email.split('@')[0], provider: 'email' } 
+
+  res.status(501).json({
+    error: 'Email/password auth is not configured on the legacy backend. Use the ROADSoS NextAuth/Supabase auth flow.',
   });
 });
 
@@ -141,7 +131,7 @@ const bystanderReportLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
 
 // --- Data Erasure (DPDP Compliance) ---
 app.delete('/api/user/data', requireAuth, async (req, res) => {
-  const userId = (req as any).user?.id;
+  const userId = (req as any).userId;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   try {

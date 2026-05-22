@@ -1,6 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { NextRequest } from 'next/server';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export const runtime = 'edge';
 export const maxDuration = 30;
@@ -11,6 +12,9 @@ Emergency numbers (India): 112 (universal), 108 (ambulance), 100 (police), 101 (
 Always recommend calling emergency services for life-threatening situations.`;
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'ai:gemini', limit: 30, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   const { messages, systemContext } = await req.json() as {
     messages: { role: 'user' | 'assistant'; content: string }[];
     systemContext?: string;

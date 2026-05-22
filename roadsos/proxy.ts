@@ -1,4 +1,5 @@
 import { auth } from '@/auth';
+import { isAdminSession } from '@/lib/server/authz';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -6,8 +7,10 @@ const PUBLIC_PATHS = [
   '/',
   '/api/auth',
   '/api/nhtsa',
+  '/manifest.json',
   '/_next',
   '/favicon.ico',
+  '/icons',
   '/sw.js',
   '/workbox',
   '/public',
@@ -31,12 +34,9 @@ export async function proxy(request: NextRequest) {
   }
 
   // Admin Role Checks
-  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/control-room');
+  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/control-room') || pathname.startsWith('/api/admin');
   if (isAdminPath) {
-    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase());
-    const userEmail = session.user.email?.toLowerCase();
-    const isAdmin = userEmail && adminEmails.includes(userEmail);
-    if (!isAdmin) {
+    if (!isAdminSession(session)) {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
       }
@@ -61,5 +61,6 @@ export const config = {
     '/api/sos/:path*',
     '/api/profile/:path*',
     '/api/voice/:path*',
+    '/api/admin/:path*',
   ],
 };

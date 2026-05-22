@@ -1,0 +1,25 @@
+{
+  "name": "roadsos-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22 <27",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "npm run dev --prefix roadsos",
+    "dev:all": "concurrently \"npm run dev --prefix roadsos\" \"npm run dev --prefix backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix roadsos",
+    "lint": "npm run lint --prefix roadsos",
+    "typecheck": "npm run typecheck --prefix roadsos",
+    "test:e2e": "npm run test:e2e --prefix roadsos",
+    "audit:prod": "npm run audit:prod --prefix roadsos",
+    "verify": "npm run verify --prefix roadsos",
+    "start": "npm run start --prefix roadsos",
+    "install:all": "npm install && npm install --prefix roadsos && npm install --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

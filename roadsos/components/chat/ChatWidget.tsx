@@ -387,7 +387,7 @@ export function ChatWidget() {
       ctx.stroke();
 
       // Configure waves according to status
-      let waveCount = 3;
+      const waveCount = 3;
       let amplitude = 12;
       let speed = 0.08;
       let color = '59, 130, 246'; // blue default (Gemini)
