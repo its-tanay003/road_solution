@@ -81,7 +81,7 @@ A dedicated workflow empowering untrained bystanders to assist effectively durin
 
 ### 5. Resilient Architecture & Deployment
 
-* **Multi-Service Vercel Deployment**: Configured via an `experimentalServices` `vercel.json` file to independently route and scale the Vite frontend (`/`) and the Node.js backend (`/_/backend`) within a monorepo.
+* **Unified Next.js App Router Deployment**: Configured via Vercel to independently route and scale serverless API routes and the frontend within a unified Next.js architecture.
 * **Mesh Mode Simulation**: P2P communication logic designed as a fallback for internet-deprived or rural environments.
 * **Offline-First PWA**: Service Worker integration for sub-second UI responsiveness and map caching even in unstable network conditions.
 
@@ -124,25 +124,27 @@ ROADSoS is engineered for multi-agency interoperability, ensuring that emergency
 
 The platform has undergone rigorous production hardening to ensure zero-error builds and reliable real-time performance.
 
-* **Frontend**: React 19, Vite 8, Tailwind CSS 4, Framer Motion, Leaflet
-* **Backend**: Node.js (Express), Socket.io, Redis, Anthropic SDK
+* **Frontend**: Next.js 14 (App Router), React 19, Tailwind CSS 4, Framer Motion, Leaflet
+* **Backend**: Next.js Serverless API Routes, Supabase, NextAuth v5, Anthropic SDK
 * **Hardening**: Resolved complex TypeScript redeclaration issues, standardized browser/node timer typings, and optimized Tailwind 4 design tokens for production stability.
 * **Intelligence**: Multi-agent consensus core utilizing Claude 3.5 Sonnet for Vision & Triage
 * **Networking**: WebRTC P2P Mesh Fallback
 * **Observability**: Prometheus & Recharts
-* **Deployment**: Vercel (Experimental Multi-Service Monorepo)
+* **Deployment**: Vercel (Next.js Edge/Serverless)
 
 ## 🛠️ Getting Started
 
-1. Clone the repository and install dependencies in both `backend` and `frontend` directories.
-2. Configure your `.env` files. Ensure you provide your `ANTHROPIC_API_KEY`.
-3. To run locally, use the concurrent script from the root:
+1. Clone the repository and install dependencies in the `roadsos` directory.
+2. Configure your `.env.local` file. Ensure you provide your `ANTHROPIC_API_KEY`, Supabase credentials, and Google Maps API Key.
+3. To run locally, use the dev script from the `roadsos` directory:
 
 ```bash
+cd roadsos
+npm install
 npm run dev
 ```
 
-*This starts both the Vite frontend and Node backend simultaneously.*
+*This starts the Next.js development server.*
 
 
-4. Access the demo at `http://localhost:5173`.
+4. Access the demo at `http://localhost:3000`.
