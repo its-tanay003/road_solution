@@ -17,12 +17,15 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public paths
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isPublic = PUBLIC_PATHS.some((p) => p === '/' ? pathname === '/' : pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
   // Check session
   const session = await auth();
   if (!session?.user) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const loginUrl = new URL('/', request.url);
     return NextResponse.redirect(loginUrl);
   }
