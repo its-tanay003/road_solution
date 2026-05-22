@@ -5,36 +5,27 @@
 ROADSoS is a high-stakes, real-world ready Emergency Operating System designed to bridge the gap between accident occurrence and professional rescue. It transforms the "Golden Hour" of emergency response through AI-driven triage, cinematic visual intelligence, and resilient communication architectures.
 
 ## 2. CORE SYSTEM FEATURES
-### A. Intelligent SOS Triggering
-- **Multi-Modal Activation**: Support for manual hardware-simulated triggers and voice-activated SOS ("Emergency Help").
-- **Autonomous Detection**: Simulated G-Force trigger (12.4G) with a 10s consciousness countdown for automatic rescue initiation.
-- **Cinematic Experience**: High-stress visual overlays, heartbeat audio cues, and red-alert UI states.
 
-### B. AI Triage & Decision Core
-- **Claude-Powered Triage**: Real-time conversational AI that assesses victim status, injury severity, and vehicle dynamics.
-- **Decision Transparency**: "AI Thinking" overlay that streams the system's logic (e.g., "Analyzing crash dynamics", "Selecting nearest ALS responder").
-- **Multilingual Support (India Focus)**: Integrated i18next support for **English, Hindi (हिन्दी), and Tamil (தமிழ்)** to ensure localized accessibility.
-- **Regional Compliance (India)**: Simulated integration with India's **112 emergency system** and **iRAD (Integrated Road Accident Database)** for MoRTH-aligned reporting.
+### A. Implemented Features (Live & Functional)
+- **Next.js App Router Architecture**: Production-hardened full-stack framework with Server Components and API Routes.
+- **Supabase Authentication & Database**: Real-world OAuth (Google/Apple) integration with secure session handling and UUID generation.
+- **WebRTC P2P Mesh Fallback**: Functional peer-to-peer communication layer designed to sustain connections when primary network fails.
+- **Offline-First PWA**: Service Worker caching enabled for sub-second UI responsiveness.
+- **Cinematic Experience & UI**: High-stress visual overlays, heartbeat audio cues, and red-alert UI states fully implemented via Tailwind CSS 4 and Framer Motion.
+- **Multilingual Support**: Real i18next support for English, Hindi, and Tamil.
 
-### C. Real-Time Command & Control
-- **Dynamic Dashboard**: High-density view featuring live telemetry, incident timelines, and map-based tracking.
-- **Live Map Integration**: Dark-themed Leaflet maps with custom markers for Hospitals, Police, and Ambulances.
-- **India Black Spot Heatmaps**: iRAD-based risk overlays highlighting high-incident zones across Indian National Highways.
+### B. Simulated Features (For Hackathon/Demo Purposes)
+- **Autonomous G-Force Detection**: Simulated 12.4G trigger with a 10s consciousness countdown (mocked hardware trigger).
+- **108 GVK EMRI Dispatching**: Robust mock engine for dispatching, automating resource assignment, and real-time ETA countdowns.
+- **Drone Recon Dispatch**: Simulated "Recon DR-1" drones with placeholder/simulated video feeds.
+- **Responder AR HUD**: 3D spatial guidance (Three.js) is implemented visually but currently uses simulated routing data.
+- **Pitch Mode & Hotkey Architecture**: Built-in 5-slide immersive pitch deck and demo-controller with time dilation scenarios.
 
-### D. Resilience & Privacy
-- **Mesh Mode Simulation**: P2P communication simulation for internet-deprived or rural environments.
-- **ZK-Medical Encryption**: Client-side AES-GCM encryption for sensitive medical profiles, ensuring privacy during transmission.
-- **Offline-First PWA**: Service Worker integration for sub-second UI responsiveness and map caching.
-
-### E. Tactical Drone & AR Recon
-- **Autonomous Drone Dispatch**: Simulated "Recon DR-1" drones with real-time video feeds for immediate scene assessment.
-- **Responder AR HUD**: 3D spatial guidance (Three.js) for responders, featuring turn-by-turn navigation and impact physics simulation.
-- **Vaahan Dynamic Context**: Real-time victim-vehicle telemetry (insurance, owner, RTO) for responders.
-
-### F. Presentation & Demo Orchestration
-- **Pitch Mode**: Integrated 5-slide immersive pitch deck for rapid hackathon storytelling.
-- **Global Orchestrator**: Centralized demo controller with time dilation (0.5x, 1x, 2x) and internet-kill scenarios.
-- **Hotkey Architecture**: Comprehensive keyboard-driven triggers for foolproof live demonstrations.
+### C. Planned Features (Future Roadmap)
+- **MoRTH iRAD Integration**: Direct API connections to the Integrated Road Accident Database.
+- **112 Emergency System Live Link**: Live bi-directional data flow with state emergency response centers.
+- **ZK-Medical Encryption**: Future migration to Zero-Knowledge AES-GCM encryption for transmission of sensitive medical profiles.
+- **Live Vaahan Telemetry**: Real-time victim-vehicle telemetry via RTO databases.
 
 ## 3. SIH 2026 STRATEGIC EVALUATION LAYERS
 - **Deployment Roadmap**: A dedicated `/roadmap` page outlining a 3-phase national rollout, comprehensive cost models (Infrastructure vs SaaS), and MoRTH integration diagrams.
