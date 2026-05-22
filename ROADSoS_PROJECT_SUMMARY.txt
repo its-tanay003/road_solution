@@ -44,22 +44,22 @@ ROADSoS is a high-stakes, real-world ready Emergency Operating System designed t
 
 ## 4. TECHNICAL ARCHITECTURE
 ### Frontend (The Nerve Center)
-- **Framework**: React 19 + Vite 8.
+- **Framework**: Next.js 14 App Router + React 19.
 - **Styling**: Tailwind CSS 4 + Framer Motion (for cinematic transitions).
 - **3D Visualization**: Three.js for AR navigation and vehicle impact modeling.
 - **State Management**: Zustand with persistent storage.
 
 ### Backend (The Intelligence Core)
-- **Engine**: Node.js (Express) + Socket.io.
-- **Dispatch Simulation**: Robust mock engine for **108 GVK EMRI** dispatching, featuring automated resource assignment and real-time ETA countdowns via WebSockets.
+- **Engine**: Next.js Serverless API Routes + NextAuth v5 + Supabase.
+- **Dispatch Simulation**: Robust mock engine for **108 GVK EMRI** dispatching, featuring automated resource assignment and real-time ETA countdowns.
 - **Notifications**: Integrated WhatsApp alert simulation and iRAD-compliant JSON report generation.
 
 ## 5. STABILITY & PRODUCTION HARDENING
 - **Dependency-Lean Logic**: Replaced unstable third-party plugins (react-hot-toast, chartjs-annotation) with custom, lightweight Framer Motion and CSS solutions to ensure 100% demo uptime.
-- **Type-Safe HMR**: Enforced `import type` for state machines to resolve Vite bundling edge cases.
+- **Type-Safe HMR**: Enforced `import type` for state machines to resolve Next.js Server Component bundling edge cases.
 - **Accessibility Fixes**: Resolved critical missing hook and title attribute lints for a judge-ready presentation.
 
 ---
 **Status**: SIH COMPLIANT / PRODUCTION READY
 **Repository**: its-tanay003/road_solution
-**Build Signature**: Verified stable across Vite 8 and Vercel Multi-Service runtimes.
+**Build Signature**: Verified stable across Next.js 14 and Vercel Serverless runtimes.
