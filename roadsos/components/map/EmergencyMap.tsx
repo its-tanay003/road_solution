@@ -248,7 +248,6 @@ export function EmergencyMap() {
   // Opt-in setting to appear on map during SOS
   const [shareLocationDuringSOS, setShareLocationDuringSOS] = useState<boolean>(true);
 
-  const serviceRef = useRef<google.maps.places.PlacesService | null>(null);
   const { status: sosStatus, location: sosLocation, responder } = useSOSStore();
   const searchParams = useSearchParams();
 
@@ -453,7 +452,6 @@ export function EmergencyMap() {
 
   const onMapLoad = useCallback((m: google.maps.Map) => {
     setMap(m);
-    serviceRef.current = new google.maps.places.PlacesService(m);
   }, []);
 
   // Fetch standard layer places (Google Places and NHTSA Heatmaps)
@@ -477,39 +475,62 @@ export function EmergencyMap() {
       return;
     }
 
-    if (!serviceRef.current) return;
+    if (typeof google === 'undefined' || !google.maps?.places?.Place) return;
 
-    const newPlaces: PlaceResult[] = [];
-    let completedRequests = 0;
+    let active = true;
 
-    layersToFetch.forEach((layerType) => {
-      const cfg = LAYER_CONFIG[layerType];
-      serviceRef.current!.nearbySearch(
-        { location: centerPos, radius: 5000, type: cfg.placeType },
-        (results, status) => {
-          completedRequests++;
-          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            results.slice(0, 8).forEach((r) => {
-              newPlaces.push({
-                id: r.place_id ?? crypto.randomUUID(),
-                name: r.name ?? 'Unknown',
-                lat: r.geometry?.location?.lat() ?? 0,
-                lng: r.geometry?.location?.lng() ?? 0,
-                type: layerType,
-                source: 'google',
-                address: r.vicinity,
-                open: r.opening_hours?.isOpen?.(),
-                rating: r.rating,
+    async function fetchAllLayers() {
+      const newPlaces: PlaceResult[] = [];
+      
+      try {
+        const promises = layersToFetch.map(async (layerType) => {
+          const cfg = LAYER_CONFIG[layerType];
+          const request: google.maps.places.SearchNearbyRequest = {
+            fields: ['id', 'displayName', 'location', 'formattedAddress', 'rating', 'nationalPhoneNumber'],
+            locationRestriction: {
+              center: centerPos!,
+              radius: 5000,
+            },
+            includedTypes: [cfg.placeType],
+            maxResultCount: 8,
+          };
+
+          try {
+            const { places } = await google.maps.places.Place.searchNearby(request);
+            if (places && places.length > 0) {
+              places.forEach((p) => {
+                newPlaces.push({
+                  id: p.id ?? crypto.randomUUID(),
+                  name: p.displayName ?? 'Unknown',
+                  lat: p.location?.lat() ?? 0,
+                  lng: p.location?.lng() ?? 0,
+                  type: layerType,
+                  source: 'google',
+                  address: p.formattedAddress ?? undefined,
+                  rating: p.rating ?? undefined,
+                  phone: p.nationalPhoneNumber ?? undefined,
+                });
               });
-            });
+            }
+          } catch (err) {
+            console.error(`[Google Places searchNearby] Failed for ${layerType}:`, err);
           }
+        });
 
-          if (completedRequests === layersToFetch.length) {
-            setPlaces(newPlaces);
-          }
+        await Promise.all(promises);
+        if (active) {
+          setPlaces(newPlaces);
         }
-      );
-    });
+      } catch (err) {
+        console.error('[Google Places API New] fetchAllLayers error:', err);
+      }
+    }
+
+    void fetchAllLayers();
+
+    return () => {
+      active = false;
+    };
   }, [activeLayers, userPos, sharedPin]);
 
   // Fetch OpenStreetMap and WHO separate layers when enabled
