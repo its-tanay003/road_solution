@@ -1,6 +1,5 @@
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
 const PUBLIC_PATHS = [
   '/',
@@ -13,15 +12,15 @@ const PUBLIC_PATHS = [
   '/public',
 ];
 
-export async function proxy(request: NextRequest) {
+export const proxy = auth(async function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // Allow public paths
   const isPublic = PUBLIC_PATHS.some((p) => p === '/' ? pathname === '/' : pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
-  // Check session
-  const session = await auth();
+  // Check session via request.auth
+  const session = request.auth;
   if (!session?.user) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -45,7 +44,7 @@ export async function proxy(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [

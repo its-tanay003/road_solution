@@ -7,11 +7,10 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   buildExcludes: [/middleware-manifest\.json$/],
-});
+} as any);
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: require('path').resolve(__dirname, '..'),
-  // @ts-ignore
   allowedDevOrigins: ['192.168.137.1'],
   serverExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
   experimental: {
