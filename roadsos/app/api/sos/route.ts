@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { createAdminClient } from '@/lib/supabase/client';
 
 interface SOSBody {
@@ -8,14 +9,21 @@ interface SOSBody {
   address: string;
   batteryLevel?: number;
   networkType?: string;
-  userId?: string;
   emergencyType?: string;
   triggerType?: string;
+  emergencyContacts?: { phone: string; name: string }[];
 }
 
 export async function POST(req: NextRequest) {
+  // Auth guard
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const userId = session.user.id;
+
   const body = await req.json() as SOSBody;
-  const { incidentId, lat, lng, address, batteryLevel, networkType, userId, emergencyType = 'road_crash', triggerType = 'manual' } = body;
+  const { incidentId, lat, lng, address, batteryLevel, networkType, emergencyType = 'road_crash', triggerType = 'manual', emergencyContacts = [] } = body;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
   const supabaseConfigured = supabaseUrl.length > 0 && !supabaseUrl.includes('your-project');
@@ -26,32 +34,60 @@ export async function POST(req: NextRequest) {
       const adminDb = createAdminClient();
       if (adminDb) {
         await adminDb.from('incidents').insert({
-          id: incidentId, user_id: userId ?? null, incident_type: emergencyType,
-          status: 'active', lat, lng, address,
-          battery_level: batteryLevel ?? null, network_type: networkType ?? null,
-          trigger_type: triggerType, broadcast_status: { sms: 'pending' }, media_urls: [],
+          id: incidentId,
+          user_id: userId,
+          incident_type: emergencyType,
+          status: 'active',
+          lat,
+          lng,
+          address,
+          battery_level: batteryLevel ?? null,
+          network_type: networkType ?? null,
+          trigger_type: triggerType,
+          broadcast_status: { sms: 'pending' },
+          media_urls: [],
         });
       }
     } catch (e) { console.warn('[SOS] DB insert failed:', e); }
   }
 
-  // 2. Twilio SMS
+  // 2. Twilio SMS — send to user's actual emergency contacts
   const twilioSid = process.env.TWILIO_ACCOUNT_SID ?? '';
   const twilioToken = process.env.TWILIO_AUTH_TOKEN ?? '';
   const twilioFrom = process.env.TWILIO_PHONE_NUMBER ?? '';
   let smsStatus: 'sent' | 'stub' | 'failed' = 'stub';
 
-  if (twilioSid && !twilioSid.includes('your-')) {
+  // Fetch contacts from DB if not provided in body
+  let contactsToNotify = emergencyContacts;
+  if (contactsToNotify.length === 0 && supabaseConfigured) {
+    try {
+      const adminDb = createAdminClient();
+      if (adminDb) {
+        const { data } = await adminDb
+          .from('emergency_contacts')
+          .select('name, phone')
+          .eq('user_id', userId);
+        contactsToNotify = data ?? [];
+      }
+    } catch (e) { console.warn('[SOS] Failed to fetch contacts:', e); }
+  }
+
+  if (twilioSid && !twilioSid.includes('your-') && contactsToNotify.length > 0) {
     try {
       const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
-      const msgBody = `🆘 ROADSoS: Emergency at ${address}. ${mapsLink}`;
-      const auth = Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
-      const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
-        method: 'POST',
-        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ From: twilioFrom, To: '+919999999999', Body: msgBody }),
-      });
-      smsStatus = r.ok ? 'sent' : 'failed';
+      const msgBody = `🆘 ROADSoS EMERGENCY: Your contact needs help at ${address}. Location: ${mapsLink}`;
+      const authHeader = Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
+
+      const sendResults = await Promise.allSettled(
+        contactsToNotify.map((contact) =>
+          fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+            method: 'POST',
+            headers: { Authorization: `Basic ${authHeader}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ From: twilioFrom, To: contact.phone, Body: msgBody }),
+          })
+        )
+      );
+      smsStatus = sendResults.some((r) => r.status === 'fulfilled') ? 'sent' : 'failed';
     } catch { smsStatus = 'failed'; }
   }
 

@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
+import withPWAInit from 'next-pwa';
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+  buildExcludes: [/middleware-manifest\.json$/],
+});
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+  outputFileTracingRoot: require('path').resolve(__dirname, '..'),
   // @ts-ignore
   allowedDevOrigins: ['192.168.137.1'],
   serverExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
@@ -11,17 +20,16 @@ const nextConfig: NextConfig = {
     },
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // Do NOT ignore build errors — fix them properly
+    ignoreBuildErrors: false,
   },
-
   images: {
-    domains: [
-      'lh3.googleusercontent.com',
-      'avatars.githubusercontent.com',
-      'upload.wikimedia.org',
-    ],
     remotePatterns: [
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      { protocol: 'https', hostname: 'upload.wikimedia.org' },
       { protocol: 'https', hostname: '**.supabase.co' },
+      { protocol: 'https', hostname: 'ui-avatars.com' },
     ],
   },
   env: {
@@ -29,4 +37,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
