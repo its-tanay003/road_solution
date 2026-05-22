@@ -488,7 +488,7 @@ export function EmergencyMap() {
           const request: google.maps.places.SearchNearbyRequest = {
             fields: ['id', 'displayName', 'location', 'formattedAddress', 'rating', 'nationalPhoneNumber'],
             locationRestriction: {
-              center: new google.maps.LatLng(centerPos.lat, centerPos.lng),
+              center: { lat: centerPos.lat, lng: centerPos.lng },
               radius: 5000,
             },
             includedTypes: [cfg.placeType],
