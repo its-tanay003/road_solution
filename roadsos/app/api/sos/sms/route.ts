@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { to, message } = await req.json();
     
@@ -22,12 +28,12 @@ export async function POST(req: NextRequest) {
       });
     }
     
-    const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+    const authHeader = Buffer.from(`${sid}:${token}`).toString('base64');
     const sendPromises = to.map(async (phone) => {
       const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${auth}`,
+          'Authorization': `Basic ${authHeader}`,
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
