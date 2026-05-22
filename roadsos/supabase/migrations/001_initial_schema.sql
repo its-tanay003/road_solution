@@ -1,3 +1,16 @@
+-- Users profile table
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  phone TEXT,
+  date_of_birth DATE,
+  blood_group TEXT,
+  medical_conditions TEXT,
+  allergies TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Emergency contacts table
 CREATE TABLE IF NOT EXISTS public.emergency_contacts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -53,3 +66,14 @@ CREATE POLICY "Users delete own contacts" ON public.emergency_contacts FOR DELET
 
 CREATE POLICY "Users read own sos" ON public.sos_events FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users insert own sos" ON public.sos_events FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Storage Bucket and Policies
+INSERT INTO storage.buckets (id, name, public) VALUES ('medical-records', 'medical-records', false) ON CONFLICT DO NOTHING;
+
+CREATE POLICY "Users can upload their own medical records"
+  ON storage.objects FOR INSERT
+  WITH CHECK (auth.uid() = owner);
+
+CREATE POLICY "Users can view their own medical records"
+  ON storage.objects FOR SELECT
+  USING (auth.uid() = owner);
