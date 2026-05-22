@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import webpush from 'web-push';
 import { createAdminClient } from '@/lib/supabase/client';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'sos:push', limit: 10, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -16,12 +20,8 @@ export async function POST(req: NextRequest) {
     const vapidPrivateKey = process.env.VAPID_PRIVATE || '';
     
     if (!vapidPublicKey || !vapidPrivateKey) {
-      console.warn('[Web Push API] VAPID keys missing. Simulating Web Push broadcast.');
-      return NextResponse.json({
-        success: true,
-        mocked: true,
-        message: 'Mock Web Push sent to subscribed devices successfully (missing VAPID keys)'
-      });
+      console.error('[Web Push API] VAPID keys missing.');
+      return NextResponse.json({ error: 'Push provider is not configured' }, { status: 503 });
     }
     
     // Set VAPID credentials

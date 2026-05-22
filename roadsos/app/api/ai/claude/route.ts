@@ -1,6 +1,7 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 import { NextRequest } from 'next/server';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export const runtime = 'edge';
 export const maxDuration = 30;
@@ -19,6 +20,9 @@ Core principles:
 Emergency numbers (India): 112 (universal), 108 (ambulance), 100 (police), 101 (fire), 181 (women helpline)`;
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'ai:claude', limit: 30, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   const { messages, systemContext } = await req.json() as {
     messages: { role: 'user' | 'assistant'; content: string }[];
     systemContext?: string;

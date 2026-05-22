@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'sos:sms', limit: 10, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,12 +24,8 @@ export async function POST(req: NextRequest) {
     const from = process.env.TWILIO_FROM || process.env.TWILIO_PHONE_NUMBER || '';
     
     if (!sid || !token || !from) {
-      console.warn('[Twilio API] Missing environment variables. Mocking SMS dispatch.');
-      return NextResponse.json({
-        success: true,
-        mocked: true,
-        message: 'Mock Twilio SMS dispatched successfully (missing credentials)'
-      });
+      console.error('[Twilio API] Missing required environment variables.');
+      return NextResponse.json({ error: 'SMS provider is not configured' }, { status: 503 });
     }
     
     const authHeader = Buffer.from(`${sid}:${token}`).toString('base64');

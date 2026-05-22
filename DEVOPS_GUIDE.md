@@ -1,66 +1,72 @@
-# ROADSoS DevOps & Environment Configuration Guide
+# ROADSoS DevOps Guide
 
-This document outlines the Supabase environment configuration, local development setups, the automatic architectural resilience system, and the deployment procedures on Vercel.
+## Deployment Target
 
----
+Deploy `roadsos/` as the only production web app. The root `vercel.json` is configured for this target.
 
-## 🔑 Supabase Environment Credentials
+The Vercel project root directory must be the repository root. A Vercel project root of `frontend/` will deploy the legacy Vite app and is incorrect for production.
 
-To enable complete user authentication and database access in ROADSoS, the frontend requires the following two public environment variables:
+## Local Verification
 
-| Variable Name | Description | Example / Required Value |
-| :--- | :--- | :--- |
-| `NEXT_PUBLIC_SUPABASE_URL` | The secure project API endpoint URL | `https://njfvhhlkthqrlesmwlwv.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The anonymous public publishable API Key | `sb_publishable_SXOi_ihNjq1mvfRPVD5wMg_e3uwtPuD` |
+```powershell
+cd "C:/New Volume (D)/mandi/roadsos"
+npm ci
+npm run lint
+npm run typecheck
+npm run audit:prod
+npm run build
+npm run test:e2e
+```
 
----
+## Environment Variables
 
-## 🛡️ Secure Runtime & Fallback Proxy Architecture
+Use `.env.example` as the template. Filled secrets belong only in `roadsos/.env.local`, Vercel environment variables, or the relevant provider dashboard.
 
-To prevent severe production failures (like a blank "white screen of death") when environment variables are missing, ROADSoS uses an **Architectural Resilience Shield**. 
+Required groups:
 
-### 1. Graceful Mock Fallback
-Inside [`roadsos/lib/supabase/client.ts`](file:///c:/New%20Volume%20%28D%29/mandi/roadsos/lib/supabase/client.ts), client initialization is protected. If `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set:
-- The system intercepts the missing credentials.
-- It prints a `[ROADSoS] CRITICAL` console warning.
-- It returns a **Safe Mock Client Proxy** (a deep proxy object) which matches the expected Supabase API contract (`auth`, `from`, `storage`, `channel`, etc.).
-- This mock client handles any nested database queries and authentication lifecycle triggers gracefully (e.g. returning blank result arrays and resolving promises safely) rather than throwing fatal runtime errors.
+- `AUTH_SECRET` / `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- Supabase URL, anon key, service-role key
+- `ADMIN_EMAILS`
+- Google/Apple OAuth credentials
+- Google Maps key
+- AI provider keys
+- Twilio, Resend, and VAPID notification keys
 
-### 2. Isolated Root Error Boundary
-If any unexpected client initialization failure passes the initial proxy protection, [`roadsos/app/error.tsx`](file:///c:/New%20Volume%20%28D%29/mandi/roadsos/app/error.tsx) intercepts the exception. It suspends the failing component tree and displays a high-fidelity **Nexus Shield DevOps Portal** instead of a blank screen, allowing users to:
-1. View the exact isolated trace message.
-2. Read a step-by-step setup guide to fix the issue.
-3. Reload the application directly from the UI.
-4. Copy a comprehensive diagnostics report to the clipboard.
+## Secret Rotation
 
----
+If any real key has appeared in a committed file, rotate it at the provider immediately. Editing the repository does not invalidate exposed keys.
 
-## 💻 Local Development Setup
+Rotate at minimum:
 
-For local testing and verification, populate environment keys in the `roadsos` directory:
+- Supabase anon and service-role keys
+- Google OAuth secrets
+- Google AI/Gemini keys
+- VAPID keys
+- Twilio/Resend keys if they were ever committed
 
-1. Create or verify a `.env.local` file inside the `roadsos/` directory:
-   ```bash
-   # Path: roadsos/.env.local
-   NEXT_PUBLIC_SUPABASE_URL=https://njfvhhlkthqrlesmwlwv.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_SXOi_ihNjq1mvfRPVD5wMg_e3uwtPuD
-   ```
-2. Restart your local development server:
-   ```bash
-   cd roadsos
-   npm run dev
-   ```
+## Supabase
 
----
+Before launch:
 
-## 🚀 Vercel Production Deployment
+- Apply schema migrations intentionally.
+- Verify RLS policies in the live Supabase project.
+- Test user, admin, and unauthenticated access separately.
+- Verify storage buckets and object policies for uploaded emergency media.
 
-To configure credentials on Vercel:
+The migration `roadsos/supabase/migrations/202605220001_security_hardening.sql` addresses the latest advisor findings observed on the ROADSoS Supabase project: duplicate profile policies, missing foreign-key indexes, RLS-enabled tables without policies, public execution of the custom `rls_auto_enable()` helper, and RLS on `public.spatial_ref_sys`. Review and apply it deliberately because enabling RLS on extension-owned metadata can affect clients that read PostGIS metadata.
 
-1. Go to your **Vercel Dashboard** and select your project.
-2. Navigate to **Settings** > **Environment Variables**.
-3. Add the following environment variables:
-   * **Key**: `NEXT_PUBLIC_SUPABASE_URL` | **Value**: `<Your Supabase Project URL>`
-   * **Key**: `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Value**: `<Your Supabase Anon API Key>`
-4. Choose the environments to apply these keys to (**Production**, **Preview**, **Development**).
-5. Trigger a redeployment from your deployments tab to rebuild the static assets with the fresh environment configurations.
+## CI/CD
+
+GitHub Actions must pass before merging to `main`.
+
+Recommended branch protections:
+
+- Require the ROADSoS CI workflow.
+- Require pull request review.
+- Block force pushes to `main`.
+- Require Vercel preview success before production promotion.
+
+## Incident Readiness
+
+Production still needs provider-level observability: Vercel logs, Supabase logs, error tracking, uptime checks, and restore-tested database backups.

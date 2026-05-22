@@ -1,0 +1,62 @@
+name: ROADSoS CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  roadsos:
+    name: roadsos build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: roadsos
+
+    env:
+      CI: true
+      AUTH_SECRET: ci-auth-secret-change-in-real-environments
+      NEXTAUTH_SECRET: ci-auth-secret-change-in-real-environments
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-supabase-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-supabase-service-role-key
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      APPLE_ID: ci-apple-client-id
+      APPLE_SECRET: ci-apple-client-secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: roadsos/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Dependency audit
+        run: npm run audit:prod
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright tests
+        run: npm run test:e2e -- --project=chromium

@@ -1,11 +1,15 @@
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export const runtime = 'edge';
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'ai:gemini-map', limit: 30, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   try {
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     if (!apiKey) {

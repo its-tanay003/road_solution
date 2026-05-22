@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'voice:whisper', limit: 20, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {

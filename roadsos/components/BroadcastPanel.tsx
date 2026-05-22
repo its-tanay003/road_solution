@@ -80,7 +80,7 @@ export function BroadcastPanel({ onContinue }: BroadcastPanelProps) {
     const animateWave = () => {
       phase += 0.15;
       if (sineWaveRef.current) {
-        let points = [];
+        const points = [];
         const width = 300;
         const height = 40;
         for (let x = 0; x <= width; x += 2) {

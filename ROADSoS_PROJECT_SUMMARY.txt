@@ -1,56 +1,49 @@
-# ROADSoS – EMERGENCY INTELLIGENCE PLATFORM
-# PROJECT SUMMARY & TECHNICAL MANIFESTO
+# ROADSoS PROJECT SUMMARY
 
-## 1. PROJECT OVERVIEW
-ROADSoS is a high-stakes, real-world ready Emergency Operating System designed to bridge the gap between accident occurrence and professional rescue. It transforms the "Golden Hour" of emergency response through AI-driven triage, cinematic visual intelligence, and resilient communication architectures.
+## Product Intent
 
-## 2. CORE SYSTEM FEATURES
+ROADSoS is a road-emergency intelligence platform focused on crash/SOS activation, medical profile access, emergency contact notification, first-aid/AI triage, real-time map workflows, and control-room response views.
 
-### A. Implemented Features (Live & Functional)
-- **Next.js App Router Architecture**: Production-hardened full-stack framework with Server Components and API Routes.
-- **Supabase Authentication & Database**: Real-world OAuth (Google/Apple) integration with secure session handling and UUID generation.
-- **WebRTC P2P Mesh Fallback**: Functional peer-to-peer communication layer designed to sustain connections when primary network fails.
-- **Offline-First PWA**: Service Worker caching enabled for sub-second UI responsiveness.
-- **Cinematic Experience & UI**: High-stress visual overlays, heartbeat audio cues, and red-alert UI states fully implemented via Tailwind CSS 4 and Framer Motion.
-- **Multilingual Support**: Real i18next support for English, Hindi, and Tamil.
+## Production Architecture
 
-### B. Simulated Features (For Hackathon/Demo Purposes)
-- **Autonomous G-Force Detection**: Simulated 12.4G trigger with a 10s consciousness countdown (mocked hardware trigger).
-- **108 GVK EMRI Dispatching**: Robust mock engine for dispatching, automating resource assignment, and real-time ETA countdowns.
-- **Drone Recon Dispatch**: Simulated "Recon DR-1" drones with placeholder/simulated video feeds.
-- **Responder AR HUD**: 3D spatial guidance (Three.js) is implemented visually but currently uses simulated routing data.
-- **Pitch Mode & Hotkey Architecture**: Built-in 5-slide immersive pitch deck and demo-controller with time dilation scenarios.
+The active production source of truth is:
 
-### C. Planned Features (Future Roadmap)
-- **MoRTH iRAD Integration**: Direct API connections to the Integrated Road Accident Database.
-- **112 Emergency System Live Link**: Live bi-directional data flow with state emergency response centers.
-- **ZK-Medical Encryption**: Future migration to Zero-Knowledge AES-GCM encryption for transmission of sensitive medical profiles.
-- **Live Vaahan Telemetry**: Real-time victim-vehicle telemetry via RTO databases.
+`C:/New Volume (D)/mandi/roadsos`
 
-## 3. SIH 2026 STRATEGIC EVALUATION LAYERS
-- **Deployment Roadmap**: A dedicated `/roadmap` page outlining a 3-phase national rollout, comprehensive cost models (Infrastructure vs SaaS), and MoRTH integration diagrams.
-- **Impact Research**: A `/research` page detailing our primary survey of 87 respondents, identifying the 48% "Fear of Legal Trouble" gap, and validating our Good Samaritan features.
-- **Technical Manifesto**: A `/technical` page documenting our security posture (AES-256), OWASP Top 10 mitigation, and accessibility (WCAG 2.1) compliance.
-- **Evaluation Assets**: Includes `JUDGES_README.md` (rubric-aligned guide) and `PITCH_VIDEO_SCRIPT.md` (timed pitch narrative).
+Primary stack:
 
-## 4. TECHNICAL ARCHITECTURE
-### Frontend (The Nerve Center)
-- **Framework**: Next.js 14 App Router + React 19.
-- **Styling**: Tailwind CSS 4 + Framer Motion (for cinematic transitions).
-- **3D Visualization**: Three.js for AR navigation and vehicle impact modeling.
-- **State Management**: Zustand with persistent storage.
+- Next.js App Router
+- React 19
+- NextAuth v5
+- Supabase database/auth/storage
+- Vercel hosting
+- Playwright E2E tests
 
-### Backend (The Intelligence Core)
-- **Engine**: Next.js Serverless API Routes + NextAuth v5 + Supabase.
-- **Dispatch Simulation**: Robust mock engine for **108 GVK EMRI** dispatching, featuring automated resource assignment and real-time ETA countdowns.
-- **Notifications**: Integrated WhatsApp alert simulation and iRAD-compliant JSON report generation.
+Legacy code:
 
-## 5. STABILITY & PRODUCTION HARDENING
-- **Dependency-Lean Logic**: Replaced unstable third-party plugins (react-hot-toast, chartjs-annotation) with custom, lightweight Framer Motion and CSS solutions to ensure 100% demo uptime.
-- **Type-Safe HMR**: Enforced `import type` for state machines to resolve Next.js Server Component bundling edge cases.
-- **Accessibility Fixes**: Resolved critical missing hook and title attribute lints for a judge-ready presentation.
+- `frontend/` is the old Vite app.
+- `backend/` is the old Express backend.
+- `archive/` contains historical demo material.
 
----
-**Status**: SIH COMPLIANT / PRODUCTION READY
-**Repository**: its-tanay003/road_solution
-**Build Signature**: Verified stable across Next.js 14 and Vercel Serverless runtimes.
+## Production Readiness Status
+
+Status: NOT PRODUCTION READY until all local and CI gates pass and live Supabase/Vercel settings are verified.
+
+Required gates:
+
+- No merge conflict markers.
+- No tracked secrets.
+- `npm ci` succeeds in `roadsos`.
+- `npm run lint` succeeds.
+- `npm run typecheck` succeeds.
+- `npm run audit:prod` succeeds.
+- `npm run build` succeeds.
+- `npm run test:e2e` succeeds.
+- Vercel builds the root/`roadsos` project, not `frontend`.
+- Supabase RLS is verified on the live project.
+
+## Operational Notes
+
+OAuth providers must be real provider credentials. Mock credentials, demo OTPs, and fallback secrets are not valid production authentication.
+
+Admin access is controlled by `ADMIN_EMAILS`. Supabase RLS remains the final data boundary and must be tested with real user/admin sessions.

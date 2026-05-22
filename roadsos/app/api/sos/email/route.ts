@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'sos:email', limit: 10, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -109,12 +113,8 @@ export async function POST(req: NextRequest) {
     `;
     
     if (!resendKey || resendKey.includes('your-')) {
-      console.warn('[Resend API] RESEND_KEY is missing. Simulating email broadcast.');
-      return NextResponse.json({
-        success: true,
-        mocked: true,
-        message: 'Mock emergency email broadcast dispatched successfully (missing RESEND_KEY)'
-      });
+      console.error('[Resend API] RESEND_KEY is missing.');
+      return NextResponse.json({ error: 'Email provider is not configured' }, { status: 503 });
     }
     
     // Broadcast to registered contacts via Resend API

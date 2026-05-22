@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { createAdminClient } from '@/lib/supabase/client';
+import { checkRateLimit, rateLimitedResponse } from '@/lib/server/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(req, { keyPrefix: 'sos:all-clear', limit: 10, windowMs: 60_000 });
+  if (!limit.allowed) return rateLimitedResponse(limit);
+
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { incidentId, contacts, userName } = await req.json();
     
@@ -16,7 +26,8 @@ export async function POST(req: NextRequest) {
           await supabase
             .from('incidents')
             .update({ status: 'resolved', resolved_at: new Date().toISOString() })
-            .eq('id', incidentId);
+            .eq('id', incidentId)
+            .eq('user_id', session.user.id);
         }
       } catch (dbErr) {
         console.warn('[All Clear API] Database update error:', dbErr);

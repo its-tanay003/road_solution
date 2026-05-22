@@ -13,13 +13,17 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      throw new Error(`NHTSA API returned ${response.status}`);
+      console.warn(`[API/NHTSA] Upstream returned ${response.status}`);
+      return NextResponse.json(
+        { error: 'NHTSA upstream unavailable', upstreamStatus: response.status },
+        { status: 503 },
+      );
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('[API/NHTSA] Proxy Fetch Error:', error);
+    console.warn('[API/NHTSA] Proxy fetch failed:', error instanceof Error ? error.message : error);
     return NextResponse.json({ error: 'Failed to fetch NHTSA data' }, { status: 502 });
   }
 }
