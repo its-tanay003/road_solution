@@ -17,3 +17,5 @@ lint-results*.txt
 test-results/
 playwright-report/
 tests/playwright-report/
+my-app/
+backend/
