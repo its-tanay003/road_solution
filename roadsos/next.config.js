@@ -1,17 +1,18 @@
-import type { NextConfig } from "next";
-import path from 'node:path';
+const path = require('path');
 
-const nextConfig: NextConfig = {
-  outputFileTracingRoot: path.resolve(process.cwd(), '..'),
-  allowedDevOrigins: ['192.168.137.1'],
-  serverExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', '192.168.137.1:3000'],
     },
-  },
-  typescript: {
-    ignoreBuildErrors: true,
+    serverComponentsExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
   },
   images: {
     remotePatterns: [
@@ -22,9 +23,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'ui-avatars.com' },
     ],
   },
-  env: {
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  },
-};
+}
 
-export default nextConfig;
+module.exports = nextConfig

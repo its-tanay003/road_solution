@@ -3,14 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev":         "npm run dev --prefix roadsos",
-    "build":       "npm run build --prefix roadsos",
-    "start":       "npm run start --prefix roadsos",
-    "dev:backend": "npm run dev --prefix backend",
-    "dev:all":     "concurrently \"npm run dev --prefix roadsos\" \"npm run dev --prefix backend\""
-  },
-  "dependencies": {
-    "next": "16.2.6"
+    "dev":     "npm run dev --prefix my-app",
+    "build":   "npm run build --prefix my-app",
+    "start":   "npm run start --prefix my-app",
+    "dev:all": "concurrently \"npm run dev --prefix my-app\" \"npm run dev --prefix backend\""
   },
   "devDependencies": {
     "concurrently": "^9.2.0"
