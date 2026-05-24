@@ -1,5 +1,3 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
@@ -8,11 +6,12 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Next.js 15: serverComponentsExternalPackages moved to top-level
+  serverExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', '192.168.137.1:3000'],
     },
-    serverComponentsExternalPackages: ['@anthropic-ai/sdk', '@google/generative-ai', 'openai'],
   },
   images: {
     remotePatterns: [
