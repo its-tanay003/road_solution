@@ -13,12 +13,15 @@ function generateUUID(input: string) {
   return `${hex}-0000-4000-a000-000000000000`;
 }
 
+const googleClientId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+
 const providers = [];
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+if (googleClientId && googleClientSecret) {
   providers.push(Google({
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    clientId: googleClientId,
+    clientSecret: googleClientSecret,
     checks: ['state'],
   }));
 }
@@ -33,6 +36,35 @@ if (process.env.APPLE_ID && process.env.APPLE_SECRET) {
 const nextAuthResult = NextAuth({
   providers,
   trustHost: true,
+  cookies: {
+    pkceCodeVerifier: {
+      name: 'authjs.pkce.code_verifier',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: true,
+      },
+    },
+    state: {
+      name: 'authjs.state',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: true,
+      },
+    },
+    nonce: {
+      name: 'authjs.nonce',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: true,
+      },
+    },
+  },
   callbacks: {
     async signIn({ user, account }) {
       if (!user.id) return true;

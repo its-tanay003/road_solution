@@ -1,0 +1,15 @@
+{
+  "name": "roadsos-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "roadsos"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w roadsos",
+    "build": "npm run build -w roadsos",
+    "start": "npm run start -w roadsos",
+    "lint": "npm run lint -w roadsos",
+    "verify": "npm run build -w roadsos"
+  }
+}
