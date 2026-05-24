@@ -39,6 +39,7 @@ export default defineConfig({
       GOOGLE_CLIENT_SECRET: 'ci-google-client-secret',
       APPLE_ID: 'ci-apple-client-id',
       APPLE_SECRET: 'ci-apple-client-secret',
+      ADMIN_EMAILS: 'test@example.com',
     },
   },
 });
