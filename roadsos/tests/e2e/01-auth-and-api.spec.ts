@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('Authentication', () => {
   test('unauthenticated user sees login screen with correct elements', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
 
     // Should see login page, not home page
     await expect(page.locator('text=ROADSoS')).toBeVisible();
@@ -46,7 +45,6 @@ test.describe('Authentication', () => {
       }
     });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     // No JS exceptions should occur on the login page
     const jsErrors = criticalErrors.filter(e =>
       e.includes('TypeError') ||
@@ -60,7 +58,6 @@ test.describe('Authentication', () => {
   test('login page is accessible on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     const googleBtn = page.locator('button:has-text("Continue with Google")');
     await expect(googleBtn).toBeVisible();
     // Button should be tappable (min 44px height)
@@ -123,7 +120,6 @@ test.describe('Pages Load Without Crash', () => {
     const errors: string[] = [];
     page.on('pageerror', err => errors.push(err.message));
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
 });

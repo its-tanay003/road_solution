@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { MessageSquare, X, Send, Bot, Zap, Brain, Mic, MicOff, Volume2, Sparkles, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { usePathname } from 'next/navigation';
 
 const MODEL_CHAIN: AIModel[] = ['claude', 'gemini', 'gpt'];
 
@@ -25,6 +26,7 @@ const QUICK_ACTIONS = [
 ];
 
 export function ChatWidget() {
+  const pathname = usePathname();
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
 
@@ -481,6 +483,10 @@ export function ChatWidget() {
 
   const cfg = MODEL_CONFIG[model];
   const Icon = cfg.icon;
+
+  if (pathname === '/chat') {
+    return null;
+  }
 
   return (
     <>

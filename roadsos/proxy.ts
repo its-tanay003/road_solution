@@ -24,6 +24,8 @@ export const proxy = auth(async function proxy(request) {
 
   // Check session via request.auth
   const session = request.auth;
+  console.log(`[Middleware Proxy] Path: ${pathname}, Session:`, JSON.stringify(session));
+
   if (!session?.user) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -16,7 +16,7 @@ interface LiveStreamPanelProps {
 const EMPTY_PEERS = {};
 
 export function LiveStreamPanel({ stream = null, peers = EMPTY_PEERS, onStop }: LiveStreamPanelProps) {
-  const { incidentId, location, telemetryData } = useSOSStore();
+  const { incidentId, status, location, telemetryData } = useSOSStore();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
   
@@ -263,7 +263,9 @@ export function LiveStreamPanel({ stream = null, peers = EMPTY_PEERS, onStop }: 
     return () => cancelAnimationFrame(animId);
   }, [hasVideo, expanded, location]);
 
-  const toggleExpand = () => setExpanded(prev => !prev);
+  if (status !== 'active' && status !== 'acknowledged') {
+    return null;
+  }
 
   return (
     <div

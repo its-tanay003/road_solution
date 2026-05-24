@@ -141,7 +141,7 @@ export const auth = ((...args: any[]) => {
 
   // Regular call
   return (async () => {
-    const session = await nextAuthResult.auth(...args);
+    const session = await (nextAuthResult.auth as any)(...args);
     if (session) return session;
 
     try {
