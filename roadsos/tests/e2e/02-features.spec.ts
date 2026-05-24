@@ -5,6 +5,11 @@ test.setTimeout(60000);
 test.describe('ROADSoS Feature & Browse Testing', () => {
   
   test.beforeEach(async ({ context }) => {
+    // Disable CarPlay/Automotive mode during tests to force standard layout rendering
+    await context.addInitScript(() => {
+      window.localStorage.setItem('automotive-mode', 'false');
+    });
+
     // Inject mock session cookies so user is authenticated
     await context.addCookies([
       {
