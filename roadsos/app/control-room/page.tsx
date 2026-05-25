@@ -8,20 +8,14 @@ import { getBrowserClient } from '@/lib/supabase/browser';
 import type { DBIncident, DBUser, DBResponder } from '@/lib/supabase/types';
 import { useWebRTC } from '@/lib/webrtc';
 import {
-  Shield, Radio, Users, Phone, MapPin, AlertTriangle, CheckCircle,
-  Clock, X, ChevronRight, Activity, Zap, Play, Square, Video,
-  Compass, Battery, Heart, ShieldAlert, CheckCircle2, UserCheck
+  Shield, Radio, Users, MapPin, CheckCircle,
+  Clock, X, Activity, Zap,
+  Compass, Battery, ShieldAlert, CheckCircle2, UserCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-// Helper to calculate time ago
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return `${Math.floor(diff)}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  return `${Math.floor(diff / 3600)}h ago`;
-}
+// (timeAgo helper removed as it was unused)
 
 // Active SOS Card Component that handles its own WebRTC handshake
 function ActiveSOSCard({
@@ -109,7 +103,6 @@ function ActiveSOSCard({
   }, [remoteStream]);
 
   const hasVideoTrack = remoteStream && remoteStream.getVideoTracks().length > 0;
-  const hasAudioTrack = remoteStream && remoteStream.getAudioTracks().length > 0;
 
   return (
     <div className="bg-gray-900/60 border border-gray-800 backdrop-blur-md rounded-3xl overflow-hidden shadow-xl flex flex-col relative group">
@@ -279,8 +272,8 @@ function ActiveSOSCard({
 }
 
 export default function ControlRoomPage() {
-  const { data: session, status } = useSession();
-  const { incidents, connectionStatus, error, updateIncidentStatus, refresh } = useRealtimeIncidents({ limit: 100 });
+  const { status } = useSession();
+  const { incidents, connectionStatus, refresh } = useRealtimeIncidents({ limit: 100 });
 
   const [selectedIncident, setSelectedIncident] = useState<DBIncident | null>(null);
   const [responders, setResponders] = useState<DBResponder[]>([]);
