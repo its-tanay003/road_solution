@@ -15,7 +15,7 @@ const PUBLIC_PATHS = [
   '/public',
 ];
 
-export const proxy = auth(async function proxy(request) {
+export default auth(async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Allow public paths
