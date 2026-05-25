@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['html', { outputFolder: 'tests/playwright-report' }], ['list']],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
@@ -21,13 +21,13 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run start',
-    url: 'http://localhost:3000',
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: true,
     timeout: 120_000,
     env: {
       AUTH_SECRET: 'ci-playwright-auth-secret-change-in-real-envs',
       NEXTAUTH_SECRET: 'ci-playwright-auth-secret-change-in-real-envs',
-      NEXTAUTH_URL: 'http://localhost:3000',
+      NEXTAUTH_URL: 'http://127.0.0.1:3000',
       NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'ci-supabase-anon-key',
       SUPABASE_SERVICE_ROLE_KEY: 'ci-supabase-service-role-key',
