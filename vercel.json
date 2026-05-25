@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "npm run build -w roadsos",
+  "outputDirectory": "roadsos/.next",
+  "installCommand": "npm install --legacy-peer-deps"
+}
