@@ -25,11 +25,24 @@ test.describe('ROADSoS Feature & Browse Testing', () => {
         value: 'mock-token',
         domain: 'localhost',
         path: '/',
+      },
+      {
+        name: 'authjs.session-token',
+        value: 'mock-token',
+        domain: '127.0.0.1',
+        path: '/',
+      },
+      {
+        name: 'next-auth.session-token',
+        value: 'mock-token',
+        domain: '127.0.0.1',
+        path: '/',
       }
     ]);
 
     // Grant location and notifications permissions to browser context
     await context.grantPermissions(['geolocation', 'notifications'], { origin: 'http://localhost:3000' });
+    await context.grantPermissions(['geolocation', 'notifications'], { origin: 'http://127.0.0.1:3000' });
     await context.setGeolocation({ latitude: 31.248054, longitude: 75.703378 });
 
     // Mock external Overpass (OSM) map requests to avoid network dependencies
