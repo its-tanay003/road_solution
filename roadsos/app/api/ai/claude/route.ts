@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     model: anthropic('claude-sonnet-4-20250514'),
     system: EMERGENCY_SYSTEM_PROMPT + (systemContext ? `\n\nCurrent context: ${systemContext}` : ''),
     messages,
-    maxOutputTokens: 1024,
+    maxTokens: 1024,
     temperature: 0.3,
   });
 

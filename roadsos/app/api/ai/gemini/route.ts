@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     model: google('gemini-1.5-pro'),
     system: GEMINI_EMERGENCY_PROMPT + (systemContext ? `\n\nContext: ${systemContext}` : ''),
     messages,
-    maxOutputTokens: 1024,
+    maxTokens: 1024,
     temperature: 0.2,
   });
 

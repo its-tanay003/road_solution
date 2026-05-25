@@ -10,6 +10,8 @@
     "build": "npm run build -w roadsos",
     "start": "npm run start -w roadsos",
     "lint": "npm run lint -w roadsos",
-    "verify": "npm run build -w roadsos"
+    "verify": "npm run build -w roadsos",
+    "typecheck": "npm run typecheck -w roadsos",
+    "audit:prod": "npm run audit:prod -w roadsos"
   }
 }

@@ -10,7 +10,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "audit:prod": "npm audit --omit=dev"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.0",
