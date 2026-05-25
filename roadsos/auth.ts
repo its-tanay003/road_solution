@@ -41,7 +41,7 @@ const nextAuthResult = NextAuth({
       name: 'authjs.pkce.code_verifier',
       options: {
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         path: '/',
         secure: true,
       },
@@ -50,7 +50,7 @@ const nextAuthResult = NextAuth({
       name: 'authjs.state',
       options: {
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         path: '/',
         secure: true,
       },
@@ -59,7 +59,7 @@ const nextAuthResult = NextAuth({
       name: 'authjs.nonce',
       options: {
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         path: '/',
         secure: true,
       },
