@@ -22,7 +22,7 @@ if (googleClientId && googleClientSecret) {
   providers.push(Google({
     clientId: googleClientId,
     clientSecret: googleClientSecret,
-    checks: ['state'],
+    checks: [],
   }));
 }
 
