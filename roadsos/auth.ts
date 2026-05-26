@@ -38,37 +38,45 @@ const nextAuthResult = NextAuth({
   trustHost: true,
   callbacks: {
     async signIn({ user, account }) {
-      if (!user.id) return true;
-      const uuid = generateUUID(user.email || user.id);
-      user.id = uuid;
-      
-      const adminDb = createAdminClient();
-      if (!adminDb) {
-        console.warn('[NextAuth] Supabase admin client not configured during signIn callback');
-        return true;
-      }
-      try {
-        const { error } = await adminDb
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            name: user.name || 'User',
-            email: user.email || null,
-            avatar_url: user.image || null,
-            updated_at: new Date().toISOString()
-          });
-
-        if (error) {
-          console.error('[NextAuth] Error upserting user in signIn callback:', error.message);
-        }
-      } catch (err) {
-        console.error('[NextAuth] Exception in signIn callback:', err);
-      }
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        let finalId = generateUUID(user.email || user.id || '');
+        const adminDb = createAdminClient();
+        
+        if (adminDb && user.email) {
+          try {
+            // 1. Ensure user exists in Supabase auth.users
+            const { error: createError } = await adminDb.auth.admin.createUser({
+              id: finalId,
+              email: user.email,
+              email_confirm: true,
+              user_metadata: { full_name: user.name || 'User' }
+            });
+            
+            // If email is already taken, fetch their true existing UUID
+            if (createError && createError.message.includes('already been registered')) {
+              const { data: usersData } = await adminDb.auth.admin.listUsers();
+              const existingUser = usersData?.users?.find((u: any) => u.email === user.email);
+              if (existingUser) {
+                finalId = existingUser.id;
+              }
+            }
+            
+            // 2. Safely upsert base profile now that we have the correct ID
+            await adminDb.from('profiles').upsert({
+              id: finalId,
+              name: user.name || 'User',
+              email: user.email || null,
+              avatar_url: user.image || null,
+              updated_at: new Date().toISOString()
+            });
+          } catch (e) {
+            console.error('[NextAuth] Error syncing user in jwt:', e);
+          }
+        }
+        token.id = finalId;
       }
       return token;
     },

@@ -79,12 +79,13 @@ export async function POST(req: NextRequest) {
 
   try {
     // 1. Ensure user exists in auth.users first to satisfy foreign key constraints
-    const { data: authUser, error: checkError } = await adminDb.auth.admin.getUserById(userId);
+    let finalUserId = userId;
+    const { data: authUser, error: checkError } = await adminDb.auth.admin.getUserById(finalUserId);
     
     if (checkError || !authUser?.user) {
-      // User doesn't exist in auth.users, let's create them
+      // User doesn't exist in auth.users with this ID, let's create them safely
       const { error: createError } = await adminDb.auth.admin.createUser({
-        id: userId,
+        id: finalUserId,
         email: session.user.email || undefined,
         email_confirm: true,
         user_metadata: {
@@ -94,7 +95,14 @@ export async function POST(req: NextRequest) {
         phone: phone || undefined
       });
       
-      if (createError) {
+      if (createError && createError.message.includes('already been registered') && session.user.email) {
+        // Fallback: Use the existing user's ID
+        const { data: usersData } = await adminDb.auth.admin.listUsers();
+        const existingUser = usersData?.users?.find((u: any) => u.email === session.user.email);
+        if (existingUser) {
+          finalUserId = existingUser.id;
+        }
+      } else if (createError) {
         console.warn('[Profile API] Could not create auth user:', createError.message);
       }
     }
@@ -115,7 +123,7 @@ export async function POST(req: NextRequest) {
     const { error: userError } = await adminDb
       .from('profiles')
       .upsert({
-        id: userId,
+        id: finalUserId,
         name: name || session.user.name || 'User',
         phone: phone || null,
         medical_data: {
@@ -138,7 +146,7 @@ export async function POST(req: NextRequest) {
       const { error: deleteError } = await adminDb
         .from('emergency_contacts')
         .delete()
-        .eq('user_id', userId);
+        .eq('user_id', finalUserId);
 
       if (deleteError) {
         return NextResponse.json({ error: deleteError.message }, { status: 500 });
@@ -146,8 +154,8 @@ export async function POST(req: NextRequest) {
 
       // Insert new ones (if any)
       if (contacts.length > 0) {
-        const contactsToInsert = contacts.map((c, index) => ({
-          user_id: userId,
+        const contactsToInsert = contacts.map((c: any, index: number) => ({
+          user_id: finalUserId,
           name: c.name,
           phone: c.phone,
           relationship: c.relationship || c.relation || 'Emergency Contact',
