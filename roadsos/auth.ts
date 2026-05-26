@@ -36,35 +36,6 @@ if (process.env.APPLE_ID && process.env.APPLE_SECRET) {
 const nextAuthResult = NextAuth({
   providers,
   trustHost: true,
-  cookies: {
-    pkceCodeVerifier: {
-      name: 'authjs.pkce.code_verifier',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: true,
-      },
-    },
-    state: {
-      name: 'authjs.state',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: true,
-      },
-    },
-    nonce: {
-      name: 'authjs.nonce',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: true,
-      },
-    },
-  },
   callbacks: {
     async signIn({ user, account }) {
       if (!user.id) return true;
