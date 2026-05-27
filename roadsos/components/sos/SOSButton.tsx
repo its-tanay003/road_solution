@@ -19,32 +19,63 @@ export function SOSButton() {
   const pressStartRef = useRef(0);
   const clickTimesRef = useRef<number[]>([]);
 
+  const cancelPress = useCallback(() => {
+    const elapsed = pressStartRef.current ? Date.now() - pressStartRef.current : 0;
+    if (elapsed >= HOLD_DURATION && status === 'idle') {
+      arm('manual');
+    }
+    setPressing(false);
+    setPressPercent(0);
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    pressStartRef.current = 0;
+  }, [status, arm]);
+
   const startPress = useCallback(() => {
     if (status !== 'idle') return;
     setPressing(true);
     pressStartRef.current = Date.now();
 
     const animate = () => {
+      if (!pressStartRef.current) return;
       const elapsed = Date.now() - pressStartRef.current;
       const pct = Math.min((elapsed / HOLD_DURATION) * 100, 100);
       setPressPercent(pct);
-      if (pct < 100) animFrameRef.current = requestAnimationFrame(animate);
+      
+      if (elapsed >= HOLD_DURATION) {
+        arm('manual');
+        setPressing(false);
+        setPressPercent(0);
+        if (holdTimerRef.current) {
+          clearTimeout(holdTimerRef.current);
+          holdTimerRef.current = null;
+        }
+        if (animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+          animFrameRef.current = null;
+        }
+        pressStartRef.current = 0;
+      } else {
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
     };
     animFrameRef.current = requestAnimationFrame(animate);
 
     holdTimerRef.current = setTimeout(() => {
-      arm('manual');
-      setPressing(false);
-      setPressPercent(0);
+      if (status === 'idle') {
+        arm('manual');
+        setPressing(false);
+        setPressPercent(0);
+        pressStartRef.current = 0;
+      }
     }, HOLD_DURATION);
   }, [status, arm]);
-
-  const cancelPress = useCallback(() => {
-    setPressing(false);
-    setPressPercent(0);
-    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-  }, []);
 
   const handleClick = useCallback(() => {
     if (status !== 'idle') return;

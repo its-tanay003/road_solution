@@ -13,7 +13,19 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:godmode": "playwright test tests/godmode/ --reporter=list",
+    "test:godmode:ui": "playwright test tests/godmode/ --ui",
+    "test:godmode:micro": "playwright test tests/godmode/L1-micro-frontend.spec.ts",
+    "test:godmode:api": "playwright test tests/godmode/L2-nuclear-api.spec.ts",
+    "test:godmode:db": "vitest run tests/godmode/L3-database-annihilation.spec.ts",
+    "test:godmode:chaos": "playwright test tests/godmode/L4-absolute-chaos.spec.ts",
+    "test:godmode:security": "playwright test tests/godmode/L5-impossible-security.spec.ts",
+    "test:godmode:ai": "playwright test tests/godmode/L6-L8-ai-perf-e2e.spec.ts",
+    "test:godmode:load": "artillery run tests/godmode/load-godmode.yml --output godmode-load-report.json",
+    "test:godmode:live": "playwright test tests/godmode/L9-L10-advanced-live.spec.ts",
+    "test:godmode:all": "npm run test:godmode && npm run test:godmode:db",
+    "test:godmode:report": "npx playwright show-report && artillery report godmode-load-report.json"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.0",

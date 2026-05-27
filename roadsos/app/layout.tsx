@@ -13,6 +13,7 @@ import { AutomotiveLayout } from '@/components/AutomotiveLayout';
 import { VoiceNavigator } from '@/components/VoiceNavigator';
 import { LiveStreamPanel } from '@/components/LiveStreamPanel';
 import { DbHealthCheck } from '@/components/DbHealthCheck';
+import { ScrollRestorer } from '@/components/ScrollRestorer';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <AutomotiveLayout>
             {/* Global overlays */}
+            <ScrollRestorer />
             <DbHealthCheck />
             <PanicMode />
             <VoiceCommands />

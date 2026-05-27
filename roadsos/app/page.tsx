@@ -32,6 +32,36 @@ export default function HomePage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      let hasUnsafe = false;
+      const unsafeKeys = ['redirect', 'next', 'callbackUrl', 'url'];
+      
+      for (const key of unsafeKeys) {
+        if (searchParams.has(key)) {
+          const val = searchParams.get(key);
+          if (val) {
+            const isLocal = val.startsWith('/') && !val.startsWith('//');
+            const isAllowedDomain = val.includes('localhost') || val.includes('127.0.0.1');
+            const hasProtocol = val.includes('://') || val.startsWith('//') || val.toLowerCase().includes('javascript:');
+            
+            if ((hasProtocol || !isLocal) && !isAllowedDomain) {
+              searchParams.delete(key);
+              hasUnsafe = true;
+            }
+          }
+        }
+      }
+      
+      if (hasUnsafe) {
+        const cleanSearch = searchParams.toString();
+        const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '');
+        window.location.replace(newUrl);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
       const checkCarMode = () => {
         const ua = navigator.userAgent.toLowerCase();
         const hasCarAgent =

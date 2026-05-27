@@ -1,0 +1,33 @@
+config:
+  target: "http://127.0.0.1:3000"
+  phases:
+    - name: "Warmup"
+      duration: 10
+      arrivalRate: 2
+    - name: "Ramp to 50 RPS"
+      duration: 10
+      arrivalRate: 2
+      rampTo: 50
+    - name: "Sustained 100 RPS"
+      duration: 15
+      arrivalRate: 100
+    - name: "VIRAL SPIKE 1000 RPS"
+      duration: 5
+      arrivalRate: 1000
+    - name: "NUCLEAR SPIKE 2000 RPS"
+      duration: 5
+      arrivalRate: 2000
+    - name: "Post-spike recovery"
+      duration: 15
+      arrivalRate: 100
+  defaults:
+    headers:
+      x-forwarded-for: "127.0.0.1"
+
+scenarios:
+  - name: "Standard Homepage and Session Check Flow"
+    flow:
+      - get:
+          url: "/"
+      - get:
+          url: "/api/auth/session"

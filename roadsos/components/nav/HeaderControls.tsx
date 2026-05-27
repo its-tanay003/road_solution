@@ -43,6 +43,54 @@ export function HeaderControls() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Trap focus inside language selector dropdown when open (WCAG Focus Trap)
+  React.useEffect(() => {
+    if (!dropdownOpen) return;
+
+    // Auto focus first option on open
+    const timer = setTimeout(() => {
+      if (!dropdownRef.current) return;
+      const options = Array.from(
+        dropdownRef.current.querySelectorAll('button:not([aria-label="Select language"])')
+      ) as HTMLElement[];
+      if (options.length > 0) {
+        options[0].focus();
+      }
+    }, 50);
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return;
+      if (!dropdownRef.current) return;
+      const focusables = Array.from(
+        dropdownRef.current.querySelectorAll('button:not([aria-label="Select language"]), a, [tabindex="0"]')
+      ) as HTMLElement[];
+      if (focusables.length === 0) return;
+      
+      const active = document.activeElement as HTMLElement;
+      const index = focusables.indexOf(active);
+      
+      if (e.shiftKey) {
+        if (index <= 0) {
+          focusables[focusables.length - 1].focus();
+        } else {
+          focusables[index - 1].focus();
+        }
+      } else {
+        if (index === -1 || index >= focusables.length - 1) {
+          focusables[0].focus();
+        } else {
+          focusables[index + 1].focus();
+        }
+      }
+      e.preventDefault();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [dropdownOpen]);
+
   const currentLang = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
   const handleLanguageChange = (code: string) => {
@@ -77,16 +125,16 @@ export function HeaderControls() {
           }
         }}
         aria-label="Push Notifications"
-        className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm"
+        className="w-11 h-11 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm"
       >
-        <Bell size={16} className="text-blue-400" />
+        <Bell size={18} className="text-blue-400" />
       </button>
 
       {/* Quick Theme Toggle Button */}
       <button
         onClick={toggleTheme}
         aria-label={`Cycle theme, current: ${theme}`}
-        className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm"
+        className="w-11 h-11 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm"
       >
         {renderThemeIcon()}
       </button>
@@ -98,11 +146,11 @@ export function HeaderControls() {
           aria-expanded={dropdownOpen}
           aria-label="Select language"
           className={cn(
-            "h-9 px-2.5 gap-1.5 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm",
+            "h-11 px-3 gap-1.5 rounded-xl flex items-center justify-center bg-gray-900/60 border border-gray-800/80 text-gray-400 hover:text-white hover:border-gray-700/80 active:scale-95 transition-all shadow-sm min-w-[44px]",
             dropdownOpen && "border-red-500/50 text-white bg-gray-900"
           )}
         >
-          <Globe size={16} className={cn("transition-transform duration-300", dropdownOpen && "rotate-45 text-red-400")} />
+          <Globe size={18} className={cn("transition-transform duration-300", dropdownOpen && "rotate-45 text-red-400")} />
           <span className="text-xs font-bold uppercase tracking-tight hidden xs:inline">
             {currentLang.code}
           </span>

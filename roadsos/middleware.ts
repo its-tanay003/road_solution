@@ -16,7 +16,36 @@ const PUBLIC_PATHS = [
 ];
 
 export default auth(async function middleware(request) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
+  console.log(`[Middleware Entry] Path: ${pathname}, SearchParams: ${searchParams.toString()}`);
+
+  // Protect against open redirects / deep-link attacks
+  let hasUnsafe = false;
+  const newParams = new URLSearchParams(searchParams);
+  const unsafeKeys = ['redirect', 'next', 'callbackUrl', 'url'];
+  
+  for (const key of unsafeKeys) {
+    if (newParams.has(key)) {
+      const val = newParams.get(key);
+      if (val) {
+        // Unsafe if it starts with // or has :// or javascript: unless it is local
+        const isLocal = val.startsWith('/') && !val.startsWith('//');
+        const isAllowedDomain = val.includes('localhost') || val.includes('127.0.0.1');
+        const hasProtocol = val.includes('://') || val.startsWith('//') || val.toLowerCase().includes('javascript:');
+        
+        if ((hasProtocol || !isLocal) && !isAllowedDomain) {
+          newParams.delete(key);
+          hasUnsafe = true;
+        }
+      }
+    }
+  }
+
+  if (hasUnsafe) {
+    const cleanUrl = new URL(pathname, request.url);
+    cleanUrl.search = newParams.toString();
+    return NextResponse.redirect(cleanUrl);
+  }
 
   // Allow public paths
   const isPublic = PUBLIC_PATHS.some((p) => p === '/' ? pathname === '/' : pathname.startsWith(p));
@@ -50,6 +79,7 @@ export default auth(async function middleware(request) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/:path*',
     '/control-room/:path*',
     '/settings/:path*',
