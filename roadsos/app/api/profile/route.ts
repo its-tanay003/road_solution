@@ -38,8 +38,12 @@ export async function GET(req: NextRequest) {
       .eq('id', userId)
       .single();
 
-    if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows found"
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+    if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows found
+      console.error('[Profile GET] profiles query error:', profileError);
+      return NextResponse.json(
+        { error: profileError.message, hint: 'Run supabase/migrations/202605270001_create_profiles_table.sql in your Supabase project.' },
+        { status: 500 }
+      );
     }
 
     // 2. Get emergency contacts
@@ -120,24 +124,30 @@ export async function POST(req: NextRequest) {
         ? allergies.split(',').map(s => s.trim()).filter(Boolean)
         : [];
 
+    const profilePayload = {
+      id: finalUserId,
+      name: name || session.user.name || 'User',
+      phone: phone || null,
+      medical_data: {
+        blood_group: bloodGroup || 'Unknown',
+        medical_conditions: parsedConditions,
+        allergies: parsedAllergies,
+        date_of_birth: dob || null,
+        home_address: address || null,
+      },
+      updated_at: new Date().toISOString()
+    };
+
     const { error: userError } = await adminDb
       .from('profiles')
-      .upsert({
-        id: finalUserId,
-        name: name || session.user.name || 'User',
-        phone: phone || null,
-        medical_data: {
-          blood_group: bloodGroup || 'Unknown',
-          medical_conditions: parsedConditions,
-          allergies: parsedAllergies,
-          date_of_birth: dob || null,
-          home_address: address || null,
-        },
-        updated_at: new Date().toISOString()
-      });
+      .upsert(profilePayload, { onConflict: 'id' });
 
     if (userError) {
-      return NextResponse.json({ error: userError.message }, { status: 500 });
+      console.error('[Profile POST] upsert error:', userError);
+      return NextResponse.json(
+        { error: userError.message, hint: 'Run supabase/migrations/202605270001_create_profiles_table.sql in your Supabase project.' },
+        { status: 500 }
+      );
     }
 
     // 3. Update emergency contacts
