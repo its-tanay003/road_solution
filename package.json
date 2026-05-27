@@ -14,5 +14,9 @@
     "typecheck": "npm run typecheck -w roadsos",
     "audit:prod": "npm run audit:prod -w roadsos",
     "test:e2e": "npm run test:e2e -w roadsos"
+  },
+  "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0"
   }
 }

@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
   const limit = checkRateLimit(req, { keyPrefix: 'ai:claude', limit: 30, windowMs: 60_000 });
   if (!limit.allowed) return rateLimitedResponse(limit);
 
+  // Defense-in-depth: verify ANTHROPIC_API_KEY is configured before streaming
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response(JSON.stringify({ error: 'AI provider not configured' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+  }
+
   const { messages, systemContext } = await req.json() as {
     messages: { role: 'user' | 'assistant'; content: string }[];
     systemContext?: string;

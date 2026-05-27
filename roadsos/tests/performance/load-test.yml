@@ -1,0 +1,75 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      rampTo: 20
+      name: Warm up
+    - duration: 30
+      arrivalRate: 20
+      rampTo: 50
+      name: Ramp up load
+  plugins:
+    ensure: {}
+  apdex:
+    threshold: 1500
+  ensure:
+    thresholds:
+      - "http.codes.200": 95
+      - "http.response_time.p99": 3000
+
+scenarios:
+  - name: "Browse static pages"
+    weight: 40
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+            - maxResponseTime: 1000
+      - get:
+          url: "/chat"
+          expect:
+            - statusCode: 200
+            - maxResponseTime: 3000
+      - get:
+          url: "/map"
+          expect:
+            - statusCode: 200
+            - maxResponseTime: 3000
+
+  - name: "Auth check load"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/auth/providers"
+          expect:
+            - statusCode: 200
+            - maxResponseTime: 1000
+
+  - name: "Unauthenticated API attempts"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/ai/claude"
+          json:
+            messages:
+              - role: "user"
+                content: "emergency help"
+          expect:
+            - statusCode: 401
+            - maxResponseTime: 500
+
+  - name: "SOS rapid fire"
+    weight: 10
+    flow:
+      - post:
+          url: "/api/sos"
+          json:
+            lat: 23.0225
+            lng: 72.5714
+            triggerType: "load-test"
+          expect:
+            - statusCode:
+                - 401
+                - 429

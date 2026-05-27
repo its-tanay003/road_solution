@@ -1,0 +1,84 @@
+<USER_REQUEST>
+╔══════════════════════════════════════════════════════════════════════════╗
+║     ROADSoS — MAXIMUM DIFFICULTY TESTING SUITE                          ║
+║     ADVERSARIAL · CHAOS · PENETRATION · STRESS · EDGE CASE              ║
+║     If your app passes all of this, it is production-grade.              ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+PROJECT:
+  App  → ROADSoS Emergency Intelligence Platform
+  Repo → github.com/its-tanay003/road_solution
+  Live → https://road-solution.vercel.app
+
+RULES:
+  - Every test must PASS to consider the system production-ready
+  - No skipping. No mocking real services in integration tests.
+  - Every failure is a BUG that must be fixed before moving on.
+  - Tests are intentionally designed to break the app.
+  - Show exact output of every single test.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LEVEL 1 — BRUTAL FRONTEND TESTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create tests/brutal/01-frontend-brutal.spec.ts:
+
+import { test, expect, chromium } from '@playwright/test'
+
+// ── L1-T1: SIMULTANEOUS TAB STRESS ───────────────────────────
+test('L1-T1: App survives 10 simultaneous tabs', async ({ browser }) => {
+  const pages = await Promise.all(
+    Array(10).fill(null).map(() => browser.newPage())
+  )
+  cons
+<truncated 45215 bytes>
+ocked', async ({ request }) => {
+  const injections = [
+    // NoSQL injection
+    { messages: [{ role: 'user', content: { '$gt': '' } }] },
+    { messages: [{ role: 'user', content: { '$where': 'sleep(1000)' } }] },
+    // Command injection
+    { messages: [{ role: 'user', content: '`cat /etc/passwd`' }] },
+    { messages: [{ role: 'user', content: '$(id)' }] },
+    { messages: [{ role: 'user', content: '; ls -la /' }] },
+    { messages: [{ role: 'user', content: '| whoami' }] },
+    // LDAP injection
+    { messages: [{ role: 'user', content: '*)(uid=*))(|(uid=*' }] },
+    // XML injection
+    { messages: [{ role: 'user', content: '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>' }] },
+  ]
+
+  for (const payload of injections) {
+    const res = await request.post(`${BASE}/api/ai/claude`, { data: payload })
+    expect([400, 401]).toContain(res.status())
+    console.log(`Injection blocked: ${JSON.stringify(payload).slice(0, 50)} → ${res.status()}`)
+  }
+})
+
+// ── L6-T4: OWASP A05 — Security Misconfiguration ─────────────
+test('L6-T4: Server fingerprinting minimized', async ({ request }) => {
+  const res = await request.get(`${BASE}/`)
+  const headers = res.headers()
+
+  // Must NOT reveal server details
+  const dangerous = ['x-powered-by', 'server', 'x-aspnet-version', 'x-runtime']
+  dangerous.forEach(h => {
+    if (headers[h]) {
+      console.log(`WARNING: Server info exposed in header ${h}: ${headers[h]}`)
+    } else {
+      console.log(`OK: ${h} not exposed`)
+    }
+  })
+
+  expect(headers['x-powered-by']).toBeUndefined()
+})
+
+// ── L6-T5: OWASP A07 — Auth Failures ─────────────────────────
+test('L6-T5: Brute force protection on auth', async ({ request }) => {
+  const statuses: number[] = []
+
+  // Attempt 30 rapid logins
+  for (let i = 0; i 
+<truncated 28746 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.
