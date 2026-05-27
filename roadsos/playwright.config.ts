@@ -5,6 +5,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.spec.ts',
+  // L3 uses Vitest imports and must be run via vitest, not Playwright
+  testIgnore: ['**/L3-database-annihilation.spec.ts'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
