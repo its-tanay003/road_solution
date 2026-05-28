@@ -574,10 +574,11 @@ export function ChatWidget() {
                       key={key}
                       onClick={() => setModel(key)}
                       className={cn(
-                        'flex-1 py-2 text-xs font-semibold transition-colors',
-                        model === key ? 'text-white border-b-2' : 'text-gray-500 hover:text-gray-300'
+                        'flex-1 py-2 text-xs font-semibold transition-colors border-b-2',
+                        model === key 
+                          ? (key === 'claude' ? 'text-white border-amber-600' : key === 'gemini' ? 'text-white border-blue-500' : 'text-white border-emerald-500')
+                          : 'text-gray-500 hover:text-gray-300 border-transparent'
                       )}
-                      style={{ borderBottomColor: model === key ? cfg.color : 'transparent' }}
                       aria-label={`Switch to ${c.label}`}
                     >
                       {c.label}
@@ -750,8 +751,10 @@ export function ChatWidget() {
                 <div className="flex items-center justify-center gap-4 pt-4 border-t border-gray-900 shrink-0">
                   <button
                     onClick={toggleMic}
-                    style={{ backgroundColor: liveMicActive ? '#1e293b' : '#dc2626' }}
-                    className="w-12 h-12 rounded-full flex items-center justify-center border border-gray-800 text-white shadow-xl hover:scale-105 active:scale-95 transition-all"
+                    className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center border border-gray-800 text-white shadow-xl hover:scale-105 active:scale-95 transition-all",
+                      liveMicActive ? "bg-slate-800" : "bg-red-650"
+                    )}
                   >
                     {liveMicActive ? <Mic size={18} /> : <MicOff size={18} />}
                   </button>
