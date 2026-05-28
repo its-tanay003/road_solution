@@ -1,72 +1,59 @@
-# ROADSoS DevOps Guide
+# ROADSoS DevOps & Operations Guide
 
-## Deployment Target
+This guide serves as a brief dashboard for local commands and hosting parameters. For the complete, high-fidelity setup instructions, database schema seeding, OAuth consoles, Vercel edge pipelines, and Playwright verification metrics, please refer directly to:
 
-Deploy `roadsos/` as the only production web app. The root `vercel.json` is configured for this target.
+👉 **[Volume 7: DevOps and Deployment Manual](file:///c:/New%20Volume%20(D)/mandi/docs/7_DEVOPS_AND_DEPLOYMENT_GUIDE.md)**
 
-The Vercel project root directory must be the repository root. A Vercel project root of `frontend/` will deploy the legacy Vite app and is incorrect for production.
+---
 
-## Local Verification
+## 🚀 Core Local Commands
+
+Run these checks within the `roadsos/` folder before launching or compiling:
 
 ```powershell
 cd "C:/New Volume (D)/mandi/roadsos"
+
+# 1. Clean dependencies installation
 npm ci
+
+# 2. Dynamic lint check
 npm run lint
+
+# 3. TypeScript type validation
 npm run typecheck
+
+# 4. Production vulnerability audit
 npm run audit:prod
+
+# 5. Native Next.js bundle build
 npm run build
+
+# 6. E2E Browser Playwright simulation
 npm run test:e2e
 ```
 
-## Environment Variables
+Do not promote any preview deployment to production if any verification gates fail.
 
-Use `.env.example` as the template. Filled secrets belong only in `roadsos/.env.local`, Vercel environment variables, or the relevant provider dashboard.
+---
 
-Required groups:
+## 🔑 Key Operational Secrets
 
-- `AUTH_SECRET` / `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL`
-- Supabase URL, anon key, service-role key
-- `ADMIN_EMAILS`
-- Google/Apple OAuth credentials
-- Google Maps key
-- AI provider keys
-- Twilio, Resend, and VAPID notification keys
+Ensure the following configuration tokens are mapped in your local `.env.local` or Vercel edge dashboard:
 
-## Secret Rotation
+- `AUTH_SECRET` / `NEXTAUTH_SECRET` — Session authentication encryption.
+- `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Client database connection.
+- `SUPABASE_SERVICE_ROLE_KEY` — Bypasses Row Level Security (RLS) policies for administrative profile creation.
+- `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET` — OAuth single sign-on parameters.
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` — Dispatches SOS SMS/WhatsApp alerts.
+- `ADMIN_EMAILS` — Access permission allowlist for the dispatcher control room dashboard.
+- `GEMINI_API_KEY` — Conversational first aid assistant prompts.
 
-If any real key has appeared in a committed file, rotate it at the provider immediately. Editing the repository does not invalidate exposed keys.
+---
 
-Rotate at minimum:
-
-- Supabase anon and service-role keys
-- Google OAuth secrets
-- Google AI/Gemini keys
-- VAPID keys
-- Twilio/Resend keys if they were ever committed
-
-## Supabase
-
-Before launch:
-
-- Apply schema migrations intentionally.
-- Verify RLS policies in the live Supabase project.
-- Test user, admin, and unauthenticated access separately.
-- Verify storage buckets and object policies for uploaded emergency media.
-
-The migration `roadsos/supabase/migrations/202605220001_security_hardening.sql` addresses the latest advisor findings observed on the ROADSoS Supabase project: duplicate profile policies, missing foreign-key indexes, RLS-enabled tables without policies, public execution of the custom `rls_auto_enable()` helper, and RLS on `public.spatial_ref_sys`. Review and apply it deliberately because enabling RLS on extension-owned metadata can affect clients that read PostGIS metadata.
-
-## CI/CD
-
-GitHub Actions must pass before merging to `main`.
-
-Recommended branch protections:
-
-- Require the ROADSoS CI workflow.
-- Require pull request review.
-- Block force pushes to `main`.
-- Require Vercel preview success before production promotion.
-
-## Incident Readiness
-
-Production still needs provider-level observability: Vercel logs, Supabase logs, error tracking, uptime checks, and restore-tested database backups.
+## 🛠️ Production Build Target
+- **Platform:** Vercel Hosting
+- **Root Directory:** Repository Root (`./`)
+- **Compile Settings:**
+  - Build Command: `npm run build --prefix roadsos`
+  - Install Command: `npm ci --prefix roadsos`
+  - Output Directory: `roadsos/.next`

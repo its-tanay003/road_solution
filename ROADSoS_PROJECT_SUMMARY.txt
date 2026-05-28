@@ -1,49 +1,49 @@
-# ROADSoS PROJECT SUMMARY
+========================================================================
+                      ROADSoS PROJECT SUMMARY
+========================================================================
 
-## Product Intent
+PRODUCT INTENT:
+ROADSoS is an emergency response web platform for crash/SOS workflows,
+user medical profiles, emergency contacts, real-time maps, AI triage,
+and responder/admin control-room views.
 
-ROADSoS is a road-emergency intelligence platform focused on crash/SOS activation, medical profile access, emergency contact notification, first-aid/AI triage, real-time map workflows, and control-room response views.
+DEEP PROJECT SUBMISSION DOCUMENTATION:
+A comprehensive 7-volume project submission documentation suite is located
+under the "docs/" folder at the root level of the workspace. You can read
+each volume directly by opening the following markdown files:
 
-## Production Architecture
+  1. Project Synopsis & Tech Stack
+     -> docs/1_PROJECT_SYNOPSIS.md
+  2. Software Requirements Specification (SRS)
+     -> docs/2_SRS_DOCUMENT.md
+  3. System Architecture & Detailed Design
+     -> docs/3_SYSTEM_ARCHITECTURE_AND_DESIGN.md
+  4. Relational Database & Row-Level Security
+     -> docs/4_DATABASE_SCHEMA_AND_SECURITY.md
+  5. REST API Reference Manual
+     -> docs/5_API_REFERENCE_MANUAL.md
+  6. Citizen & Dispatcher User Manual
+     -> docs/6_USER_AND_OPERATOR_MANUAL.md
+  7. DevOps & Setup Deployment Manual
+     -> docs/7_DEVOPS_AND_DEPLOYMENT_GUIDE.md
 
-The active production source of truth is:
+PRODUCTION ARCHITECTURE:
+Active Production Workspace: C:/New Volume (D)/mandi/roadsos
+Primary Stack: Next.js App Router (React 19), NextAuth v5, Supabase Database,
+Tailwind CSS 4, Playwright E2E Tests, Vercel edge hosting.
 
-`C:/New Volume (D)/mandi/roadsos`
+PRODUCTION READINESS GATE:
+Before merging or promoting previews, you must run the following validation:
+  cd "C:/New Volume (D)/mandi/roadsos"
+  npm ci
+  npm run lint
+  npm run typecheck
+  npm run audit:prod
+  npm run build
+  npm run test:e2e
 
-Primary stack:
+All tests and compilation gates must pass before a deployment is considered
+production-ready.
 
-- Next.js App Router
-- React 19
-- NextAuth v5
-- Supabase database/auth/storage
-- Vercel hosting
-- Playwright E2E tests
+========================================================================
 
-Legacy code:
-
-- `frontend/` is the old Vite app.
-- `backend/` is the old Express backend.
-- `archive/` contains historical demo material.
-
-## Production Readiness Status
-
-Status: NOT PRODUCTION READY until all local and CI gates pass and live Supabase/Vercel settings are verified.
-
-Required gates:
-
-- No merge conflict markers.
-- No tracked secrets.
-- `npm ci` succeeds in `roadsos`.
-- `npm run lint` succeeds.
-- `npm run typecheck` succeeds.
-- `npm run audit:prod` succeeds.
-- `npm run build` succeeds.
-- `npm run test:e2e` succeeds.
-- Vercel builds the root/`roadsos` project, not `frontend`.
-- Supabase RLS is verified on the live project.
-
-## Operational Notes
-
-OAuth providers must be real provider credentials. Mock credentials, demo OTPs, and fallback secrets are not valid production authentication.
-
-Admin access is controlled by `ADMIN_EMAILS`. Supabase RLS remains the final data boundary and must be tested with real user/admin sessions.

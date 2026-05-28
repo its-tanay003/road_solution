@@ -1,70 +1,49 @@
-# ROADSoS
+# 🚑 ROADSoS: Emergency Intelligence & SOS Platform
 
-ROADSoS is an emergency response web platform for crash/SOS workflows, user medical profiles, emergency contacts, real-time maps, AI triage, and responder/admin control-room views.
+ROADSoS is a real-time, emergency-response platform designed to streamline the crash response pipeline. By combining **Next.js 15 App Router**, **Supabase Real-Time CDC**, **WebRTC live distress feeds**, **Automotive Car Mode**, and **Generative AI Triage**, ROADSoS bridges the critical communication gap between citizens in distress and emergency service dispatch centers.
 
-## Production Source Of Truth
+---
 
-The production application is `roadsos/`, a Next.js App Router workspace using React 19, NextAuth v5, Supabase, Tailwind CSS 4, Playwright, and Vercel.
+## 📂 Project Submission Documentation Suite
 
-Legacy folders remain for reference:
+We have compiled a comprehensive, premium **7-Volume Project Submission Documentation Suite** designed to satisfy rigorous academic, technical, and executive panel evaluations. You can access each volume directly via the links below:
 
-- `frontend/`: previous Vite implementation. Not the production target.
-- `backend/`: previous Express/Socket.io backend. Not the production deploy path unless explicitly revived.
-- `archive/`: historical demo/hackathon material.
+| Volume | Document Link | Focus & Substantive Themes |
+| :---: | :--- | :--- |
+| **Vol. 1** | [1_PROJECT_SYNOPSIS.md](file:///c:/New%20Volume%20(D)/mandi/docs/1_PROJECT_SYNOPSIS.md) | Executive abstract, Golden Hour problem statement, key differentiators, tech stack, modular roadmap. |
+| **Vol. 2** | [2_SRS_DOCUMENT.md](file:///c:/New%20Volume%20(D)/mandi/docs/2_SRS_DOCUMENT.md) | IEEE 830-1998 standard Software Requirements Specification, functional/non-functional requirements catalog, SOS lifecycle state and sequence diagrams (Mermaid format). |
+| **Vol. 3** | [3_SYSTEM_ARCHITECTURE_AND_DESIGN.md](file:///c:/New%20Volume%20(D)/mandi/docs/3_SYSTEM_ARCHITECTURE_AND_DESIGN.md) | Client-server tiers, Next.js Route map, WebRTC peer-connection/signaling logic via Supabase CDC, and Car Mode responsive adapter calculations. |
+| **Vol. 4** | [4_DATABASE_SCHEMA_AND_SECURITY.md](file:///c:/New%20Volume%20(D)/mandi/docs/4_DATABASE_SCHEMA_AND_SECURITY.md) | Relational database schema data dictionaries, conceptual ERD (Mermaid), Row Level Security (RLS) policies audit, and SQL automation triggers. |
+| **Vol. 5** | [5_API_REFERENCE_MANUAL.md](file:///c:/New%20Volume%20(D)/mandi/docs/5_API_REFERENCE_MANUAL.md) | Formally drafted REST API reference contracts with exact request/response JSON schemas, rate limits, and error status code logs. |
+| **Vol. 6** | [6_USER_AND_OPERATOR_MANUAL.md](file:///c:/New%20Volume%20(D)/mandi/docs/6_USER_AND_OPERATOR_MANUAL.md) | Visual and step-by-step user guide for Citizens (including Shake-to-SOS & Car Mode) and Dispatch Operators (dashboard radar & dispatch workflows). |
+| **Vol. 7** | [7_DEVOPS_AND_DEPLOYMENT_GUIDE.md](file:///c:/New%20Volume%20(D)/mandi/docs/7_DEVOPS_AND_DEPLOYMENT_GUIDE.md) | Local installation guide, `.env.local` template, Supabase SQL migration script setup, Google Cloud OAuth console configurations, Vercel host pipelines, and Playwright verification checks. |
 
-## Current Production Status
+---
 
-This repository must pass the `roadsos` verification gates before being considered production-ready:
+## 🛠️ Production Architecture Quick-View
 
-```powershell
-cd "C:/New Volume (D)/mandi/roadsos"
-npm ci
-npm run lint
-npm run typecheck
-npm run audit:prod
-npm run build
-npm run test:e2e
-```
+The active production source of truth is:
+`C:/New Volume (D)/mandi/roadsos`
 
-Do not promote a deployment if any of these fail.
+- **Primary Stack:** Next.js App Router (React 19), NextAuth v5, Supabase, Tailwind CSS 4, Google Maps, Gemini/Claude AI.
+- **Verification Gates:** Before promoting any code to production, all local validation gates must pass:
+  ```powershell
+  cd "C:/New Volume (D)/mandi/roadsos"
+  npm ci
+  npm run lint
+  npm run typecheck
+  npm run audit:prod
+  npm run build
+  npm run test:e2e
+  ```
 
-## Required Environment
+---
 
-Copy `.env.example` to `roadsos/.env.local` for local development, then configure the same values in Vercel for Preview and Production.
+## 📦 Directory Structure
 
-Required categories:
+- `roadsos/` — Active production Next.js application workspace.
+- `docs/` — Premium 7-Volume project submission documentation.
+- `frontend/` — Previous legacy Vite implementation (for reference).
+- `backend/` — Previous legacy Express/Socket.io backend (for reference).
+- `archive/` — Historical demo and hackathon materials.
 
-- NextAuth secret and canonical app URL.
-- Supabase URL, anon key, and service-role key.
-- OAuth providers for Google and/or Apple.
-- Admin operator email allowlist.
-- Google Maps, AI provider keys, and emergency notification provider keys.
-
-Never commit filled `.env`, `.env.local`, or backup env files.
-
-## Deployment
-
-The root `vercel.json` builds `roadsos`:
-
-```json
-{
-  "framework": "nextjs",
-  "buildCommand": "npm run build --prefix roadsos",
-  "installCommand": "npm ci --prefix roadsos",
-  "outputDirectory": "roadsos/.next"
-}
-```
-
-The Vercel project must use the repository root as its root directory. If Vercel is configured to use `frontend/` as the project root, production will deploy the legacy Vite app instead of ROADSoS Next.js.
-
-## Security Notes
-
-- Credentials auth and mock OAuth fallbacks are intentionally disabled.
-- Protected application and API routes are guarded by the Next.js proxy.
-- Admin/control-room access requires a valid session with an email listed in `ADMIN_EMAILS`.
-- Supabase RLS must be verified against the live Supabase project before launch.
-- Any previously committed secrets must be rotated in their provider dashboards.
-
-## CI
-
-GitHub Actions runs lint, typecheck, production dependency audit, build, and Playwright browser tests for `roadsos`. CI is a release gate, not a suggestion.
