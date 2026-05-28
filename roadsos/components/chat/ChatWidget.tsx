@@ -146,7 +146,10 @@ export function ChatWidget() {
           }),
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+        }
         
         const reader = response.body!.getReader();
         const decoder = new TextDecoder();
@@ -177,11 +180,12 @@ export function ChatWidget() {
         if (activeModel !== model) {
           setModel(activeModel);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.warn(`Model ${activeModel} failed:`, err);
         attempts++;
         if (attempts >= maxAttempts) {
-          updateLastMessage(`❌ Service temporarily unavailable. All emergency AI channels are offline. Please call 112 directly.`);
+          const errMsg = err?.message || 'Service temporarily unavailable';
+          updateLastMessage(`❌ ${errMsg}. Please call 112 directly.`);
           setActiveFallbackMsg(null);
         }
       }

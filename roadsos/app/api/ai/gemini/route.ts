@@ -15,6 +15,14 @@ export async function POST(req: NextRequest) {
   const limit = checkRateLimit(req, { keyPrefix: 'ai:gemini', limit: 30, windowMs: 60_000 });
   if (!limit.allowed) return rateLimitedResponse(limit);
 
+  // Verify Gemini API key is configured before streaming to avoid hanging
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    return new Response(
+      JSON.stringify({ error: 'Gemini AI provider not configured. Please supply GOOGLE_GENERATIVE_AI_API_KEY.' }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   const { messages, systemContext } = await req.json() as {
     messages: { role: 'user' | 'assistant'; content: string }[];
     systemContext?: string;
